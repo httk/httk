@@ -1,0 +1,28 @@
+=================================================================================================
+The High-Throughput Toolkit (httk) v$HTTKVERSION
+
+For License information see the file COPYING.
+=================================================================================================
+
+1. Place httk in some path of your system.
+
+2. Edit httk.cfg to configure paths to other software that you want to use from httk. For programs (e.g., cif2cell) you want the path
+   to point at the executable. For python libraries, you want the path setting to point at the directory you would
+   include in PYTHONPATH, i.e., a directory that typically contains a subdirectory with the name of the package.
+
+   If you don't have certain software, don't worry, just leave the line blank. If you have some libraries installed 
+   in the system (e.g. 'import ase' works), then you can also leave the lines blank. If you want to make sure
+   *not* to use system libraries, set allow_system_libs=no (this is useful if you are forced to work on a machine with a
+   too old version installed in the system)
+      
+    You need ase and cif2cell for all the Example programs to work.
+
+3. Read relevant parts of README.txt and run the Examples/ programs (they should work without any path adjustments)
+
+4. If you want to be able to use httk just by 'import httk' from anywhere, add 
+     export "PYTHONPATH=/path/to/httk:$PYTHONPATH"
+   to the file .bashrc in your home directory. (Or the corresponding line to .tschrc if you use tcsh)
+
+5. Read the rest of README.txt and contribute code :)
+
+

@@ -1,0 +1,22 @@
+#
+# Run two relaxations and a static run
+#
+
+execfile('data')
+
+computation.subrun_create("RELAX1","BASE")
+computation.apply_templates('relax')
+computation.run_relaxation(relax_ions=True, relax_volume=True, relax_cellshape=True)
+relaxruns=computation.lastruns
+computation.subrun_link("RELAX1")
+
+computation.subrun_create("RELAX2","RELAX1")
+computation.run_relaxation(relax_ions=True, relax_volume=True, relax_cellshape=True)
+relaxruns=computation.lastruns
+computation.subrun_link("RELAX2")
+
+# Clean relaxation runs
+for run in relaxruns:
+    computation.subrun_clean(run)
+
+computation.subrun_archive_all()
