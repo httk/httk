@@ -1,0 +1,20 @@
+=================================================================================================
+The High-Throughput Toolkit (httk)
+
+For License information see the file COPYING.
+=================================================================================================
+
+Latest version: v$HTTKVERSION
+
+
+Nov 25, 2013: v0.4, first externally released version
+
+Current status:
+
+  httk.core: FracVector is 'production ready', rest of core is beta quality code, 
+     (but MutableFracVector is missing a crucial piece of code to allow actually changing elements)
+  httk.db, httk.external, httk.iface: Alpha quality code, some part reasonably stable (e.g. DbStructure, etc.)
+  httk.io. httk.tasks, httk.exe, httk.ctrl : Started, needs much more work
+  httk.analysis: Not started
+
+  

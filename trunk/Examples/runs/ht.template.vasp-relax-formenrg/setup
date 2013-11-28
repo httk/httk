@@ -1,0 +1,15 @@
+#!/usr/env/python
+
+# Setup POTCAR
+# ioa = httk.IoAdapterFileWriter(os.path.join(rundir,"POTCAR"))
+# f = ioa.file            
+# POTCAR = ""
+# spieces_counts=[]
+# magmoms=[]
+# for i in range(len(struct.assignments)):
+#     assignment = struct.assignments[i]
+#     count = struct.counts[i]
+#     symbol = periodictable.atomic_symbol(assignment)
+#     f.write(vasp_if.get_pseudopotential(symbol))
+#     spieces_counts.append(count)
+#     magmoms.append(str(count)+"*"+str(get_magmom(symbol)))
