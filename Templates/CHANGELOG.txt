@@ -3,9 +3,27 @@ The High-Throughput Toolkit (httk)
 
 For License information see the file COPYING.
 =================================================================================================
+(Note: when/if updating this file, edit CHANGELOG.txt in Templates/)
 
 Latest version: v$HTTKVERSION
 
+Jan 31, 2014: v0.4.1
+
+  - handle httk.cfg sanely in svn (first make copies httk.cfg.default)
+  - svntools/*.sh: a few scripts to help with command line svn
+      (use svn_findnew.sh to list all files that are not in svn, except
+       those in svn_exclude, use svn_finddelted.sh to find any files
+       that has been removed.)
+  - modification of a number of core database structures to make it 
+    easier to provide straight out of the database floating point
+    structure data needed for easy e.g. website visualization.
+    (This was always the intention, only, upon actually implementing it
+    a number of shortcomings was apparent.)
+  - ability to manually supress citation printing on exit even if it
+    is turned on in httk.cfg (fixes a bug in Templates/subvars.sh)
+  - numpy now available via httk/external
+  - fix of bug where structure -> db -> structure did not preserve hexhash
+    (= rather extensive changes to db module)
 
 Nov 25, 2013: v0.4, first externally released version
 

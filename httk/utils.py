@@ -174,3 +174,20 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True):
 #     for element in car:
 #         for rest in breath_first_loop_x(*cdr):
 #             yield (element,) + rest
+
+
+try:
+    # Python 2
+    import ConfigParser as configparser
+except ImportError:
+    # Python 3
+    import configparser
+
+def read_config(ioa):
+    ioa = IoAdapterFileReader.use(ioa)
+    f = ioa.file
+        
+    config = configparser.ConfigParser()
+    config.readfp(f)
+
+    return config

@@ -86,6 +86,10 @@ class Sqlite(object):
         def close(self):
             return self.cursor.close()
 
+        @property
+        def description(self):
+            return self.cursor.description
+
         def __iter__(self):
             for row in self.cursor:
                 yield row

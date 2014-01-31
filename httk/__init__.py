@@ -41,7 +41,7 @@ from config import config
 # IF YOU MAKE SIGNIFICANT CHANGES TO httk, PLEASE UPDATE THIS VARIABLE WITH A PERSONAL SUFFIX 
 # E.G. 0.4.rickard.2
 
-version='0.4'
+version='0.4.1'
 
 
 
