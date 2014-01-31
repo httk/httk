@@ -20,6 +20,9 @@ import tempfile, os, shutil
 
 def register_code(store,name,ver,refs=None):
     # Find the present instance of 'code', if it does not exist, create it    
+    if refs == None:
+        refs = {}
+    
     search = store.searcher()
     code = dbcomputation.DbCode.variable(search, 'code')
     search.add(code.name == name)
@@ -31,7 +34,7 @@ def register_code(store,name,ver,refs=None):
     if len(matches) > 0:
         print "==== Code found in database."
         codeobj = matches[0][0][0]
-        refsobjs = dbcomputation.DbCodeReference.find_all(store, 'code', codeobj)[0]
+        refsobjs = dbcomputation.DbCodeReference.find_all(store, 'code', codeobj)
     else:
         print "==== Code not found in database, creating entry."
         codeobj = dbcomputation.DbCode(name, ver, store=store)

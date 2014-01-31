@@ -19,7 +19,7 @@ Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
 
 import hashlib, os.path
-from core.ioadapters import IoAdapterFileReader
+from core.ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 
 def hexhash_str(data,prepend=None):
     s = hashlib.sha1()
@@ -55,12 +55,21 @@ def hexhash_ioa(ioa,prepend=None):
     s.update("\0%u\0" % size)
     return s.hexdigest() 
 
-def generate_manifest_for_files(codename,codever, basedir, filenames,fakenames=None,skip_filenames=False):
-    hash_manifest=""
+def generate_manifest_for_files(codename,codever, basedir, filenames,fakenames=None,skip_filenames=False,write=False,excludes=None):
+    hash_manifest=codename+" "+codever+"\n\n"
+    # We should always exclude the ht.manifest file form the manifest
+    if excludes == None:
+        excludes = ['ht.manifest']
+    else:
+        excludes.append('ht.manifest')
+    
     for i in range(len(filenames)):
         f = filenames[i]
         if skip_filenames:
-            hash_manifest += hexhash_ioa(f)+"\n"
+            try:
+                hash_manifest += hexhash_ioa(f)+"\n"
+            except IOError:
+                hash_manifest += "0\n"
         else:
             if fakenames != None and fakenames[i] != None:
                 relpath = fakenames[i]
@@ -70,12 +79,62 @@ def generate_manifest_for_files(codename,codever, basedir, filenames,fakenames=N
                     relpath = f
                 else:
                     relpath = os.path.relpath(f, common_prefix)
-            hash_manifest += relpath+" "+hexhash_ioa(f)+"\n"
-    hash_hex = hexhash_str(hash_manifest,prepend=codename+" "+codever)
+            if relpath in excludes:
+                continue
+            try:
+                hash_manifest += relpath+" "+hexhash_ioa(f)+"\n"
+            except IOError:
+                hash_manifest += relpath+" "+"0\n"
+
+    hash_hex = hexhash_str(hash_manifest)
+
+    if write != None:
+        ioa = IoAdapterFileWriter.use(os.path.join(basedir,"ht.manifest"))
+        ioa.file.write(hash_manifest)
+        ioa.file.close()
+    
     return (hash_manifest,hash_hex)
 
-def generate_manifest_for_dir(codename,codever, basedir, excludes=None):
-    raise Exception("generate_manifest_for_dir: Not implemented, sorry")
+def generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=False):
+    filelist = []
+
+    for root, dirs, files in os.walk(basedir):
+        filelist += [os.path.join(root,x) for x in files]
+        # Make sure we always generate the same manifest
+    filelist = sorted(filelist)
+
+    return generate_manifest_for_files(codename, codever, basedir, filelist, fakenames=fakenames, skip_filenames=skip_filenames,write=write,excludes=excludes)
+
+
+    #raise Exception("generate_manifest_for_dir: Not implemented, sorry")
+
+def check_or_generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False):
+    manifestpath = os.path.join(basedir,"ht.manifest")
+    if excludes == None:
+        excludes = ['ht.manifest']
+    else:
+        excludes.append('ht.manifest')
+
+    if os.path.exists(manifestpath):
+        # Just verify that manifest is correct
+        (manifest, hexhash) = generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=False)
+        test = IoAdapterFileReader.use(manifestpath).file.read()
+        hexhash1 = hexhash_str(manifest)
+        hexhash2 = hexhash_str(test)
+        hexhash3 = hexhash_ioa(manifestpath)
+        print hexhash,hexhash1, hexhash2,hexhash3
+        #print "-----"
+        #print test
+        #print "-----"
+        #print manifest
+        #print "-----"
+        if hexhash != hexhash2:
+            raise Exception("Manifest mismatch, the ht.manifest in the directory does not match the actual files! Hashes are:"+str(hexhash)+" vs. "+str(hexhash2))
+    else:
+        # Generate a new manifest
+        (manifest, hexhash) = generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=True)        
+
+    return (manifest, hexhash)
 
 def tuple_to_str(t):
     strlist = []

@@ -6,6 +6,7 @@ _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 sys.path.insert(1, os.path.join(_realpath,'..'))
 
 import httk
+httk.citation.dont_print_citations_at_exit()
 print httk.version
 ")
 

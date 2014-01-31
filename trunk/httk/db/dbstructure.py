@@ -63,7 +63,7 @@ class DbPrototype(Storable):
     def __init__(self, hexhash, prototype_formula, site_count, counts, coords_int_g, cell_int_g,  
                  periodicity, nonequiv_atoms_in_cell, spacegroup_number, setting, hm_symbol, hall_symbol, types=None, store=None):
         """
-        """                        
+        """
         # Storable init
         self.storable_init(store,hexhash=hexhash, prototype_formula=prototype_formula, site_count=site_count, counts=counts, 
                            coords_int_g=coords_int_g, cell_int_g=cell_int_g,
@@ -76,6 +76,8 @@ class DbPrototype(Storable):
         if isinstance(old,DbPrototype) and (store == None or store == old.store.store):
             return old    
         else:
+            old = Prototype.use(old).tidy()
+            
             hexhash = old.hexhash
 
             if reuse and store != None:
@@ -161,7 +163,7 @@ class DbMultiAssignment(Storable):
     There is a point with this being its own table, rather than inlining site_assignmnets: now extensions can refer to one
     specific MultiAssignment by ID. 
     """
-    types = storable_types('MultiAssignment', ('site_assignments',[('number',int),('ratio',float),('int_g_ratio',int)]))
+    types = storable_types('MultiAssignment', ('site_assignments',[('sitegroup',int),('number',int),('ratio',float),('int_g_ratio',int)]))
     
     def __init__(self, site_assignments, types=None, store=None):
         """
@@ -174,7 +176,7 @@ class DbMultiAssignment(Storable):
         if isinstance(old,DbMultiAssignment) and (store == None or store == old.store.store):
             return old    
         else:
-            site_assignments = [(x[0],float(x[1]),((x[1]*1000000000).limit_resolution(1)).floor(),) for x in old]          
+            site_assignments = [(i,old[i][0],float(old[i][1]),((old[i][1]*1000000000).limit_resolution(1)).floor(),) for i in range(len(old))]          
             return DbMultiAssignment(site_assignments, store=store)
 
 
@@ -187,17 +189,17 @@ class DbStructure(Storable):
                            ('formula_parts',[('symbol',str),('number',int),('float_count',float),('count_int_g',int)]), 
                            ('abstract_formula',str),('atoms_in_cell',int),
                            ('sgprototype',DbPrototype),('sgprototype_assignments',[int]),('sgprototype_multi_assignments',[DbMultiAssignment]),
-                           ('float_cell',(0,3)),('float_coords',(0,3)), 
-                           ('counts',[int]), ('assignments',[int]), ('multi_assignments',[DbMultiAssignment]),
+                           ('float_cell',[('vector',int),('x',float),('y',float),('z',float)]),('float_coords',[('sitegroup',int),('a',float),('b',float),('c',float)]), 
+                           ('counts',[int]), ('assignments',[('sitegroup',int),('assignment',int)]), ('multi_assignments',[DbMultiAssignment]),
                            ('extended',int), ('extension_list',[str]), 
                            ('periodicity',int), 
                            ('float_volume',float),('volume_int_g',int),
-                           ('tags',[('key',str),('val',str)]),index=['hexhash','formula','element_count',
+                           index=['hexhash','formula','element_count',
                             'abstract_formula','atoms_in_cell','extended','periodicity','float_volume'])
     
     def __init__(self, hexhash, formula, element_count, formula_parts, abstract_formula, atoms_in_cell, sgprototype, sgprototype_assignments, sgprototype_multi_assignments, float_cell, 
                  float_coords, counts, assignments,multi_assignments,
-                 extended, extension_list, periodicity, float_volume, volume_int_g, tags, types=None, store=None):
+                 extended, extension_list, periodicity, float_volume, volume_int_g, types=None, store=None):
         """
         """                  
         self.storable_init(store,hexhash=hexhash, formula=formula, element_count=element_count, formula_parts=formula_parts, abstract_formula=abstract_formula, atoms_in_cell=atoms_in_cell,
@@ -205,7 +207,7 @@ class DbStructure(Storable):
                            float_cell=float_cell, 
                            float_coords=float_coords, counts=counts, assignments=assignments,multi_assignments=multi_assignments,
                            extended=extended, extension_list=extension_list, periodicity=periodicity,
-                           float_volume=float_volume, volume_int_g = volume_int_g, tags=tags)
+                           float_volume=float_volume, volume_int_g = volume_int_g)
 
     @property
     def cell(self):
@@ -213,7 +215,6 @@ class DbStructure(Storable):
         return newcell
 
     def to_Structure(self):
-        # TODO: WARNING, presently this routine does not handle multi_assignments correctly. 
         unique_coords = self.sgprototype.coords_int_g.to_fracvector()
         unique_counts = self.sgprototype.counts
         structure = Structure.create(cell=self.cell, coords = unique_coords, counts=unique_counts, assignments=self.sgprototype_assignments, volume = self.vol, hall_symbol = self.sgprototype.hall_symbol)
@@ -221,7 +222,18 @@ class DbStructure(Storable):
         # or if it eventually is better to just re-generate it via our Structure implementation. However, *presently* the ASE 
         # structure -> p1structure routines have major problems actually doing this conversion correctly for all inputs, so *presently*
         # I think this is the best we can do.
-        p1structure = Structure.create(cell=self.cell, coords = self.float_coords, counts=self.counts, assignments=self.assignments, volume = self.vol, hall_symbol = 'P 1')
+        
+        # TODO: WARNING, presently this routine does not handle multi_assignments correctly. 
+        # Re-do this with multi_assignmnets
+        assignments = []
+        for assignment in self.assignments:
+            assignments.append(assignment[1])
+
+        coords = []
+        for coord in self.float_coords:
+            coords.append([coord[1],coord[2],coord[3]])
+        
+        p1structure = Structure.create(cell=self.cell, coords=coords, counts=self.counts, assignments=assignments, volume = self.vol, hall_symbol = 'P 1')
         structure.set_p1structure(p1structure)
         return structure
 
@@ -271,10 +283,8 @@ class DbStructure(Storable):
                 if p != None:
                     return p
 
-            old = Structure.use(old)
+            old = Structure.use(old).tidy()
         
-            tag_list = tuple(old.tags.items())
-
             #try:
             #    sgstruct = SgStructure.use(old)
             #    sgprototype = Prototype(old.cell, sgstruct.nonequiv.counts, sgstruct.nonequiv.coords,refs=sgstruct.refs, sgstruct=sgstruct)                        
@@ -322,13 +332,30 @@ class DbStructure(Storable):
             dbprotomass = []
             for site_assignment in old.multi_assignments:
                 dbprotomass.append(DbMultiAssignment.use(site_assignment,store=store))
+
+            float_cell = []
+            scale = (old.volume.to_float())**(1.0/3.0)
+            all_cell = old.cell.to_floats()
+            for i in range(3):
+                float_cell.append((i,all_cell[i][0]*scale,all_cell[i][1]*scale,all_cell[i][2]*scale))
+
+            idx = 0
+            float_coords = []
+            assignments = []
+            all_coords = old.p1coords.to_floats()
+            for group in range(len(old.p1counts)):
+                assignments.append((group,old.p1assignments[group]))
+                for count in range(old.p1counts[group]):
+                    float_coords.append((group,all_coords[idx][0],all_coords[idx][1],all_coords[idx][2]))
+                    idx += 1
             
             createdstructure=DbStructure(hexhash, old.formula, old.element_count, formula_parts_list, old.abstract_formula, old.N, dbsgprototype, 
-                 prototype_assignments, dbprotomass, old.cell.to_floats(), 
-                 old.p1coords.to_floats(), old.p1counts, old.p1assignments, dbmass,
-                 old.extended, list(old.extensions), old.sgprototype.periodicity, float(old.volume), volume_int_g, tag_list, store=store)
+                 prototype_assignments, dbprotomass, float_cell, 
+                 float_coords, old.p1counts, assignments, dbmass,
+                 old.extended, list(old.extensions), old.sgprototype.periodicity, float(old.volume), volume_int_g, store=store)
 
             newrefs = DbStructureReference.merge(createdstructure, old.refs, store=store, reuse=True)
+            newtags = DbStructureTag.merge(createdstructure, old.tags, store=store, reuse=True)
             
             return createdstructure;
             
@@ -352,7 +379,7 @@ class DbStructureReference(Storable):
     def __init__(self, structure, reference, types=None, store=None):
         """
         """
-        # Storable init        
+        # Storable init
         self.storable_init(store, structure=structure, reference=reference)
 
     @classmethod
@@ -378,13 +405,49 @@ class DbStructureReference(Storable):
                        
         return outresults
 
+class DbStructureTag(Storable):
+    """
+    Class for storing references pertaining to a computation
+    
+    There is a point with this being its own table, rather than inlining site_assignmnets: now extensions can refer to one
+    specific MultiAssignment by ID. 
+    """
+    types = storable_types('StructureTag', ('structure',DbStructure), ('tag',str), ('val',str), index=['structure','tag','val'])
+    
+    def __init__(self, compound, tag, val, types=None, store=None):
+        """
+        """
+        # Storable init        
+        self.storable_init(store, compound=compound, tag=tag, val=val)
+
+    @classmethod
+    def merge(cls, compound, tags, store=None, reuse=False):
+        outresults = []
+        compound = DbStructure.use(compound,reuse=True, store=store)
+        for tag in tags:
+            search = store.searcher()
+            p = DbStructureTag.variable(search,'p')
+            search.add(p.compound == compound)
+            search.add(p.tag == tag)
+            search.output(p,'object')
+            results = list(search)
+            if len(results) > 0:
+                result = results[0]
+                if result.val != tags[tag]:
+                    raise Exception("DBStructureTag: tag already set with different value.")
+            else:
+                result = DbStructureTag(compound, tag, tags[tag], store=store)
+            
+            outresults.append(result)
+                       
+        return outresults
 
 class DbStructureExtensionIsotope(Storable):
     """
     Class for storing atomic assignments
     """
-    types = storable_types('StructureExtensionDisordered', ('referenced_assignment',DbMultiAssignment), 
-                           ('symbol',int),('number',int),('protons',int))
+    types = storable_types('DbStructureExtensionIsotope', ('referenced_assignment',DbMultiAssignment), 
+                           ('symbol',int),('atomic_number',int),('mass_number',int))
     
     def __init__(self, hexhash, assignments, types=None, store=None):
         """
@@ -405,6 +468,7 @@ class DbStructureExtensionIsotope(Storable):
 
             assignments = [(x[0],x[1],float(x[2]),((x[2]*1000000000).limit_resolution(1)).floor(),) for x in old.assignments]
 
+            #TODO: Fix
             hexhash_assingmnets = AssignmentMap.create(assignments=assignments)
             hexhash = hexhash_assingmnets.hexhash
             if reuse and store != None:

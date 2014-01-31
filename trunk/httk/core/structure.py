@@ -80,7 +80,8 @@ class Structure(object):
         else:
             try:
                 return old.to_Structure()
-            except Exception as e:    
+            except Exception as e:   
+                raise
                 raise Exception("Structure.use: unknown input:"+str(e)+" object was:"+str(old))
 
     @classmethod
@@ -171,7 +172,8 @@ class Structure(object):
                     extensions.add('disordered')
                     break
         else:
-            extended = False
+            extended = False            
+
 
         multi_assignments = tuple()       
         for assignment in assignments:
@@ -252,7 +254,8 @@ class Structure(object):
         return "<Structure: "+str(self.nonequiv.cell)+">"
 
     def to_tuple(self):
-        return (self.sgprototype.to_tuple(), self.volume.to_tuple(), self.multi_assignments)
+        new = self.tidy()
+        return (new.sgprototype.to_tuple(), new.volume, new.multi_assignments)
     
     def __hash__(self):
         return self.to_tuple().__hash__()
@@ -283,8 +286,24 @@ class Structure(object):
         return Structure(newprototype, self.multi_assignments, self.volume, extended=self.extended, extensions=self.extensions, tags=self.tags, refs=self.refs)
 
     def tidy(self):
-        c2 = self.round()
-        return c2
+        """
+        Limits the representation of the structure to an accuracy suitable for database, etc., storage.
+        The primary use is that hexhash runs this method, making sure that the hexhash of a structure 
+        is preserved when stored and re-retrived
+        """
+        newvol = self.volume.limit_resolution().simplify()
+        newprototype = self.sgprototype.tidy()
+
+        new_multi_assignments = []
+        for site_assignment in self.multi_assignments:
+            new_multi_assignments.append([(a[0],a[1].limit_resolution()) for a in site_assignment])
+        
+        #TODO: Limit accuracy of assignments as well
+        newstructure = Structure(newprototype, new_multi_assignments, newvol, extended=self.extended, extensions=self.extensions, tags=self.tags, refs=self.refs)
+        if self._p1structure != None and self._p1structure != self:
+            newp1structure = self._p1structure.tidy()
+            newstructure.set_p1structure(newp1structure)
+        return newstructure
 
     # Convinience methods. Many of these just re-directs to the prototype object, but that saves a lot of writing :)
 

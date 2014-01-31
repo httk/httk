@@ -362,7 +362,7 @@ class FracVector(object):
             
         return FracVector(noms, denom)
 
-    def limit_resolution(self, resolution):
+    def limit_resolution(self, resolution=1000000000):
         """
         Returns a FracVector of reduced resolution.
         

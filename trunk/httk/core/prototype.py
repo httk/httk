@@ -146,8 +146,8 @@ class Prototype(object):
     def __rep__(self):
         return "<Structure: "+str(self.cell)+">"
 
-    def to_tuple(self):
-        proto = self                    
+    def to_tuple(self):        
+        proto = self.tidy()                 
         return (proto.hall_symbol,proto.cell.to_tuple(), proto.coordgroups.to_tuple(),proto.periodicity)
     
     def __hash__(self):
@@ -156,7 +156,7 @@ class Prototype(object):
     @property
     def hexhash(self):
         if self._hexhash == None:
-            self._hexhash = tuple_to_hexhash(self.tidy().to_tuple())
+            self._hexhash = tuple_to_hexhash(self.to_tuple())
         return self._hexhash
 
     def __eq__(self,other):
@@ -180,8 +180,14 @@ class Prototype(object):
         return struct
 
     def tidy(self):
-        c2 = self.round()
-        return c2
+        """
+        Clean up representation to limited accuracy (suitable for e.g. storage in a database)
+        The primary use of this is to make sure the hexhash is preserved after storage + retrival
+        """
+        newcell = self.cell.limit_resolution(1000000000).simplify()
+        newcoordgroups = self.coordgroups.limit_resolution(1000000000).simplify()    
+        newproto = Prototype(self.hall_symbol, newcell, newcoordgroups, self.periodicity, self.individual_data)
+        return newproto
 
     @property
     def spacegroup_number(self):
@@ -201,3 +207,4 @@ class Prototype(object):
     @property
     def prototype_formula(self):
         return prototype_formula(self)    
+

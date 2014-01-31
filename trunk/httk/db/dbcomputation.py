@@ -100,19 +100,19 @@ class DbComputation(Storable):
     Class for storing a prototype, i.e., a crystal structure sans atomic assignments and the overall volume
     """   
     
-    def __init__(self, computation_date, added_date, compound, code, manifest_hexhash, input_hexhash, related, tags, signature, store=None):
+    def __init__(self, computation_date, added_date, description, code, manifest_hexhash, input_hexhash, related, signature, store=None):
         """
         """                
         # Storable init        
         self.storable_init(store,computation_date=computation_date, added_date=added_date, 
-                           compound=compound, code=code, manifest_hexhash=manifest_hexhash, input_hexhash=input_hexhash, 
-                           related=related, tags=tags, signature=signature)
+                           description=description, code=code, manifest_hexhash=manifest_hexhash, input_hexhash=input_hexhash, 
+                           related=related, signature=signature)
 
     @classmethod
-    def create(cls,date=None,compound=None, code=None, manifest_hexhash=None, input_hexhash=None, related=None, tags=None, signature=None, store=None):
+    def create(cls,date=None,description='', code=None, manifest_hexhash=None, input_hexhash=None, related=None, signature=None, store=None):
         added_date = datetime.datetime.today().isoformat()
-        if compound != None:
-            compound = httk.db.DbCompound.use(compound, store=store)
+        #if compound != None:
+        #    compound = httk.db.DbCompound.use(compound, store=store)
         if date == None:
             date = added_date
         try:
@@ -121,19 +121,28 @@ class DbComputation(Storable):
             pass
         #if refs != None:
         #    refs = DbReferenceList.use(refs,reuse=True,store=store)
-        return DbComputation(date,added_date,compound,code,manifest_hexhash, input_hexhash, related, tuple(tags.items()), signature, store)
+        dbcomputation = DbComputation(date,added_date,description, code,manifest_hexhash, input_hexhash, related, signature, store)
+        #dbtags = DbComputationTag.merge(dbcomputation, tags, store=store, reuse=True)
+        return dbcomputation
 
     @classmethod
     def use(cls, old, store=None, reuse=False):
         if isinstance(old,DbComputation) and (store == None or store == old.store.store):
             return old    
         else:
-            return DbComputation(old.computation_date, old.added_date, old.compound, old.code, old.manifest_hexhash, old.input_hexhash, old.related, old.tags, old.signature, old.refs, store=store)
-
+            dbcomputation = DbComputation(old.computation_date, old.added_date, old.compound, old.code, old.manifest_hexhash, old.input_hexhash, old.related, old.signature, old.refs, store=store)
+            dbtags = DbComputationTag.merge(dbcomputation, old.tags, store=store, reuse=True)
+            return dbcomputation
+        
+# For self-referential type declarations the type variable must be set after class declaration.
+DbComputation.types = storable_types('Computation', ('computation_date',str), ('added_date',str), 
+                           ('description',str), ('code',DbCode), ('manifest_hexhash',str), ('input_hexhash',str),
+                           ('related',[DbComputation]),('tags',[('key',str),('val',str)]),
+                           ('signature',[DbSignature]),index=['computation_date','structure','code'])
 
 class DbComputationReference(Storable):
     """
-    Class for storing atomic assignments
+    Class for storing references pertaining to a computation
     
     There is a point with this being its own table, rather than inlining site_assignmnets: now extensions can refer to one
     specific MultiAssignment by ID. 
@@ -167,6 +176,40 @@ class DbComputationReference(Storable):
                        
         return outresults
 
+class DbComputationTag(Storable):
+    """
+    Class for storing references pertaining to a computation
+    
+    There is a point with this being its own table, rather than inlining site_assignmnets: now extensions can refer to one
+    specific MultiAssignment by ID. 
+    """
+    types = storable_types('ComputationTag', ('computation',DbComputation), ('tag',str), ('val',str), index=['computation','tag'])
+    
+    def __init__(self, computation, tag, val, types=None, store=None):
+        """
+        """
+        # Storable init        
+        self.storable_init(store, computation=computation, tag=tag, val=val)
+
+    @classmethod
+    def merge(cls, compound, tags, store=None, reuse=False):
+        outresults = []
+        compound = DbComputation.use(compound,reuse=True, store=store)
+        for tag in tags:
+            search = store.searcher()
+            p = DbComputationTag.variable(search,'p')
+            search.add(p.compound == compound)
+            search.add(p.tag == tag)
+            search.output(p,'object')
+            results = list(search)
+            if len(results) > 0:
+                result = results[0]
+                if result.val != tags[tag]:
+                    raise Exception("DbComputationTag: tag already set with different value.")
+            else:
+                result = DbComputationTag(compound, tag, tags[tag], store=store)
+            
+            outresults.append(result)
 
 class DbCompound(Storable):
     """
@@ -174,21 +217,20 @@ class DbCompound(Storable):
     types = storable_types('Compound', ('hexhash',str), ('source_computation',DbComputation), ('name',str),
                            ('names',[str]),('basic_structure',DbStructure), ('formula',str), ('abstract_formula',str), ('formula_parts',[('element',int),('count',int)]),
                            ('element_count',int),('spacegroup_number',int),
-                           ('tags',[('key',str),('val',str)]), 
                            ('extended',int), ('extensions',[str]), ('periodicity',int), 
                            index=['hexhash','source_computation','name','basic_structure','formula','abstract_formula',
                                   'element_count','spacegroup_number','extended','periodicity','disordered','periodicity'])
     
     def __init__(self, hexhash, source_computation, name, names, basic_structure, formula, 
                  abstract_formula, formula_parts, element_count,  
-                 spacegroup_number, tags, extended, extensions, periodicity, store=None):
+                 spacegroup_number, extended, extensions, periodicity, store=None):
         """
         """                
         
         # Storable init        
         self.storable_init(store, hexhash=hexhash, source_computation=source_computation, name=name, names=names, basic_structure=basic_structure, formula=formula, 
                            formula_parts=formula_parts, abstract_formula=abstract_formula, element_count=element_count, 
-                 spacegroup_number=spacegroup_number, tags=tags, extended=extended, extensions=extensions, periodicity=periodicity)
+                 spacegroup_number=spacegroup_number, extended=extended, extensions=extensions, periodicity=periodicity)
     
     @classmethod
     def use(cls, old, store=None, reuse=False):
@@ -234,17 +276,12 @@ class DbCompound(Storable):
             dbcompound = DbCompound(hexhash, source_computation, old.name, old.names, basic_structure, 
                               old.formula, old.abstract_formula, formula_parts, 
                               old.element_count, 
-                              old.spacegroup_number, tags, extended, extensions, periodicity=0, store=store)
+                              old.spacegroup_number, extended, extensions, periodicity=0, store=store)
 
-            #newrefs = DbCompoundReference.merge(dbcompound, basic_structure.refs, store=store, reuse=True)
+            newtags = DbCompoundTag.merge(dbcompound, tags, store=store, reuse=True)            
+            newrefs = DbCompoundReference.merge(dbcompound, old.refs, store=store, reuse=True)
 
             return dbcompound
-
-# For self-referential type declarations the type variable must be set after class declaration.
-DbComputation.types = storable_types('Computation', ('computation_date',str), ('added_date',str), 
-                           ('compound',DbCompound), ('code',DbCode), ('manifest_hexhash',str), ('input_hexhash',str),
-                           ('related',[DbComputation]),('tags',[('key',str),('val',str)]),
-                           ('signature',[DbSignature]),index=['computation_date','structure','code'])
 
 class DbCompoundReference(Storable):
     """
@@ -263,7 +300,10 @@ class DbCompoundReference(Storable):
     @classmethod
     def merge(cls, compound, refs, store=None, reuse=False):
         outresults = []
-        refs = [DbReference.use(x,reuse=True, store=store) for x in refs]
+        try:
+            refs = [DbReference.use(x,reuse=True, store=store) for x in refs]
+        except TypeError:
+            return
         compound = DbCompound.use(compound,reuse=True, store=store)
         for ref in refs:
             search = store.searcher()
@@ -281,14 +321,49 @@ class DbCompoundReference(Storable):
                        
         return outresults
 
-class DbCompoundDuplicateStructures(Storable):
+class DbCompoundTag(Storable):
+    """
+    Class for storing references pertaining to a computation
+    
+    There is a point with this being its own table, rather than inlining site_assignmnets: now extensions can refer to one
+    specific MultiAssignment by ID. 
+    """
+    types = storable_types('CompoundTag', ('compound',DbCompound), ('tag',str), ('val',str), index=['compound','tag','val'])
+    
+    def __init__(self, compound, tag, val, types=None, store=None):
+        """
+        """
+        # Storable init        
+        self.storable_init(store, compound=compound, tag=tag, val=val)
+
+    @classmethod
+    def merge(cls, compound, tags, store=None, reuse=False):
+        outresults = []
+        compound = DbCompound.use(compound,reuse=True, store=store)
+        for tag in tags:
+            search = store.searcher()
+            p = DbCompoundTag.variable(search,'p')
+            search.add(p.compound == compound)
+            search.add(p.tag == tag)
+            search.output(p,'object')
+            results = list(search)
+            if len(results) > 0:
+                result = results[0]
+                if result.val != tags[tag]:
+                    raise Exception("DbCompoundTag: tag already set with different value.")
+            else:
+                result = DbCompoundTag(compound, tag, tags[tag], store=store)
+            
+            outresults.append(result)
+
+class DbCompoundDuplicateStructure(Storable):
     """
     Class for keeping track of duplicate structures for a Compound
     
     There is a point with this being its own table, rather than inside the Compound table: now we can add duplicates after a DbCompound is already in place.
 
     """
-    types = storable_types('CompoundDuplicateStructures', ('compound',DbCompound), ('structure',DbStructure), index=['compound','structure'])
+    types = storable_types('CompoundDuplicateStructure', ('compound',DbCompound), ('structure',DbStructure), index=['compound','structure'])
     
     def __init__(self, compound, struct, types=None, store=None):
         """
@@ -303,7 +378,7 @@ class DbCompoundDuplicateStructures(Storable):
         dbcompound = DbCompound.use(compound,reuse=True, store=store)
         for dbstructure in structures:
             search = store.searcher()
-            p = DbCompoundDuplicateStructures.variable(search,'p')
+            p = DbCompoundDuplicateStructure.variable(search,'p')
             search.add(p.compound == dbcompound)
             search.add(p.structure == dbstructure)
             search.output(p,'object')
@@ -311,8 +386,82 @@ class DbCompoundDuplicateStructures(Storable):
             if len(results) > 0:
                 result = results[0]
             else:
-                result = DbCompoundDuplicateStructures(dbcompound, dbstructure, store=store)
+                result = DbCompoundDuplicateStructure(dbcompound, dbstructure, store=store)
             
             outresults.append(result)
                        
         return outresults
+
+class DbComputationRelatedStructure(Storable):
+    """
+    Class for keeping track of duplicate structures for a Compound
+    
+    There is a point with this being its own table, rather than inside the Compound table: now we can add duplicates after a DbCompound is already in place.
+
+    """
+    types = storable_types('ComputationRelatedStructure', ('computation',DbComputation), ('structure',DbStructure), ('relation', str), index=['computation','structure','relation'])
+    
+    def __init__(self, computation, struct, relation, types=None, store=None):
+        """
+        """
+        # Storable init        
+        self.storable_init(store, computation=computation, structure=struct, relation=relation)
+
+    @classmethod
+    def merge(cls, computation, structures, relation, store=None, reuse=False):
+        outresults = []
+        structures = [DbStructure.use(x,reuse=True, store=store) for x in structures]
+        dbcomputation = DbComputation.use(computation,reuse=True, store=store)
+        for dbstructure in structures:
+            search = store.searcher()
+            p = DbComputationRelatedStructure.variable(search,'p')
+            search.add(p.computation == dbcomputation)
+            search.add(p.structure == dbstructure)
+            search.add(p.relation == relation)
+            search.output(p,'object')
+            results = list(search)
+            if len(results) > 0:
+                result = results[0]
+            else:
+                result = DbComputationRelatedStructure(dbcomputation, dbstructure, relation, store=store)
+            
+            outresults.append(result)
+                       
+        return outresults
+
+class DbComputationRelatedCompound(Storable):
+    """
+    Class for keeping track of duplicate structures for a Compound
+    
+    There is a point with this being its own table, rather than inside the Compound table: now we can add duplicates after a DbCompound is already in place.
+
+    """
+    types = storable_types('ComputationRelatedCompound', ('computation',DbComputation), ('compound',DbCompound), ('relation', str), index=['computation','compound','relation'])
+    
+    def __init__(self, computation, compound, relation, types=None, store=None):
+        """
+        """
+        # Storable init        
+        self.storable_init(store, computation=computation, compound=compound, relation=relation)
+
+    @classmethod
+    def merge(cls, computation, compounds, relation, store=None, reuse=False):
+        outresults = []
+        compounds = [DbCompound.use(x,reuse=True, store=store) for x in compounds]
+        dbcomputation = DbComputation.use(computation,reuse=True, store=store)
+        for dbcompound in compounds:
+            search = store.searcher()
+            p = DbComputationRelatedCompound.variable(search,'p')
+            search.add(p.computation == dbcomputation)
+            search.add(p.compound == dbcompound)
+            search.output(p,'object')
+            results = list(search)
+            if len(results) > 0:
+                result = results[0]
+            else:
+                result = DbComputationRelatedCompound(dbcomputation, dbcompound, relation, store=store)
+            
+            outresults.append(result)
+                       
+        return outresults
+    

@@ -199,6 +199,7 @@ class SqlStore(object):
                             subtypename = t[i][0]
                             subtypes.append((subtypename,t[i][1],))
                             if isinstance(entry,tuple):
+                                #print "TRYING",entry,i,subtypename
                                 data[subtypename] = entry[i]
                             elif isinstance(entry,dict):
                                 data[subtypename] = entry[t[i][0]]

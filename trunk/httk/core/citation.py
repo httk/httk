@@ -39,7 +39,13 @@ def add_ext_citation(software, author):
         external_citations[software] = set()
     external_citations[software].add(author)
 
+auto_print_citations_at_exit=False
+cancel_print_citations = False
+
 def print_citations():
+    global cancel_print_citations
+    if cancel_print_citations:
+        return
     authors = {}
     for citation in module_citations:
         module_authors = module_citations[citation]
@@ -65,14 +71,18 @@ def print_citations():
             print "  * "+software+" by "+", ".join(external_citations[software])
     print "===================================================="
 
-auto_print_citations_at_exit=False
-
 def print_citations_at_exit():
-    global auto_print_citations_at_exit
+    global auto_print_citations_at_exit, cancel_print_citations
     if not auto_print_citations_at_exit:
         import atexit
         atexit.register(print_citations)
         auto_print_citations_at_exit = True
+    cancel_print_citations = False
+
+def dont_print_citations_at_exit():
+    global cancel_print_citations
+    auto_print_citations_at_exit = False
+    cancel_print_citations = True
 
 try:
     val = config.get("general", "auto_print_citations_at_exit")
