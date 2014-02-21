@@ -1,8 +1,8 @@
-all:	httk.cfg templates 
+all:	httk.cfg maketemplates 
 	@echo "================================="
 	@echo "==== Please read INSTALL.txt ===="
 	@echo "================================="
-templates:
+maketemplates:
 	echo '$$HTTKVERSION' | Templates/subsvars.sh > VERSION
 	( cd Templates; \
 	  for template in *.txt; do \
