@@ -1,0 +1,36 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+if [ "$1" == "-f" ]; then
+    FORCE="-f"
+else
+    FORCE=""
+fi
+
+echo "==== httk-project-update-manifest"
+echo ""
+
+if [ -z "$HTTK_PROJECT_DIR" ]; then
+    echo "You are not in a subdirectory to a project."
+    echo "If this is a new project, you need to run httk-project"
+    echo "in your project directory."
+    exit 1
+fi
+
+cd "$HTTK_PROJECT_DIR"
+
+if [ -e "ht.project/locked" ]; then
+    echo "This project is locked. It is not meant to be further changed"
+    echo "(probably because you have already submitted it to a database)"
+    echo ""
+    echo "To remove this warning, delete ht.project/locked"
+    echo "Though, it is not something you normally should do."
+    echo ""
+    exit 1
+fi
+
+echo "==== Generating project manifests (this make take a long time, especially if your project contains many files)"
+"${HTTK_BIN_PATH}/internal/update_project_manifest.py" $FORCE "$HTTK_PROJECT_DIR"

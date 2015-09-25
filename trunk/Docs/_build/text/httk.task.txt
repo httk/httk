@@ -1,0 +1,34 @@
+
+httk.task package
+*****************
+
+
+Submodules
+==========
+
+
+httk.task.reader module
+=======================
+
+httk.task.reader.read_manifest(ioa, verify_signature=True)
+
+httk.task.reader.reader(projectpath, inpath, excludes=None, default_description=None, project_counter=0, force_remake_manifests=False)
+
+   Read and yield all tasks from the project in path
+
+httk.task.reader.submit_reader(projectpath, default_description=None, excludes=None, project=None, project_counter=0)
+
+   Read and yield all tasks from the project in path
+
+   For 'submitted' projects that already have manifests and should not
+   be altered in any way.
+
+
+httk.task.taskmgr module
+========================
+
+httk.task.taskmgr.create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned', instantiate_name='ht.instantiate.py', overwrite=False, overwrite_head_dir=True, remove_instantiate=True, name=None)
+
+
+Module contents
+===============

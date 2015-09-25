@@ -1,0 +1,99 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: aab855d714014fd6d276af94f8e138df
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/01/1010132.cif $
+#------------------------------------------------------------------------------
+data_1010132
+_chemical_name_systematic          'Phosphane'
+_publ_section_title
+;
+La struttura dell'idrogeno fosforato (P H~3~) e dell'idrogeno
+arsenicale (As H~3~)
+;
+loop_
+_publ_author_name
+  'Natta, G'
+  'Casazza, E'
+_journal_name_full                 'Gazzetta Chimica Italiana'
+_journal_coden_ASTM                GCITA9
+_journal_volume                    60
+_journal_year                      1930
+_journal_page_first                851
+_journal_page_last                 859
+_cod_database_code 1010132
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42 3 2"
+_symmetry_space_group_name_Hall 'P 4n 2 3'
+_[local]_omdb_cod_original_Hall 'P 4n 2 3'
+_symmetry_Int_Tables_number 208
+ 
+_cell_length_a    6.31000
+_cell_length_b    6.31000
+_cell_length_c    6.31000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y+1/2,-x+1/2,-z+1/2
+14 -y+1/2,x+1/2,z+1/2
+15 y+1/2,-x+1/2,z+1/2
+16 y+1/2,x+1/2,-z+1/2
+17 -x+1/2,-z+1/2,-y+1/2
+18 -x+1/2,z+1/2,y+1/2
+19 x+1/2,-z+1/2,y+1/2
+20 x+1/2,z+1/2,-y+1/2
+21 -z+1/2,-y+1/2,-x+1/2
+22 -z+1/2,y+1/2,x+1/2
+23 z+1/2,-y+1/2,x+1/2
+24 z+1/2,y+1/2,-x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+P1 P 4 c 0.75000 0.75000 0.75000 1.0
+H1 H 12 i 0.68400 0.00000 0.50000 1.0
+ 
+

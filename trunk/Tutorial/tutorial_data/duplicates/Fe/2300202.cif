@@ -1,0 +1,188 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 689a9677d332cf96fdae1964efbb9ada
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/30/02/2300202.cif $
+#------------------------------------------------------------------------------
+data_2300202
+loop_
+_publ_author_name
+'Wood, Ian G.'
+'Vo\<cadlo, Lidunka'
+'Dobson, David P.'
+'Price, G. David'
+'Fortes, A. D.'
+'Cooper, Frances J.'
+'Neale, J. W.'
+'Walker, Andrew M.'
+'Marshall, W. G.'
+'Tucker, M. G.'
+'Francis, D. J.'
+'Stone, H. J.'
+'McCammon, C. A.'
+_publ_section_title
+;
+ Thermoelastic properties of magnesiow\"ustite,
+ (Mg~1{-~<i>x</i>}Fe~<i>x~</i>)O: determination of the
+ Anderson--Gr\"uneisen parameter by time-of-flight neutron powder
+ diffraction at simultaneous high pressures and temperatures
+;
+_journal_issue                   5
+_journal_name_full               'Journal of Applied Crystallography'
+_journal_page_first              886
+_journal_page_last               896
+_journal_volume                  41
+_journal_year                    2008
+_chemical_name_systematic        ' ?'
+_[local]_cod_data_source_file    ks5172.cif
+_[local]_cod_data_source_block   PRL47388_ZRO2_phase_2
+_[local]_cod_cif_authors_sg_H-M  'I m 3 m'
+_cod_original_cell_volume        22.60376
+_cod_database_code               2300202
+_journal_paper_doi 10.1107/S0021889808025417
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4/m -3 2/m"
+_symmetry_space_group_name_Hall '-I 4 2 3'
+_[local]_omdb_cod_original_Hall '-I 4 2 3'
+_symmetry_Int_Tables_number 229
+ 
+_cell_length_a    2.82740
+_cell_length_b    2.82740
+_cell_length_c    2.82740
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y,-x,-z
+14 -y,x,z
+15 y,-x,z
+16 y,x,-z
+17 -x,-z,-y
+18 -x,z,y
+19 x,-z,y
+20 x,z,-y
+21 -z,-y,-x
+22 -z,y,x
+23 z,-y,x
+24 z,y,-x
+25 -x,-y,-z
+26 -x,y,z
+27 x,-y,z
+28 x,y,-z
+29 -y,-z,-x
+30 -y,z,x
+31 y,-z,x
+32 y,z,-x
+33 -z,-x,-y
+34 -z,x,y
+35 z,-x,y
+36 z,x,-y
+37 y,x,z
+38 y,-x,-z
+39 -y,x,-z
+40 -y,-x,z
+41 x,z,y
+42 x,-z,-y
+43 -x,z,-y
+44 -x,-z,y
+45 z,y,x
+46 z,-y,-x
+47 -z,y,-x
+48 -z,-y,x
+49 x+1/2,y+1/2,z+1/2
+50 x+1/2,-y+1/2,-z+1/2
+51 -x+1/2,y+1/2,-z+1/2
+52 -x+1/2,-y+1/2,z+1/2
+53 y+1/2,z+1/2,x+1/2
+54 y+1/2,-z+1/2,-x+1/2
+55 -y+1/2,z+1/2,-x+1/2
+56 -y+1/2,-z+1/2,x+1/2
+57 z+1/2,x+1/2,y+1/2
+58 z+1/2,-x+1/2,-y+1/2
+59 -z+1/2,x+1/2,-y+1/2
+60 -z+1/2,-x+1/2,y+1/2
+61 -y+1/2,-x+1/2,-z+1/2
+62 -y+1/2,x+1/2,z+1/2
+63 y+1/2,-x+1/2,z+1/2
+64 y+1/2,x+1/2,-z+1/2
+65 -x+1/2,-z+1/2,-y+1/2
+66 -x+1/2,z+1/2,y+1/2
+67 x+1/2,-z+1/2,y+1/2
+68 x+1/2,z+1/2,-y+1/2
+69 -z+1/2,-y+1/2,-x+1/2
+70 -z+1/2,y+1/2,x+1/2
+71 z+1/2,-y+1/2,x+1/2
+72 z+1/2,y+1/2,-x+1/2
+73 -x+1/2,-y+1/2,-z+1/2
+74 -x+1/2,y+1/2,z+1/2
+75 x+1/2,-y+1/2,z+1/2
+76 x+1/2,y+1/2,-z+1/2
+77 -y+1/2,-z+1/2,-x+1/2
+78 -y+1/2,z+1/2,x+1/2
+79 y+1/2,-z+1/2,x+1/2
+80 y+1/2,z+1/2,-x+1/2
+81 -z+1/2,-x+1/2,-y+1/2
+82 -z+1/2,x+1/2,y+1/2
+83 z+1/2,-x+1/2,y+1/2
+84 z+1/2,x+1/2,-y+1/2
+85 y+1/2,x+1/2,z+1/2
+86 y+1/2,-x+1/2,-z+1/2
+87 -y+1/2,x+1/2,-z+1/2
+88 -y+1/2,-x+1/2,z+1/2
+89 x+1/2,z+1/2,y+1/2
+90 x+1/2,-z+1/2,-y+1/2
+91 -x+1/2,z+1/2,-y+1/2
+92 -x+1/2,-z+1/2,y+1/2
+93 z+1/2,y+1/2,x+1/2
+94 z+1/2,-y+1/2,-x+1/2
+95 -z+1/2,y+1/2,-x+1/2
+96 -z+1/2,-y+1/2,x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Fe1 Fe 2 a 0.00000 0.00000 0.00000 1.0
+ 
+

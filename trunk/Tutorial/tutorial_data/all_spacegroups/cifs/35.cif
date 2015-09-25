@@ -1,0 +1,103 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 2a1c40ac61625568ff447a5c119c7a7e
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2011-09-28 14:24:46 +0000 (Wed, 28 Sep 2011) $
+#$Revision: 26848 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/23/2002329.cif $
+#------------------------------------------------------------------------------
+data_2002329
+_chemical_name_systematic          'Tricalcium tetragallium oxide'
+_publ_section_title
+;
+Ueber Erdalkalimetalloxogallate (VIII) Synthese und Aufbau eines neuen
+Calciumoxogallats Ca3 Ga4 O9
+;
+loop_
+_publ_author_name
+  'Schulze, A R'
+  'Mueller-Buschbaum, Hk'
+_journal_name_full
+;
+Monatshefte fuer Chemie und verwandte Teile anderer Wissenschaften
+(109,1978-)
+;
+_journal_volume                    112
+_journal_year                      1981
+_journal_page_first                149
+_journal_page_last                 156
+_refine_ls_R_factor_all            0.062
+_cod_database_code 2002329
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C m m 2"
+_symmetry_space_group_name_Hall 'C 2 -2'
+_[local]_omdb_cod_original_Hall 'C 2 -2'
+_symmetry_Int_Tables_number 35
+ 
+_cell_length_a    14.35800
+_cell_length_b    16.82500
+_cell_length_c    5.32100
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x,y,z
+4 x,-y,z
+5 x+1/2,y+1/2,z
+6 -x+1/2,-y+1/2,z
+7 -x+1/2,y+1/2,z
+8 x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ca1 Ca 2 a 0.00000 0.00000 0.00000 1.0
+Ca2 Ca 4 e 0.00000 0.40170 -0.09020 1.0
+Ca3 Ca 8 f 0.12930 0.20960 -0.00377 1.0
+Ca4 Ca 4 d 0.23990 0.00000 -0.05090 1.0
+Ga1 Ga 4 e 0.00000 0.26230 0.47050 1.0
+Ga2 Ga 8 f 0.10880 0.09390 0.48730 1.0
+Ga3 Ga 8 f 0.20050 0.33460 0.43660 1.0
+Ga4 Ga 4 d 0.38780 0.00000 0.38980 1.0
+O1 O 4 e 0.00000 0.15400 0.59800 1.0
+O2 O 4 e 0.00000 0.27200 0.13300 1.0
+O3 O 2 b 0.00000 0.50000 0.22600 1.0
+O4 O 8 f 0.10200 0.30400 0.63600 1.0
+O5 O 4 d 0.10400 0.00000 0.65400 1.0
+O6 O 8 f 0.11500 0.08900 0.15000 1.0
+O7 O 8 f 0.16900 0.41500 0.22700 1.0
+O8 O 4 c 0.25000 0.25000 0.24300 1.0
+O9 O 8 f 0.29400 0.36100 0.65700 1.0
+O10 O 4 d 0.39100 0.00000 0.72800 1.0
+ 
+

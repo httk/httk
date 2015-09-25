@@ -1,0 +1,90 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 7a9cdf79ca46cc55a15b06af5d408a66
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/80/1008035.cif $
+#------------------------------------------------------------------------------
+data_1008035
+_chemical_name_systematic          'Uranium(III) bromide'
+_publ_section_title
+;
+The structure of uranium tribromide by neutron diffraction profile
+analysis
+;
+loop_
+_publ_author_name
+  'Levy, J H'
+  'Taylor, J C'
+  'Wilson, P W'
+_journal_name_full                 'Journal of the Less-Common Metals'
+_journal_coden_ASTM                JCOMAH
+_journal_volume                    39
+_journal_year                      1975
+_journal_page_first                265
+_journal_page_last                 270
+_refine_ls_R_factor_all            0.1
+_cod_database_code 1008035
+_journal_paper_doi 10.1016/0022-5088(75)90200-3
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 63/m"
+_symmetry_space_group_name_Hall '-P 6c'
+_[local]_omdb_cod_original_Hall '-P 6c'
+_symmetry_Int_Tables_number 176
+ 
+_cell_length_a    7.94200
+_cell_length_b    7.94200
+_cell_length_c    4.44100
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/2
+3 -y,x-y,z
+4 -x,-y,z+1/2
+5 -x+y,-x,z
+6 y,-x+y,z+1/2
+7 -x,-y,-z
+8 -x+y,-x,-z+1/2
+9 y,-x+y,-z
+10 x,y,-z+1/2
+11 x-y,x,-z
+12 -y,x-y,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+U1 U 2 c 0.33333 0.66667 0.25000 1.0
+Br1 Br 6 h 0.38590 0.08630 0.25000 1.0
+ 
+

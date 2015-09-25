@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.24pt}
+\beamer@sectionintoc {1}{Overview}{2}{0}{1}
+\beamer@sectionintoc {2}{Examples}{6}{0}{2}
+\beamer@sectionintoc {3}{Open Materials Database}{22}{0}{3}
+\beamer@sectionintoc {4}{Installation}{24}{0}{4}
+\beamer@sectionintoc {5}{Concluding remarks}{25}{0}{5}

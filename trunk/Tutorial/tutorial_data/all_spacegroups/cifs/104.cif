@@ -1,0 +1,165 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 89eb96dd75a51193af945882ef1f5d6c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-04-01 09:37:47 +0000 (Mon, 01 Apr 2013) $
+#$Revision: 78037 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/32/89/4328997.cif $
+#------------------------------------------------------------------------------
+data_4328997
+loop_
+_publ_author_name
+'Fang-Hua Zhao'
+'Yun-Xia Che'
+'Ji-Min Zheng'
+'Fernande Grandjean'
+'Gary J. Long'
+_publ_section_title
+;
+ Two Acentric Mononuclear Molecular Complexes with Unusual Magnetic and
+ Ferroelectric Properties
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              4862
+_journal_page_last               4868
+_journal_paper_doi               10.1021/ic300394c
+_journal_volume                  51
+_journal_year                    2012
+_computing_cell_refinement       'Bruker SMART'
+_computing_data_collection       'Bruker SMART'
+_computing_data_reduction        'Bruker SAINT'
+_computing_molecular_graphics    'Bruker SHELXTL'
+_computing_publication_material  'Bruker SHELXTL'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      294(2)
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'CCD area detector'
+_diffrn_measurement_method       'phi and omega scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0322
+_diffrn_reflns_av_sigmaI/netI    0.0246
+_diffrn_reflns_limit_h_max       8
+_diffrn_reflns_limit_h_min       -11
+_diffrn_reflns_limit_k_max       11
+_diffrn_reflns_limit_k_min       -11
+_diffrn_reflns_limit_l_max       10
+_diffrn_reflns_limit_l_min       -11
+_diffrn_reflns_number            4075
+_diffrn_reflns_theta_full        26.29
+_diffrn_reflns_theta_max         26.29
+_diffrn_reflns_theta_min         3.03
+_exptl_absorpt_coefficient_mu    1.743
+_exptl_absorpt_correction_T_max  0.8450
+_exptl_absorpt_correction_T_min  0.7219
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   sadabs
+_exptl_crystal_colour            Blue
+_exptl_crystal_density_diffrn    1.968
+_exptl_crystal_density_meas      none
+_exptl_crystal_description       Block
+_exptl_crystal_F_000             478
+_exptl_crystal_size_max          0.20
+_exptl_crystal_size_mid          0.16
+_exptl_crystal_size_min          0.10
+_refine_diff_density_max         0.172
+_refine_diff_density_min         -0.438
+_refine_diff_density_rms         0.064
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.023(15)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.000
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     64
+_refine_ls_number_reflns         816
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.000
+_refine_ls_R_factor_all          0.0248
+_refine_ls_R_factor_gt           0.0213
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0351P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0533
+_refine_ls_wR_factor_ref         0.0545
+_reflns_number_gt                740
+_reflns_number_total             816
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ic300394c_si_002_2.cif
+_[local]_cod_data_source_block   2Cu
+_cod_original_cell_volume        801.03(19)
+_cod_database_code               4328997
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4 n c"
+_symmetry_space_group_name_Hall 'P 4 -2n'
+_[local]_omdb_cod_original_Hall 'P 4 -2n'
+_symmetry_Int_Tables_number 104
+ 
+_cell_length_a    9.51340
+_cell_length_b    9.51340
+_cell_length_c    8.85070
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+5 -x+1/2,y+1/2,z+1/2
+6 x+1/2,-y+1/2,z+1/2
+7 y+1/2,x+1/2,z+1/2
+8 -y+1/2,-x+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+C1 C 8 c 0.72040 0.72870 0.28390 1.0
+Cl1 Cl 2 a 0.00000 0.00000 0.16278 1.0
+Cl2 Cl 2 a 0.00000 0.00000 0.55068 1.0
+Cu1 Cu 2 a 0.00000 0.00000 0.84530 1.0
+N1 N 8 c 0.56540 0.78852 0.45420 1.0
+N2 N 8 c 0.60504 0.68454 0.35450 1.0
+N3 N 8 c 0.65190 0.89155 0.44700 1.0
+N4 N 8 c 0.74881 0.85703 0.34110 1.0
+N5 N 8 c 0.79683 0.66280 0.18010 1.0
+H1 H 8 c 0.77320 0.58000 0.15040 1.0
+H2 H 8 c 0.81820 -0.09070 0.31430 1.0
+H3 H 8 c 0.86990 0.70290 0.14260 1.0
+ 
+

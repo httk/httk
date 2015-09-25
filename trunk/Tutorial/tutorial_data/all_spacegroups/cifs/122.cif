@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 4be7f41151bc4d983f7861fede606054
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/62/9006285.cif $
+#------------------------------------------------------------------------------
+data_9006285
+loop_
+_publ_author_name
+'Boisen, M. B.'
+'Gibbs, G. V.'
+'Bukowinski, M. S. T.'
+_publ_section_title
+;
+ Framework silica structures generated using simulated annealing
+ with a potential energy function based on an H6Si2O7 molecule
+ Sample: 2
+;
+_journal_name_full               'Physics and Chemistry of Minerals'
+_journal_page_first              269
+_journal_page_last               284
+_journal_volume                  21
+_journal_year                    1994
+_exptl_crystal_density_diffrn    2.364
+_[local]_cod_chemical_formula_sum_orig 'Si O2'
+_cod_database_code               9006285
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I -4 2 d"
+_symmetry_space_group_name_Hall 'I -4 2bw'
+_[local]_omdb_cod_original_Hall 'I -4 2bw'
+_symmetry_Int_Tables_number 122
+ 
+_cell_length_a    4.74810
+_cell_length_b    4.74810
+_cell_length_c    7.48800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z+1/4
+3 -x,y+1/2,-z+1/4
+4 -x,-y,z
+5 y,x+1/2,z+1/4
+6 y,-x,-z
+7 -y,x,-z
+8 -y,-x+1/2,z+1/4
+9 x+1/2,y+1/2,z+1/2
+10 x+1/2,-y,-z+3/4
+11 -x+1/2,y,-z+3/4
+12 -x+1/2,-y+1/2,z+1/2
+13 y+1/2,x,z+3/4
+14 y+1/2,-x+1/2,-z+1/2
+15 -y+1/2,x+1/2,-z+1/2
+16 -y+1/2,-x,z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Si1 Si 4 b 0.00000 0.00000 0.50000 1.0
+O1 O 8 d 0.62338 0.25000 0.12500 1.0
+ 
+

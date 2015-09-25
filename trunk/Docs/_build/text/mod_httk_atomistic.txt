@@ -1,0 +1,130 @@
+
+The httk.atomistic package
+**************************
+
+This page documents the features of the httk.atomistic package most
+relevant for regular users. For a complete listing of members and
+subpackages, please refer to the full API documentation instead, *Full
+httk API documentation*.
+
+
+Introduction
+============
+
+The httk.atomistic package
+
+Classes and utilities for dealing with high-throughput calculations of
+atomistic systems.
+
+
+Atomistic description
+=====================
+
+class class httk.atomistic.Structure(assignmentsobj, rc_sitesobj=None, uc_sitesobj=None, rc_scale=1, uc_scale=1)
+
+   A Structure represents N sites of, e.g., atoms or ions, in any
+   periodic or non-periodic arrangement.  The structure object is
+   meant to be immutable and assumes that no internal variables are
+   changed after its creation.  All methods that 'changes' the object
+   creates and returns a new, updated, structure object.
+
+   Naming conventions in this Class (and elsewhere in httk):
+
+   For cells:
+      cell = an abstract name for any reasonable representation of a
+      'cell' that defines the basis vectors used for representing the
+      structure  cellobj = object of class Cell basis = a 3x3
+      sequence-type with (in rows) the three basis vectors (for a
+      periodic system, defining the unit cell, and defines the unit of
+      repetition for the periodic dimensions) lengths_and_angles =
+      (a,b,c,alpha,beta,gamma): the basis vector lengths and angles
+      niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3,
+      2*v2*v3)) where v1, v2, v3 are the vectors forming the basis
+      metric =
+      ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))
+
+   For sites:
+      sites = used as an abstract name for any sensible representation
+      of a list of coordinates and a cell
+
+      sitesobj = object of class Sites
+
+      representative = only representative atoms, should be repeated
+      by structure symmetry group to give all sites unitccell = all
+      atoms in unitcell
+
+      rc_counts = number of atoms of each type (assignment) in the
+      representative structure uc_counts = number of atoms of each
+      type (assignment) in the primcell structure
+
+      coordgroups = coordinates represented as a 3-level-list of
+      coordinates, e.g. [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]]
+      where level-1 list = groups: one group for each equivalent atom
+
+      counts_and_coords = (counts,coords) = one list with the number
+      of atoms of one type + a 2-level list of coordinates.
+
+      coords = 2-level list of coordinates.
+
+      reduced = coordinates given in cell vectors cartesian =
+      coordinates given as direct cartesian coordinates
+
+   For assignments of atoms, etc. to sites:
+      assignments = abstract name for any representation of assignment
+      of atoms assignmentsobj = object of class Assignment
+      atomic_numbers = a sequence of integers for the atomic number of
+      each species occupations = a sequence with the actual
+      assignments *repeated* as needed.
+
+   For cell scaling:
+      scaling = abstract name for any representation of cell scaling
+      scale = multiply all basis vectors with this number volume =
+      rescaling the cell such that it takes this volume
+
+   For periodicity:
+      periodicity = abstract name of a representation of periodicity
+      pbc = 'periodic boundary conditions' = sequence of True and
+      False for which basis vectors are periodic / non-periodic
+      nonperiodic_vecs = integer, number of basis vectors, counted
+      from the first, which are non-periodic
+
+   For spacegroup:
+      spacegroup = abstract name for any spacegroup representation
+      spacegroupobj = object of type Spacegroup hall_symbol =
+      specifically the hall_symbol representation of the spacegroup
+
+   Member naming should use unambiguous combinations of the above
+   terms.
+
+class class httk.atomistic.Cell(basis)
+
+   Represents a cell (e.g., a unitcell, but also possibly just the
+   basis vectors of a non-periodic system)
+
+class class httk.atomistic.UnitcellStructure(cellobj=None, assignmentsobj=None, rc_sitesobj=None, uc_sitesobj=None, struct=None, uc_scale=1)
+
+   FullSitesStructure essentially just wraps Structure, and provides a
+   strict subset of the functionality therein. This is needed,
+   because in interaction with, e.g., databases, we sometimes need to
+   restrict the available fields to those properties accessible via
+   this object.
+
+class class httk.atomistic.RepresentativeSites(reduced_coordgroups=None, cartesian_coordgroups=None, reduced_coords=None, cartesian_coords=None, counts=None, normalized_cellobj=None, hall_symbol=None, pbc=None, wyckoff_symbols=None)
+
+   Represents any collection of sites in a unitcell
+
+class class httk.atomistic.UnitcellSites(reduced_coordgroups=None, reduced_coords=None, counts=None, normalized_cellobj=None, hall_symbol='P 1', pbc=None)
+
+   Represents any collection of sites in a unitcell
+
+class class httk.atomistic.Assignments(siteassignments, extensions=[])
+
+   Represents a possible vector of assignments
+
+class class httk.atomistic.Compound(wyckoff_sequence, anonymous_wyckoff_sequence, formula, anonymous_formula, spacegroup_number, extended, extensions)
+
+class class httk.atomistic.CompoundStructure(compound, structure)
+
+class class httk.atomistic.StructurePhaseDiagram(structures, energies, hull_indices, competing_indices, hull_competing_indices, hull_distances, coord_system, phase_lines)
+
+   Represents a phase diagram of structures

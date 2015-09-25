@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,15 +18,20 @@
 """
 This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
 """
-
-import os, sys
+import os, sys, time
 import sqlite3 as sqlite
 import atexit
+from httk.core import FracScalar
 
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
 #database_debug = True
+database_debug_slow = True
+if os.environ.has_key('DATABASE_DEBUG_SLOW'):
+    database_debug_slow = True
+if os.environ.has_key('DATABASE_DEBUG'):
+    database_debug = True
 
 def db_open(filename):
     global sqliteconnections
@@ -59,23 +64,38 @@ class Sqlite(object):
         self.connection.rollback()
 
     def commit(self):
-        #if self._block_commit:
-       #     raise Exception("Who is commiting?!")
         self.connection.commit()
 
     class SqliteCursor(object):
         def __init__(self,db):
             self.cursor = db.connection.cursor()
+            self.db =db
 
         def execute(self,sql,values=[]):
             global database_debug
-            if os.environ.has_key('DATABASE_DEBUG') or database_debug:
+            if database_debug:
                 print >> sys.stderr, "DEBUG: EXECUTING SQL:"+sql+" :: "+str(values)
+            if database_debug_slow:
+                time1 = time.time()
             try:
                 self.cursor.execute(sql,values)
-            except Exception as e:
+            except Exception:
                 info = sys.exc_info()
                 raise Exception("backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1])), None, info[2]
+            if database_debug_slow:
+                time2 = time.time()
+                if (time2-time1)>1 and not sql.startswith("CREATE"):
+                    debug_cursor = self.db.connection.cursor()
+                    print >> sys.stderr, "SLOW DATABASE DEBUG: EXECUTING SQL:"+sql+" :: "+str(values)
+                    print >> sys.stderr, "sqlite execute finished in ",(time2-time1)*1000.0,"ms"
+                    try:
+                        debug_cursor.execute("EXPLAIN QUERY PLAN "+sql,values)
+                        queryplan="### QUERY PLAN ####\n"+"\n".join([str(x) for x in debug_cursor.fetchall()]) + "\n########"
+                        print >> sys.stderr, queryplan
+                    except sqlite.OperationalError:
+                        print >> sys.stderr, "(Could not retrieve query plan)"
+                        pass
+                    debug_cursor.close()
 
         def fetchone(self):
             return self.cursor.fetchone()
@@ -112,6 +132,10 @@ class Sqlite(object):
                 typestr = "REAL"
             elif columntypes[i] == str:
                 typestr = "TEXT"
+            elif columntypes[i] == FracScalar:
+                typestr = "INTEGER"
+            elif columntypes[i] == bool:
+                typestr = "INTEGER"
             else:
                 raise Exception("backend.Sqlite.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")                      
             
@@ -120,7 +144,12 @@ class Sqlite(object):
         self.modify_structure("CREATE TABLE "+name+" ("+sql+")",(),cursor=cursor)    
         if index != None:
             for ind in index:
-                self.modify_structure("CREATE INDEX "+name+"_"+ind+"_index"+" ON "+name+"("+ind+")",(),cursor=cursor)    
+                if isinstance(ind,tuple):
+                    indexname = "__".join(ind)
+                    indexcolumns = ",".join(ind)
+                    self.modify_structure("CREATE INDEX "+name+"_"+indexname+"_index"+" ON "+name+"("+indexcolumns+")",(),cursor=cursor)    
+                else:
+                    self.modify_structure("CREATE INDEX "+name+"_"+ind+"_index"+" ON "+name+"("+ind+")",(),cursor=cursor)    
 
     def insert_row(self,name,columnnames,columnvalues,cursor = None):
         if len(columnvalues)>0:

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+SELF=$0
+HOME=$(dirname "$0")
+DIR=$(cd "$HOME"; pwd -P)
+
+if [ "$1" == "sh" -o "$1" == "bash" -o "$1" == "ksh88" -o "$1" == "ksh" -o "$1" == "zsh" ]; then
+   echo "export PATH=$DIR/bin:\$PATH;"
+   echo "export PYTHONPATH=$DIR:\$PYTHONPATH"
+fi
+
+if [ "$1" == "fish" ]; then
+   echo "set -x PATH $DIR/bin \$PATH;"
+   echo "set -x PYTHONPATH $DIR \$PYTHONPATH"
+fi
+
+if [ -z "$1" ]; then
+   echo "export PATH=$DIR/bin:\$PATH;"
+   echo "export PYTHONPATH=$DIR:\$PYTHONPATH"
+fi

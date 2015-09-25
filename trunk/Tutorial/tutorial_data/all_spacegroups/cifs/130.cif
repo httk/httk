@@ -1,0 +1,91 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 397b8a17268b739cc2ce341dac3fd038
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/40/1004064.cif $
+#------------------------------------------------------------------------------
+data_1004064
+_chemical_name_systematic          'PALLADIUM DIBISMUTH OXIDE'
+_[local]_cod_cif_authors_sg_H-M  'P 4/n c c Z'
+loop_
+_publ_author_name
+  'Conflant, P'
+  'Boivin, J C'
+  'Thomas, D'
+_journal_name_full                 'Revue de Chimie Minerale'
+_journal_coden_ASTM                RVCMA8
+_journal_volume                    14
+_journal_year                      1977
+_journal_page_first                249
+_journal_page_last                 255
+_exptl_crystal_density_meas        8.7
+_refine_ls_R_factor_all            0.041
+_cod_database_code 1004064
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/n 21/c 2/c (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4a 2ac'
+_[local]_omdb_cod_original_Hall '-P 4a 2ac'
+_symmetry_Int_Tables_number 130
+ 
+_cell_length_a    8.62200
+_cell_length_b    8.62200
+_cell_length_c    5.90700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y,-z+1/2
+3 -x,y+1/2,-z+1/2
+4 -x+1/2,-y+1/2,z
+5 -y,-x,-z+1/2
+6 -y+1/2,x,z
+7 y,-x+1/2,z
+8 y+1/2,x+1/2,-z+1/2
+9 -x,-y,-z
+10 -x+1/2,y,z+1/2
+11 x,-y+1/2,z+1/2
+12 x+1/2,y+1/2,-z
+13 y,x,z+1/2
+14 y+1/2,-x,-z
+15 -y,x+1/2,-z
+16 -y+1/2,-x+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Bi1 Bi 8 f -0.07935 0.07935 0.25000 1.0
+Pd1 Pd 4 c 0.25000 0.25000 0.08190 1.0
+O1 O 16 g 0.45800 0.14000 0.08900 1.0
+ 
+

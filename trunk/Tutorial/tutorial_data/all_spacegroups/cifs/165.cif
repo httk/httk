@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 3135a5610d4585d2a1de3c7ad0efe24b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-01 13:28:26 +0000 (Wed, 01 May 2013) $
+#$Revision: 83387 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/02/1510236.cif $
+#------------------------------------------------------------------------------
+data_1510236
+loop_
+_publ_author_name
+'van Look, N.'
+'Schubert, K.'
+_publ_section_title
+;
+ Kristallstrukturuntersuchungen im System Au-Mg und einigen verwandten
+ Legierungen
+;
+_journal_name_full               'Metall (Berlin)'
+_journal_page_first              4
+_journal_page_last               6
+_journal_volume                  23
+_journal_year                    1969
+_chemical_name_systematic        'Au Mg3'
+_citation_journal_id_ASTM        MTLLAF
+_[local]_cod_data_source_file    gold_297.cif
+_[local]_cod_data_source_block   Au1Mg3
+_[local]_cod_chemical_formula_sum_orig 'Au1 Mg3'
+_cod_original_cell_volume        473.6015
+_cod_database_code               1510236
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -3 2/c 1"
+_symmetry_space_group_name_Hall '-P 3 2"c'
+_[local]_omdb_cod_original_Hall '-P 3 2"c'
+_symmetry_Int_Tables_number 165
+ 
+_cell_length_a    8.04000
+_cell_length_b    8.04000
+_cell_length_c    8.46000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 x-y,-y,-z+1/2
+5 y,x,-z+1/2
+6 -x,-x+y,-z+1/2
+7 -x,-y,-z
+8 y,-x+y,-z
+9 x-y,x,-z
+10 -x+y,y,z+1/2
+11 -y,-x,z+1/2
+12 x,x-y,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Mg1 Mg 2 a 0.00000 0.00000 0.25000 1.0
+Mg2 Mg 4 d 0.33333 0.66667 0.18000 1.0
+Mg3 Mg 12 g 0.38000 0.06000 0.08000 1.0
+Au1 Au 6 f 0.66000 0.00000 0.25000 1.0
+ 
+

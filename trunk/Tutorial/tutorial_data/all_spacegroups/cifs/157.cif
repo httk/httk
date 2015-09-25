@@ -1,0 +1,87 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: b38adc4a892521455df9bbdcb48a797a
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/05/1510578.cif $
+#------------------------------------------------------------------------------
+data_1510578
+loop_
+_publ_author_name
+'Weithaler, C.'
+'Klepp, K.O.'
+_publ_section_title
+;
+ Preparation and crystal structures of the new gold rich thioauratesRb4
+ Au6 S5 and Cs4 Au6 S5
+;
+_journal_name_full               'Journal of Alloys Compd.'
+_journal_page_first              12
+_journal_page_last               18
+_journal_volume                  243
+_journal_year                    1996
+_chemical_name_systematic        'Cs4 (Au6 S5)'
+_citation_journal_id_ASTM        JALCEU
+_[local]_cod_data_source_file    gold_681.cif
+_[local]_cod_data_source_block   Au6Cs4S5
+_cod_database_code               1510578
+_journal_paper_doi 10.1016/S0925-8388(96)02362-6
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 3 1 m"
+_symmetry_space_group_name_Hall 'P 3 -2'
+_[local]_omdb_cod_original_Hall 'P 3 -2'
+_symmetry_Int_Tables_number 157
+ 
+_cell_length_a    10.24300
+_cell_length_b    10.24300
+_cell_length_c    5.29000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 -x,-x+y,z
+5 x-y,-y,z
+6 y,x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Au1 Au 6 d 0.71420 0.54440 0.07700 1.0
+S1 S 3 c 0.24800 0.00000 0.30500 1.0
+S2 S 2 b 0.33333 0.66667 0.85000 1.0
+Cs1 Cs 1 a 0.00000 0.00000 0.83500 1.0
+Cs2 Cs 3 c 0.60090 0.00000 0.55200 1.0
+ 
+

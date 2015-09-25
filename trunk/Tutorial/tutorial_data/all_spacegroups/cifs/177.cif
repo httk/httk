@@ -1,0 +1,300 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 3b8e5a920f368e1cfb0048423895ae8d
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 16:04:56 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120072 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/23/37/2233730.cif $
+#------------------------------------------------------------------------------
+data_2233730
+loop_
+_publ_author_name
+'Chygorin, Eduard N.'
+'Petrusenko, Svitlana R.'
+'Kokozay, Volodymyr N.'
+'Omelchenko, Irina V.'
+'Shishkin, Oleg V.'
+_publ_section_title
+;
+ Tris(2,2'-bipyridine-\k^2^<i>N</i>,<i>N</i>')cobalt(III)
+ tris(oxalato-\k^2^<i>O</i>^1^,<i>O</i>^2^)ferrate(III) monohydrate
+;
+_journal_coeditor_code           BR2188
+_journal_issue                   3
+_journal_name_full               'Acta Crystallographica Section E'
+_journal_page_first              m233
+_journal_page_last               m234
+_journal_volume                  68
+_journal_year                    2012
+_computing_cell_refinement
+;
+<i>CrysAlis RED</i> (Oxford Diffraction, 2009)
+;
+_computing_data_collection
+;
+<i>CrysAlis CCD</i> (Oxford Diffraction, 2009)
+;
+_computing_data_reduction
+;
+<i>CrysAlis RED</i> (Oxford Diffraction, 2009)
+;
+_computing_molecular_graphics    'SHELXTL (Sheldrick, 2008)'
+_computing_publication_material  'publCIF (Westrip, 2010)'
+_computing_structure_refinement
+'SHELXTL (Sheldrick, 2008) and PLATON (Spek, 2009)'
+_computing_structure_solution    'SHELXTL (Sheldrick, 2008)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_detector_area_resol_mean 16.1827
+_diffrn_measured_fraction_theta_full 0.990
+_diffrn_measured_fraction_theta_max 0.990
+_diffrn_measurement_device_type  'Oxford Diffraction Xcalibur/Sapphire3'
+_diffrn_measurement_method       '\w scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'Enhance (Mo) X-ray Source'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0700
+_diffrn_reflns_av_sigmaI/netI    0.0448
+_diffrn_reflns_limit_h_max       18
+_diffrn_reflns_limit_h_min       -18
+_diffrn_reflns_limit_k_max       17
+_diffrn_reflns_limit_k_min       -18
+_diffrn_reflns_limit_l_max       17
+_diffrn_reflns_limit_l_min       -17
+_diffrn_reflns_number            17786
+_diffrn_reflns_theta_full        30.00
+_diffrn_reflns_theta_max         30.00
+_diffrn_reflns_theta_min         3.12
+_diffrn_standards_decay_%        1
+_diffrn_standards_interval_count 50
+_diffrn_standards_number         2
+_exptl_absorpt_coefficient_mu    0.920
+_exptl_absorpt_correction_T_max  0.8375
+_exptl_absorpt_correction_T_min  0.6084
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details
+;
+(CrysAlis RED; Oxford Diffraction, 2009)
+;
+_exptl_crystal_colour            violet
+_exptl_crystal_density_diffrn    1.560
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             882
+_exptl_crystal_size_max          0.60
+_exptl_crystal_size_mid          0.40
+_exptl_crystal_size_min          0.20
+_platon_squeeze_details
+;
+;
+_refine_diff_density_max         0.360
+_refine_diff_density_min         -0.830
+_refine_ls_abs_structure_details 'Flack (1983), 699 Friedel pairs'
+_refine_ls_abs_structure_Flack   0.57(3)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.038
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_constraints    40
+_refine_ls_number_parameters     90
+_refine_ls_number_reflns         1807
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.038
+_refine_ls_R_factor_all          0.0852
+_refine_ls_R_factor_gt           0.0625
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0909P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1451
+_refine_ls_wR_factor_ref         0.1546
+_reflns_number_gt                1393
+_reflns_number_total             1807
+_reflns_threshold_expression     I>2\s(I)
+_iucr_refine_instructions_details
+;
+TITL k332 in P622
+CELL  0.71073   13.0560   13.0560   12.4800    90.000    90.000   120.000
+ZERR 1           0.0020    0.0030    0.0030     0.000     0.000     0.000
+LATT  -1
+SYMM           X - Y ,              X ,              Z
+SYMM             - Y ,          X - Y ,              Z
+SYMM             - X ,            - Y ,              Z
+SYMM         - X + Y ,            - X ,              Z
+SYMM               Y ,        - X + Y ,              Z
+SYMM             - Y ,            - X ,            - Z
+SYMM           X - Y ,            - Y ,            - Z
+SYMM               X ,          X - Y ,            - Z
+SYMM               Y ,              X ,            - Z
+SYMM         - X + Y ,              Y ,            - Z
+SYMM             - X ,        - X + Y ,            - Z
+SFAC  C Co Fe N O H
+UNIT    72    2   2  12  26 52
+omit 0 60
+omit -2   4   1
+omit  0   0   7
+omit -1   2   3
+omit -1   4   0
+omit  0   3   2
+omit -1   3   0
+omit -1   4   3
+omit -3   4   3
+omit -6  17   2
+omit -10  16   5
+omit -1   3   7
+omit -5  14   3
+omit -4  16   3
+omit  0   1   2
+L.S. 5
+FMAP 2
+PLAN 20
+temp 20
+size 0.6 0.4 0.2
+ACTA
+conf
+BOND $H
+TWIN   -1  0 0  0 -1 0 0 0 -1
+WGHT    0.090900
+BASF   0.56550
+FVAR       4.59526
+CO1   2   0.33333   0.66667   0.50000  10.16667   0.02894   0.02894 =
+       0.02351   0.00000   0.00000   0.01447
+FE1   3   0.66667   0.33333   0.00000  10.16667   0.11814   0.11814 =
+       0.03610   0.00000   0.00000   0.05907
+N1    4   0.46595   0.67892   0.41309  11.00000   0.03245   0.02697 =
+       0.02803  -0.00199  -0.00044   0.01713
+C1    1   0.57597   0.75910   0.45020  11.00000   0.02576   0.02666 =
+       0.03287   0.00126   0.00182   0.01487
+O1    5   0.68013   0.46761   0.08770  11.00000   0.11550   0.12941 =
+       0.04139   0.00310   0.02772   0.04495
+O2    5   0.77335   0.66314   0.09088  11.00000   0.18869   0.15187 =
+       0.07576   0.00197   0.03012   0.12705
+C2    1   0.67711   0.78204   0.39503  11.00000   0.03275   0.04514 =
+       0.04215   0.00075   0.00771   0.01763
+AFIX  43
+H2    6   0.75120   0.83524   0.42265  11.00000  -1.20000
+AFIX   0
+C3    1   0.66782   0.72566   0.29861  11.00000   0.04670   0.06021 =
+       0.04282   0.00674   0.01512   0.03585
+AFIX  43
+H3    6   0.73516   0.74176   0.25997  11.00000  -1.20000
+AFIX   0
+C4    1   0.55762   0.64569   0.26113  11.00000   0.04694   0.04520 =
+       0.03684  -0.00443   0.00509   0.02715
+AFIX  43
+H4    6   0.54899   0.60673   0.19649  11.00000  -1.20000
+AFIX   0
+C5    1   0.46040   0.62391   0.32010  11.00000   0.04222   0.04093 =
+       0.03172  -0.00824   0.00018   0.02230
+AFIX  43
+H5    6   0.38629   0.56796   0.29455  11.00000  -1.20000
+AFIX   0
+C6    1   0.75265   0.57022   0.05275  11.00000   0.12119   0.12475 =
+       0.03781   0.00105   0.01574   0.07856
+O1W   5   1.00000   1.00000   0.46767  10.16667   0.01680   0.01680 =
+       0.06048   0.00000   0.00000   0.00840
+AFIX   3
+H1W   6   0.94378   1.00000   0.50000  10.33333  -1.50000
+AFIX   0
+HKLF 4 1  0.0000  1.0000  0.0000  0.0000  0.0000  1.0000  1.0000  0.0000  0.0000
+END
+;
+_[local]_cod_data_source_file    br2188.cif
+_[local]_cod_data_source_block   I
+_[local]_cod_chemical_formula_sum_orig 'C36 H26 Co Fe N6 O13 '
+_cod_database_code               2233730
+loop_
+_platon_squeeze_void_nr
+_platon_squeeze_void_average_x
+_platon_squeeze_void_average_y
+_platon_squeeze_void_average_z
+_platon_squeeze_void_volume
+_platon_squeeze_void_count_electrons
+_platon_squeeze_void_content
+1 0.000 0.000 0.000 161 21 ' '
+2 0.000 0.500 0.000 8 1 ' '
+3 0.500 0.000 0.000 8 1 ' '
+4 0.500 0.500 0.000 8 1 ' '
+5 0.000 0.500 0.500 6 1 ' '
+6 0.500 0.000 0.500 6 1 ' '
+7 0.500 0.500 0.500 6 1 ' '
+_cod_database_fobs_code 2233730
+_journal_paper_doi 10.1107/S1600536812003224
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 6 2 2"
+_symmetry_space_group_name_Hall 'P 6 2'
+_[local]_omdb_cod_original_Hall 'P 6 2'
+_symmetry_Int_Tables_number 177
+ 
+_cell_length_a    13.05600
+_cell_length_b    13.05600
+_cell_length_c    12.48000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z
+3 -y,x-y,z
+4 -x,-y,z
+5 -x+y,-x,z
+6 y,-x+y,z
+7 x-y,-y,-z
+8 x,x-y,-z
+9 y,x,-z
+10 -x+y,y,-z
+11 -x,-x+y,-z
+12 -y,-x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Co1 Co 2 d 0.33333 0.66667 0.50000 1.0
+Fe1 Fe 2 c 0.33333 0.66667 0.00000 1.0
+N1 N 12 n 0.46590 0.67890 0.41309 1.0
+C1 C 12 n 0.46040 0.62390 0.32010 1.0
+C2 C 12 n 0.55760 0.64570 0.26110 1.0
+C3 C 12 n 0.57600 0.75910 0.45020 1.0
+C4 C 12 n 0.66780 0.72570 0.29860 1.0
+C5 C 12 n 0.67710 0.78200 0.39500 1.0
+C6 C 12 n 0.75260 0.57020 0.05270 1.0
+O1 O 2 e 0.00000 0.00000 0.46770 1.0
+O2 O 12 n 0.68010 0.46760 0.08770 1.0
+O3 O 12 n 0.77340 0.66310 0.09090 1.0
+H1 H 12 n 0.38630 0.56800 0.29460 1.0
+H2 H 12 n 0.54900 0.60670 0.19650 1.0
+H3 H 12 n 0.73520 0.74180 0.26000 1.0
+H4 H 12 n 0.75120 0.83520 0.42260 1.0
+H5 H 6 k -0.05620 0.00000 0.50000 0.667
+ 
+

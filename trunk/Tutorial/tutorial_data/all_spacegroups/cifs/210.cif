@@ -1,0 +1,246 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: feab8fe39b5f5983f335ea4a44b60868
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-29 11:49:26 +0000 (Sun, 29 Dec 2013) $
+#$Revision: 91935 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/10/68/4106813.cif $
+#------------------------------------------------------------------------------
+data_4106813
+loop_
+_publ_author_name
+'Tom Hasell'
+'Marc Schmidtmann'
+'Andrew I. Cooper'
+_publ_section_title
+;
+ Molecular Doping of Porous Organic Cages
+;
+_journal_name_full               'Journal of the American Chemical Society'
+_journal_page_first              14920
+_journal_page_last               14923
+_journal_volume                  133
+_journal_year                    2011
+_chemical_absolute_configuration syn
+_computing_cell_refinement       'Bruker AXS SAINT V7.68A'
+_computing_data_collection       'Bruker APEX2'
+_computing_data_reduction        'Bruker AXS SAINT V7.68A'
+_computing_structure_refinement  'SHELXL (Sheldrick, 2008)'
+_computing_structure_solution    'SHELXD (Sheldrick, 2008)'
+_diffrn_ambient_temperature      358(2)
+_diffrn_measured_fraction_theta_full 0.989
+_diffrn_measured_fraction_theta_max 0.989
+_diffrn_measurement_device_type  'Bruker APEX-II CCD'
+_diffrn_measurement_method       'profile data from \w-scans'
+_diffrn_radiation_source         Synchrotron
+_diffrn_radiation_wavelength     0.77490
+_diffrn_reflns_av_R_equivalents  0.0962
+_diffrn_reflns_av_sigmaI/netI    0.0541
+_diffrn_reflns_limit_h_max       21
+_diffrn_reflns_limit_h_min       -27
+_diffrn_reflns_limit_k_max       21
+_diffrn_reflns_limit_k_min       -27
+_diffrn_reflns_limit_l_max       7
+_diffrn_reflns_limit_l_min       -27
+_diffrn_reflns_number            8304
+_diffrn_reflns_theta_full        25.42
+_diffrn_reflns_theta_max         25.42
+_diffrn_reflns_theta_min         2.52
+_exptl_absorpt_coefficient_mu    0.519
+_exptl_absorpt_correction_T_max  0.4902
+_exptl_absorpt_correction_T_min  0.4062
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'SADABS 2008/1 (Sheldrick, 2008)'
+_exptl_crystal_density_diffrn    1.067
+_exptl_crystal_F_000             5224
+_refine_diff_density_max         0.178
+_refine_diff_density_min         -0.186
+_refine_diff_density_rms         0.043
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.0(3)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.621
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     69
+_refine_ls_number_reflns         935
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.621
+_refine_ls_R_factor_all          0.1479
+_refine_ls_R_factor_gt           0.1046
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.1000P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.2549
+_refine_ls_wR_factor_ref         0.2733
+_reflns_number_gt                561
+_reflns_number_total             935
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ja205969q_si_009.cif
+_[local]_cod_data_source_block   egc020358k5
+_cod_original_cell_volume        15499(4)
+_cod_database_code               4106813
+_journal_paper_doi 10.1021/ja205969q
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "F 41 3 2"
+_symmetry_space_group_name_Hall 'F 4d 2 3'
+_[local]_omdb_cod_original_Hall 'F 4d 2 3'
+_symmetry_Int_Tables_number 210
+ 
+_cell_length_a    24.93300
+_cell_length_b    24.93300
+_cell_length_c    24.93300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y+1/4,-x+1/4,-z+1/4
+14 -y+1/4,x+1/4,z+1/4
+15 y+1/4,-x+1/4,z+1/4
+16 y+1/4,x+1/4,-z+1/4
+17 -x+1/4,-z+1/4,-y+1/4
+18 -x+1/4,z+1/4,y+1/4
+19 x+1/4,-z+1/4,y+1/4
+20 x+1/4,z+1/4,-y+1/4
+21 -z+1/4,-y+1/4,-x+1/4
+22 -z+1/4,y+1/4,x+1/4
+23 z+1/4,-y+1/4,x+1/4
+24 z+1/4,y+1/4,-x+1/4
+25 x,y+1/2,z+1/2
+26 x,-y+1/2,-z+1/2
+27 -x,y+1/2,-z+1/2
+28 -x,-y+1/2,z+1/2
+29 y,z+1/2,x+1/2
+30 y,-z+1/2,-x+1/2
+31 -y,z+1/2,-x+1/2
+32 -y,-z+1/2,x+1/2
+33 z,x+1/2,y+1/2
+34 z,-x+1/2,-y+1/2
+35 -z,x+1/2,-y+1/2
+36 -z,-x+1/2,y+1/2
+37 -y+1/4,-x+3/4,-z+3/4
+38 -y+1/4,x+3/4,z+3/4
+39 y+1/4,-x+3/4,z+3/4
+40 y+1/4,x+3/4,-z+3/4
+41 -x+1/4,-z+3/4,-y+3/4
+42 -x+1/4,z+3/4,y+3/4
+43 x+1/4,-z+3/4,y+3/4
+44 x+1/4,z+3/4,-y+3/4
+45 -z+1/4,-y+3/4,-x+3/4
+46 -z+1/4,y+3/4,x+3/4
+47 z+1/4,-y+3/4,x+3/4
+48 z+1/4,y+3/4,-x+3/4
+49 x+1/2,y,z+1/2
+50 x+1/2,-y,-z+1/2
+51 -x+1/2,y,-z+1/2
+52 -x+1/2,-y,z+1/2
+53 y+1/2,z,x+1/2
+54 y+1/2,-z,-x+1/2
+55 -y+1/2,z,-x+1/2
+56 -y+1/2,-z,x+1/2
+57 z+1/2,x,y+1/2
+58 z+1/2,-x,-y+1/2
+59 -z+1/2,x,-y+1/2
+60 -z+1/2,-x,y+1/2
+61 -y+3/4,-x+1/4,-z+3/4
+62 -y+3/4,x+1/4,z+3/4
+63 y+3/4,-x+1/4,z+3/4
+64 y+3/4,x+1/4,-z+3/4
+65 -x+3/4,-z+1/4,-y+3/4
+66 -x+3/4,z+1/4,y+3/4
+67 x+3/4,-z+1/4,y+3/4
+68 x+3/4,z+1/4,-y+3/4
+69 -z+3/4,-y+1/4,-x+3/4
+70 -z+3/4,y+1/4,x+3/4
+71 z+3/4,-y+1/4,x+3/4
+72 z+3/4,y+1/4,-x+3/4
+73 x+1/2,y+1/2,z
+74 x+1/2,-y+1/2,-z
+75 -x+1/2,y+1/2,-z
+76 -x+1/2,-y+1/2,z
+77 y+1/2,z+1/2,x
+78 y+1/2,-z+1/2,-x
+79 -y+1/2,z+1/2,-x
+80 -y+1/2,-z+1/2,x
+81 z+1/2,x+1/2,y
+82 z+1/2,-x+1/2,-y
+83 -z+1/2,x+1/2,-y
+84 -z+1/2,-x+1/2,y
+85 -y+3/4,-x+3/4,-z+1/4
+86 -y+3/4,x+3/4,z+1/4
+87 y+3/4,-x+3/4,z+1/4
+88 y+3/4,x+3/4,-z+1/4
+89 -x+3/4,-z+3/4,-y+1/4
+90 -x+3/4,z+3/4,y+1/4
+91 x+3/4,-z+3/4,y+1/4
+92 x+3/4,z+3/4,-y+1/4
+93 -z+3/4,-y+3/4,-x+1/4
+94 -z+3/4,y+3/4,x+1/4
+95 z+3/4,-y+3/4,x+1/4
+96 z+3/4,y+3/4,-x+1/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+N1 N 96 h 0.29460 0.47250 0.28640 1.0
+C1 C 96 h 0.28270 0.43850 0.32110 1.0
+C2 C 96 h 0.31600 0.39180 0.33450 1.0
+C3 C 96 h 0.36010 0.37800 0.30380 1.0
+C4 C 96 h 0.75660 0.11960 0.27800 1.0
+C5 C 96 h 0.75970 0.01850 0.27869 1.0
+C6 C 96 h 0.79270 0.06990 0.28930 1.0
+H1 H 96 h 0.25060 0.44300 0.33960 1.0
+H2 H 96 h 0.36860 0.39880 0.27400 1.0
+H3 H 96 h 0.72410 0.11770 0.29930 1.0
+H4 H 96 h 0.72920 0.01660 0.30340 1.0
+H5 H 96 h 0.77550 0.15230 0.28730 1.0
+H6 H 96 h 0.80480 0.07040 0.32630 1.0
+H7 H 96 h 0.82390 0.07060 0.26610 1.0
+I1 I 16 c 0.12500 0.12500 0.12500 0.229
+I2 I 32 e 0.19220 0.19220 0.19220 0.083
+I3 I 32 e 0.23650 0.23650 0.23650 0.0547
+ 
+

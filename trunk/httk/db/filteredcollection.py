@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division
-import itertools, os, sys, re
+import itertools, os, sys, re, inspect
 
 class FilteredCollection(object):
     """ 
@@ -34,6 +34,7 @@ class FilteredCollection(object):
         self.columns = []
         self.sorts = []
         self.indirection = 1
+        self._storable_tables = 0
 
     def add(self,filterexpr):
         """
@@ -94,6 +95,16 @@ class FilteredCollection(object):
         other.filterexprs = list(self.filterexpr)
         other.columns = list(self.columns)
 
+    def variable(self,obj,outid=None,parent=None,parentkey=None,subkey=None):
+        types = obj.types()
+        #types = {"name":obj.object_name, "keys":obj.object_properties, "keydict":dict(obj.object_properties), "index":obj.object_index}
+        self.store.new(types['name'],types)
+
+        if outid == None:
+            outid = types['name']+"_"+str(self._storable_tables)
+            self._storable_tables += 1
+        table = TableOrColumn(self, types['name'],parent=parent, outid=outid,key=parentkey, subkey=subkey, indirection=1,classref=obj)
+        return table
 
 class FCDict(FilteredCollection):
     """
@@ -225,10 +236,12 @@ class FCMultiDict(FilteredCollection):
         """
         Return an object where the attributes of respective filtered collection is
         accessible as attributes. An example:
+        
           languagereview = FCMultiDict('programming':programming_fc, 'review':review_fc)
           language = languagereview.data('programming').language
           review = languagereview.data('review')
           myFCMultiDict.set_filter(language.name == "python" & review.goodness > 9)
+
         """
         if outid == None:
             outid = "data_"+str(len(self.tables))
@@ -240,10 +253,12 @@ class FCMultiDict(FilteredCollection):
         """
         Return an object where the attributes of respective filtered collection is
         accessible as attributes. An example:
+
           languagereview = FCMultiDict('programming':programming_fc, 'review':review_fc)
           language = languagereview.data('programming').language
           review = languagereview.data('review')
           myFCMultiDict.set_filter(language.name == "python" & review.goodness > 9)
+
         """
         if outid == None:
             outid = table.name+"_"+name+"_"+str(len(self.tables))
@@ -322,6 +337,29 @@ class FCMultiDict(FilteredCollection):
 # import atexit
 # atexit.register(sqlite_close_all)
 ###############################################################
+
+def instantiate_from_store(classobj,store,id):
+    types = classobj.types()
+    output = store.retrieve(types['name'], types, id)
+    args = types['init_keydict'].keys()
+    calldict = {}
+    #print "ARGS",args, output, id
+    for arg in args:
+        try:
+            calldict[arg]=output[arg]
+        except KeyError:
+            pass
+    #print "CALLDICT",classobj,calldict
+    try:
+        newobj = classobj(**calldict)
+    except TypeError:
+        print "Error when trying to create a new object",classobj,calldict
+        raise
+    newobj.db.sid = id
+    # TODO: The handling of codependent data is a mess and really should be better abstracted up in HttkObject
+    if hasattr(newobj,'_codependent_callbacks'):
+        newobj._codependent_callbacks += [lambda x,y=store: x.db.fetch_codependent_data(y)]
+    return newobj
 
 class FCSqlite(FilteredCollection):
     def __init__(self,sqlstore):
@@ -438,7 +476,8 @@ class FCSqlite(FilteredCollection):
             for entry in cursor:    
                 entry = list(entry)                
                 for replace in mustreplace:
-                    entry[replace[0]] = replace[1].instantiate_from_store(self.store,entry[replace[0]])
+                    entry[replace[0]] = instantiate_from_store(replace[1],self.store,entry[replace[0]])
+                    #entry[replace[0]] = replace[1].instantiate_from_store(self.store,entry[replace[0]])
                 yield (entry,headers)
 
         cursor.close()
@@ -472,7 +511,13 @@ def fc_sql(expr):
     elif isinstance(expr,(str,unicode)):
         # TODO: Fix quoting system
         return "\""+str(expr).replace("'", "''")+"\""
-    else:        
+
+#    try:
+#        return "\""+str(expr.hexhash)+"\""
+#    except Exception:
+    try:
+        return str(expr.db.sid) 
+    except Exception:
         return str(expr)
 
 def fc_get_srctable_context(*args):
@@ -691,10 +736,54 @@ class BinaryComparison(Expression):
             raise Exception("Syntax Error")
 
     def _sql(self):
+        op = self._operator
+        leftarg = None
+        rightarg = None
+        if self._args[0] is None:
+            leftarg = 'NULL'
+        elif self._args[0] is True:
+            leftarg = '1'
+        elif self._args[0] is False:
+            leftarg = '0'
+        else:
+            leftarg = fc_sql(self._args[0])
+        if self._args[1] is None:
+            rightarg = 'NULL'
+        elif self._args[1] is True:
+            rightarg = '1'
+        elif self._args[1] is False:
+            rightarg = '0'
+        else:
+            rightarg = fc_sql(self._args[1])
+        if leftarg == 'NULL' or rightarg == 'NULL':
+            if self._operator == '=':
+                op = 'IS'
+            elif self._operator == '!=':
+                op = 'IS NOT'            
+            if leftarg == 'NULL' and rightarg != 'NULL': 
+                leftarg, rightarg = rightarg, leftarg                
+
         if self._operator in ('=','<','>','>=','<=','!='):
-            return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
+            return "("+leftarg + " "+op+" " + rightarg+")"
         else:
             raise Exception("Syntax Error" + self._operator)
+        
+#         if self._operator == '=' and self._args[0] is None and self._args[1] is None:
+#             return "(NULL IS NULL)"
+#         elif self._operator == '=' and self._args[0] is None:
+#             return "("+fc_sql(self._args[1])+" IS NULL)"
+#         elif self._operator == '=' and self._args[1] is None:
+#             return "("+fc_sql(self._args[1])+" IS NULL)"
+#         if self._operator == '!=' and self._args[0] is None and self._args[1] is None:
+#             return "(NULL IS NOT NULL)"
+#         elif self._operator == '!=' and self._args[0] is None:
+#             return "("+fc_sql(self._args[1])+" IS NOT NULL)"
+#         elif self._operator == '!=' and self._args[1] is None:
+#             return "("+fc_sql(self._args[1])+" IS NOT NULL)"
+#         elif self._operator in ('=','<','>','>=','<=','!='):
+#             return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
+#         else:
+#             raise Exception("Syntax Error" + self._operator)
 
 class BinaryOp(Expression):
     def __init__(self,context,operator,left,right):
@@ -788,13 +877,13 @@ class TableOrColumn(Expression):
 
     def __getattr__(self,name):
         if self._classref != None:
-            typedict = self._classref.types['keydict']
+            typedict = dict(self._classref.types()['keys']+self._classref.types()['derived'])
             try:
                 typex = typedict[name]
                 #if isinstance(typex,Storable):
                 # Workaround to check if the object is storable without having to do a circular import...
                 if hasattr(typex,'types'):
-                    return TableOrColumn(self._context,self._outid + "." + name+"_"+ typex.types['name']+"_sid",self,srctable=self._srctable,indirection=self._indirection-1,classref=typex)
+                    return TableOrColumn(self._context,self._outid + "." + name+"_"+ typex.types()['name']+"_sid",self,srctable=self._srctable,indirection=self._indirection-1,classref=typex)
                 elif isinstance(typex,list):
                     if typex[0] in self._context.store.basics: 
                         subname = self._name + "_" + name
@@ -813,6 +902,13 @@ class TableOrColumn(Expression):
                         # Handle tuple
                         #print name, self._outid, self._classref
                         #raise Exception("Not implemented yet")
+                    if len(typex)==1 and hasattr(typex[0],'types'):
+                        subname = self._name + "_" + name
+                        outid = subname + "_" + str(len(self._context.tables))
+                        table = TableOrColumn(self._context,subname,parent=self,outid=outid,key=self._name+"_id",subkey=self._name+"_sid",indirection=self._indirection-1)
+                        table._declare_as_table()
+                        column = TableOrColumn(self._context,outid + "." + name+"_"+ typex[0].types()['name']+"_sid",parent=table,outid=outid,key=None,subkey=None,indirection=self._indirection-1)
+                        return column
                     else:
                         # Handle other defined Storable type
                         raise Exception("Not implemented yet")
@@ -866,6 +962,7 @@ class TableOrColumn(Expression):
 
     def _sql(self):
         if not self._iscolumn:
+            #print "HUH",self._outid, ".", self._name, "_id"
             return self._outid + "." + self._name+"_id"
             #raise Exception("Syntax error: asked to generate column sql on non-column.")
         return self._name

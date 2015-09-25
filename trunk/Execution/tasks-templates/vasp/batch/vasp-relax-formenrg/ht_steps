@@ -1,0 +1,332 @@
+#!/bin/bash
+# httk-vasp-relaxformenrg (relax until converged)
+# 1.2
+# Carefully relax a structure into its ground state.
+#
+# Version history:
+#    1.0: Initial version
+#    1.1: Fixed bug if structure started with atoms too close (infinite loop)
+#         Also added task freeze capability
+#    1.2: Better handling of bad convergence during relax2
+#
+#
+
+. "$HTTK_DIR"/Execution/tasks/ht_tasks_api.sh
+. "$HTTK_DIR"/Execution/tasks/vasp/vasptools.sh
+
+# For now we want to rely on the taskmanager timeout, so just
+# keep the timeout of our RUN_CONTROLLED somewhat larger
+TIMEOUT=$((HT_TASKMGR_TIMEOUT + 3600))
+# (It may be a future feature to let some computations
+# timeout earlier though.)
+
+HT_TASK_INIT "$@"
+
+echo "== ht_steps for preinit run, step: $STEP"
+
+####################### start ############################
+if [ "$STEP" == "start" ]; then
+
+    cp ../POSCAR POSCAR
+    VASP_PREPARE_POTCAR ./POSCAR
+    VASP_POTCAR_SUMMARY
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "START INPUT"
+    HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR ../POTCAR.summary
+    HT_TASK_STORE_VAR TOOCLOSESTEP 0
+
+    HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+fi
+
+####################### prerelax ############################
+if [ "$STEP" == "prerelax" ]; then
+
+    VASP_PRECLEAN
+    cp ../INCAR.prerelax INCAR
+    VASP_PREPARE_CALC 
+    VASP_PREPARE_KPOINTS 10 
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    ### DEBUG
+    #VASP_RUN_CONTROLLED 8640 bash -c "cp ../OUTCAR.debug OUTCAR; cp ../CONTCAR.debug CONTCAR; cp ../OSZICAR.debug OSZICAR; cat ../stdout.out.debug; exit 2"
+    ###
+
+    echo "RETURN CODE: $RETURNCODE"
+
+    VASP_CLEAN_OUTCAR
+
+    # We keep going if all went well, OR, if we run out of nsw steps, other errors
+    # we try to fix.
+    if [ "$RETURNCODE" == "0" -o "$RETURNCODE" == "4" ]; then
+	HT_TASK_ATOMIC_SECTION_START
+	# Prerelaxation step successfull
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END PRERELAX"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	VASP_INPUTS_ADJUST
+	
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.prerelax
+	mv ../XDATCAR XDATCAR.prerelax
+	mv ../OSZICAR OSZICAR.prerelax
+	mv ../vasp.out vasp.out.prerelax
+	mv ../CONTCAR CONTCAR.last
+
+	mv ../CHGCAR CHGCAR.last
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+    fi
+    # Prerelaxation step unsuccessfull, prioritize down
+    # this run, and try to fix the problem
+    HT_TASK_SET_PRIORITY 5
+
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR 
+    RESULT="$?"
+    if [ "$RESULT" == "2" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT fix_too_close
+    elif [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+    fi
+    HT_TASK_ATOMIC_SECTION_END_BROKEN 
+
+fi
+
+####################### fix_too_close ############################
+if [ "$STEP" == "fix_too_close" ]; then
+    HT_TASK_ATOMIC_SECTION_START
+
+    cp ../POSCAR POSCAR
+    VASP_POSCAR_SCALE_VOLUME 1.1
+
+    HT_TASK_STORE_VAR TOOCLOSESTEP $((TOOCLOSESTEP+1))
+
+    if [ "$TOOCLOSESTEP" -gt "5" ]; then
+	echo "Atoms too close seems unfixable despite cell expansion. Are the atoms on top of eachother?"
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 	
+    fi
+
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "FIX TOO CLOSE NEW SCALED POSCAR"
+    HT_TASK_ATOMIC_RUNLOG_APPEND ./POSCAR 
+
+    HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+fi
+
+####################### relax1 ############################
+if [ "$STEP" == "relax1" ]; then
+
+    VASP_PRECLEAN
+    cp CONTCAR.last POSCAR
+    cp ../INCAR.relax INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    VASP_CLEAN_OUTCAR
+
+    if [ "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: 1"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	VASP_INPUTS_ADJUST
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax1
+	mv ../XDATCAR XDATCAR.relax1
+	mv ../OSZICAR OSZICAR.relax1
+	mv ../vasp.out vasp.out.relax1
+
+	HT_TASK_STORE_VAR RELAXSTEP 2
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+
+    # Prerelaxation step unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR 
+    RESULT="$?"
+    if [ "$RESULT" == "2" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1_fix_too_close
+    elif [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+    fi
+    HT_TASK_ATOMIC_SECTION_END_BROKEN 
+
+fi
+
+####################### relax1_fix_too_close ############################
+if [ "$STEP" == "relax1_fix_too_close" ]; then
+
+    cp CONTCAR.last POSCAR
+    VASP_POSCAR_SCALE_VOLUME 1.05
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "FIX TOO CLOSE IN RELAX1 SCALE CONTCAR"
+    HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR 
+    cp ../POSCAR CONTCAR.last
+
+    HT_TASK_STORE_VAR TOOCLOSESTEP $((TOOCLOSESTEP+1))
+
+    if [ "$TOOCLOSESTEP" -gt "5" ]; then
+	echo "Atoms too close seems unfixable despite cell expansion. Are the atoms on top of eachother?"
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 	
+    fi
+
+    HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+fi
+
+####################### relax2 ############################
+if [ "$STEP" == "relax2" ]; then
+
+    echo "== RELAXATION STEP: $((RELAXSTEP))"
+
+    VASP_PRECLEAN
+    cp CONTCAR.last POSCAR
+    cp ../INCAR.relax INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    BADCONV=$(grep "^BADCONV" ht.controlled.msgs)
+
+    VASP_CLEAN_OUTCAR
+
+    if [ -z "$BADCONV" -a "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: $RELAXSTEP"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax$RELAXSTEP
+	mv ../XDATCAR XDATCAR.relax$RELAXSTEP
+	mv ../OSZICAR OSZICAR.relax$RELAXSTEP
+	mv ../vasp.out vasp.out.relax$RELAXSTEP
+
+	OLDENERGY=$(VASP_GET_ENERGY ../OSZICAR.last)
+	EDIFFG=$(VASP_GET_TAG EDIFFG ../INCAR)
+	EDIFFG10=$(HT_FCALC "$EDIFFG * 10")
+	CHANGE=$(HT_FCALC "abs(($OLDENERGY)-($NEWENERGY))")
+	echo "ENERGY DIFFERENCE: $CHANGE, EDIFFG*10: $EDIFFG10"
+	if HT_FTEST "$CHANGE > $EDIFFG10"; then
+	    if [ "$RELAXSTEP" -gt 5 ]; then
+		echo "Tried too many relaxations, structure refuses to converge, giving up."
+		HT_TASK_BROKEN
+	    fi
+	    echo "Energy change too lagre, doing another relaxation run."
+	    HT_TASK_STORE_VAR RELAXSTEP $((RELAXSTEP+1))
+	    HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+	fi
+
+	mv OUTCAR.cleaned.relax$RELAXSTEP OUTCAR.cleaned.relax-final
+	mv XDATCAR.relax$RELAXSTEP XDATCAR.relax-final
+	mv OSZICAR.relax$RELAXSTEP OSZICAR.relax-final
+	mv vasp.out.relax$RELAXSTEP vasp.out.relax-final
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT cleanup
+    fi
+
+    # We recovered from a bad convergence. In that case, just
+    # re-run another relaxation step 2
+    if [ -n "$BADCONV" -a "$RETURNCODE" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "BADCONV RECOVERED RE-RUN STEP2"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax$RELAXSTEP
+	mv ../XDATCAR XDATCAR.relax$RELAXSTEP
+	mv ../OSZICAR OSZICAR.relax$RELAXSTEP
+	mv ../vasp.out vasp.out.relax$RELAXSTEP
+
+	if [ "$RELAXSTEP" -gt 5 ]; then
+	    echo "Tried too many relaxations, structure refuses to converge, giving up."
+	    HT_TASK_BROKEN
+	fi
+	echo "Signs of bad electronic convergence, doing another relaxation run."
+
+	HT_TASK_STORE_VAR RELAXSTEP $((RELAXSTEP+1))
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+
+    # relaxation step 2 unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR 
+    RESULT="$?"
+    if [ "$RESULT" == "2" ]; then
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 
+    elif [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+    HT_TASK_ATOMIC_SECTION_END_BROKEN 
+fi
+
+####################### cleanup ############################
+if [ "$STEP" == "cleanup" ]; then
+
+    rm -f ../OSZICAR OSZICAR.last
+    rm -f ../CONTCAR CONTCAR.last
+    rm -f ../CHGCAR CHGCAR.last
+
+    HT_TASK_CLEANUP
+    rm -f CHG EIGENVAL ht.controlled.msgs IBZKPT vasprun.xml POSCAR POTCAR WAVECAR PCDAT OUTCAR
+  
+    HT_TASK_COMPRESS
+    HT_TASK_FINISHED
+fi
+
+####################### freeze ############################
+if [ "$STEP" == "freeze" ]; then
+
+    rm -f OSZICAR.last
+    rm -f CONTCAR.last
+    rm -f CHGCAR.last
+
+    rm -f CHG CHGCAR CONTCAR DOSCAR OSZICAR XDATCAR EIGENVAL IBZKPT vasprun.xml WAVECAR PCDAT OUTCAR
+  
+    HT_TASK_COMPRESS
+    bunzip2 ht.RUNLOG.bz2
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "TASK FROZEN"
+    HT_TASK_ATOMIC_SECTION_END_NEXT unfreeze
+fi
+
+####################### unfreeze ############################
+if [ "$STEP" == "unfreeze" ]; then
+    HT_TASK_UNCOMPRESS
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "TASK UNFROZEN"
+    HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+fi

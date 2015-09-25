@@ -1,0 +1,314 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: b70e31c0584dccb950a026b2f88db8e0
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-04-19 17:27:28 +0000 (Sat, 19 Apr 2014) $
+#$Revision: 110650 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/01/95/2019502.cif $
+#------------------------------------------------------------------------------
+data_2019502
+loop_
+_publ_author_name
+'Kremenovi\'c, Aleksandar'
+'Vuli\'c, Predrag'
+_publ_section_title
+;
+ Disordered kalsilite KAlSiO~4~
+;
+_journal_coeditor_code           CU3046
+_journal_issue                   3
+_journal_name_full               'Acta Crystallographica Section C'
+_journal_page_first              256
+_journal_page_last               259
+_journal_paper_doi               10.1107/S2053229614002423
+_journal_volume                  70
+_journal_year                    2014
+_chemical_name_systematic        'Potassium aluminium orthosilicate'
+_computing_data_collection       'Philips PC-APD PW1877 (Philips, 1989)'
+_computing_molecular_graphics    'DIAMOND (Brandenburg & Putz, 2005)'
+_computing_publication_material  'publCIF (Westrip, 2010)'
+_computing_structure_refinement  'FULLPROF (Rodriguez-Carvajal, 1990)'
+_diffrn_ambient_temperature      295
+_diffrn_measurement_device_type  'Philips PW1710'
+_diffrn_measurement_method       'profile data from \q/2\q scans'
+_diffrn_radiation_monochromator  'equatorial mounted graphite'
+_exptl_crystal_density_diffrn    2.614
+_pd_char_colour                  white
+_pd_meas_2theta_range_inc        0.020000
+_pd_meas_2theta_range_max        89.95000
+_pd_meas_2theta_range_min        3.99000
+_pd_meas_number_of_points        4299
+_pd_meas_scan_method             step
+_pd_proc_2theta_range_inc        0.020000
+_pd_proc_2theta_range_max        89.9607
+_pd_proc_2theta_range_min        4.0007
+_pd_proc_ls_profile_function     pseudo-Voigt
+_pd_proc_ls_prof_R_factor        7.0012
+_pd_proc_ls_prof_wR_expected     4.5067
+_pd_proc_ls_prof_wR_factor       9.7352
+_pd_spec_mounting                'packed powder pellet'
+_pd_spec_mount_mode              reflection
+_pd_spec_shape                   flat_sheet
+_pd_spec_size_axial              25
+_pd_spec_size_equat              25
+_pd_spec_size_thick              1
+_refine_ls_goodness_of_fit_all   2.1601
+_refine_ls_number_parameters     45
+_refine_ls_number_reflns         164
+_refine_ls_number_restraints     6
+_iucr_refine_instructions_details
+;
+COMM KA-1000C,1h  model ab mix
+! Current global Chi2 (Bragg contrib.) =      4.738
+! Files => DAT-file: dis_model_ab_mix_iso.dat,  PCR-file: dis_model_ab_mix _iso
+!JobNprNphNbaNexNsc Nor Dum IwgIloIas Res SteNre Cry UniCor Opt Aut
+   0   5   1  28   1   0   1   1   0   0   1   0   1   0   0   0   0   0   1
+!
+!IprPplIoc Mat Pcr Ls1 Ls2 Ls3 NLI Prf Ins RpaSymHklFouSho Ana
+   3   2   1   1   1   0   4   0   0   3   0  -1   1   1   2   1   1
+!
+! Lambda1  Lambda2    Ratio    BkposWdtCthmmuRAsyLimRpolarz  2nd-muR ->Patt# 1
+ 1.540560 1.544330  0.50000   90.000 25.0000  0.7998  0.0000   35.00
+ 0.0000  0.0000
+!
+!NCYEpsR_atR_anR_prR_glThmin       Step       Thmax    PSD    Sent0
+10  0.10  0.70  0.70  0.70  0.70      3.9900   0.020000    89.9500
+0.000   0.000
+!
+!2Theta/TOF/E(Kev)   Background  for Pattern#  1
+        15.4143       350.5336        181.00
+        17.0054       339.9242        191.00
+        18.3607       415.7819        201.00
+        21.6313       432.9759        211.00
+        23.5464       492.3825        221.00
+        24.9018       576.5456        231.00
+        26.0804       616.1080        241.00
+        27.2884       538.4018        251.00
+        30.0580       376.2840        261.00
+        31.7670       417.7754        271.00
+        33.2991       566.9238        281.00
+        36.0982       449.8347        291.00
+        37.7188       361.1207        301.00
+        39.0446       346.2317        311.00
+        43.5821       246.9686        321.00
+        46.2634       226.2974        331.00
+        49.3304       223.0275        341.00
+        52.1295       275.6247        351.00
+        57.0795       419.6545        361.00
+        60.7036       313.8150        371.00
+        64.2500       263.7749        381.00
+        67.0357       317.6435        391.00
+        68.0536       209.3701        401.00
+        71.6964       224.3191        411.00
+        74.4821       228.4648        421.00
+        78.5268       225.3613        431.00
+        83.1339       200.0617        441.00
+        88.6786       150.3885        451.00
+!
+! Excluded regions (LowTHighT) for Pattern#  1
+        0.00       15.00
+!
+!
+      45    !Number of refined parameters
+!
+!  Zero    Code    SyCos    Code   SySinCode  Lambda     Code MORE ->Patt# 1
+ -0.01070    0.0  0.00000    0.0  0.00000    0.0 0.000000    0.00   0
+!-------------------------------------------------------------------------------
+!  Data for PHASE number:   1  ==> Current R_Bragg for Pattern#  1:     8.19
+!-------------------------------------------------------------------------------
+KALSIO4  modelab mix
+!
+!Nat Dis Ang Pr1 Pr2 Pr3 JbtIrfIsyStr Furth       ATZ    NvkNpr More
+   9   6   0 0.0 0.0 1.0   0   0   0   0   0        316.321   0   5   1
+!
+!JviJdi Hel Sol Mom TerBrindRMuaRMubRMucJtypNsp_RefPh_ShiftN_Domains
+   0   3   0   0   0   0  1.0000  0.0000  0.0000  0.0000 0 0 0 0
+!
+! Max_dst(dist) (angles)  Bond-Valence Calc.
+      3.5000      3.5000
+P 63                     <--Space group symbol
+!AtomTyp       X        Y        Z     BisoOcc     In Fin N_tSpc /Codes
+!    beta11   beta22   beta33   beta12   beta13   beta23  /Codes
+Sia    SI+4    0.33333  0.66666  0.45815  3.75045   0.16667   0   0   0    0
+                  0.00     0.00    41.00   101.00      0.00
+Ala    AL+3    0.33333  0.66666  0.07424  3.29337   0.16667   0   0   0    0
+                  0.00     0.00    41.00   161.00      0.00
+O2a    O-2     0.61389  0.01908  0.02309  1.68753   0.50000   0   0   0    0
+                 90.10   100.10    41.00   111.00      0.00
+O1a    O-2     0.33333  0.66667  0.27785  4.71330   0.16667   0   0   0    0
+                  0.00     0.00    41.00   171.00      0.00
+Sib    SI+4    0.33333  0.66666  0.95815  3.75045   0.16667   0   0   0    0
+                  0.00     0.00    41.00   101.00      0.00
+Alb    AL+3    0.33333  0.66666  0.57425  3.29337   0.16667   0   0   0    0
+                  0.00     0.00    41.00   161.00      0.00
+O2b    O-2     0.61389  0.01908  0.52310  1.68753   0.50000   0   0   0    0
+                 90.10   100.10    41.00   111.00      0.00
+O1b    O-2     0.33333  0.66667  0.77785  4.71330   0.16667   0   0   0    0
+                  0.00     0.00    41.00   171.00      0.00
+K      K+1     0.00000  0.00000  0.27354  0.00000   0.33333   0   0   2    0
+                  0.00     0.00     0.00     0.00      0.00
+0.06493  0.06493  0.00264  0.03246  0.00000   0.00000
+       121.00   121.00    11.00   120.50     0.00      0.00
+!-------> Profile Parameters for Pattern #  1
+!  Scale        Shape1      Bov      Str1      Str2      Str3   Strain-Model
+ 0.10473E-01   0.72816   0.00000   0.00000   0.00000   0.00000       0
+   131.00000    60.100     0.000     0.000     0.000     0.000
+!       U         V          W           X          Y GauSizLorSiz Size-Model
+0.513735  -0.097814   0.020434   0.000000   0.000000   0.000000   0.000000    0
+     80.100     70.100     50.100      0.000      0.000      0.000      0.000
+!     a          b         c        alpha      beta       gamma      #Cell Info
+   5.198174   5.198174   8.586480  90.000000  90.000000 120.000000
+   31.00000   31.00000   21.00000    0.00000    0.00000   31.00000
+!  Pref1    Pref2      Asy1     Asy2     Asy3     Asy4
+1.00000  0.00000  0.03112  0.01731  0.00000  0.00000
+     0.00     0.00   151.00   141.00     0.00     0.00
+! Soft distance constraints:
+Sia  O2a    1    0.00000    0.00000    0.00050    5.69751    0.00100
+Ala  O2a    1    0.00000    0.00000    0.00050    4.29898    0.00100
+K    O2a    1    0.00000    0.00000    0.00050    3.84991    0.00100
+Sib  O2b    1    0.00000    0.00000    0.00050    5.69751    0.00100
+Alb  O2b    1    0.00000    0.00000    0.00050    4.29898    0.00100
+K    O2b    1    0.00000    0.00000    0.00050    3.84991    0.00100
+!  2Th1/TOF1    2Th2/TOF2  Pattern # 1
+      15.000      89.950       1
+;
+_[local]_cod_data_source_file    cu3046sup1.cf
+_[local]_cod_data_source_block   I
+_cod_database_code               2019502
+loop_
+_diffrn_radiation_type
+_diffrn_radiation_wavelength
+CuK\a~1~ 1.54056
+CuK\a~2~ 1.54439
+loop_
+_pd_proc_intensity_bkg_calc
+15.4143
+350.5361
+17.0054
+339.9111
+18.3607
+415.7918
+21.6313
+433.0206
+23.5464
+492.3551
+24.9018
+576.4832
+26.0804
+616.1279
+27.2884
+538.3953
+30.0580
+376.2775
+31.7670
+417.7827
+33.2991
+566.8165
+36.0982
+449.8297
+37.7188
+361.1339
+39.0446
+346.1686
+43.5821
+246.9774
+46.2634
+226.2689
+49.3304
+223.0287
+52.1295
+275.6213
+57.0795
+419.6371
+60.7036
+313.8333
+64.2500
+263.7802
+67.0357
+317.6703
+68.0536
+209.3775
+71.6964
+224.3023
+74.4821
+228.4840
+78.5268
+225.3773
+83.1339
+200.0613
+88.6786
+150.3816
+loop_
+_pd_proc_ls_background_function
+linear
+extrapolation,
+points
+were
+determined
+by
+visual
+estimation
+and
+refined
+loop_
+_pd_proc_wavelength
+1.540562
+1.544390
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 6"
+_symmetry_space_group_name_Hall 'P 6'
+_[local]_omdb_cod_original_Hall 'P 6c'
+_symmetry_Int_Tables_number 168
+ 
+_cell_length_a    5.19817
+_cell_length_b    5.19817
+_cell_length_c    4.29325
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z
+3 -y,x-y,z
+4 -x,-y,z
+5 -x+y,-x,z
+6 y,-x+y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Si1 Si 2 b 0.33333 0.66667 0.08370 0.5
+Al1 Al 2 b 0.33333 0.66667 0.85152 0.5
+O1 O 6 d 0.01900 0.61394 -0.04618 0.5
+O2 O 2 b 0.33333 0.66667 0.44430 0.5
+K1 K 1 a 0.00000 0.00000 0.45292 1.0
+ 
+

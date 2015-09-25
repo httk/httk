@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+
+QUEUE="$1"
+shift 1
+. "$SCRIPT_PATH/config"
+if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
+    . "$SCRIPT_PATH/config.$QUEUE"
+fi
+
+
+if [ -n "$3" ]; then
+    rsync -az -r --files-from=- "$1" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR"/Runs/"$QUEUE"/"$2" --exclude-from "$3"
+else
+    rsync -az -r --files-from=- "$1" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR"/Runs/"$QUEUE"/"$2"
+fi

@@ -1,0 +1,158 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 457decf5256a6a5ba3bc90c4c6496281
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 01:47:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120105 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/32/27/4322712.cif $
+#------------------------------------------------------------------------------
+data_4322712
+loop_
+_publ_author_name
+'James D. Martin'
+'Brian R. Leafblad'
+'Roger M. Sullivan'
+'Paul D. Boyle'
+_publ_contact_author
+;
+James D. Martin
+Department of Chemistry
+North Carolina State University
+Raleigh, NC 27695
+;
+_publ_contact_author_email       'jdmartin@ncsu.edu'
+_publ_contact_author_fax         '(919)515-5079'
+_publ_contact_author_phone       '(919)515-3402'
+_publ_section_title
+;
+ \a- and \b-CuAlCl4: Framework Construction Using Corner-Shared
+ Tetrahedral Metal-Halide Building Blocks
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              1341
+_journal_page_last               1346
+_journal_volume                  37
+_journal_year                    1998
+_computing_data_reduction        'NRCVAX DATRD2'
+_computing_molecular_graphics    NRCVAX
+_computing_publication_material  'NRCVAX TABLES Jan 94 Version'
+_computing_structure_refinement  'NRCVAX LSTSQ'
+_computing_structure_solution    'CuAlCl4 as starting coordinates'
+_diffrn_ambient_temperature      293
+_diffrn_measurement_device       'Nonius CAD-4    '
+_diffrn_measurement_method       'Theta/2theta scan b/P/b '
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'xray tube'
+_diffrn_radiation_type           'Molybdenum K\a'
+_diffrn_radiation_wavelength     .71073
+_diffrn_reflns_av_R_equivalents  .070
+_diffrn_reflns_limit_h_max       8
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       5
+_diffrn_reflns_limit_k_min       0
+_diffrn_reflns_limit_l_max       14
+_diffrn_reflns_limit_l_min       0
+_diffrn_reflns_number            3481
+_diffrn_reflns_theta_max         30.00
+_diffrn_reflns_theta_min         0.00
+_diffrn_standards_decay_%        3.5
+_diffrn_standards_interval_time  80
+_diffrn_standards_number         3
+_exptl_absorpt_coefficient_mu    25.87
+_exptl_absorpt_correction_T_max  .9824
+_exptl_absorpt_correction_T_min  .3854
+_exptl_absorpt_correction_type   empirical
+_exptl_crystal_density_diffrn    3.909
+_exptl_crystal_F_000             362.40
+_exptl_crystal_size_max          .35
+_exptl_crystal_size_mid          .40
+_exptl_crystal_size_min          .25
+_refine_diff_density_max         1.34
+_refine_diff_density_min         -1.85
+_refine_ls_abs_structure_Rogers  .920(113)
+_refine_ls_extinction_coef       0.023(2)
+_refine_ls_extinction_method     Larson
+_refine_ls_goodness_of_fit_obs   1.57
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     17
+_refine_ls_number_reflns         425
+_refine_ls_R_factor_all          .046
+_refine_ls_R_factor_obs          .046
+_refine_ls_shift/esd_max         .000
+_refine_ls_structure_factor_coef F
+_refine_ls_weighting_scheme      '1/(\s^2^(F)+ .0005F^2^)'
+_refine_ls_wR_factor_all         .047
+_refine_ls_wR_factor_obs         .047
+_reflns_number_observed          425
+_reflns_number_total             507
+_reflns_observed_criterion       'Inet > 1.5\s(Inet)'
+_[local]_cod_data_source_file    ic971148v_1.cif
+_[local]_cod_data_source_block   jdm9502
+_[local]_cod_chemical_formula_sum_orig 'Cu Al Br4 '
+_cod_database_code               4322712
+loop_
+_diffrn_standard_refln_index_h
+_diffrn_standard_refln_index_k
+_diffrn_standard_refln_index_l
+1 3 6
+2 2 8
+-2 2 0
+_journal_paper_doi 10.1021/ic971148v
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -4 2 c"
+_symmetry_space_group_name_Hall 'P -4 2c'
+_[local]_omdb_cod_original_Hall 'P -4 2c'
+_symmetry_Int_Tables_number 112
+ 
+_cell_length_a    5.73210
+_cell_length_b    5.73210
+_cell_length_c    10.60460
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y,z
+5 y,x,z+1/2
+6 y,-x,-z
+7 -y,x,-z
+8 -y,-x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cu1 Cu 2 f 0.50000 0.50000 0.00000 1.0
+Al1 Al 2 b 0.50000 0.00000 0.25000 1.0
+Br1 Br 8 n 0.74091 0.22883 0.37257 1.0
+ 
+

@@ -1,0 +1,65 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+
+HTTK_USER_HOME=~/.httk/
+mkdir -p "$HTTK_USER_HOME"
+mkdir -p "$HTTK_USER_HOME/tasks"
+mkdir -p "$HTTK_USER_HOME/computers"
+mkdir -p "$HTTK_USER_HOME/keys"
+
+function readdata {
+    DEFAULT=$1
+    read DATA
+    if [ -n "$DATA" ]; then
+	echo "$DATA"
+    else
+	echo "$DEFAULT"
+    fi
+}
+
+function setcfg {
+    PTH="$1"
+    TAG="$2"
+    VAL="$3"
+    (awk "!/^ *$TAG *=/{print \$0}" "$PTH/config"; echo "$TAG=$VAL") > "$PTH/ht.tmp.config"
+    mv "$PTH/ht.tmp.config" "$PTH/config"
+}
+
+if [ -e "$HTTK_USER_HOME/config" ]; then
+   NAME=$(awk -F "=" '/name/ {print $2}' "$HTTK_USER_HOME/config")
+   EMAIL=$(awk -F "=" '/email/ {print $2}' "$HTTK_USER_HOME/config")
+fi
+
+echo "A few questions about your user information will follow."
+echo "If you want to change these answers later, run httk-setup."
+echo ""
+echo "What is your name? [$NAME]"
+NAME=$(readdata "$NAME")
+echo "What is your email? [$EMAIL]"
+EMAIL=$(readdata "$EMAIL")
+
+if [ ! -e "$HTTK_USER_HOME/config" ]; then
+   cat > "$HTTK_USER_HOME/config" <<EOF	
+[main]
+name=$NAME
+email=$EMAIL
+EOF
+else
+    setcfg "$HTTK_USER_HOME" name "$NAME"
+    setcfg "$HTTK_USER_HOME" email "$EMAIL"
+fi
+
+if [ ! -e "$HTTK_USER_HOME/keys/key1.priv" ]; then
+    echo "You do not yet have a personal encryption key."
+    echo "I will now create one for you and store it in the directory:"
+    echo "  $HTTK_USER_HOME/keys/"
+    echo ""
+    mkdir -p "$HTTK_USER_HOME/keys/"
+    echo "(creating keys, this takes some time...)"
+    COMMENT="$NAME ($EMAIL)"
+    "${HTTK_BIN_PATH}/internal/ed25519_genkeys.py" "$HTTK_USER_HOME/keys/key1.pub" "$HTTK_USER_HOME/keys/key1.priv" "$COMMENT"
+    echo ""
+fi
+

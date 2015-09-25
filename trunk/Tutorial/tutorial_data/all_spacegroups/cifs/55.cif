@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 60ee30b3243b158e1dada2c74a686db1
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-01 13:55:14 +0000 (Wed, 01 May 2013) $
+#$Revision: 83567 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/03/1510385.cif $
+#------------------------------------------------------------------------------
+data_1510385
+loop_
+_publ_author_name
+'Wilkens, M.'
+'Wegst, J.'
+'Gunzel, E.'
+'Burkhardt, W.'
+'Meissner, H.G.'
+'Schutt, W.'
+'Schubert, K.'
+'Esslinger, P.'
+_publ_section_title
+;
+ Einige strukturelle Ergebnisse an metallischen Phasen
+;
+_journal_name_full               Naturwissenschaften
+_journal_page_first              248
+_journal_page_last               249
+_journal_volume                  43
+_journal_year                    1956
+_chemical_name_systematic        'Au2 Cu Zn'
+_citation_journal_id_ASTM        NATWAY
+_[local]_cod_data_source_file    gold_472.cif
+_[local]_cod_data_source_block   Au2Cu1Zn1
+_[local]_cod_chemical_formula_sum_orig 'Au2 Cu1 Zn1'
+_cod_original_cell_volume        120.9513
+_cod_database_code               1510385
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 21/b 21/a 2/m"
+_symmetry_space_group_name_Hall '-P 2 2ab'
+_[local]_omdb_cod_original_Hall '-P 2 2ab'
+_symmetry_Int_Tables_number 55
+ 
+_cell_length_a    4.64800
+_cell_length_b    8.99800
+_cell_length_c    2.89200
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x+1/2,y+1/2,-z
+4 -x,-y,z
+5 -x,-y,-z
+6 -x+1/2,y+1/2,z
+7 x+1/2,-y+1/2,z
+8 x,y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Zn1 Zn 4 g 0.18800 0.61400 0.00000 0.5
+Cu1 Cu 4 g 0.18800 0.61400 0.00000 0.5
+Au1 Au 4 h 0.68800 0.63600 0.50000 1.0
+ 
+

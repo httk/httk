@@ -1,0 +1,1022 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.iface.platon_if &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk" href="../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.iface.platon_if</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is a mess and in need of heavy cleanup.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="n">FracVector</span>
+<span class="kn">from</span> <span class="nn">httk.atomistic</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">httk.atomistic.data</span> <span class="kn">import</span> <span class="n">periodictable</span><span class="p">,</span> <span class="n">spacegroups</span>
+<span class="kn">import</span> <span class="nn">httk</span>  
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">errno</span>
+
+<div class="viewcode-block" id="platon_lis_to_struct_broken"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_lis_to_struct_broken">[docs]</a><span class="k">def</span> <span class="nf">platon_lis_to_struct_broken</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input format::</span>
+<span class="sd">            </span>
+<span class="sd">                                                               ============</span>
+<span class="sd">        ====================================================== Crystal Data ================================================================</span>
+<span class="sd">                                                               ============</span>
+<span class="sd">                                Input Cell  (Lattice Type: P)   -   Temp =   0K             Reduced Cell     (Acta Cryst.(1976),A32,297-298)</span>
+<span class="sd">        ---------------------------------------------------------------------------------   ------------------------------------------------</span>
+<span class="sd">        a =       3.47100  Angstrom                alpha =            90 Degree             a  =    3.471     alpha  =   90.00  V  =    79.6</span>
+<span class="sd">        b =       3.47100                           beta =            90                    b  =    3.471     beta   =   90.00              </span>
+<span class="sd">        c =       6.60300                          gamma =            90                    c  =    6.603     gamma  =   90.00              </span>
+<span class="sd">        </span>
+<span class="sd">        ...</span>
+<span class="sd">        </span>
+<span class="sd">        ------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="sd">        Flags Label         Fractional Coordinates (x,y,z)          Orthogonal Coordinates (XO,YO,ZO)   Site SSN*SSOF =    S.O.F   Move Type</span>
+<span class="sd">        ------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="sd">        -     Ag(1)              1/4            1/4        0.61200      0.8677      0.8677      4.0410   4mm  8   1/8          1    -    Met</span>
+<span class="sd">        -     Zr(2)              1/4            1/4        0.13700      0.8677      0.8677      0.9046   4mm  8   1/8          1    -    Met</span>
+<span class="sd">        -     Ag(1)a            -1/4           -1/4       -0.61200     -0.8677     -0.8677     -4.0410   4mm  8   1/8          1   5.455 Met</span>
+<span class="sd">        -     Zr(2)a            -1/4           -1/4       -0.13700     -0.8677     -0.8677     -0.9046   4mm  8   1/8          1   5.455 Met</span>
+<span class="sd">        -     Ag(1)b            -1/4           -1/4        0.38800     -0.8678     -0.8678      2.5620   4mm  8   1/8          1   5.456 Met</span>
+<span class="sd">        -     Zr(2)b            -1/4           -1/4        0.86300     -0.8678     -0.8678      5.6984   4mm  8   1/8          1   5.456 Met</span>
+<span class="sd">        -     Ag(1)c            -1/4            3/4       -0.61200     -0.8677      2.6033     -4.0410   4mm  8   1/8          1   5.465 Met</span>
+<span class="sd">        -     Zr(2)c            -1/4            3/4       -0.13700     -0.8678      2.6033     -0.9046   4mm  8   1/8          1   5.465 Met</span>
+<span class="sd">        -     Ag(1)d            -1/4            3/4        0.38800     -0.8678      2.6033      2.5620   4mm  8   1/8          1   5.466 Met</span>
+<span class="sd">        -     Zr(2)d            -1/4            3/4        0.86300     -0.8678      2.6032      5.6984   4mm  8   1/8          1   5.466 Met</span>
+<span class="sd">        -     Ag(1)e             3/4           -1/4       -0.61200      2.6033     -0.8677     -4.0410   4mm  8   1/8          1   5.555 Met</span>
+<span class="sd">        -     Zr(2)e             3/4           -1/4       -0.13700      2.6033     -0.8677     -0.9046   4mm  8   1/8          1   5.555 Met</span>
+<span class="sd">        -     Ag(1)f             3/4           -1/4        0.38800      2.6033     -0.8678      2.5620   4mm  8   1/8          1   5.556 Met</span>
+<span class="sd">        -     Zr(2)f             3/4           -1/4        0.86300      2.6032     -0.8678      5.6984   4mm  8   1/8          1   5.556 Met</span>
+<span class="sd">        -     Ag(1)g             3/4            3/4       -0.61200      2.6033      2.6033     -4.0410   4mm  8   1/8          1   5.565 Met</span>
+<span class="sd">        -     Zr(2)g             3/4            3/4       -0.13700      2.6033      2.6033     -0.9046   4mm  8   1/8          1   5.565 Met</span>
+<span class="sd">        -     Ag(1)h             3/4            3/4        0.38800      2.6033      2.6033      2.5620   4mm  8   1/8          1   5.566 Met</span>
+<span class="sd">        -     Zr(2)h             3/4            3/4        0.86300      2.6032      2.6032      5.6984   4mm  8   1/8          1   5.566 Met</span>
+<span class="sd">        ====================================================================================================================================</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileReader</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>    
+
+    <span class="n">seen_coords</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">read_spacegroup</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">read_a_alpha</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_b_beta</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_c_gamma</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&gt;&gt;|&quot;</span><span class="p">)</span>
+        <span class="c">#for i in range(1,14):</span>
+        <span class="c">#    sys.stdout.write(match.group(i)+&quot;|&quot;)</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">11</span><span class="p">)))</span>
+        
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">a1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">c1</span><span class="p">])</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">to_floats</span><span class="p">()))</span>
+        <span class="n">limcoord</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">a1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">c1</span><span class="p">])</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="n">coordtuple</span> <span class="o">=</span> <span class="p">((</span><span class="n">species</span><span class="p">,</span><span class="n">ratio</span><span class="o">.</span><span class="n">to_tuple</span><span class="p">()),</span><span class="n">limcoord</span><span class="o">.</span><span class="n">to_tuple</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">coordtuple</span> <span class="ow">in</span> <span class="n">seen_coords</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">species</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">)))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+        <span class="n">seen_coords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coordtuple</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">in_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">end_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">section</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="p">[</span><span class="s">&#39;^ *Space Group +(([^ ]+ )+) +&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Space Group Symmetry&#39;</span> <span class="ow">and</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">None</span><span class="p">,</span><span class="n">read_spacegroup</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_a_alpha</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_b_beta</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_c_gamma</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ Asymmetric Residue Unit \(= ARU\) Code List *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">True</span><span class="p">,</span><span class="n">end_table</span><span class="p">],</span>
+            <span class="c">#[&#39;^ *=+ *$&#39;,lambda results,match: results[&#39;in_table&#39;]==True,end_table],</span>
+            <span class="p">[</span><span class="s">&#39;^[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ ]*) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ </span><span class="se">\n</span><span class="s">]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">True</span><span class="p">,</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Flags Label +Fractional Coordinates \(x,y,z\) +Orthogonal Coordinates \(XO,YO,ZO\) +&#39;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Space Group Symmetry&#39;</span><span class="p">,</span><span class="n">in_table</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *=+ ([A-Za-z ]+) =+ *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">section</span><span class="p">],</span>
+          <span class="p">],</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c"># If we only have =1 occupancy everywhere, drop the occupancy ratio</span>
+    <span class="n">simple_occs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">occupancy</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">occupancy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">1e-6</span><span class="p">):</span>
+            <span class="n">occupancies</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span>
+            <span class="k">break</span>
+        <span class="n">simple_occs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occupancy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">occupancies</span> <span class="o">=</span> <span class="n">simple_occs</span>
+
+    <span class="c">#print &quot;OUT&quot;,out[&#39;occupancies&#39;]</span>
+    <span class="c">#exit(0)</span>
+
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">],</span><span class="n">alpha</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">],</span>
+                                       <span class="n">gamma</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">],</span><span class="n">occupancies</span><span class="o">=</span><span class="n">occupancies</span><span class="p">,</span><span class="n">coords</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">],</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;platon_sg&#39;</span><span class="p">:</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]})</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">struct</span>
+
+
+</div>
+<div class="viewcode-block" id="platon_lis_to_struct_broken2"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_lis_to_struct_broken2">[docs]</a><span class="k">def</span> <span class="nf">platon_lis_to_struct_broken2</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input::</span>
+
+<span class="sd">                                                               ============</span>
+<span class="sd">        ====================================================== Crystal Data ================================================================</span>
+<span class="sd">                                                               ============</span>
+<span class="sd">                                Input Cell  (Lattice Type: P)   -   Temp =   0K             Reduced Cell     (Acta Cryst.(1976),A32,297-298)</span>
+<span class="sd">        ---------------------------------------------------------------------------------   ------------------------------------------------</span>
+<span class="sd">        a =       3.47100  Angstrom                alpha =            90 Degree             a  =    3.471     alpha  =   90.00  V  =    79.6</span>
+<span class="sd">        b =       3.47100                           beta =            90                    b  =    3.471     beta   =   90.00              </span>
+<span class="sd">        c =       6.60300                          gamma =            90                    c  =    6.603     gamma  =   90.00              </span>
+<span class="sd">        </span>
+<span class="sd">        ...</span>
+<span class="sd">        </span>
+<span class="sd">        ====================================================================================================================================</span>
+<span class="sd">        10.0 Angstrom Coordination Sphere Around Atom I = Ag(1)  [ARU = 1555.01]             1/4      1/4  0.61200    0.8677  0.8677  4.0410</span>
+<span class="sd">        ------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="sd">         Nr     d(I,J) To  Atom J  Symm_Oper. on Atom J    ARU(J)  Type     Phi     Mu         X        Y        Z        XO      YO      ZO</span>
+<span class="sd">        ------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="sd">         1      2.9615 --  Zr(4)  [                    =         ] Intra-135.00  34.03      -1/4     -1/4  0.86300   -0.8678 -0.8678  5.6984</span>
+<span class="sd">         2      2.9615 --  Zr(4)n [1+x,1+y,z           =  1665.01] Intra  45.00  34.03       3/4      3/4  0.86300    2.6032  2.6032  5.6984</span>
+<span class="sd">         3      2.9615 --  Zr(4)j [x,1+y,z             =  1565.01] Intra 135.00  34.03      -1/4      3/4  0.86300   -0.8678  2.6032  5.6984</span>
+<span class="sd">         4      2.9615 --  Zr(4)l [1+x,y,z             =  1655.01] Intra -45.00  34.03       3/4     -1/4  0.86300    2.6032 -0.8678  5.6984</span>
+<span class="sd">         5      3.1364 --  Zr(3)  [                    =         ] Intra   0.00 -90.00       1/4      1/4  0.13700    0.8677  0.8677  0.9046</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileReader</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>    
+
+    <span class="n">seen_coords</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">read_spacegroup</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">read_a_alpha</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_b_beta</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_c_gamma</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&gt;&gt;|&quot;</span><span class="p">)</span>
+        <span class="c">#for i in range(1,14):</span>
+        <span class="c">#    sys.stdout.write(match.group(i)+&quot;|&quot;)</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">11</span><span class="p">)))</span>
+        
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\([^)]*\)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">a1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">c1</span><span class="p">])</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">to_floats</span><span class="p">()))</span>
+        <span class="n">limcoord</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">a1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">c1</span><span class="p">])</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="n">coordtuple</span> <span class="o">=</span> <span class="p">((</span><span class="n">species</span><span class="p">,</span><span class="n">ratio</span><span class="o">.</span><span class="n">to_tuple</span><span class="p">()),</span><span class="n">limcoord</span><span class="o">.</span><span class="n">to_tuple</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">coordtuple</span> <span class="ow">in</span> <span class="n">seen_coords</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">species</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">)))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+        <span class="n">seen_coords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coordtuple</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">in_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">end_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">section</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="p">[</span><span class="s">&#39;^ *Space Group +(([^ ]+ )+) +&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Space Group Symmetry&#39;</span> <span class="ow">and</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">None</span><span class="p">,</span><span class="n">read_spacegroup</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_a_alpha</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_b_beta</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Crystal Data&#39;</span><span class="p">,</span><span class="n">read_c_gamma</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ Asymmetric Residue Unit \(= ARU\) Code List *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">True</span><span class="p">,</span><span class="n">end_table</span><span class="p">],</span>
+            <span class="c">#[&#39;^ *=+ *$&#39;,lambda results,match: results[&#39;in_table&#39;]==True,end_table],</span>
+            <span class="p">[</span><span class="s">&#39;^[^ ]* +[^ ]* +[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +.* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">True</span><span class="p">,</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Angstrom Coordination Sphere Around Atom +&#39;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_table&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;section&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Space Group Symmetry&#39;</span><span class="p">,</span><span class="n">in_table</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *=+ ([A-Za-z ]+) =+ *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">section</span><span class="p">],</span>
+          <span class="p">],</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c"># If we only have =1 occupancy everywhere, drop the occupancy ratio</span>
+    <span class="n">simple_occs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">occupancy</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">occupancy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">1e-6</span><span class="p">):</span>
+            <span class="n">occupancies</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span>
+            <span class="k">break</span>
+        <span class="n">simple_occs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occupancy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">occupancies</span> <span class="o">=</span> <span class="n">simple_occs</span>
+
+    <span class="c">#print &quot;OUT&quot;,out[&#39;occupancies&#39;]</span>
+    <span class="c">#exit(0)</span>
+
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">],</span><span class="n">alpha</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">],</span>
+                                       <span class="n">gamma</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">],</span><span class="n">occupancies</span><span class="o">=</span><span class="n">occupancies</span><span class="p">,</span><span class="n">coords</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">],</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;platon_sg&#39;</span><span class="p">:</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]})</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">struct</span>
+
+
+
+</div>
+<div class="viewcode-block" id="platon_styin_to_sgstruct"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_styin_to_sgstruct">[docs]</a><span class="k">def</span> <span class="nf">platon_styin_to_sgstruct</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input:</span>
+<span class="sd">    </span>
+<span class="sd">        F -4 3 M        id=[0] dblock_code=[44325-ICSD] formula=</span>
+<span class="sd">        5.5000    5.5000    5.5000   90.0000   90.0000   90.0000</span>
+<span class="sd">        N</span>
+<span class="sd">        Sb1       0.25000   0.25000   0.25000</span>
+<span class="sd">        Al1       0.00000   0.00000   0.00000</span>
+<span class="sd">        END</span>
+<span class="sd">        END</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileReader</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>    
+
+<span class="c">#     print ioa.file.read()</span>
+<span class="c">#     exit()</span>
+<span class="c">#     </span>
+<span class="c">#     fi = iter(ioa)</span>
+<span class="c"># </span>
+<span class="c">#     spg_comment = next(fi).strip()</span>
+<span class="c">#     spgsymbol = spg_comment[:15]</span>
+<span class="c">#     comment = spg_comment[16:]</span>
+<span class="c">#     a,b,c,alpha,beta,gamma = [float(x) for x in next(fi).strip().split()]</span>
+<span class="c"># </span>
+<span class="c">#     coords = []</span>
+<span class="c">#     occupancies = []</span>
+<span class="c">#     for line in fi:</span>
+<span class="c">#         strcoord = line.strip().split()</span>
+<span class="c">#         if strcoord[0] == &#39;END&#39;:</span>
+<span class="c">#             break</span>
+<span class="c">#         coord = map(lambda x: float(x.strip()),strcoord[1:4])</span>
+<span class="c">#         coords.append(coord)</span>
+<span class="c">#         occupation = strcoord[0]</span>
+<span class="c">#         occupation = re.sub(&#39;[0-9]*#*$&#39;, &#39;&#39;, occupation)</span>
+<span class="c">#         occupancies.append(occupation)        </span>
+
+    <span class="k">def</span> <span class="nf">read_spacegroup</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">read_cell</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;has_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))])</span>
+
+    <span class="k">def</span> <span class="nf">read_end</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;has_cell&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">False</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="p">[</span><span class="s">&#39;^ *([a-zA-Z]+)[^ ]* +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;has_cell&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">],</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">!=</span><span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">],</span><span class="n">read_cell</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([^ ]+ )+  &#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span><span class="o">==</span><span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">],</span><span class="n">read_spacegroup</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *[Ee][Nn][Dd] *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;has_cell&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">],</span><span class="n">read_end</span><span class="p">],</span>
+          <span class="p">],</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c">#spacegroup = &quot;&quot;.join(out[&#39;spacegroup&#39;].split())</span>
+    <span class="c">#spacegroup = spacegroup[0]+(spacegroup[1:].lower())</span>
+    <span class="c">#print &quot;GOT SPACEGROUP&quot;,spacegroup</span>
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span>
+
+    <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;c&#39;</span><span class="p">],</span><span class="n">alpha</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">],</span>
+                                       <span class="n">gamma</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;gamma&#39;</span><span class="p">],</span><span class="n">occupancies</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">],</span><span class="n">coords</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">],</span> <span class="n">spacegroup</span><span class="o">=</span><span class="n">spacegroup</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;platon_sg&#39;</span><span class="p">:</span><span class="n">spacegroup</span><span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">sgstruct</span>
+</div>
+<div class="viewcode-block" id="platon_styout_to_sgstruct"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_styout_to_sgstruct">[docs]</a><span class="k">def</span> <span class="nf">platon_styout_to_sgstruct</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input::</span>
+<span class="sd">    </span>
+<span class="sd">        Results for  id=[0] dblock_code=[44325-I New: F-43m </span>
+<span class="sd">        =====================================================</span>
+<span class="sd">        </span>
+<span class="sd">        Pearson code : cF   8  Sb  4.0  Al  4.0</span>
+<span class="sd">        Cell parameters :   7.7782  7.7782  7.7782   90.000   90.000   90.000</span>
+<span class="sd">        Space group symbol : F -4 3 m   Number in IT : 216</span>
+<span class="sd">        </span>
+<span class="sd">        Setting x,y,z             Origin ( 0.0000 0.0000 0.0000)  Gamma =  0.4330</span>
+<span class="sd">        </span>
+<span class="sd">               Al1       4(c)  1/4     1/4     1/4                             Al   1</span>
+<span class="sd">              Sb1        4(a)  0       0       0                               Sb   1</span>
+<span class="sd">        </span>
+<span class="sd">        Wyckoff sequence : c a                                                                                                         </span>
+<span class="sd">        </span>
+<span class="sd">        Volume of Unit Cell :   470.5842</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        OTHER Standardization with Similar Gamma :</span>
+<span class="sd">        </span>
+<span class="sd">        Setting -x,-y,-z          Origin ( 0.7500 0.7500 0.7500)  Gamma =  0.4330</span>
+<span class="sd">        </span>
+<span class="sd">              Sb1        4(c)  1/4     1/4     1/4                             Sb   1</span>
+<span class="sd">               Al1       4(a)  0       0       0                               Al   1</span>
+<span class="sd">        </span>
+<span class="sd">        Wyckoff sequence : c a                                                                                                         </span>
+<span class="sd">        </span>
+<span class="sd">        Volume of Unit Cell :   470.5842</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">cell_params</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;gamma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">spacegroup</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="c">#def setting_start(results,match):</span>
+    <span class="c">#    results[&#39;setting&#39;].append({&#39;coords&#39;:[],&#39;occupancies&#39;:[],&#39;wycoff&#39;:[]})</span>
+    <span class="c">#    results[&#39;in_setting&#39;] = True</span>
+    <span class="k">def</span> <span class="nf">setting_stop</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;coords&#39;</span><span class="p">:[],</span><span class="s">&#39;occupancies&#39;</span><span class="p">:[],</span><span class="s">&#39;wycoff&#39;</span><span class="p">:[]})</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;wycoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c">#def debug(results,match):</span>
+    <span class="c">#    print &quot;DEBUG&quot;,match</span>
+        
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="c">#[&#39;^Wyckoff&#39;,None,setting_stop],</span>
+            <span class="p">[</span><span class="s">&#39;^ *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">setting_stop</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^Cell parameters : +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">cell_params</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^Space group symbol : +(.+) +Number in IT : +([0-9]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">spacegroup</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ +([a-zA-Z]+)([0-9]*)#* +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="c">#[&#39;^Setting&#39;,None,setting_start],</span>
+          <span class="p">],</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">structdata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> 
+                    <span class="p">[(</span><span class="s">&#39;coords&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]),</span>
+                     <span class="p">(</span><span class="s">&#39;occupancies&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]),</span>
+                     <span class="p">(</span><span class="s">&#39;spacegroup&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">])</span>
+                     <span class="p">])</span>
+    <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">structdata</span><span class="p">)</span>
+ 
+    <span class="k">return</span> <span class="n">sgstruct</span>
+
+</div>
+<div class="viewcode-block" id="structure_to_platon"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.structure_to_platon">[docs]</a><span class="k">def</span> <span class="nf">structure_to_platon</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">struct</span><span class="p">,</span><span class="n">precards</span><span class="p">,</span><span class="n">postcards</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a file on PLATONS input format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileReader</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">=</span><span class="n">ioa</span><span class="o">.</span><span class="n">file</span> 
+    <span class="k">if</span> <span class="s">&#39;comment&#39;</span> <span class="ow">in</span> <span class="n">struct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">():</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;TITL &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;TITL structure</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">precards</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">card</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;CESD 0.00001 0.00001 0.00001 0.00001 0.00001 0.00001</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;CELL &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_a</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_b</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_c</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_alpha</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_beta</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_gamma</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">idx</span><span class="o">=</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_nbr_atoms</span><span class="p">):</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_occupancies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">species</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">struct</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="c">#print &quot;X&quot;,species+str(idx)+&quot; &quot;+&quot; &quot;.join([str(float(x)) for x in struct.coords[i]])+&quot;\n&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">postcards</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">card</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="sites_to_platon"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.sites_to_platon">[docs]</a><span class="k">def</span> <span class="nf">sites_to_platon</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">sites</span><span class="p">,</span><span class="n">cell</span><span class="p">,</span><span class="n">precards</span><span class="p">,</span><span class="n">postcards</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a file on PLATONS input format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileWriter</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">=</span><span class="n">ioa</span><span class="o">.</span><span class="n">file</span> 
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;TITL structure</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">precards</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">card</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;CESD 0.00001 0.00001 0.00001 0.00001 0.00001 0.00001</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;CELL &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">a</span><span class="p">))</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">b</span><span class="p">))</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">c</span><span class="p">))</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">beta</span><span class="p">))</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">gamma</span><span class="p">))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">idx</span><span class="o">=</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coords</span><span class="p">)):</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">rc_occupancies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">species</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="c">#print &quot;X&quot;,species+str(idx)+&quot; &quot;+&quot; &quot;.join([str(float(x)) for x in struct.coords[i]])+&quot;\n&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">postcards</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">card</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="platon_sites_to_styin"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_sites_to_styin">[docs]</a><span class="k">def</span> <span class="nf">platon_sites_to_styin</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">sites</span><span class="p">,</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input::</span>
+
+<span class="sd">        P 4 B M              </span>
+<span class="sd">            5.5179    5.5179    3.9073   90.0000   90.0000   90.0000</span>
+<span class="sd">        Bi1       0.50000   0.00000   0.54500   0.50000</span>
+<span class="sd">        Ti1       0.00000   0.00000   0.00000</span>
+<span class="sd">        Na1       0.50000   0.00000   0.54500   0.50000</span>
+<span class="sd">        O1        0.00000   0.00000   0.51000</span>
+<span class="sd">        O2        0.72900   0.22900   0.01500</span>
+<span class="sd">        END</span>
+<span class="sd">        END</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">IoAdapterFileWriter</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>   
+    <span class="n">f</span> <span class="o">=</span> <span class="n">ioa</span><span class="o">.</span><span class="n">file</span> 
+    <span class="n">sgsymbol</span> <span class="o">=</span> <span class="n">get_stidy_spacegroup</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">hall_symbol</span><span class="p">)</span>
+    
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sgsymbol</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot; </span><span class="si">%9.4f</span><span class="s"> </span><span class="si">%9.4f</span><span class="s"> </span><span class="si">%9.4f</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">a</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">b</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">c</span><span class="p">)))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%9.4f</span><span class="s"> </span><span class="si">%9.4f</span><span class="s"> </span><span class="si">%9.4f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">beta</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">gamma</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">])):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%-3s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">int_to_anonymous_symbol</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)));</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;     &quot;</span><span class="p">);</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%9.5f</span><span class="s"> </span><span class="si">%9.5f</span><span class="s"> </span><span class="si">%9.5f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span><span class="nb">float</span><span class="p">(</span><span class="n">sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">])))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+</div>
+<div class="viewcode-block" id="platon_styout_to_structure"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.platon_styout_to_structure">[docs]</a><span class="k">def</span> <span class="nf">platon_styout_to_structure</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span> <span class="n">based_on_struct</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input::</span>
+<span class="sd">    </span>
+<span class="sd">        Results for  id=[0] dblock_code=[44325-I New: F-43m </span>
+<span class="sd">        =====================================================</span>
+<span class="sd">        </span>
+<span class="sd">        Pearson code : cF   8  Sb  4.0  Al  4.0</span>
+<span class="sd">        Cell parameters :   7.7782  7.7782  7.7782   90.000   90.000   90.000</span>
+<span class="sd">        Space group symbol : F -4 3 m   Number in IT : 216</span>
+<span class="sd">        </span>
+<span class="sd">        Setting x,y,z             Origin ( 0.0000 0.0000 0.0000)  Gamma =  0.4330</span>
+<span class="sd">        </span>
+<span class="sd">               Al1       4(c)  1/4     1/4     1/4                             Al   1</span>
+<span class="sd">              Sb1        4(a)  0       0       0                               Sb   1</span>
+<span class="sd">        </span>
+<span class="sd">        Wyckoff sequence : c a                                                                                                         </span>
+<span class="sd">        </span>
+<span class="sd">        Volume of Unit Cell :   470.5842</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        OTHER Standardization with Similar Gamma :</span>
+<span class="sd">        </span>
+<span class="sd">        Setting -x,-y,-z          Origin ( 0.7500 0.7500 0.7500)  Gamma =  0.4330</span>
+<span class="sd">        </span>
+<span class="sd">              Sb1        4(c)  1/4     1/4     1/4                             Sb   1</span>
+<span class="sd">               Al1       4(a)  0       0       0                               Al   1</span>
+<span class="sd">        </span>
+<span class="sd">        Wyckoff sequence : c a                                                                                                         </span>
+<span class="sd">        </span>
+<span class="sd">        Volume of Unit Cell :   470.5842</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">cell_params</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">][</span><span class="s">&#39;rc_gamma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">spacegroup</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="c">#def setting_start(results,match):</span>
+    <span class="c">#    results[&#39;setting&#39;].append({&#39;coords&#39;:[],&#39;occupancies&#39;:[],&#39;wycoff&#39;:[]})</span>
+    <span class="c">#    results[&#39;in_setting&#39;] = True</span>
+    <span class="k">def</span> <span class="nf">setting_stop</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;coords&#39;</span><span class="p">:[],</span><span class="s">&#39;occupancies&#39;</span><span class="p">:[],</span><span class="s">&#39;wyckoff&#39;</span><span class="p">:[],</span><span class="s">&#39;multiplicities&#39;</span><span class="p">:[]})</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">newcoord</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span><span class="mi">5000000</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="c">#print &quot;CHECK1&quot;,[match.group(4),match.group(5),match.group(6)]</span>
+        <span class="c">#print &quot;CHECK2:&quot;,newcoord</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+        
+        
+        <span class="k">if</span> <span class="n">based_on_struct</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abstract_symbol</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">anonymous_symbol_to_int</span><span class="p">(</span><span class="n">abstract_symbol</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="n">wyckoff_string</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">wyckoff_symbol</span> <span class="o">=</span> <span class="n">wyckoff_string</span><span class="p">[</span><span class="n">wyckoff_string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">wyckoff_string</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;)&quot;</span><span class="p">)]</span>
+        <span class="n">multiplicity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wyckoff_string</span><span class="p">[:</span><span class="n">wyckoff_string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)])</span>
+            
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;wyckoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wyckoff_symbol</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;multiplicities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">multiplicity</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_setting&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c">#def debug(results,match):</span>
+    <span class="c">#    print &quot;DEBUG&quot;,match</span>
+        
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="c">#[&#39;^Wyckoff&#39;,None,setting_stop],</span>
+            <span class="p">[</span><span class="s">&#39;^ *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">setting_stop</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^Cell parameters : +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">cell_params</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^Space group symbol : +(.+) +Number in IT : +([0-9]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">spacegroup</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ +([a-zA-Z]+)([0-9]*)#* +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="c">#[&#39;^Setting&#39;,None,setting_start],</span>
+          <span class="p">],</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c">#print &quot;HX&quot;,out[&#39;setting&#39;][0][&#39;wyckoff&#39;]</span>
+
+    <span class="k">if</span> <span class="n">based_on_struct</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">structdata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> 
+                        <span class="p">[(</span><span class="s">&#39;rc_reduced_occupationscoords&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]),</span>
+                         <span class="p">(</span><span class="s">&#39;rc_occupancies&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]),</span>
+                         <span class="p">(</span><span class="s">&#39;spacegroup&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">]),</span>
+                         <span class="p">(</span><span class="s">&#39;wyckoff_symbols&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;wyckoff&#39;</span><span class="p">])</span>
+                         <span class="p">])</span>
+        <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">structdata</span><span class="p">)</span>        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Handle both normal structures and scaleless structures</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rc_cell</span> <span class="o">=</span> <span class="n">based_on_struct</span><span class="o">.</span><span class="n">rc_cell</span>
+            <span class="n">structdata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> 
+                            <span class="p">[(</span><span class="s">&#39;rc_reduced_occupationscoords&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;rc_occupancies&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;spacegroup&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;rc_cell&#39;</span><span class="p">,</span><span class="n">rc_cell</span><span class="p">),</span>
+                             <span class="p">(</span><span class="s">&#39;wyckoff_symbols&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;wyckoff&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;multiplicities&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;multiplicities&#39;</span><span class="p">])</span>
+                             <span class="p">]</span>
+                            <span class="p">)</span>        
+            <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">based_on_struct</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">structdata</span><span class="p">)</span>        
+            <span class="n">sgstruct</span><span class="o">.</span><span class="n">add_tags</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">())</span>
+            <span class="n">sgstruct</span><span class="o">.</span><span class="n">add_refs</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">get_refs</span><span class="p">())</span>
+
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> 
+            <span class="n">structdata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> 
+                            <span class="p">[(</span><span class="s">&#39;rc_reduced_occupationscoords&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;coords&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;rc_occupancies&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;occupancies&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;spacegroup&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;spacegroup&#39;</span><span class="p">][</span><span class="s">&#39;symbol&#39;</span><span class="p">]),</span>                             
+                             <span class="p">(</span><span class="s">&#39;wyckoff_symbols&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;wyckoff&#39;</span><span class="p">]),</span>
+                             <span class="p">(</span><span class="s">&#39;multiplicities&#39;</span><span class="p">,</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;multiplicities&#39;</span><span class="p">])</span>
+                             <span class="p">]</span>
+                            <span class="p">)</span>
+            <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">based_on_struct</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">structdata</span><span class="p">)</span>        
+            <span class="n">sgstruct</span><span class="o">.</span><span class="n">add_tags</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">())</span>
+            <span class="n">sgstruct</span><span class="o">.</span><span class="n">add_refs</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">get_refs</span><span class="p">())</span>
+            <span class="n">sgstruct</span><span class="o">.</span><span class="n">add_rc_cells</span><span class="p">(</span><span class="n">based_on_struct</span><span class="o">.</span><span class="n">get_rc_cells</span><span class="p">())</span>
+
+        
+    <span class="k">return</span> <span class="n">sgstruct</span>
+
+</div>
+<span class="n">stidy_spacegroups</span> <span class="o">=</span> <span class="p">{</span>
+<span class="mi">1</span><span class="p">:(</span><span class="s">&quot;P 1&quot;</span><span class="p">,),</span>
+<span class="mi">2</span><span class="p">:(</span><span class="s">&quot;P -1&quot;</span><span class="p">,),</span>
+<span class="mi">3</span><span class="p">:(</span><span class="s">&quot;P 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 2 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 1 2&quot;</span><span class="p">,),</span>
+<span class="mi">4</span><span class="p">:(</span><span class="s">&quot;P 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 21 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 1 21&quot;</span><span class="p">,),</span>
+<span class="mi">5</span><span class="p">:(</span><span class="s">&quot;C 2&quot;</span><span class="p">,</span><span class="s">&quot;C 2 1 1&quot;</span><span class="p">,</span><span class="s">&quot;C 1 2 1&quot;</span><span class="p">,),</span>
+<span class="mi">6</span><span class="p">:(</span><span class="s">&quot;P m&quot;</span><span class="p">,</span><span class="s">&quot;P m 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 m 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 1 m&quot;</span><span class="p">,),</span>
+<span class="mi">7</span><span class="p">:(</span><span class="s">&quot;P c&quot;</span><span class="p">,</span><span class="s">&quot;P c 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 c 1&quot;</span><span class="p">,),</span>
+<span class="mi">8</span><span class="p">:(</span><span class="s">&quot;C m&quot;</span><span class="p">,</span><span class="s">&quot;C m 1 1&quot;</span><span class="p">,</span><span class="s">&quot;C 1 m 1&quot;</span><span class="p">,),</span>
+<span class="mi">9</span><span class="p">:(</span><span class="s">&quot;C c&quot;</span><span class="p">,</span><span class="s">&quot;C c 1 1&quot;</span><span class="p">,</span><span class="s">&quot;C 1 c 1&quot;</span><span class="p">,),</span>
+<span class="mi">10</span><span class="p">:(</span><span class="s">&quot;P 2/m&quot;</span><span class="p">,</span><span class="s">&quot;P 2/m 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 2/m 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 1 2/m&quot;</span><span class="p">,),</span>
+<span class="mi">11</span><span class="p">:(</span><span class="s">&quot;P 21/m&quot;</span><span class="p">,</span><span class="s">&quot;P 21/m 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 21/m 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 1 21/m&quot;</span><span class="p">,),</span>
+<span class="mi">12</span><span class="p">:(</span><span class="s">&quot;C 2/m&quot;</span><span class="p">,</span><span class="s">&quot;C 2/m 1 1&quot;</span><span class="p">,</span><span class="s">&quot;C 1 2/m 1&quot;</span><span class="p">,),</span>
+<span class="mi">13</span><span class="p">:(</span><span class="s">&quot;P 2/c&quot;</span><span class="p">,</span><span class="s">&quot;P 2/c 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 2/c 1&quot;</span><span class="p">,),</span>
+<span class="mi">14</span><span class="p">:(</span><span class="s">&quot;P 21/c&quot;</span><span class="p">,</span><span class="s">&quot;P 21/c 1 1&quot;</span><span class="p">,</span><span class="s">&quot;P 1 21/c 1&quot;</span><span class="p">,),</span>
+<span class="mi">15</span><span class="p">:(</span><span class="s">&quot;C 2/c&quot;</span><span class="p">,</span><span class="s">&quot;C 2/c 1 1&quot;</span><span class="p">,</span><span class="s">&quot;C 1 2/c 1&quot;</span><span class="p">,),</span>
+<span class="mi">16</span><span class="p">:(</span><span class="s">&quot;P 2 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">17</span><span class="p">:(</span><span class="s">&quot;P 2 2 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 2 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 21 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">18</span><span class="p">:(</span><span class="s">&quot;P 21 21 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 21 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 2 21&quot;</span><span class="p">,),</span>
+<span class="mi">19</span><span class="p">:(</span><span class="s">&quot;P 21 21 21&quot;</span><span class="p">,),</span>
+<span class="mi">20</span><span class="p">:(</span><span class="s">&quot;C 2 2 21&quot;</span><span class="p">,</span><span class="s">&quot;A 21 2 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">21</span><span class="p">:(</span><span class="s">&quot;C 2 2 2&quot;</span><span class="p">,</span><span class="s">&quot;A 2 2 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">22</span><span class="p">:(</span><span class="s">&quot;F 2 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">23</span><span class="p">:(</span><span class="s">&quot;I 2 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">24</span><span class="p">:(</span><span class="s">&quot;I 21 21 21&quot;</span><span class="p">,),</span>
+<span class="mi">25</span><span class="p">:(</span><span class="s">&quot;P m m 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 m m&quot;</span><span class="p">,</span><span class="s">&quot;P m 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">26</span><span class="p">:(</span><span class="s">&quot;P m c 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 m a&quot;</span><span class="p">,</span><span class="s">&quot;P b 21 m&quot;</span><span class="p">,),</span>
+<span class="mi">27</span><span class="p">:(</span><span class="s">&quot;P c c 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 a a&quot;</span><span class="p">,</span><span class="s">&quot;P b 2 b&quot;</span><span class="p">,),</span>
+<span class="mi">28</span><span class="p">:(</span><span class="s">&quot;P m a 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 m b&quot;</span><span class="p">,</span><span class="s">&quot;P c 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">29</span><span class="p">:(</span><span class="s">&quot;P c a 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 a b&quot;</span><span class="p">,</span><span class="s">&quot;P c 21 b&quot;</span><span class="p">,),</span>
+<span class="mi">30</span><span class="p">:(</span><span class="s">&quot;P n c 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 n a&quot;</span><span class="p">,</span><span class="s">&quot;P b 2 n&quot;</span><span class="p">,),</span>
+<span class="mi">31</span><span class="p">:(</span><span class="s">&quot;P m n 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 m n&quot;</span><span class="p">,</span><span class="s">&quot;P n 21 m&quot;</span><span class="p">,),</span>
+<span class="mi">32</span><span class="p">:(</span><span class="s">&quot;P b a 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 c b&quot;</span><span class="p">,</span><span class="s">&quot;P c 2 a&quot;</span><span class="p">,),</span>
+<span class="mi">33</span><span class="p">:(</span><span class="s">&quot;P n a 21&quot;</span><span class="p">,</span><span class="s">&quot;P 21 n b&quot;</span><span class="p">,</span><span class="s">&quot;P c 21 n&quot;</span><span class="p">,),</span>
+<span class="mi">34</span><span class="p">:(</span><span class="s">&quot;P n n 2&quot;</span><span class="p">,</span><span class="s">&quot;P 2 n n&quot;</span><span class="p">,</span><span class="s">&quot;P n 2 n&quot;</span><span class="p">,),</span>
+<span class="mi">35</span><span class="p">:(</span><span class="s">&quot;C m m 2&quot;</span><span class="p">,</span><span class="s">&quot;A 2 m m&quot;</span><span class="p">,</span><span class="s">&quot;B m 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">36</span><span class="p">:(</span><span class="s">&quot;C m c 21&quot;</span><span class="p">,</span><span class="s">&quot;A 21 m a&quot;</span><span class="p">,</span><span class="s">&quot;B b 21 m&quot;</span><span class="p">,),</span>
+<span class="mi">37</span><span class="p">:(</span><span class="s">&quot;C c c 2&quot;</span><span class="p">,</span><span class="s">&quot;A 2 a a&quot;</span><span class="p">,</span><span class="s">&quot;B b 2 b&quot;</span><span class="p">,),</span>
+<span class="mi">38</span><span class="p">:(</span><span class="s">&quot;A m m 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 m m&quot;</span><span class="p">,</span><span class="s">&quot;C m 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">39</span><span class="p">:(</span><span class="s">&quot;A b m 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 c m&quot;</span><span class="p">,</span><span class="s">&quot;C m 2 a&quot;</span><span class="p">,),</span>
+<span class="mi">40</span><span class="p">:(</span><span class="s">&quot;A m a 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 m b&quot;</span><span class="p">,</span><span class="s">&quot;C c 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">41</span><span class="p">:(</span><span class="s">&quot;A b a 2&quot;</span><span class="p">,</span><span class="s">&quot;B 2 c b&quot;</span><span class="p">,</span><span class="s">&quot;C c 2 a&quot;</span><span class="p">,),</span>
+<span class="mi">42</span><span class="p">:(</span><span class="s">&quot;F m m 2&quot;</span><span class="p">,</span><span class="s">&quot;F 2 m m&quot;</span><span class="p">,</span><span class="s">&quot;F m 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">43</span><span class="p">:(</span><span class="s">&quot;F d d 2&quot;</span><span class="p">,</span><span class="s">&quot;F 2 d d&quot;</span><span class="p">,</span><span class="s">&quot;F d 2 d&quot;</span><span class="p">,),</span>
+<span class="mi">44</span><span class="p">:(</span><span class="s">&quot;I m m 2&quot;</span><span class="p">,</span><span class="s">&quot;I 2 m m&quot;</span><span class="p">,</span><span class="s">&quot;I m 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">45</span><span class="p">:(</span><span class="s">&quot;I b a 2&quot;</span><span class="p">,</span><span class="s">&quot;I 2 c b&quot;</span><span class="p">,</span><span class="s">&quot;I c 2 a&quot;</span><span class="p">,),</span>
+<span class="mi">46</span><span class="p">:(</span><span class="s">&quot;I m a 2&quot;</span><span class="p">,</span><span class="s">&quot;I 2 m b&quot;</span><span class="p">,</span><span class="s">&quot;I c 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">47</span><span class="p">:(</span><span class="s">&quot;P m m m&quot;</span><span class="p">,),</span>
+<span class="mi">48</span><span class="p">:(</span><span class="s">&quot;P n n n&quot;</span><span class="p">,),</span>
+<span class="mi">49</span><span class="p">:(</span><span class="s">&quot;P c c m&quot;</span><span class="p">,</span><span class="s">&quot;P m a a&quot;</span><span class="p">,</span><span class="s">&quot;P b m b&quot;</span><span class="p">,),</span>
+<span class="mi">50</span><span class="p">:(</span><span class="s">&quot;P b a n&quot;</span><span class="p">,</span><span class="s">&quot;P n c b&quot;</span><span class="p">,</span><span class="s">&quot;P c n a&quot;</span><span class="p">,),</span>
+<span class="mi">51</span><span class="p">:(</span><span class="s">&quot;P m m a&quot;</span><span class="p">,</span><span class="s">&quot;P b m m&quot;</span><span class="p">,</span><span class="s">&quot;P m c m&quot;</span><span class="p">,),</span>
+<span class="mi">52</span><span class="p">:(</span><span class="s">&quot;P n n a&quot;</span><span class="p">,</span><span class="s">&quot;P b n n&quot;</span><span class="p">,</span><span class="s">&quot;P n c n&quot;</span><span class="p">,),</span>
+<span class="mi">53</span><span class="p">:(</span><span class="s">&quot;P m n a&quot;</span><span class="p">,</span><span class="s">&quot;P b m n&quot;</span><span class="p">,</span><span class="s">&quot;P n c m&quot;</span><span class="p">,),</span>
+<span class="mi">54</span><span class="p">:(</span><span class="s">&quot;P c c a&quot;</span><span class="p">,</span><span class="s">&quot;P b a a&quot;</span><span class="p">,</span><span class="s">&quot;P b c b&quot;</span><span class="p">,),</span>
+<span class="mi">55</span><span class="p">:(</span><span class="s">&quot;P b a m&quot;</span><span class="p">,</span><span class="s">&quot;P m c b&quot;</span><span class="p">,</span><span class="s">&quot;P c m a&quot;</span><span class="p">,),</span>
+<span class="mi">56</span><span class="p">:(</span><span class="s">&quot;P c c n&quot;</span><span class="p">,</span><span class="s">&quot;P n a a&quot;</span><span class="p">,</span><span class="s">&quot;P b n b&quot;</span><span class="p">,),</span>
+<span class="mi">57</span><span class="p">:(</span><span class="s">&quot;P b c m&quot;</span><span class="p">,</span><span class="s">&quot;P m c a&quot;</span><span class="p">,</span><span class="s">&quot;P b m a&quot;</span><span class="p">,),</span>
+<span class="mi">58</span><span class="p">:(</span><span class="s">&quot;P n n m&quot;</span><span class="p">,</span><span class="s">&quot;P m n n&quot;</span><span class="p">,</span><span class="s">&quot;P n m n&quot;</span><span class="p">,),</span>
+<span class="mi">59</span><span class="p">:(</span><span class="s">&quot;P m m n&quot;</span><span class="p">,</span><span class="s">&quot;P n m m&quot;</span><span class="p">,</span><span class="s">&quot;P m n m&quot;</span><span class="p">,),</span>
+<span class="mi">60</span><span class="p">:(</span><span class="s">&quot;P b c n&quot;</span><span class="p">,</span><span class="s">&quot;P n c a&quot;</span><span class="p">,</span><span class="s">&quot;P b n a&quot;</span><span class="p">,),</span>
+<span class="mi">61</span><span class="p">:(</span><span class="s">&quot;P b c a&quot;</span><span class="p">,</span><span class="s">&quot;P c a b&quot;</span><span class="p">,),</span>
+<span class="mi">62</span><span class="p">:(</span><span class="s">&quot;P n m a&quot;</span><span class="p">,</span><span class="s">&quot;P b n m&quot;</span><span class="p">,</span><span class="s">&quot;P m c n&quot;</span><span class="p">,),</span>
+<span class="mi">63</span><span class="p">:(</span><span class="s">&quot;C m c m&quot;</span><span class="p">,</span><span class="s">&quot;A m m a&quot;</span><span class="p">,</span><span class="s">&quot;B b m m&quot;</span><span class="p">,),</span>
+<span class="mi">64</span><span class="p">:(</span><span class="s">&quot;C m c a&quot;</span><span class="p">,</span><span class="s">&quot;A b m a&quot;</span><span class="p">,</span><span class="s">&quot;B b c m&quot;</span><span class="p">,),</span>
+<span class="mi">65</span><span class="p">:(</span><span class="s">&quot;C m m m&quot;</span><span class="p">,</span><span class="s">&quot;A m m m&quot;</span><span class="p">,</span><span class="s">&quot;B m m m&quot;</span><span class="p">,),</span>
+<span class="mi">66</span><span class="p">:(</span><span class="s">&quot;C c c m&quot;</span><span class="p">,</span><span class="s">&quot;A m a a&quot;</span><span class="p">,</span><span class="s">&quot;B b m b&quot;</span><span class="p">,),</span>
+<span class="mi">67</span><span class="p">:(</span><span class="s">&quot;C m m a&quot;</span><span class="p">,</span><span class="s">&quot;A b m m&quot;</span><span class="p">,</span><span class="s">&quot;B m c m&quot;</span><span class="p">,),</span>
+<span class="mi">68</span><span class="p">:(</span><span class="s">&quot;C c c a&quot;</span><span class="p">,</span><span class="s">&quot;A b a a&quot;</span><span class="p">,</span><span class="s">&quot;B b c b&quot;</span><span class="p">,),</span>
+<span class="mi">69</span><span class="p">:(</span><span class="s">&quot;F m m m&quot;</span><span class="p">,),</span>
+<span class="mi">70</span><span class="p">:(</span><span class="s">&quot;F d d d&quot;</span><span class="p">,),</span>
+<span class="mi">71</span><span class="p">:(</span><span class="s">&quot;I m m m&quot;</span><span class="p">,),</span>
+<span class="mi">72</span><span class="p">:(</span><span class="s">&quot;I b a m&quot;</span><span class="p">,</span><span class="s">&quot;I m c b&quot;</span><span class="p">,</span><span class="s">&quot;I c m a&quot;</span><span class="p">,),</span>
+<span class="mi">73</span><span class="p">:(</span><span class="s">&quot;I b c a&quot;</span><span class="p">,</span><span class="s">&quot;I c a b&quot;</span><span class="p">,),</span>
+<span class="mi">74</span><span class="p">:(</span><span class="s">&quot;I m m a&quot;</span><span class="p">,</span><span class="s">&quot;I b m m&quot;</span><span class="p">,</span><span class="s">&quot;I m c m&quot;</span><span class="p">,),</span>
+<span class="mi">75</span><span class="p">:(</span><span class="s">&quot;P 4&quot;</span><span class="p">,),</span>
+<span class="mi">76</span><span class="p">:(</span><span class="s">&quot;P 41&quot;</span><span class="p">,),</span>
+<span class="mi">77</span><span class="p">:(</span><span class="s">&quot;P 42&quot;</span><span class="p">,),</span>
+<span class="mi">78</span><span class="p">:(</span><span class="s">&quot;P 43&quot;</span><span class="p">,),</span>
+<span class="mi">79</span><span class="p">:(</span><span class="s">&quot;I 4&quot;</span><span class="p">,),</span>
+<span class="mi">80</span><span class="p">:(</span><span class="s">&quot;I 41&quot;</span><span class="p">,),</span>
+<span class="mi">81</span><span class="p">:(</span><span class="s">&quot;P -4&quot;</span><span class="p">,),</span>
+<span class="mi">82</span><span class="p">:(</span><span class="s">&quot;I -4&quot;</span><span class="p">,),</span>
+<span class="mi">83</span><span class="p">:(</span><span class="s">&quot;P 4/m&quot;</span><span class="p">,),</span>
+<span class="mi">84</span><span class="p">:(</span><span class="s">&quot;P 42/m&quot;</span><span class="p">,),</span>
+<span class="mi">85</span><span class="p">:(</span><span class="s">&quot;P 4/n&quot;</span><span class="p">,),</span>
+<span class="mi">86</span><span class="p">:(</span><span class="s">&quot;P 42/n&quot;</span><span class="p">,),</span>
+<span class="mi">87</span><span class="p">:(</span><span class="s">&quot;I 4/m&quot;</span><span class="p">,),</span>
+<span class="mi">88</span><span class="p">:(</span><span class="s">&quot;I 41/a&quot;</span><span class="p">,),</span>
+<span class="mi">89</span><span class="p">:(</span><span class="s">&quot;P 4 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">90</span><span class="p">:(</span><span class="s">&quot;P 4 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">91</span><span class="p">:(</span><span class="s">&quot;P 41 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">92</span><span class="p">:(</span><span class="s">&quot;P 41 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">93</span><span class="p">:(</span><span class="s">&quot;P 42 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">94</span><span class="p">:(</span><span class="s">&quot;P 42 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">95</span><span class="p">:(</span><span class="s">&quot;P 43 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">96</span><span class="p">:(</span><span class="s">&quot;P 43 21 2&quot;</span><span class="p">,),</span>
+<span class="mi">97</span><span class="p">:(</span><span class="s">&quot;I 4 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">98</span><span class="p">:(</span><span class="s">&quot;I 41 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">99</span><span class="p">:(</span><span class="s">&quot;P 4 m m&quot;</span><span class="p">,),</span>
+<span class="mi">100</span><span class="p">:(</span><span class="s">&quot;P 4 b m&quot;</span><span class="p">,),</span>
+<span class="mi">101</span><span class="p">:(</span><span class="s">&quot;P 42 c m&quot;</span><span class="p">,),</span>
+<span class="mi">102</span><span class="p">:(</span><span class="s">&quot;P 42 n m&quot;</span><span class="p">,),</span>
+<span class="mi">103</span><span class="p">:(</span><span class="s">&quot;P 4 c c&quot;</span><span class="p">,),</span>
+<span class="mi">104</span><span class="p">:(</span><span class="s">&quot;P 4 n c&quot;</span><span class="p">,),</span>
+<span class="mi">105</span><span class="p">:(</span><span class="s">&quot;P 42 m c&quot;</span><span class="p">,),</span>
+<span class="mi">106</span><span class="p">:(</span><span class="s">&quot;P 42 b c&quot;</span><span class="p">,),</span>
+<span class="mi">107</span><span class="p">:(</span><span class="s">&quot;I 4 m m&quot;</span><span class="p">,),</span>
+<span class="mi">108</span><span class="p">:(</span><span class="s">&quot;I 4 c m&quot;</span><span class="p">,),</span>
+<span class="mi">109</span><span class="p">:(</span><span class="s">&quot;I 41 m d&quot;</span><span class="p">,),</span>
+<span class="mi">110</span><span class="p">:(</span><span class="s">&quot;I 41 c d&quot;</span><span class="p">,),</span>
+<span class="mi">111</span><span class="p">:(</span><span class="s">&quot;P -4 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">112</span><span class="p">:(</span><span class="s">&quot;P -4 2 c&quot;</span><span class="p">,),</span>
+<span class="mi">113</span><span class="p">:(</span><span class="s">&quot;P -4 21 m&quot;</span><span class="p">,),</span>
+<span class="mi">114</span><span class="p">:(</span><span class="s">&quot;P -4 21 c&quot;</span><span class="p">,),</span>
+<span class="mi">115</span><span class="p">:(</span><span class="s">&quot;P -4 m 2&quot;</span><span class="p">,),</span>
+<span class="mi">116</span><span class="p">:(</span><span class="s">&quot;P -4 c 2&quot;</span><span class="p">,),</span>
+<span class="mi">117</span><span class="p">:(</span><span class="s">&quot;P -4 b 2&quot;</span><span class="p">,),</span>
+<span class="mi">118</span><span class="p">:(</span><span class="s">&quot;P -4 n 2&quot;</span><span class="p">,),</span>
+<span class="mi">119</span><span class="p">:(</span><span class="s">&quot;I -4 m 2&quot;</span><span class="p">,),</span>
+<span class="mi">120</span><span class="p">:(</span><span class="s">&quot;I -4 c 2&quot;</span><span class="p">,),</span>
+<span class="mi">121</span><span class="p">:(</span><span class="s">&quot;I -4 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">122</span><span class="p">:(</span><span class="s">&quot;I -4 2 d&quot;</span><span class="p">,),</span>
+<span class="mi">123</span><span class="p">:(</span><span class="s">&quot;P 4/m m m&quot;</span><span class="p">,),</span>
+<span class="mi">124</span><span class="p">:(</span><span class="s">&quot;P 4/m c c&quot;</span><span class="p">,),</span>
+<span class="mi">125</span><span class="p">:(</span><span class="s">&quot;P 4/n b m&quot;</span><span class="p">,),</span>
+<span class="mi">126</span><span class="p">:(</span><span class="s">&quot;P 4/n n c&quot;</span><span class="p">,),</span>
+<span class="mi">127</span><span class="p">:(</span><span class="s">&quot;P 4/m b m&quot;</span><span class="p">,),</span>
+<span class="mi">128</span><span class="p">:(</span><span class="s">&quot;P 4/m n c&quot;</span><span class="p">,),</span>
+<span class="mi">129</span><span class="p">:(</span><span class="s">&quot;P 4/n m m&quot;</span><span class="p">,),</span>
+<span class="mi">130</span><span class="p">:(</span><span class="s">&quot;P 4/n c c&quot;</span><span class="p">,),</span>
+<span class="mi">131</span><span class="p">:(</span><span class="s">&quot;P 42/m m c&quot;</span><span class="p">,),</span>
+<span class="mi">132</span><span class="p">:(</span><span class="s">&quot;P 42/m c m&quot;</span><span class="p">,),</span>
+<span class="mi">133</span><span class="p">:(</span><span class="s">&quot;P 42/n b c&quot;</span><span class="p">,),</span>
+<span class="mi">134</span><span class="p">:(</span><span class="s">&quot;P 42/n n m&quot;</span><span class="p">,),</span>
+<span class="mi">135</span><span class="p">:(</span><span class="s">&quot;P 42/m b c&quot;</span><span class="p">,),</span>
+<span class="mi">136</span><span class="p">:(</span><span class="s">&quot;P 42/m n m&quot;</span><span class="p">,),</span>
+<span class="mi">137</span><span class="p">:(</span><span class="s">&quot;P 42/n m c&quot;</span><span class="p">,),</span>
+<span class="mi">138</span><span class="p">:(</span><span class="s">&quot;P 42/n c m&quot;</span><span class="p">,),</span>
+<span class="mi">139</span><span class="p">:(</span><span class="s">&quot;I 4/m m m&quot;</span><span class="p">,),</span>
+<span class="mi">140</span><span class="p">:(</span><span class="s">&quot;I 4/m c m&quot;</span><span class="p">,),</span>
+<span class="mi">141</span><span class="p">:(</span><span class="s">&quot;I 41/a m d&quot;</span><span class="p">,),</span>
+<span class="mi">142</span><span class="p">:(</span><span class="s">&quot;I 41/a c d&quot;</span><span class="p">,),</span>
+<span class="mi">143</span><span class="p">:(</span><span class="s">&quot;P 3&quot;</span><span class="p">,),</span>
+<span class="mi">144</span><span class="p">:(</span><span class="s">&quot;P 31&quot;</span><span class="p">,),</span>
+<span class="mi">145</span><span class="p">:(</span><span class="s">&quot;P 32&quot;</span><span class="p">,),</span>
+<span class="mi">146</span><span class="p">:(</span><span class="s">&quot;R 3&quot;</span><span class="p">,),</span>
+<span class="mi">147</span><span class="p">:(</span><span class="s">&quot;P -3&quot;</span><span class="p">,),</span>
+<span class="mi">148</span><span class="p">:(</span><span class="s">&quot;R -3&quot;</span><span class="p">,),</span>
+<span class="mi">149</span><span class="p">:(</span><span class="s">&quot;P 3 1 2&quot;</span><span class="p">,),</span>
+<span class="mi">150</span><span class="p">:(</span><span class="s">&quot;P 3 2 1&quot;</span><span class="p">,),</span>
+<span class="mi">151</span><span class="p">:(</span><span class="s">&quot;P 31 1 2&quot;</span><span class="p">,),</span>
+<span class="mi">152</span><span class="p">:(</span><span class="s">&quot;P 31 2 1&quot;</span><span class="p">,),</span>
+<span class="mi">153</span><span class="p">:(</span><span class="s">&quot;P 32 1 2&quot;</span><span class="p">,),</span>
+<span class="mi">154</span><span class="p">:(</span><span class="s">&quot;P 32 2 1&quot;</span><span class="p">,),</span>
+<span class="mi">155</span><span class="p">:(</span><span class="s">&quot;R 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">156</span><span class="p">:(</span><span class="s">&quot;P 3 m 1&quot;</span><span class="p">,),</span>
+<span class="mi">157</span><span class="p">:(</span><span class="s">&quot;P 3 1 m&quot;</span><span class="p">,),</span>
+<span class="mi">158</span><span class="p">:(</span><span class="s">&quot;P 3 c 1&quot;</span><span class="p">,),</span>
+<span class="mi">159</span><span class="p">:(</span><span class="s">&quot;P 3 1 c&quot;</span><span class="p">,),</span>
+<span class="mi">160</span><span class="p">:(</span><span class="s">&quot;R 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">161</span><span class="p">:(</span><span class="s">&quot;R 3 c&quot;</span><span class="p">,),</span>
+<span class="mi">162</span><span class="p">:(</span><span class="s">&quot;P -3 1 m&quot;</span><span class="p">,),</span>
+<span class="mi">163</span><span class="p">:(</span><span class="s">&quot;P -3 1 c&quot;</span><span class="p">,),</span>
+<span class="mi">164</span><span class="p">:(</span><span class="s">&quot;P -3 m 1&quot;</span><span class="p">,),</span>
+<span class="mi">165</span><span class="p">:(</span><span class="s">&quot;P -3 c 1&quot;</span><span class="p">,),</span>
+<span class="mi">166</span><span class="p">:(</span><span class="s">&quot;R -3 m&quot;</span><span class="p">,),</span>
+<span class="mi">167</span><span class="p">:(</span><span class="s">&quot;R -3 c&quot;</span><span class="p">,),</span>
+<span class="mi">168</span><span class="p">:(</span><span class="s">&quot;P 6&quot;</span><span class="p">,),</span>
+<span class="mi">169</span><span class="p">:(</span><span class="s">&quot;P 61&quot;</span><span class="p">,),</span>
+<span class="mi">170</span><span class="p">:(</span><span class="s">&quot;P 65&quot;</span><span class="p">,),</span>
+<span class="mi">171</span><span class="p">:(</span><span class="s">&quot;P 62&quot;</span><span class="p">,),</span>
+<span class="mi">172</span><span class="p">:(</span><span class="s">&quot;P 64&quot;</span><span class="p">,),</span>
+<span class="mi">173</span><span class="p">:(</span><span class="s">&quot;P 63&quot;</span><span class="p">,),</span>
+<span class="mi">174</span><span class="p">:(</span><span class="s">&quot;P -6&quot;</span><span class="p">,),</span>
+<span class="mi">175</span><span class="p">:(</span><span class="s">&quot;P 6/m&quot;</span><span class="p">,),</span>
+<span class="mi">176</span><span class="p">:(</span><span class="s">&quot;P 63/m&quot;</span><span class="p">,),</span>
+<span class="mi">177</span><span class="p">:(</span><span class="s">&quot;P 6 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">178</span><span class="p">:(</span><span class="s">&quot;P 61 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">179</span><span class="p">:(</span><span class="s">&quot;P 65 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">180</span><span class="p">:(</span><span class="s">&quot;P 62 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">181</span><span class="p">:(</span><span class="s">&quot;P 64 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">182</span><span class="p">:(</span><span class="s">&quot;P 63 2 2&quot;</span><span class="p">,),</span>
+<span class="mi">183</span><span class="p">:(</span><span class="s">&quot;P 6 m m&quot;</span><span class="p">,),</span>
+<span class="mi">184</span><span class="p">:(</span><span class="s">&quot;P 6 c c&quot;</span><span class="p">,),</span>
+<span class="mi">185</span><span class="p">:(</span><span class="s">&quot;P 63 c m&quot;</span><span class="p">,),</span>
+<span class="mi">186</span><span class="p">:(</span><span class="s">&quot;P 63 m c&quot;</span><span class="p">,),</span>
+<span class="mi">187</span><span class="p">:(</span><span class="s">&quot;P -6 m 2&quot;</span><span class="p">,),</span>
+<span class="mi">188</span><span class="p">:(</span><span class="s">&quot;P -6 c 2&quot;</span><span class="p">,),</span>
+<span class="mi">189</span><span class="p">:(</span><span class="s">&quot;P -6 2 m&quot;</span><span class="p">,),</span>
+<span class="mi">190</span><span class="p">:(</span><span class="s">&quot;P -6 2 c&quot;</span><span class="p">,),</span>
+<span class="mi">191</span><span class="p">:(</span><span class="s">&quot;P 6/m m m&quot;</span><span class="p">,),</span>
+<span class="mi">192</span><span class="p">:(</span><span class="s">&quot;P 6/m c c&quot;</span><span class="p">,),</span>
+<span class="mi">193</span><span class="p">:(</span><span class="s">&quot;P 63/m c m&quot;</span><span class="p">,),</span>
+<span class="mi">194</span><span class="p">:(</span><span class="s">&quot;P 63/m m c&quot;</span><span class="p">,),</span>
+<span class="mi">195</span><span class="p">:(</span><span class="s">&quot;P 2 3&quot;</span><span class="p">,),</span>
+<span class="mi">196</span><span class="p">:(</span><span class="s">&quot;F 2 3&quot;</span><span class="p">,),</span>
+<span class="mi">197</span><span class="p">:(</span><span class="s">&quot;I 2 3&quot;</span><span class="p">,),</span>
+<span class="mi">198</span><span class="p">:(</span><span class="s">&quot;P 21 3&quot;</span><span class="p">,),</span>
+<span class="mi">199</span><span class="p">:(</span><span class="s">&quot;I 21 3&quot;</span><span class="p">,),</span>
+<span class="mi">200</span><span class="p">:(</span><span class="s">&quot;P m -3&quot;</span><span class="p">,</span><span class="s">&quot;P m 3&quot;</span><span class="p">,),</span>
+<span class="mi">201</span><span class="p">:(</span><span class="s">&quot;P n -3&quot;</span><span class="p">,</span><span class="s">&quot;P n 3&quot;</span><span class="p">,),</span>
+<span class="mi">202</span><span class="p">:(</span><span class="s">&quot;F m -3&quot;</span><span class="p">,</span><span class="s">&quot;F m 3&quot;</span><span class="p">,),</span>
+<span class="mi">203</span><span class="p">:(</span><span class="s">&quot;F d -3&quot;</span><span class="p">,</span><span class="s">&quot;F d 3&quot;</span><span class="p">,),</span>
+<span class="mi">204</span><span class="p">:(</span><span class="s">&quot;I m -3&quot;</span><span class="p">,</span><span class="s">&quot;I m 3&quot;</span><span class="p">,),</span>
+<span class="mi">205</span><span class="p">:(</span><span class="s">&quot;P a -3&quot;</span><span class="p">,</span><span class="s">&quot;P a 3&quot;</span><span class="p">,),</span>
+<span class="mi">206</span><span class="p">:(</span><span class="s">&quot;I a -3&quot;</span><span class="p">,</span><span class="s">&quot;I a 3&quot;</span><span class="p">,),</span>
+<span class="mi">207</span><span class="p">:(</span><span class="s">&quot;P 4 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">208</span><span class="p">:(</span><span class="s">&quot;P 42 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">209</span><span class="p">:(</span><span class="s">&quot;F 4 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">210</span><span class="p">:(</span><span class="s">&quot;F 41 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">211</span><span class="p">:(</span><span class="s">&quot;I 4 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">212</span><span class="p">:(</span><span class="s">&quot;P 43 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">213</span><span class="p">:(</span><span class="s">&quot;P 41 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">214</span><span class="p">:(</span><span class="s">&quot;I 41 3 2&quot;</span><span class="p">,),</span>
+<span class="mi">215</span><span class="p">:(</span><span class="s">&quot;P -4 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">216</span><span class="p">:(</span><span class="s">&quot;F -4 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">217</span><span class="p">:(</span><span class="s">&quot;I -4 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">218</span><span class="p">:(</span><span class="s">&quot;P -4 3 n&quot;</span><span class="p">,),</span>
+<span class="mi">219</span><span class="p">:(</span><span class="s">&quot;F -4 3 c&quot;</span><span class="p">,),</span>
+<span class="mi">220</span><span class="p">:(</span><span class="s">&quot;I -4 3 d&quot;</span><span class="p">,),</span>
+<span class="mi">221</span><span class="p">:(</span><span class="s">&quot;P m -3 m&quot;</span><span class="p">,</span><span class="s">&quot;P m 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">222</span><span class="p">:(</span><span class="s">&quot;P n -3 n&quot;</span><span class="p">,</span><span class="s">&quot;P n 3 n&quot;</span><span class="p">,),</span>
+<span class="mi">223</span><span class="p">:(</span><span class="s">&quot;P m -3 n&quot;</span><span class="p">,</span><span class="s">&quot;P m 3 n&quot;</span><span class="p">,),</span>
+<span class="mi">224</span><span class="p">:(</span><span class="s">&quot;P n -3 m&quot;</span><span class="p">,</span><span class="s">&quot;P n 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">225</span><span class="p">:(</span><span class="s">&quot;F m -3 m&quot;</span><span class="p">,</span><span class="s">&quot;F m 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">226</span><span class="p">:(</span><span class="s">&quot;F m -3 c&quot;</span><span class="p">,</span><span class="s">&quot;F m 3 c&quot;</span><span class="p">,),</span>
+<span class="mi">227</span><span class="p">:(</span><span class="s">&quot;F d -3 m&quot;</span><span class="p">,</span><span class="s">&quot;F d 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">228</span><span class="p">:(</span><span class="s">&quot;F d -3 c&quot;</span><span class="p">,</span><span class="s">&quot;F d 3 c&quot;</span><span class="p">,),</span>
+<span class="mi">229</span><span class="p">:(</span><span class="s">&quot;I m -3 m&quot;</span><span class="p">,</span><span class="s">&quot;I m 3 m&quot;</span><span class="p">,),</span>
+<span class="mi">230</span><span class="p">:(</span><span class="s">&quot;I a -3 d&quot;</span><span class="p">,</span><span class="s">&quot;I a 3 d&quot;</span><span class="p">,)</span>                     
+                     <span class="p">}</span>
+
+<div class="viewcode-block" id="get_stidy_spacegroup"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.platon_if.get_stidy_spacegroup">[docs]</a><span class="k">def</span> <span class="nf">get_stidy_spacegroup</span><span class="p">(</span><span class="n">parse</span><span class="p">):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">spacegroups</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">spacegroups</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">stidysymb</span> <span class="ow">in</span> <span class="n">stidy_spacegroups</span><span class="p">[</span><span class="n">number</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stidysymb</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">symb</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">stidysymb</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Cannot find matching stidy spacegroup symbol&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

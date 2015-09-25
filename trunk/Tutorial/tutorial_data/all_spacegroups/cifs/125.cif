@@ -1,0 +1,158 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: cc0043dcd47272932d89724dfeee6a34
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/59/2005978.cif $
+#------------------------------------------------------------------------------
+data_2005978
+loop_
+_publ_author_name
+'Bensch, W.'
+'D\"urichen, P.'
+_publ_section_title
+;
+ Caesium Gadolinium Tetratelluride
+;
+_journal_issue                   3
+_journal_name_full               'Acta Crystallographica Section C'
+_journal_page_first              267
+_journal_page_last               269
+_journal_volume                  53
+_journal_year                    1997
+_chemical_name_common            Caesium-gadolinium-tetratelluride
+_computing_cell_refinement       DIF4
+_computing_data_collection       'DIF4 (Stoe & Cie, 1991a)'
+_computing_data_reduction        'REDU4 (Stoe & Cie, 1991b)'
+_computing_molecular_graphics    'SHELXTL/PC XP (Sheldrick, 1990b)'
+_computing_publication_material  'SHELXL93 CIFTAB'
+_computing_structure_refinement  'SHELXL93 (Sheldrick, 1993)'
+_computing_structure_solution    'SHELXS86 (Sheldrick, 1990a)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_measurement_device       'STOE AED-II'
+_diffrn_measurement_method       \w--2\q
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0394
+_diffrn_reflns_av_sigmaI/netI    0.0365
+_diffrn_reflns_limit_h_max       11
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       11
+_diffrn_reflns_limit_k_min       0
+_diffrn_reflns_limit_l_max       12
+_diffrn_reflns_limit_l_min       -16
+_diffrn_reflns_number            2196
+_diffrn_reflns_theta_max         37.47
+_diffrn_reflns_theta_min         2.16
+_diffrn_standards_decay_%        negligible
+_diffrn_standards_interval_time  120
+_diffrn_standards_number         4
+_exptl_absorpt_coefficient_mu    24.221
+_exptl_absorpt_correction_T_max  0.50830
+_exptl_absorpt_correction_T_min  0.10324
+_exptl_absorpt_correction_type   numeric
+_exptl_crystal_colour            black
+_exptl_crystal_density_diffrn    5.972
+_exptl_crystal_description       plate
+_exptl_crystal_F_000             654
+_exptl_crystal_size_max          0.14
+_exptl_crystal_size_mid          0.14
+_exptl_crystal_size_min          0.028
+_refine_diff_density_max         1.259
+_refine_diff_density_min         -2.048
+_refine_ls_extinction_coef       0.0015(2)
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_all   1.007
+_refine_ls_goodness_of_fit_obs   1.099
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     12
+_refine_ls_number_reflns         651
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.045
+_refine_ls_restrained_S_obs      1.099
+_refine_ls_R_factor_all          0.0372
+_refine_ls_R_factor_obs          0.0209
+_refine_ls_shift/esd_max         0.001
+_refine_ls_shift/esd_mean        0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_scheme
+'calc w = 1/[\s^2^(Fo^2^)+(0.0183P)^2^] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_wR_factor_all         0.0415
+_refine_ls_wR_factor_obs         0.0380
+_reflns_number_observed          496
+_reflns_number_total             652
+_reflns_observed_criterion       >2sigma(I)
+_[local]_cod_data_source_file    br1154.cif
+_[local]_cod_data_source_block   CsGdTe4
+_[local]_cod_cif_authors_sg_H-M  'P 4/n b m'
+_cod_database_code               2005978
+_journal_paper_doi 10.1107/S0108270196012309
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/n 2/b 2/m (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4a 2b'
+_[local]_omdb_cod_original_Hall '-P 4a 2b'
+_symmetry_Int_Tables_number 125
+ 
+_cell_length_a    6.87530
+_cell_length_b    6.87530
+_cell_length_c    9.41900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z
+3 -x+1/2,y,-z
+4 -x+1/2,-y+1/2,z
+5 -y+1/2,-x+1/2,-z
+6 -y+1/2,x,z
+7 y,-x+1/2,z
+8 y,x,-z
+9 -x,-y,-z
+10 -x,y+1/2,z
+11 x+1/2,-y,z
+12 x+1/2,y+1/2,-z
+13 y+1/2,x+1/2,z
+14 y+1/2,-x,-z
+15 -y,x+1/2,-z
+16 -y,-x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Gd1 Gd 2 b 0.25000 0.25000 0.50000 1.0
+Te1 Te 8 m 0.60683 0.39317 0.69395 1.0
+Cs1 Cs 2 a 0.25000 0.25000 0.00000 1.0
+ 
+

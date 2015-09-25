@@ -1,0 +1,126 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 12aa55acf9085d3608724a97788ad9eb
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-02-27 09:23:37 +0000 (Thu, 27 Feb 2014) $
+#$Revision: 103219 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/11/91/4119149.cif $
+#------------------------------------------------------------------------------
+data_4119149
+loop_
+_publ_author_name
+'Seungwook Kim'
+'Ju-Hyuck Lee'
+'Jaeyeon Lee'
+'Sang-Woo Kim'
+'Myung Hwa Kim'
+'Sungnam Park'
+'Haegeun Chung'
+'Yong-Il Kim'
+'Woong Kim'
+_publ_section_title
+;
+ Synthesis of Monoclinic Potassium Niobate Nanowires That Are Stable at
+ Room Temperature
+;
+_journal_name_full               'Journal of the American Chemical Society'
+_journal_page_first              6
+_journal_page_last               9
+_journal_paper_doi               10.1021/ja308209m
+_journal_volume                  135
+_journal_year                    2013
+_computing_structure_refinement  GSAS
+_diffrn_radiation_polarisn_ratio 0.569
+_diffrn_radiation_probe          neutron,x-ray
+_pd_calc_method                  'Rietveld Refinement'
+_pd_meas_2theta_range_inc        0.05
+_pd_meas_2theta_range_max        159.95
+_pd_meas_2theta_range_min        15.0
+_pd_phase_name                   'KNBO3 80C'
+_pd_proc_2theta_range_inc        0.05
+_pd_proc_2theta_range_max        159.6752
+_pd_proc_2theta_range_min        14.7252
+_pd_proc_info_datetime           2012-08-16T15:52:39
+_pd_proc_ls_prof_R_factor        0.0392
+_pd_proc_ls_prof_wR_factor       0.0560
+_refine_ls_goodness_of_fit_all   1.23
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     55
+_refine_ls_number_restraints     0
+_refine_ls_shift/su_max          0.06
+_refine_ls_shift/su_mean         0.01
+_reflns_d_resolution_high        0.942
+_reflns_d_resolution_low         4.050
+_reflns_limit_h_max              4
+_reflns_limit_h_min              0
+_reflns_limit_k_max              4
+_reflns_limit_k_min              0
+_reflns_limit_l_max              4
+_reflns_limit_l_min              -4
+_reflns_number_total             204
+_[local]_cod_data_source_file    ja308209m_si_002.cif
+_[local]_cod_data_source_block   COM-KNBO3-60F_phase_1
+_cod_original_cell_volume        65.0050(20)
+_cod_database_code               4119149
+loop_
+_diffrn_radiation_wavelength
+_diffrn_radiation_wavelength_wt
+_diffrn_radiation_type
+_diffrn_radiation_wavelength_id
+1.788900 1.000 K\a~1~ 1
+1.791500 0.500 K\a~2~ 2
+_cod_database_fobs_code 4119149
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1 m 1"
+_symmetry_space_group_name_Hall 'P -2y'
+_[local]_omdb_cod_original_Hall 'P -2y'
+_symmetry_Int_Tables_number 6
+ 
+_cell_length_a    4.02076
+_cell_length_b    3.99218
+_cell_length_c    4.04976
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.10120
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+K1 K 1 a 0.10170 0.00000 0.10000 1.0
+Nb1 Nb 1 b 0.61970 0.50000 0.58400 1.0
+O1 O 1 b 0.10400 0.50000 0.61790 1.0
+O2 O 1 b 0.60300 0.50000 0.12310 1.0
+O3 O 1 a 0.60700 0.00000 0.62670 1.0
+ 
+

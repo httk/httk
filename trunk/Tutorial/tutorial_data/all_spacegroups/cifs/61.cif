@@ -1,0 +1,125 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 9d0ae5a88e655e87826a09b07c5d73c8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 23:58:39 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120093 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/07/4310736.cif $
+#------------------------------------------------------------------------------
+data_4310736
+loop_
+_publ_author_name
+'C. Soulard'
+'X. Rocquefelte'
+'P.-E. Petit'
+'M. Evain'
+'S. Jobic'
+'J.-P. Iti\'e'
+'P. Munsch'
+'H.-J. Koo'
+'M.-H. Whangbo'
+_publ_section_title
+;
+ Experimental and Theoretical Investigation on the Relative Stability of
+ the PdS2- and Pyrite-Type Structures of PdSe2
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              1943
+_journal_page_last               1949
+_journal_volume                  43
+_journal_year                    2004
+_chemical_name_systematic        ' ?'
+_computing_data_reduction        Jana2000
+_computing_publication_material  Jana2000
+_computing_structure_refinement  Jana2000
+_diffrn_measurement_device_type  CAD4
+_diffrn_measurement_method       \q/2\q
+_diffrn_radiation_type           'Mo K\a'
+_diffrn_radiation_wavelength     0.71069
+_exptl_absorpt_correction_T_max  1.000
+_exptl_absorpt_correction_T_min  1.000
+_exptl_absorpt_correction_type   none
+_exptl_crystal_density_diffrn    6.765
+_exptl_crystal_F_000             456
+_refine_ls_extinction_coef       0.57(4)
+_refine_ls_extinction_method     'B-C type 1 Lorentzian isotropic'
+_refine_ls_goodness_of_fit_gt    0.94
+_refine_ls_goodness_of_fit_ref   0.93
+_refine_ls_number_parameters     17
+_refine_ls_number_reflns         801
+_refine_ls_R_factor_all          0.0304
+_refine_ls_R_factor_gt           0.0176
+_refine_ls_shift/su_max          0.0004
+_refine_ls_shift/su_mean         0.0000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details     w=1/(\s^2^(I)+0.0016I^2^)
+_refine_ls_weighting_scheme      sigma
+_refine_ls_wR_factor_gt          0.0472
+_refine_ls_wR_factor_ref         0.0527
+_reflns_number_gt                630
+_reflns_number_total             801
+_reflns_threshold_expression     'I>2\s(I)'
+_[local]_cod_data_source_file    'ic0352396si20040127_123902.cif'
+_[local]_cod_data_source_block   '(I)'
+_[local]_cod_chemical_formula_sum_orig 'Pd1 Se2'
+_cod_original_cell_volume        259.4249
+_cod_database_code               4310736
+_cod_database_fobs_code 4310736
+_journal_paper_doi 10.1021/ic0352396
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 21/b 21/c 21/a"
+_symmetry_space_group_name_Hall '-P 2ac 2ab'
+_[local]_omdb_cod_original_Hall '-P 2ac 2ab'
+_symmetry_Int_Tables_number 61
+ 
+_cell_length_a    5.74570
+_cell_length_b    5.86790
+_cell_length_c    7.69460
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x,y+1/2,-z+1/2
+4 -x+1/2,-y,z+1/2
+5 -x,-y,-z
+6 -x+1/2,y+1/2,z
+7 x,-y+1/2,z+1/2
+8 x+1/2,y,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pd1 Pd 4 a 0.00000 0.00000 0.00000 1.0
+Se1 Se 8 c 0.61125 0.11799 -0.09427 1.0
+ 
+

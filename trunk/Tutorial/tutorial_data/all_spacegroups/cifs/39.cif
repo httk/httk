@@ -1,0 +1,87 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 1ca36ec2d356b1b084ac6e629377148d
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/81/9008139.cif $
+#------------------------------------------------------------------------------
+data_9008139
+loop_
+_publ_author_name
+'Vollenkle, H.'
+'Wittmann, A.'
+'Nowatny, H.'
+_publ_section_title
+;
+ Die kristallstruktur von Li2(Si0.25Ge0.75)2O5
+;
+_journal_name_full               'Zeitschrift fur Kristallographie'
+_journal_page_first              37
+_journal_page_last               45
+_journal_volume                  126
+_journal_year                    1968
+_exptl_crystal_density_diffrn    3.234
+_[local]_cod_chemical_formula_sum_orig 'Li2 (Si.5 Ge1.5) O5'
+_cod_database_code               9008139
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "A b m 2"
+_symmetry_space_group_name_Hall 'A 2 -2c'
+_[local]_omdb_cod_original_Hall 'A 2 -2c'
+_symmetry_Int_Tables_number 39
+ 
+_cell_length_a    5.99000
+_cell_length_b    15.05000
+_cell_length_c    4.94000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 x,-y,z+1/2
+4 -x,y,z+1/2
+5 x,y+1/2,z+1/2
+6 -x,-y+1/2,z+1/2
+7 x,-y+1/2,z
+8 -x,y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Li1 Li 8 d 0.35600 -0.05700 0.44000 1.0
+Si1 Si 8 d 0.15500 0.85520 0.10000 0.25
+Ge1 Ge 8 d 0.15500 0.85520 0.10000 0.75
+O1 O 8 d 0.10400 0.86650 0.44000 1.0
+O2 O 4 c 0.24000 0.25000 0.53000 1.0
+O3 O 8 d 0.33200 -0.06700 0.03600 1.0
+ 
+

@@ -1,0 +1,52 @@
+
+httk.atomistic.data package
+***************************
+
+
+Submodules
+==========
+
+
+httk.atomistic.data.periodictable module
+========================================
+
+httk.atomistic.data.periodictable.atomic_number(parse)
+
+   Helper function to produce an atomic symbol if you have some kind
+   of identifier, but does not know what it is.
+
+httk.atomistic.data.periodictable.atomic_number_isotope(parse)
+
+   Helper function to produce an atomic symbol if you have some kind
+   of identifier, but does not know what it is.
+
+httk.atomistic.data.periodictable.atomic_symbol(parse)
+
+   Helper function to produce an atomic symbol if you have some kind
+   of identifier, but does not know what it is.
+
+httk.atomistic.data.periodictable.most_common_mass(parse)
+
+
+httk.atomistic.data.spacegroups module
+======================================
+
+httk.atomistic.data.spacegroups.find_index(parse)
+
+httk.atomistic.data.spacegroups.get_proper_hm_symbol(parse)
+
+httk.atomistic.data.spacegroups.spacegroup_get_hall(parse)
+
+httk.atomistic.data.spacegroups.spacegroup_get_hm(parse)
+
+httk.atomistic.data.spacegroups.spacegroup_get_number(parse)
+
+httk.atomistic.data.spacegroups.spacegroup_get_number_and_setting(parse)
+
+httk.atomistic.data.spacegroups.spacegroup_get_number_of_settings(number)
+
+httk.atomistic.data.spacegroups.spacegroup_get_schoenflies(parse)
+
+
+Module contents
+===============

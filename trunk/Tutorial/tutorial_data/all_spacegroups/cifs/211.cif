@@ -1,0 +1,217 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 7f457c4ac655715b73e432048dcec57f
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-04-28 06:24:16 +0000 (Mon, 28 Apr 2014) $
+#$Revision: 111860 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/55/1515552.cif $
+#------------------------------------------------------------------------------
+data_1515552
+loop_
+_publ_author_name
+'Jeong, Kyung Seok'
+'Go, Yong Bok'
+'Shin, Sung Min'
+'Lee, Suk Joong'
+'Kim, Jaheon'
+'Yaghi, Omar M.'
+'Jeong, Nakcheol'
+_publ_section_title
+;
+ Asymmetric catalytic reactions by NbO-type chiral metal--organic
+ frameworks
+;
+_journal_issue                   5
+_journal_name_full               'Chemical Science'
+_journal_page_first              877
+_journal_paper_doi               10.1039/c0sc00582g
+_journal_volume                  2
+_journal_year                    2011
+_computing_cell_refinement       'Bruekr SAINT'
+_computing_data_collection       'Bruekr SAMRT'
+_computing_data_reduction        'Bruekr SAINT'
+_computing_molecular_graphics    'Bruekr XP'
+_computing_publication_material  'Bruker XCIF'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      296(2)
+_diffrn_measured_fraction_theta_full 0.996
+_diffrn_measured_fraction_theta_max 0.996
+_diffrn_measurement_device_type  'Bruker APEX CCD'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           CuK\a
+_diffrn_radiation_wavelength     1.54178
+_diffrn_reflns_av_R_equivalents  0.0471
+_diffrn_reflns_av_sigmaI/netI    0.0284
+_diffrn_reflns_limit_h_max       26
+_diffrn_reflns_limit_h_min       -32
+_diffrn_reflns_limit_k_max       35
+_diffrn_reflns_limit_k_min       -26
+_diffrn_reflns_limit_l_max       27
+_diffrn_reflns_limit_l_min       -26
+_diffrn_reflns_number            53379
+_diffrn_reflns_theta_full        64.63
+_diffrn_reflns_theta_max         64.63
+_diffrn_reflns_theta_min         2.07
+_diffrn_standards_decay_%        none
+_exptl_absorpt_coefficient_mu    0.395
+_exptl_absorpt_correction_type   SADABS
+_exptl_crystal_colour            blue
+_exptl_crystal_density_diffrn    0.277
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             2340
+_exptl_crystal_size_max          0.38
+_exptl_crystal_size_mid          0.38
+_exptl_crystal_size_min          0.36
+_platon_squeeze_details
+;
+;
+_refine_diff_density_max         0.190
+_refine_diff_density_min         -0.365
+_refine_diff_density_rms         0.028
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.60(10)
+_refine_ls_extinction_coef       0.000009(5)
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   0.741
+_refine_ls_hydrogen_treatment    mixed
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     68
+_refine_ls_number_reflns         3874
+_refine_ls_number_restraints     19
+_refine_ls_restrained_S_all      0.741
+_refine_ls_R_factor_all          0.1328
+_refine_ls_R_factor_gt           0.0613
+_refine_ls_shift/su_max          0.001
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.1428P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1891
+_refine_ls_wR_factor_ref         0.2227
+_reflns_number_gt                1276
+_reflns_number_total             3874
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    c0sc00582g.txt
+_[local]_cod_data_source_block   CuBP
+_[local]_cod_cif_authors_sg_H-M  I432
+_cod_database_code               1515552
+loop_
+_platon_squeeze_void_nr
+_platon_squeeze_void_average_x
+_platon_squeeze_void_average_y
+_platon_squeeze_void_average_z
+_platon_squeeze_void_volume
+_platon_squeeze_void_count_electrons
+_platon_squeeze_void_content
+1 -0.003 -0.006 -0.003 24002 7298 ' '
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4 3 2"
+_symmetry_space_group_name_Hall 'I 4 2 3'
+_[local]_omdb_cod_original_Hall 'I 4 2 3'
+_symmetry_Int_Tables_number 211
+ 
+_cell_length_a    30.18920
+_cell_length_b    30.18920
+_cell_length_c    30.18920
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y,-x,-z
+14 -y,x,z
+15 y,-x,z
+16 y,x,-z
+17 -x,-z,-y
+18 -x,z,y
+19 x,-z,y
+20 x,z,-y
+21 -z,-y,-x
+22 -z,y,x
+23 z,-y,x
+24 z,y,-x
+25 x+1/2,y+1/2,z+1/2
+26 x+1/2,-y+1/2,-z+1/2
+27 -x+1/2,y+1/2,-z+1/2
+28 -x+1/2,-y+1/2,z+1/2
+29 y+1/2,z+1/2,x+1/2
+30 y+1/2,-z+1/2,-x+1/2
+31 -y+1/2,z+1/2,-x+1/2
+32 -y+1/2,-z+1/2,x+1/2
+33 z+1/2,x+1/2,y+1/2
+34 z+1/2,-x+1/2,-y+1/2
+35 -z+1/2,x+1/2,-y+1/2
+36 -z+1/2,-x+1/2,y+1/2
+37 -y+1/2,-x+1/2,-z+1/2
+38 -y+1/2,x+1/2,z+1/2
+39 y+1/2,-x+1/2,z+1/2
+40 y+1/2,x+1/2,-z+1/2
+41 -x+1/2,-z+1/2,-y+1/2
+42 -x+1/2,z+1/2,y+1/2
+43 x+1/2,-z+1/2,y+1/2
+44 x+1/2,z+1/2,-y+1/2
+45 -z+1/2,-y+1/2,-x+1/2
+46 -z+1/2,y+1/2,x+1/2
+47 z+1/2,-y+1/2,x+1/2
+48 z+1/2,y+1/2,-x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cu1 Cu 12 e 0.54327 0.00000 0.00000 1.0
+O1 O 48 j 0.53748 -0.00089 0.06295 1.0
+O2 O 12 e 0.61642 0.00000 0.00000 1.0
+C1 C 24 g 0.08272 0.50000 0.00000 1.0
+C2 C 24 g 0.13269 0.50000 0.00000 1.0
+C3 C 24 g 0.22317 0.50000 0.00000 1.0
+C4 C 48 j 0.54065 -0.00231 0.15432 1.0
+C5 C 48 j 0.54268 -0.00242 0.20184 1.0
+H1 H 48 j 0.56670 -0.00380 0.13790 0.5
+C6 C 48 j 0.58670 -0.00492 0.22770 0.5
+O3 O 48 j 0.58271 -0.00469 0.22720 0.5
+ 
+

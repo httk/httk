@@ -1,0 +1,168 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 2365e955578c8a1172382b3b9da74287
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 21:06:05 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120077 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/11/08/4110802.cif $
+#------------------------------------------------------------------------------
+data_4110802
+loop_
+_publ_author_name
+'Xiang Lin'
+'Alexander J. Blake'
+'Claire Wilson'
+'Xue Zhong Sun'
+'Neil R. Champness'
+'Michael W. George'
+'Peter Hubberstey'
+'Robert Mokaya'
+'Martin Schr\"oder'
+_publ_section_title
+;
+ A Porous Framework Polymer Based on a Zinc(II)
+ 4,4'-Bipyridine-2,6,2',6'-tetracarboxylate: Synthesis, Structure, and
+ "Zeolite-Like" Behaviors
+;
+_journal_name_full               'Journal of the American Chemical Society'
+_journal_page_first              10745
+_journal_page_last               10753
+_journal_volume                  128
+_journal_year                    2006
+_computing_cell_refinement       'Bruker SAINT version 6.36a (Bruker, 2000)'
+_computing_data_collection       'Bruker SMART version 5.625 (Bruker, 2001)'
+_computing_data_reduction        'Bruker SAINT; Bruker SHELXTL (Bruker, 2001)'
+_computing_publication_material
+'enCIFer(Allen et al.,2004);PLATON(Spek,2003)'
+_computing_structure_refinement  'SHELXL97 (Sheldrick, 1998)'
+_diffrn_ambient_temperature      150(2)
+_diffrn_measured_fraction_theta_full 0.990
+_diffrn_measured_fraction_theta_max 0.990
+_diffrn_measurement_device_type  'Bruker SMART APEX CCD area detector'
+_diffrn_measurement_method       \w
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.027
+_diffrn_reflns_av_sigmaI/netI    0.018
+_diffrn_reflns_limit_h_max       7
+_diffrn_reflns_limit_h_min       -9
+_diffrn_reflns_limit_k_max       9
+_diffrn_reflns_limit_k_min       -6
+_diffrn_reflns_limit_l_max       25
+_diffrn_reflns_limit_l_min       -25
+_diffrn_reflns_number            4888
+_diffrn_reflns_theta_full        27.46
+_diffrn_reflns_theta_max         27.46
+_diffrn_reflns_theta_min         3.07
+_diffrn_standards_decay_%        0
+_diffrn_standards_number         0
+_exptl_absorpt_coefficient_mu    2.504
+_exptl_absorpt_correction_T_max  1.000
+_exptl_absorpt_correction_T_min  0.819
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   '(SADABS; Sheldrick, 2003)'
+_exptl_crystal_colour            COLOURLESS
+_exptl_crystal_density_diffrn    1.793
+_exptl_crystal_description       BLOCK
+_exptl_crystal_F_000             532
+_exptl_crystal_size_max          0.28
+_exptl_crystal_size_mid          0.15
+_exptl_crystal_size_min          0.15
+_refine_diff_density_max         0.85
+_refine_diff_density_min         -0.40
+_refine_diff_density_rms         0.11
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.56(9)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.09
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     71
+_refine_ls_number_reflns         728
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.09
+_refine_ls_R_factor_all          0.0488
+_refine_ls_R_factor_gt           0.0452
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0689P)^2^+2.4065P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.124
+_refine_ls_wR_factor_ref         0.127
+_reflns_number_gt                679
+_reflns_number_total             746
+_reflns_threshold_expression     >2\s(I)
+_[local]_cod_data_source_file    ja060946usi20060215_033141_1.cif
+_[local]_cod_data_source_block   ZNL1L2_150K_CompoundI
+_cod_original_cell_volume        983.8(3)
+_cod_database_code               4110802
+_journal_paper_doi 10.1021/ja060946u
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42 21 2"
+_symmetry_space_group_name_Hall 'P 4n 2n'
+_[local]_omdb_cod_original_Hall 'P 4n 2n'
+_symmetry_Int_Tables_number 94
+ 
+_cell_length_a    7.02490
+_cell_length_b    7.02490
+_cell_length_c    19.93600
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z+1/2
+3 -x+1/2,y+1/2,-z+1/2
+4 -x,-y,z
+5 -y,-x,-z
+6 -y+1/2,x+1/2,z+1/2
+7 y+1/2,-x+1/2,z+1/2
+8 y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Zn1 Zn 4 c 0.00000 0.00000 0.22403 1.0
+C1 C 4 c 0.00000 0.00000 0.46260 1.0
+C2 C 8 g 0.60130 0.36220 0.07310 1.0
+C3 C 8 g 0.60220 0.37050 0.14260 1.0
+C4 C 8 g 0.71900 0.24470 0.18810 1.0
+H1 H 8 g 0.66700 0.26650 0.05070 1.0
+N1 N 4 c 0.00000 0.00000 0.32480 1.0
+O1 O 8 g -0.05280 0.70020 0.03650 1.0
+O2 O 8 g 0.69420 0.26410 0.24955 1.0
+O3 O 8 g 0.83610 0.13460 0.16035 1.0
+ 
+

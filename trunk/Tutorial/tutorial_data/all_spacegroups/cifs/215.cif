@@ -1,0 +1,101 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: c64d8bc6f7ca6e33475fd64124a4c001
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/00/1010043.cif $
+#------------------------------------------------------------------------------
+data_1010043
+_chemical_name_systematic          'Tin(IV) tetraiodide'
+_publ_section_title
+;
+Die Strukturen von Mn O, Mn S, Ag F, Ni S, Sn I~4~, Sr Cl~2~, Ba F~2~,
+Praezisionsmessungen einiger Alkalihalogenide.
+;
+loop_
+_publ_author_name                  'Ott, H'
+_journal_name_full
+;
+Zeitschrift fuer Kristallographie, Kristallgeometrie, Kristallphysik,
+Kristallchemie (-144,1977)
+;
+_journal_coden_ASTM                ZEKGAX
+_journal_volume                    63
+_journal_year                      1926
+_journal_page_first                222
+_journal_page_last                 230
+_cod_database_code 1010043
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -4 3 m"
+_symmetry_space_group_name_Hall 'P -4 2 3'
+_[local]_omdb_cod_original_Hall 'P 2 2 3'
+_symmetry_Int_Tables_number 215
+ 
+_cell_length_a    6.12000
+_cell_length_b    6.12000
+_cell_length_c    6.12000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 y,x,z
+14 y,-x,-z
+15 -y,x,-z
+16 -y,-x,z
+17 x,z,y
+18 x,-z,-y
+19 -x,z,-y
+20 -x,-z,y
+21 z,y,x
+22 z,-y,-x
+23 -z,y,-x
+24 -z,-y,x
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sn1 Sn 1 a 0.00000 0.00000 0.00000 1.0
+I1 I 4 e 0.25000 0.25000 0.25000 1.0
+ 
+

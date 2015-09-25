@@ -1,0 +1,81 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: e697ca43ec5d548250b457359c364cbd
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/05/1010519.cif $
+#------------------------------------------------------------------------------
+data_1010519
+_chemical_name_systematic          'Polonium'
+_publ_section_title
+;
+The Crystal Structure of Polonium by Electron Diffraction
+;
+loop_
+_publ_author_name
+  'Rollier, M A'
+  'Hendricks, S B'
+  'Maxwell, L R'
+_journal_name_full                 'Journal of Chemical Physics'
+_journal_coden_ASTM                JCPSA6
+_journal_volume                    4
+_journal_year                      1936
+_journal_page_first                648
+_journal_page_last                 652
+_cod_database_code 1010519
+_journal_paper_doi 10.1063/1.1749762
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 1 2 1"
+_symmetry_space_group_name_Hall 'C 2y'
+_[local]_omdb_cod_original_Hall 'C 2y'
+_symmetry_Int_Tables_number 5
+ 
+_cell_length_a    7.42000
+_cell_length_b    4.29000
+_cell_length_c    14.10000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  92.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y,-z
+3 x+1/2,y+1/2,z
+4 -x+1/2,y+1/2,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Po1 Po 4 c 0.05000 0.27000 0.24500 1.0
+Po2 Po 4 c 0.35000 0.40000 0.07000 1.0
+Po3 Po 4 c 0.63000 0.30000 0.43000 1.0
+ 
+

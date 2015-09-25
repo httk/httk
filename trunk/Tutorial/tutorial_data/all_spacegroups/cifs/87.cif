@@ -1,0 +1,95 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 20398ca322bdf0cd48ef9f6279e55e83
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/05/1510541.cif $
+#------------------------------------------------------------------------------
+data_1510541
+loop_
+_publ_author_name
+'Iandelli, A.'
+'Palenzona, A.'
+_publ_section_title
+;
+ The yttrium-gold system
+;
+_journal_name_full               'Journal of the Less-Common Metals'
+_journal_page_first              221
+_journal_page_last               227
+_journal_volume                  18
+_journal_year                    1969
+_chemical_name_systematic        'Au4 Yb'
+_citation_journal_id_ASTM        JCOMAH
+_[local]_cod_data_source_file    gold_644.cif
+_[local]_cod_data_source_block   Au4Yb1
+_[local]_cod_chemical_formula_sum_orig 'Au4 Yb1'
+_cod_original_cell_volume        181.3446
+_cod_database_code               1510541
+_journal_paper_doi 10.1016/0022-5088(69)90160-X
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4/m"
+_symmetry_space_group_name_Hall '-I 4'
+_[local]_omdb_cod_original_Hall '-I 4'
+_symmetry_Int_Tables_number 87
+ 
+_cell_length_a    6.62800
+_cell_length_b    6.62800
+_cell_length_c    4.12800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+5 -x,-y,-z
+6 x,y,-z
+7 y,-x,-z
+8 -y,x,-z
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y+1/2,z+1/2
+11 -y+1/2,x+1/2,z+1/2
+12 y+1/2,-x+1/2,z+1/2
+13 -x+1/2,-y+1/2,-z+1/2
+14 x+1/2,y+1/2,-z+1/2
+15 y+1/2,-x+1/2,-z+1/2
+16 -y+1/2,x+1/2,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Yb1 Yb 2 a 0.00000 0.00000 0.00000 1.0
+Au1 Au 8 h 0.20000 0.60000 0.00000 1.0
+ 
+

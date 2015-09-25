@@ -1,0 +1,211 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: fd1dd2d9cb5ebba9ff9aa1e4bc342812
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-01-28 17:32:42 +0000 (Tue, 28 Jan 2014) $
+#$Revision: 95674 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/11/06/7110660.cif $
+#------------------------------------------------------------------------------
+data_7110660
+loop_
+_publ_author_name
+'Imamura, Koichi'
+'Takimiya, Kazuo'
+'Otsubo, Tetsuo'
+'Aso, Yoshio'
+_publ_section_title
+;
+ Triphenyleno[1,12-bcd:4,5-b&#x2032;c&#x2032;d&#x2032;:8,9-b&#x2033;c&#x2033;d&#x2033;]trithiophene:
+ the first bowl-shaped heteroaromatic
+;
+_journal_issue                   18
+_journal_name_full               'Chemical Communications'
+_journal_page_first              1859
+_journal_paper_doi               10.1039/a905860e
+_journal_year                    1999
+_chemical_melting_point_gt       573.15
+_computing_cell_refinement       'Rigaku/AFC Diffractometer Control'
+_computing_data_collection       'Rigaku/AFC Diffractometer Control'
+_computing_data_reduction        teXsan
+_computing_publication_material  teXsan
+_computing_structure_refinement  SHELXL93
+_computing_structure_solution    SIR92
+_diffrn_ambient_temperature      296.2
+_diffrn_measurement_device_type  'Rigaku AFC7R'
+_diffrn_measurement_method       \w
+_diffrn_orient_matrix_UB_11      -0.02545
+_diffrn_orient_matrix_UB_12      -0.04280
+_diffrn_orient_matrix_UB_13      0.03047
+_diffrn_orient_matrix_UB_21      0.03547
+_diffrn_orient_matrix_UB_22      -0.00509
+_diffrn_orient_matrix_UB_23      -0.00379
+_diffrn_orient_matrix_UB_31      0.00695
+_diffrn_orient_matrix_UB_32      0.00981
+_diffrn_orient_matrix_UB_33      0.13099
+_diffrn_radiation_detector       'scintillation counter'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'Rigaku rotating anode'
+_diffrn_radiation_type           'Mo K\a'
+_diffrn_radiation_wavelength     0.7107
+_diffrn_reflns_av_R_equivalents  0.000
+_diffrn_reflns_av_sigmaI/netI    0.252
+_diffrn_reflns_limit_h_max       29
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       16
+_diffrn_reflns_limit_k_min       0
+_diffrn_reflns_limit_l_max       9
+_diffrn_reflns_limit_l_min       0
+_diffrn_reflns_number            1820
+_diffrn_reflns_reduction_process 'Lp corrections applied'
+_diffrn_reflns_theta_max         27.50
+_diffrn_standards_decay_%        0.20
+_diffrn_standards_interval_count 300
+_diffrn_standards_number         3
+_exptl_absorpt_coefficient_mu    0.576
+_exptl_absorpt_correction_T_max  0.999
+_exptl_absorpt_correction_T_min  0.961
+_exptl_absorpt_correction_type   psi-scan
+_exptl_absorpt_process_details   '(North, Phillips & Mathews, 1968)'
+_exptl_crystal_colour            'pale yellow'
+_exptl_crystal_density_diffrn    1.685
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       needles
+_exptl_crystal_F_000             2268.00
+_exptl_crystal_size_max          0.850
+_exptl_crystal_size_mid          0.030
+_exptl_crystal_size_min          0.030
+_refine_diff_density_max         0.47
+_refine_diff_density_min         -0.44
+_refine_diff_density_rms         0.10
+_refine_ls_abs_structure_Flack   -0.2(5)
+_refine_ls_extinction_coef       0.0002
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   0.995
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     126
+_refine_ls_number_reflns         698
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      0.994
+_refine_ls_R_factor_all          0.2936
+_refine_ls_R_factor_gt           0.0851
+_refine_ls_shift/su_max          0.0250
+_refine_ls_shift/su_mean         0.0030
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'w = 1/[\s^2^(Fo^2^) + (0.0818P)^2^+6.8236P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_ref         0.2502
+_reflns_number_gt                698
+_reflns_number_total             1820
+_[local]_cod_data_source_file    905860esup1.cif
+_[local]_cod_data_source_block   TPTT
+_[local]_cod_cif_authors_sg_H-M  'P 6 c c      '
+_[local]_cod_chemical_formula_sum_orig 'C18 H6 S3 '
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_chemical_melting_point' tag was changed to
+'_chemical_melting_point_gt' since the value was specified 'more
+than' ('>') a certain temperature. The value '> 300 deg ' was changed
+to '573.15' - it was converted from degrees Celsius(C) to Kelvins(K).
+
+Automatic conversion script
+Id: cif_fix_values 1891 2012-01-12 08:04:46Z andrius 
+;
+_cod_original_cell_volume        4392(1)
+_cod_database_code               7110660
+_reflns_observed_expression      >1.7sigma(I)
+loop_
+_diffrn_standard_refln_index_h
+_diffrn_standard_refln_index_k
+_diffrn_standard_refln_index_l
+0 0 2
+2 -2 2
+-2 0 2
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 6 c c"
+_symmetry_space_group_name_Hall 'P 6 -2c'
+_[local]_omdb_cod_original_Hall 'P 6 -2c'
+_symmetry_Int_Tables_number 184
+ 
+_cell_length_a    26.12100
+_cell_length_b    26.12100
+_cell_length_c    7.43300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z
+3 -y,x-y,z
+4 -x,-y,z
+5 -x+y,-x,z
+6 y,-x+y,z
+7 -x+y,y,z+1/2
+8 -x,-x+y,z+1/2
+9 -y,-x,z+1/2
+10 x-y,-y,z+1/2
+11 x,x-y,z+1/2
+12 y,x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+S1 S 12 d 0.59900 0.01410 0.19250 1.0
+S2 S 12 d 0.71170 0.28100 0.36110 1.0
+S3 S 12 d 0.86570 0.16270 0.36700 1.0
+S4 S 12 d -0.03520 0.11580 0.06000 0.5
+C1 C 12 d 0.01820 0.05970 0.15600 1.0
+C2 C 12 d 0.03530 0.11650 0.09600 1.0
+C3 C 12 d 0.57690 0.11310 0.21900 1.0
+C4 C 12 d 0.60370 0.17540 0.25900 1.0
+C5 C 12 d 0.60760 0.08290 0.27300 1.0
+C6 C 12 d 0.65660 0.20320 0.34600 1.0
+C7 C 12 d 0.65920 0.11340 0.36900 1.0
+C8 C 12 d 0.67140 0.03350 0.27300 1.0
+C9 C 12 d 0.68440 0.17310 0.40500 1.0
+C10 C 12 d 0.69400 0.08590 0.36700 1.0
+C11 C 12 d 0.70880 0.01100 0.23300 1.0
+C12 C 12 d 0.74330 0.20530 0.44800 1.0
+C13 C 12 d 0.75240 0.11850 0.40700 1.0
+C14 C 12 d 0.76910 0.04400 0.27600 1.0
+C15 C 12 d 0.76930 0.26610 0.42400 1.0
+C16 C 12 d 0.77900 0.17970 0.44700 1.0
+C17 C 12 d 0.79180 0.10060 0.35400 1.0
+C18 C 12 d 0.82990 0.30150 0.41900 1.0
+C19 C 12 d 0.83980 0.21190 0.42700 1.0
+C20 C 12 d 0.86720 0.27520 0.41800 1.0
+C21 C 12 d -0.00200 0.13900 0.04200 0.5
+C22 C 12 d -0.06600 0.08500 0.06300 0.5
+ 
+

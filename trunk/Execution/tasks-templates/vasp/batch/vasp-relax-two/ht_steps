@@ -1,0 +1,145 @@
+#!/bin/bash
+# httk-vasp-relax-two (relax twice)
+# 1.0
+
+. "$HTTK_DIR"/Execution/tasks/ht_tasks_api.sh
+. "$HTTK_DIR"/Execution/tasks/vasp/vasptools.sh
+
+#. /opt/runexample-files/ht_tasks_api.sh
+#. /opt/runexample-files/vasptools2.sh
+
+# For now we want to rely on the taskmanager timeout, so just
+# keep the timeout of our RUN_CONTROLLED somewhat larger
+TIMEOUT=$((HT_TASKMGR_TIMEOUT + 3600))
+# (It may be a future feature to let some computations
+# timeout earlier though.)
+
+HT_TASK_INIT "$@"
+
+echo "== ht_steps for preinit run, step: $STEP"
+
+####################### start ############################
+if [ "$STEP" == "start" ]; then
+
+    cp ../POSCAR POSCAR
+    VASP_PREPARE_POTCAR ./POSCAR
+    VASP_POTCAR_SUMMARY
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "START INPUT"
+    HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR ../POTCAR.summary
+
+    HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+fi
+
+####################### relax1 ############################
+if [ "$STEP" == "relax1" ]; then
+
+    VASP_PRECLEAN
+    cp ../INCAR.relax INCAR
+    VASP_PREPARE_CALC 
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    VASP_CLEAN_OUTCAR
+
+    if [ "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: 1"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax1
+	mv ../XDATCAR XDATCAR.relax1
+	mv ../OSZICAR OSZICAR.relax1
+	mv ../vasp.out vasp.out.relax1
+
+	HT_TASK_STORE_VAR RELAXSTEP 2
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+
+    # Relaxation step unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR 
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 
+    fi
+fi
+
+####################### relax2 ############################
+if [ "$STEP" == "relax2" ]; then
+
+    echo "== RELAXATION STEP: $((RELAXSTEP))"
+
+    VASP_PRECLEAN
+    VASP_CONTCAR_TO_POSCAR CONTCAR.last POSCAR
+    cp ../INCAR.relax2 INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    BADCONV=$(grep "^BADCONV" ht.controlled.msgs)
+
+    VASP_CLEAN_OUTCAR
+
+    if [ -z "$BADCONV" -a "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: $RELAXSTEP"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax$RELAXSTEP
+	mv ../XDATCAR XDATCAR.relax$RELAXSTEP
+	mv ../OSZICAR OSZICAR.relax$RELAXSTEP
+	mv ../vasp.out vasp.out.relax$RELAXSTEP
+
+	HT_TASK_STORE_VAR RELAXSTEP $((RELAXSTEP+1))
+	HT_TASK_ATOMIC_SECTION_END_NEXT cleanup
+    fi
+
+    # Relaxation step unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR 
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 
+    fi
+fi
+
+####################### cleanup ############################
+if [ "$STEP" == "cleanup" ]; then
+
+    rm -f ../OSZICAR OSZICAR.last
+    rm -f ../CONTCAR CONTCAR.last
+    rm -f ../CHGCAR CHGCAR.last
+
+    HT_TASK_CLEANUP
+    rm -f CHG EIGENVAL ht.controlled.msgs IBZKPT vasprun.xml POSCAR POTCAR WAVECAR PCDAT OUTCAR
+  
+    HT_TASK_COMPRESS
+    HT_TASK_FINISHED
+fi
+

@@ -1,0 +1,745 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.atomistic.io.structure_cif_io &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="httk.atomistic" href="../../atomistic.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../../atomistic.html" accesskey="U">httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.atomistic.io.structure_cif_io</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">hashlib</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span> 
+<span class="kn">import</span> <span class="nn">httk</span>
+
+<span class="kn">from</span> <span class="nn">httk.atomistic.data</span> <span class="kn">import</span> <span class="n">periodictable</span><span class="p">,</span> <span class="n">spacegroups</span>
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">httk.atomistic</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Spacegroup</span>
+
+<div class="viewcode-block" id="cif_to_struct"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.cif_to_struct">[docs]</a><span class="k">def</span> <span class="nf">cif_to_struct</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cif2cell&#39;</span><span class="p">,</span><span class="s">&#39;ase&#39;</span><span class="p">,</span><span class="s">&#39;platon&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;ase&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">ase_ext</span>
+                <span class="k">return</span> <span class="n">ase_ext</span><span class="o">.</span><span class="n">ase_read</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;platon&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">platon_ext</span>
+                <span class="n">sgstruct</span> <span class="o">=</span> <span class="n">platon_ext</span><span class="o">.</span><span class="n">cif_to_sgstructure</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">sgstruct</span><span class="o">.</span><span class="n">to_structure</span><span class="p">()</span>
+                <span class="c">#return platon_if.cif_to_structure(ioa)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;cif2cell&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">cif2cell_ext</span>
+                <span class="k">return</span> <span class="n">cif2cell_ext</span><span class="o">.</span><span class="n">cif_to_structure_reduce</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;cif2cell_reduce&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">cif2cell_ext</span>
+                <span class="k">return</span> <span class="n">cif2cell_ext</span><span class="o">.</span><span class="n">cif_to_structure_reduce</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;cif2cell_noreduce&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">cif2cell_ext</span>
+                <span class="k">return</span> <span class="n">cif2cell_ext</span><span class="o">.</span><span class="n">cif_to_structure_noreduce</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;cif_reader_that_can_only_read_isotropy_cif&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cif_reader_that_can_only_read_isotropy_cif</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;cif_reader_httk_preprocessed&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cif_reader_httk_preprocessed</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;cif_to_struct: None of the requested / available backends available, tried:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">backends</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="struct_to_cif"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.struct_to_cif">[docs]</a><span class="k">def</span> <span class="nf">struct_to_cif</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">ioa</span><span class="p">,</span> <span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;httk&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;httk&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">struct_to_cif_httk</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">ioa</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s">&#39;ase&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">ase_glue</span>
+                <span class="k">return</span> <span class="n">ase_glue</span><span class="o">.</span><span class="n">ase_write_struct</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">ioa</span><span class="p">,</span> <span class="s">&#39;cif&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;struct_to_cif: None of the requested / available backends available, tried:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">backends</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="struct_to_cif_httk"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.struct_to_cif_httk">[docs]</a><span class="k">def</span> <span class="nf">struct_to_cif_httk</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">ioa</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">ioa</span><span class="o">.</span><span class="n">file</span>
+
+    <span class="n">wyckoffsymbols</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_rc_repr</span><span class="p">:</span>
+        <span class="n">la</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_lengths_and_angles</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span>
+        <span class="n">hall</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">hall_symbol</span>        
+        <span class="n">sgnumber</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">spacegroup_number</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hmsymbol</span> <span class="o">=</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">get_proper_hm_symbol</span><span class="p">(</span><span class="n">hall</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">hmsymbol</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">multiplicities</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">multiplicities</span>
+        <span class="n">wyckoffsymbols</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">wyckoff_symbols</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">la</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_lengths_and_angles</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span>
+        <span class="n">hall</span> <span class="o">=</span> <span class="s">&#39;P 1&#39;</span>
+        <span class="n">sgnumber</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">hmsymbol</span> <span class="o">=</span> <span class="s">&#39;P 1&#39;</span>
+
+    <span class="k">if</span> <span class="n">header</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;data_image0</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">get_tag</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_chemical_name_systematic &#39;&quot;</span><span class="o">+</span><span class="n">struct</span><span class="o">.</span><span class="n">get_tag</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">+</span><span class="s">&quot;&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>   
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_uc_repr</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_chemical_formula_sum &#39;&quot;</span><span class="o">+</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_formula_spaceseparated</span><span class="o">+</span><span class="s">&quot;&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>    
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_length_a       &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_length_b       &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_length_c       &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_angle_alpha    &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_angle_beta     &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_cell_angle_gamma    &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_symmetry_space_group_name_Hall      &#39;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">hall</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hmsymbol</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_symmetry_space_group_name_H-M      &#39;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">hmsymbol</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_symmetry_Int_Tables_number          &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">sgnumber</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;loop_</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_label</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_type_symbol</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wyckoffsymbols</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_symmetry_multiplicity</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_Wyckoff_symbol</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_fract_x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_fract_y</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_fract_z</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_atom_site_occupancy</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">cg</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">symbollists</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">ratios</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">ratioslist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">occ</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)):</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">occ</span><span class="p">]</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="n">occ</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">wyckoffsymbols</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">multiplicity</span> <span class="o">=</span> <span class="n">multiplicities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">wyckoffsymbol</span> <span class="o">=</span> <span class="n">wyckoffsymbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">   </span><span class="si">%s</span><span class="s">  </span><span class="si">%d</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">,</span> <span class="n">wyckoffsymbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">   </span><span class="si">%s</span><span class="s">  </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="s"> </span><span class="si">%.14f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">)))</span>
+
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="cif_reader_that_can_only_read_isotropy_cif"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.cif_reader_that_can_only_read_isotropy_cif">[docs]</a><span class="k">def</span> <span class="nf">cif_reader_that_can_only_read_isotropy_cif</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">cell_length</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;length_&#39;</span><span class="o">+</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span><span class="o">=</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">cell_angle</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;angle_&#39;</span><span class="o">+</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span><span class="o">=</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">print_hm_and_hall</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+        <span class="n">grpnbr</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;grpnbr&#39;</span><span class="p">]</span>
+        <span class="n">setting</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span>
+        <span class="n">hmsymb</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;hmfull&#39;</span><span class="p">]</span>
+        <span class="n">hallsymb</span><span class="o">=</span><span class="n">spacegroups</span><span class="o">.</span><span class="n">spacegroup_get_hall</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">grpnbr</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;:&quot;</span><span class="o">+</span><span class="n">setting</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;hall_symbol&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">hallsymb</span>
+
+    <span class="k">def</span> <span class="nf">hm_symbol_origin</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;out&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;hmfull&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;hm&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+        <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">==</span><span class="s">&#39;hexagonal axes&#39;</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+        <span class="k">if</span> <span class="s">&#39;hm&#39;</span> <span class="ow">in</span> <span class="n">results</span> <span class="ow">and</span> <span class="s">&#39;grpnbr&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">print_hm_and_hall</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">hm_symbol_no_origin</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;out&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;hmfull&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;hm&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;setting&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;1&quot;</span><span class="p">;</span>
+        <span class="k">if</span> <span class="s">&#39;hm&#39;</span> <span class="ow">in</span> <span class="n">results</span> <span class="ow">and</span> <span class="s">&#39;grpnbr&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">print_hm_and_hall</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">groupnbr</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;grpnbr&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">if</span> <span class="s">&#39;hm&#39;</span> <span class="ow">in</span> <span class="n">results</span> <span class="ow">and</span> <span class="s">&#39;grpnbr&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">print_hm_and_hall</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">newcoord</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+        <span class="n">occup</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;atom&#39;</span><span class="p">:</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span><span class="s">&#39;ratio&#39;</span><span class="p">:</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">8</span><span class="p">)),}</span>
+        <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;alpha&#39;</span><span class="p">:</span>
+            <span class="n">wyckoff</span><span class="o">=</span><span class="s">&#39;&amp;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wyckoff</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">multiplicities</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>            
+        <span class="k">if</span> <span class="n">newcoord</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;seen_coords&#39;</span><span class="p">]:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;seen_coords&#39;</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;occups&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occup</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;seen_coords&#39;</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;idx&#39;</span><span class="p">]</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoord</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;occups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">occup</span><span class="p">])</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;wyckoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wyckoff</span><span class="p">)</span>      
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;multiplicities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">multiplicities</span><span class="p">)</span>      
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;idx&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;idx&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;occups&#39;</span><span class="p">:[],</span> <span class="s">&#39;wyckoff&#39;</span><span class="p">:[],</span><span class="s">&#39;multiplicities&#39;</span><span class="p">:[],</span><span class="s">&#39;coords&#39;</span><span class="p">:[],</span><span class="s">&#39;seen_coords&#39;</span><span class="p">:{}}</span>
+    <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="p">[</span><span class="s">&#39;^_cell_length_([^ ]*) (.*) *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">cell_length</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^_cell_angle_([^ ]*) (.*) *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">cell_angle</span><span class="p">],</span>           
+            <span class="p">[</span><span class="s">&#39;^_symmetry_Int_Tables_number +(.*)$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">groupnbr</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^_symmetry_space_group_name_H-M +&quot;(([^()]+) \(origin choice ([0-9]+)\))&quot; *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">hm_symbol_origin</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^_symmetry_space_group_name_H-M +&quot;(([^()]+) \((hexagonal axes)\))&quot; *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">hm_symbol_origin</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^_symmetry_space_group_name_H-M +&quot;([^()]+)&quot; *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">hm_symbol_no_origin</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">coords</span><span class="p">],</span>
+            <span class="p">],</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rc_a</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;length_a&#39;</span><span class="p">],</span><span class="n">rc_b</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;length_b&#39;</span><span class="p">],</span><span class="n">rc_c</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;length_c&#39;</span><span class="p">],</span>
+                              <span class="n">rc_alpha</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;angle_alpha&#39;</span><span class="p">],</span><span class="n">rc_beta</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;angle_beta&#39;</span><span class="p">],</span><span class="n">rc_gamma</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;angle_gamma&#39;</span><span class="p">],</span> 
+                              <span class="n">rc_reduced_occupationscoords</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">],</span> <span class="n">rc_occupancies</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;occups&#39;</span><span class="p">],</span> 
+                              <span class="n">spacegroup</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;hall_symbol&#39;</span><span class="p">],</span><span class="n">wyckoff_symbols</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;wyckoff&#39;</span><span class="p">],</span><span class="n">multiplicities</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s">&#39;multiplicities&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">struct</span>
+</div>
+<div class="viewcode-block" id="cif_reader_httk_preprocessed"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.cif_reader_httk_preprocessed">[docs]</a><span class="k">def</span> <span class="nf">cif_reader_httk_preprocessed</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">IoAdapterStringList</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;INPUT&quot;</span><span class="p">):</span>
+            <span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">newstruct</span> <span class="o">=</span> <span class="n">cif_to_struct</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cif2cell_reduce&#39;</span><span class="p">])</span>        
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;# Data extracted using the FINDSYM utility follows&quot;</span><span class="p">):</span>
+            <span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="o">=</span><span class="n">ioa</span><span class="o">.</span><span class="n">stringlist</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+            <span class="k">break</span>
+    <span class="n">only_rc_struct</span> <span class="o">=</span> <span class="n">cif_to_struct</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cif_reader_that_can_only_read_isotropy_cif&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">only_rc_struct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">hexhash</span> <span class="o">!=</span> <span class="n">newstruct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">hexhash</span><span class="p">:</span>
+        <span class="c"># This happens IF the rc representation is broken due to the use of </span>
+        <span class="c"># different but equivalent sites. In this case we have already lost, and need</span>
+        <span class="c"># to return only the &quot;proper&quot; structure in newstruct. This will cause us to loose</span>
+        <span class="c"># Wyckoff information, but for now I see now way of rescuing this.</span>
+        <span class="c"># This will all be solved when we implement our own cif reader.</span>
+        <span class="k">return</span> <span class="n">newstruct</span>
+    
+    <span class="n">newstruct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">wyckoff_symbols</span><span class="o">=</span><span class="n">only_rc_struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">wyckoff_symbols</span>
+    
+    <span class="c"># Cell basis can only be constructed from the cif approximately</span>
+    <span class="n">only_rc_struct</span><span class="o">.</span><span class="n">_rc_cell</span> <span class="o">=</span> <span class="n">newstruct</span><span class="o">.</span><span class="n">_rc_cell</span>
+    <span class="c"># Make sure the hexhash is recomputed</span>
+    <span class="n">only_rc_struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">_hexhash</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#print &quot;CHECK THIS:&quot;, newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash</span>
+    <span class="c">#print &quot;CHECK THIS:&quot;, newstruct.cellobj.to_tuple(), only_rc_struct.cellobj.to_tuple()</span>
+    <span class="k">if</span> <span class="n">newstruct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">hexhash</span> <span class="o">!=</span> <span class="n">only_rc_struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">hexhash</span><span class="p">:</span>
+        <span class="c">#print &quot;Cell mismatch:&quot;,cell_mismatch</span>
+        <span class="k">print</span> <span class="s">&quot;Structure hashes:&quot;</span><span class="p">,</span> <span class="n">newstruct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">hexhash</span><span class="p">,</span> <span class="n">only_rc_struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">hexhash</span>
+        <span class="c">#print &quot;Structures:&quot;, newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.&quot;</span><span class="p">)</span>       
+    <span class="k">return</span> <span class="n">newstruct</span>
+</div>
+<div class="viewcode-block" id="cifdata_to_struct"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.cifdata_to_struct">[docs]</a><span class="k">def</span> <span class="nf">cifdata_to_struct</span><span class="p">(</span><span class="n">cifdata</span><span class="p">):</span>
+    <span class="c">#import pprint</span>
+    <span class="c">#pp = pprint.PrettyPrinter()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cifdata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;httk.atomistic.io.structure_cif_io: cifdata to struct with more than one image in cifdata.&quot;</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">cifdata</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c">#del element[&#39;symmetry_equiv_pos_as_xyz&#39;]</span>
+    <span class="c">#pp.pprint(dict(element))</span>
+
+    <span class="n">rc_lengths</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_length_a&#39;</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_length_b&#39;</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_length_c&#39;</span><span class="p">]])</span>
+    <span class="n">rc_angles</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_angle_alpha&#39;</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_angle_beta&#39;</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;cell_angle_gamma&#39;</span><span class="p">]])</span>
+
+    <span class="n">hall_symbol</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">hm_symbol</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">spacegroupnumber</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">setting</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;symmetry_space_group_name_hall&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">hall_symbol</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;symmetry_space_group_name_hall&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="s">&#39;symmetry_space_group_name_h-m&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">hm_symbol</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;symmetry_space_group_name_h-m&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="s">&#39;symmetry_Int_Tables_number&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">spacegroupnumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;symmetry_Int_Tables_number&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s">&#39;symmetry_cell_setting&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">setting</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;symmetry_cell_setting&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Warning: reading cif data for structure, giving spacegroup but no setting information. Standard setting assumed.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">Spacegroup</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">hall_symbol</span><span class="o">=</span><span class="n">hall_symbol</span><span class="p">,</span> <span class="n">hm_symbol</span><span class="o">=</span><span class="n">hm_symbol</span><span class="p">,</span> <span class="n">spacegroupnumber</span><span class="o">=</span><span class="n">spacegroupnumber</span><span class="p">,</span> <span class="n">setting</span><span class="o">=</span><span class="n">setting</span><span class="p">)</span>
+
+    <span class="n">rc_occupancies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rc_reduced_occupationscoords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wyckoff_symbols</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">multiplicities</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;atom_site_wyckoff_symbol&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">wyckoff_symbols</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_wyckoff_symbol&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s">&#39;atom_site_symmetry_multiplicity&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">multiplicities</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_symmetry_multiplicity&#39;</span><span class="p">]]</span>
+    
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_label&#39;</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="s">&#39;atom_site_occupancy&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_occupancy&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">symbol</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_label&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;1234567890&#39;</span><span class="p">)</span>
+        
+        <span class="n">occup</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;atom&#39;</span><span class="p">:</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">symbol</span><span class="p">),</span><span class="s">&#39;ratio&#39;</span><span class="p">:</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ratio</span><span class="p">),}</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_fract_x&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_fract_y&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">],</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;atom_site_fract_z&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]]</span>
+
+        <span class="n">rc_occupancies</span> <span class="o">+=</span> <span class="p">[</span><span class="n">occup</span><span class="p">]</span>
+        <span class="n">rc_reduced_occupationscoords</span> <span class="o">+=</span> <span class="p">[</span><span class="n">coord</span><span class="p">]</span>
+
+    <span class="c">#print &quot;X&quot;,rc_lengths,rc_angles,rc_reduced_occupationscoords,rc_occupancies,spacegroup,setting,wyckoff_symbols,multiplicities</span>
+
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s">&#39;chemical_name_common&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">tags</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;chemical_name_common&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="s">&#39;chemical_name_systematic&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">tags</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;chemical_name_systematic&#39;</span><span class="p">]</span>
+
+    <span class="n">authorlist</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;publ_author_name&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">authorlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">authors</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;publ_author_name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">basic</span><span class="o">.</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">authors</span><span class="p">):</span>
+            <span class="n">authors</span> <span class="o">=</span> <span class="p">[</span><span class="n">authors</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">author</span> <span class="ow">in</span> <span class="n">authors</span><span class="p">:</span>
+            <span class="n">authorparts</span> <span class="o">=</span> <span class="n">author</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">lastname</span> <span class="o">=</span> <span class="n">authorparts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">givennames</span> <span class="o">=</span> <span class="n">authorparts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">authorlist</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Author</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">lastname</span><span class="p">,</span><span class="n">givennames</span><span class="p">)]</span>
+
+    <span class="c"># I didn&#39;t find this in the spec, on the other hand, the publ_ space is &quot;not specified&quot;, so, this seems</span>
+    <span class="c"># as a logical extension of the author list in case of a cif file that has been published in a book.</span>
+    <span class="c"># I see no harm in including it, at least.</span>
+    <span class="n">editorlist</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;publ_editor_name&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">editorlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">editors</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;publ_editor_name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">basic</span><span class="o">.</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">editors</span><span class="p">):</span>
+            <span class="n">editors</span> <span class="o">=</span> <span class="p">[</span><span class="n">editors</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">editor</span> <span class="ow">in</span> <span class="n">editors</span><span class="p">:</span>
+            <span class="n">editorparts</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">lastname</span> <span class="o">=</span> <span class="n">editorparts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">givennames</span> <span class="o">=</span> <span class="n">editorparts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">editorlist</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Author</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">lastname</span><span class="p">,</span><span class="n">givennames</span><span class="p">)]</span>
+        
+    <span class="n">refs</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;journal_name_full&#39;</span> <span class="ow">in</span> <span class="n">element</span> <span class="ow">or</span> <span class="s">&#39;journal_name_abbrev&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="n">journal</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_page_first</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_page_last</span> <span class="o">=</span> <span class="bp">None</span>    
+        <span class="n">journal_volume</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_title</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_book_title</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_issue</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">journal_publisher</span><span class="o">=</span><span class="bp">None</span>
+        <span class="n">journal_publisher_city</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="s">&#39;journal_name_abbrev&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_name_abbrev&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_name_full&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_name_full&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_page_first&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_page_first</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_page_first&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_page_last&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_page_last</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_page_last&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_volume&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_volume</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_volume&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_issue&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_issue</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_issue&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_title</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_title&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_book_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_book_title</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_book_title&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_year&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_year</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_year&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_publisher&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_publisher</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_publisher&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_publisher_city&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_publisher_city</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_publisher_city&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_book_publisher&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_publisher</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_book_publisher&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;journal_book_publisher_city&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">journal_publisher_city</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_book_publisher_city&#39;</span><span class="p">]</span>
+        
+        <span class="n">refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Reference</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">authors</span><span class="o">=</span><span class="n">authorlist</span><span class="p">,</span> <span class="n">editors</span><span class="o">=</span><span class="n">editorlist</span><span class="p">,</span> <span class="n">journal</span><span class="o">=</span><span class="n">journal</span><span class="p">,</span> <span class="n">journal_issue</span><span class="o">=</span><span class="n">journal_issue</span><span class="p">,</span> <span class="n">journal_volume</span><span class="o">=</span><span class="n">journal_volume</span><span class="p">,</span> 
+                 <span class="n">page_first</span><span class="o">=</span><span class="n">journal_page_first</span><span class="p">,</span> <span class="n">page_last</span><span class="o">=</span><span class="n">journal_page_last</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">journal_title</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="n">journal_year</span><span class="p">,</span> <span class="n">book_publisher</span><span class="o">=</span><span class="n">journal_publisher</span><span class="p">,</span>
+                 <span class="n">book_publisher_city</span><span class="o">=</span><span class="n">journal_publisher_city</span><span class="p">,</span> <span class="n">book_title</span><span class="o">=</span><span class="n">journal_book_title</span><span class="p">)]</span>
+
+    <span class="c"># This is based on some assumptions... IF a journal_* type tree exists, then we assume this is a &#39;published&#39; cif, and</span>
+    <span class="c"># in that case the only reference we want to keep is the one to the published work. Citations in the citation_* tree is going to be</span>
+    <span class="c"># all the citations from that paper, which we do not want, *unless* they mark citation_coordinate_linkage. However, </span>
+    <span class="c"># if no journal_* tree exists, then this is a &#39;generic&#39; structure cif, where the citations should point to all publications of </span>
+    <span class="c"># this structure; and we don&#39;t want to assume &#39;citation_coordinate_linkage&#39;</span>
+    <span class="n">add_all_citations</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">refs</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">refs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">add_all_citations</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="s">&#39;citation_journal_full&#39;</span> <span class="ow">in</span> <span class="n">element</span> <span class="ow">or</span> <span class="s">&#39;citation_journal_abbrev&#39;</span> <span class="ow">in</span> <span class="n">element</span> <span class="ow">or</span> <span class="s">&#39;citation_book_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">refs</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">refs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s">&#39;citation_journal_full&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_full&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="s">&#39;citation_journal_abbrev&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_abbrev&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="s">&#39;citation_book_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_book_title&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">add_all_citations</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&#39;citation_coordinate_linkage&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">element</span> <span class="ow">or</span> <span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_coordinate_linkage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;yes&#39;</span> <span class="ow">and</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_coordinate_linkage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;y&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="n">journal</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_page_first</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_page_last</span> <span class="o">=</span> <span class="bp">None</span>    
+            <span class="n">journal_volume</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_title</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_book_title</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_issue</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">journal_publisher</span><span class="o">=</span><span class="bp">None</span>
+            <span class="n">journal_publisher_city</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="s">&#39;citation_journal_full&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_full&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_journal_abbrev&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_abbrev&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_page_first&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_page_first</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_page_first&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_page_last&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_page_last</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_page_last&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_journal_volume&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_volume</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_volume&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_journal_issue&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_issue</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_journal_issue&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_title</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_title&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_book_title&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_book_title</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_book_title&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;journal_year&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_year</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;journal_year&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_book_publisher&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_publisher</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_book_publisher&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;citation_book_publisher_city&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">journal_publisher_city</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="s">&#39;citation_book_publisher_city&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="n">refs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Reference</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">authors</span><span class="o">=</span><span class="n">authorlist</span><span class="p">,</span> <span class="n">editors</span><span class="o">=</span><span class="n">editorlist</span><span class="p">,</span> <span class="n">journal</span><span class="o">=</span><span class="n">journal</span><span class="p">,</span> <span class="n">journal_issue</span><span class="o">=</span><span class="n">journal_issue</span><span class="p">,</span> <span class="n">journal_volume</span><span class="o">=</span><span class="n">journal_volume</span><span class="p">,</span> 
+                     <span class="n">page_first</span><span class="o">=</span><span class="n">journal_page_first</span><span class="p">,</span> <span class="n">page_last</span><span class="o">=</span><span class="n">journal_page_last</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">journal_title</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="n">journal_year</span><span class="p">,</span> <span class="n">book_publisher</span><span class="o">=</span><span class="n">journal_publisher</span><span class="p">,</span>
+                     <span class="n">book_publisher_city</span><span class="o">=</span><span class="n">journal_publisher_city</span><span class="p">,</span> <span class="n">book_title</span><span class="o">=</span><span class="n">journal_book_title</span><span class="p">)]</span>
+
+                            
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rc_lengths</span><span class="o">=</span><span class="n">rc_lengths</span><span class="p">,</span>
+                              <span class="n">rc_angles</span><span class="o">=</span><span class="n">rc_angles</span><span class="p">,</span> 
+                              <span class="n">rc_reduced_occupationscoords</span><span class="o">=</span><span class="n">rc_reduced_occupationscoords</span><span class="p">,</span> 
+                              <span class="n">rc_occupancies</span><span class="o">=</span><span class="n">rc_occupancies</span><span class="p">,</span> 
+                              <span class="n">spacegroup</span><span class="o">=</span><span class="n">spacegroup</span><span class="p">,</span> <span class="n">setting</span><span class="o">=</span><span class="n">setting</span><span class="p">,</span> 
+                              <span class="n">periodicity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                              <span class="n">wyckoff_symbols</span><span class="o">=</span><span class="n">wyckoff_symbols</span><span class="p">,</span><span class="n">multiplicities</span><span class="o">=</span><span class="n">multiplicities</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">refs</span><span class="o">=</span><span class="n">refs</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">struct</span>
+    
+</div>
+<div class="viewcode-block" id="struct_to_cifdata"><a class="viewcode-back" href="../../../../httk.atomistic.io.html#httk.atomistic.io.structure_cif_io.struct_to_cifdata">[docs]</a><span class="k">def</span> <span class="nf">struct_to_cifdata</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">entryid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        
+    <span class="n">wyckoffsymbols</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_rc_repr</span><span class="p">:</span>
+        <span class="n">la</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_lengths_and_angles</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span>
+        <span class="n">hall</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">hall_symbol</span>        
+        <span class="n">sgnumber</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">spacegroup_number</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hmsymbol</span> <span class="o">=</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">get_proper_hm_symbol</span><span class="p">(</span><span class="n">hall</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">hmsymbol</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">multiplicities</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">multiplicities</span>
+        <span class="n">wyckoffsymbols</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">wyckoff_symbols</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">la</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_lengths_and_angles</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span>
+        <span class="n">hall</span> <span class="o">=</span> <span class="s">&#39;P 1&#39;</span>
+        <span class="n">sgnumber</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">hmsymbol</span> <span class="o">=</span> <span class="s">&#39;P 1&#39;</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">get_tag</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">entry</span><span class="p">[</span><span class="s">&quot;chemical_name_common&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">get_tag</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>   
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_uc_repr</span><span class="p">:</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;chemical_formula_sum&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_formula_spaceseparated</span>    
+
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_length_a&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_length_b&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_length_c&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_angle_alpha&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_angle_beta&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;cell_angle_gamma&quot;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">la</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;symmetry_space_group_name_hall&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">hall</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hmsymbol</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;symmetry_space_group_name_h-m&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">hmsymbol</span><span class="p">)</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;symmetry_Int_Tables_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sgnumber</span><span class="p">)</span>
+        <span class="c"># Add setting</span>
+        
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;symmetry_space_group_name_hall&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">hall</span><span class="p">)</span>
+
+    <span class="n">refs</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">get_refs</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;citation_id&quot;</span><span class="p">,</span>
+                           <span class="s">&quot;citation_journal_full&quot;</span><span class="p">,</span><span class="s">&quot;citation_journal_issue&quot;</span><span class="p">,</span><span class="s">&quot;citation_journal_volume&quot;</span><span class="p">,</span>
+                           <span class="s">&quot;citation_page_first&quot;</span><span class="p">,</span><span class="s">&quot;citation_page_last&quot;</span><span class="p">,</span>
+                           <span class="s">&quot;citation_title&quot;</span><span class="p">,</span><span class="s">&quot;citation_year&quot;</span><span class="p">,</span><span class="s">&quot;citation_book_publisher&quot;</span><span class="p">,</span>
+                           <span class="s">&quot;citation_book_publisher_city&quot;</span><span class="p">,</span><span class="s">&quot;citation_book_title&quot;</span><span class="p">,</span><span class="s">&quot;citation_coordinate_linkage&quot;</span><span class="p">]</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;citation_author_citation_id&quot;</span><span class="p">,</span><span class="s">&quot;citation_author_name&quot;</span><span class="p">]</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;citation_editor_citation_id&quot;</span><span class="p">,</span><span class="s">&quot;citation_editor_name&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_1&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;loop_2&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;loop_3&#39;</span><span class="p">]:</span>
+            <span class="n">entry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">refs</span><span class="p">)):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">reference</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&quot;citation_journal_full&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">journal</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_journal_issue&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">journal_issue</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_journal_volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">journal_volume</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_page_first&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">page_first</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_page_last&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">page_last</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">title</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">year</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_book_publisher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">book_publisher</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_book_publisher_city&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">book_publisher_city</span> 
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_book_title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">book_title</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;citation_coordinate_linkage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_1&quot;</span><span class="p">]:</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">authors</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">author</span> <span class="ow">in</span> <span class="n">ref</span><span class="o">.</span><span class="n">authors</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_citation_id&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_name&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">author</span><span class="o">.</span><span class="n">last_name</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span><span class="o">+</span><span class="n">author</span><span class="o">.</span><span class="n">given_names</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">editors</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">editor</span> <span class="ow">in</span> <span class="n">ref</span><span class="o">.</span><span class="n">editors</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_editor_citation_id&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_name&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">editor</span><span class="o">.</span><span class="n">last_name</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span><span class="o">+</span><span class="n">editor</span><span class="o">.</span><span class="n">given_names</span><span class="p">]</span>
+
+
+        <span class="k">if</span> <span class="s">&#39;citation_author_citation_id&#39;</span> <span class="ow">in</span> <span class="n">entry</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_citation_id&#39;</span><span class="p">])</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_citation_id&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_author_name&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;loop_2&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;citation_editor_citation_id&#39;</span> <span class="ow">in</span> <span class="n">entry</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_editor_citation_id&#39;</span><span class="p">])</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_editor_citation_id&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;citation_editor_name&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;loop_3&#39;</span><span class="p">]</span>
+
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;atom_site_label&quot;</span><span class="p">,</span><span class="s">&quot;atom_site_type_symbol&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">wyckoffsymbols</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;atom_site_symmetry_multiplicity&quot;</span><span class="p">,</span><span class="s">&quot;atom_site_Wyckoff_symbol&quot;</span><span class="p">]</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;atom_site_fract_x&quot;</span><span class="p">,</span><span class="s">&quot;atom_site_fract_y&quot;</span><span class="p">,</span><span class="s">&quot;atom_site_fract_z&quot;</span><span class="p">,</span><span class="s">&quot;atom_site_occupancy&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">]:</span>
+        <span class="n">entry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">cg</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">symbollists</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">ratios</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">ratioslist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">occ</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)):</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">occ</span><span class="p">]</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="n">occ</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">wyckoffsymbols</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">multiplicity</span> <span class="o">=</span> <span class="n">multiplicities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">wyckoffsymbol</span> <span class="o">=</span> <span class="n">wyckoffsymbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">,</span> <span class="n">wyckoffsymbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ratio</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">])):</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s">&quot;loop_0&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+
+
+    <span class="k">if</span> <span class="n">entryid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">entryid</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>    
+    <span class="n">cifdata</span> <span class="o">=</span> <span class="p">[(</span><span class="n">entryid</span><span class="p">,</span> <span class="n">entry</span><span class="p">)]</span>
+    
+    <span class="k">return</span> <span class="n">cifdata</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../../atomistic.html" >httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

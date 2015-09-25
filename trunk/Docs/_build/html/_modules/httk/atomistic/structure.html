@@ -1,0 +1,1032 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.atomistic.structure &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk.atomistic" href="../atomistic.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../atomistic.html" accesskey="U">httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.atomistic.structure</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">httk.core.httkobject</span> <span class="kn">import</span> <span class="n">HttkObject</span><span class="p">,</span> <span class="n">HttkPluginPlaceholder</span><span class="p">,</span> <span class="n">httk_typed_property</span><span class="p">,</span> <span class="n">httk_typed_property_resolve</span><span class="p">,</span> <span class="n">httk_typed_property_delayed</span><span class="p">,</span> <span class="n">httk_typed_init</span>
+<span class="kn">from</span> <span class="nn">httk.core.reference</span> <span class="kn">import</span> <span class="n">Reference</span>
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="n">FracScalar</span>
+<span class="kn">from</span> <span class="nn">httk.core.basic</span> <span class="kn">import</span> <span class="n">breath_first_idxs</span>
+<span class="kn">from</span> <span class="nn">cell</span> <span class="kn">import</span> <span class="n">Cell</span>
+<span class="kn">from</span> <span class="nn">assignments</span> <span class="kn">import</span> <span class="n">Assignments</span>
+<span class="kn">from</span> <span class="nn">sites</span> <span class="kn">import</span> <span class="n">Sites</span>
+<span class="kn">from</span> <span class="nn">unitcellsites</span> <span class="kn">import</span> <span class="n">UnitcellSites</span>
+<span class="kn">from</span> <span class="nn">representativesites</span> <span class="kn">import</span> <span class="n">RepresentativeSites</span>
+<span class="kn">from</span> <span class="nn">data</span> <span class="kn">import</span> <span class="n">spacegroups</span>
+<span class="kn">from</span> <span class="nn">structureutils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">spacegroup</span> <span class="kn">import</span> <span class="n">Spacegroup</span>
+<span class="kn">from</span> <span class="nn">scalelessstructure</span> <span class="kn">import</span> <span class="n">ScalelessStructure</span>
+
+<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">ScalelessStructure</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. </span>
+<span class="sd">    The structure object is meant to be immutable and assumes that no internal variables are changed after its creation. </span>
+<span class="sd">    All methods that &#39;changes&#39; the object creates and returns a new, updated, structure object.</span>
+<span class="sd">    </span>
+<span class="sd">    Naming conventions in this class (and elsewhere in httk.atomistic):</span>
+
+<span class="sd">    For cells:</span>
+<span class="sd">        cell = an abstract name for any reasonable representation of a &#39;cell&#39; that defines </span>
+<span class="sd">               the basis vectors used for representing the structure. When a &#39;cell&#39; is returned,</span>
+<span class="sd">               it is an object of type Cell</span>
+
+<span class="sd">        basis = a 3x3 sequence-type with (in rows) the three basis vectors (for a periodic system, defining the unit cell, and defines the unit of repetition for the periodic dimensions)</span>
+
+<span class="sd">        lengths_and_angles = (a,b,c,alpha,beta,gamma): the basis vector lengths and angles</span>
+
+<span class="sd">        niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3, 2*v2*v3)) where v1, v2, v3 are the vectors forming the basis</span>
+
+<span class="sd">        metric = ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))</span>
+
+<span class="sd">    For sites:</span>
+<span class="sd">        These following prefixes are used to describe types of site specifications:</span>
+<span class="sd">            representative cell/rc = only representative atoms are given, which are then to be </span>
+<span class="sd">            repeated by structure symmetry group to give all sites</span>
+
+<span class="sd">            unit cell/uc = all atoms in unitcell</span>
+<span class="sd">            </span>
+<span class="sd">            reduced = coordinates given in cell vectors</span>
+<span class="sd">            </span>
+<span class="sd">            cartesian = coordinates given as direct cartesian coordinates</span>
+
+<span class="sd">        sites = used as an abstract name for any sensible representation of a list of coordinates and a cell,</span>
+<span class="sd">                when a &#39;sites&#39; is returned, it is an object of type Sites </span>
+<span class="sd">                  </span>
+<span class="sd">        counts = number of atoms of each type (one per entry in assignments)</span>
+<span class="sd">      </span>
+<span class="sd">        coordgroups = coordinates represented as a 3-level-list of coordinates, e.g. </span>
+<span class="sd">        [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]] where level-1 list = groups: one group for each equivalent atom</span>
+
+<span class="sd">        counts and coords = one list with the number of atoms of each type (one per entry in assignments)</span>
+<span class="sd">        and a 2-level list of coordinates.</span>
+
+<span class="sd">    For assignments of atoms, etc. to sites:</span>
+<span class="sd">        assignments = abstract name for any representation of assignment of atoms.</span>
+<span class="sd">        When returned, will be object of type Assignment.</span>
+
+<span class="sd">        atomic_numbers = a sequence of integers for the atomic number of each species</span>
+
+<span class="sd">        occupations = a sequence where the assignments are *repeated* for each coordinate as needed </span>
+<span class="sd">        (prefixed with uc or rc depending on which coordinates)</span>
+
+<span class="sd">    For cell scaling:</span>
+<span class="sd">        scaling = abstract name for any representation of cell scaling</span>
+<span class="sd">        </span>
+<span class="sd">        scale = multiply all basis vectors with this number</span>
+
+<span class="sd">        volume = rescaling the cell such that it takes this volume</span>
+
+<span class="sd">    For periodicity:</span>
+<span class="sd">        periodicity = abstract name of a representation of periodicity</span>
+
+<span class="sd">        pbc = &#39;periodic boundary conditions&#39; = sequence of True and False for which basis vectors are periodic / non-periodic</span>
+
+<span class="sd">        nonperiodic_vecs = integer, number of basis vectors, counted from the first, which are non-periodic</span>
+
+<span class="sd">    For spacegroup:</span>
+<span class="sd">        spacegroup = abstract name for any spacegroup representation. When returned, is of type Spacegroup.</span>
+
+<span class="sd">        hall_symbol = specifically the hall_symbol string representation of the spacegroup      </span>
+<span class="sd">   </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c">#TODO: When httk internally handles symmetry replication, consider removing UnitcellSites from here    </span>
+    <span class="nd">@httk_typed_init</span><span class="p">({</span><span class="s">&#39;assignments&#39;</span><span class="p">:</span><span class="n">Assignments</span><span class="p">,</span> <span class="s">&#39;rc_sites&#39;</span><span class="p">:</span><span class="n">RepresentativeSites</span><span class="p">,</span> 
+                 <span class="s">&#39;rc_cell&#39;</span><span class="p">:</span><span class="n">Cell</span><span class="p">},</span>
+                 <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;assignments&#39;</span><span class="p">,</span><span class="s">&#39;rc_sites&#39;</span><span class="p">,</span><span class="s">&#39;rc_cell&#39;</span><span class="p">])</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">rc_sites</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uc_sites</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rc_cell</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_cell</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private constructor, as per httk coding guidelines. Use Structure.create instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">assignments</span> <span class="o">=</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">rc_sites</span> <span class="o">=</span> <span class="n">rc_sites</span><span class="p">,</span> <span class="n">uc_sites</span> <span class="o">=</span> <span class="n">uc_sites</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rc_cell</span> <span class="o">=</span> <span class="n">rc_cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uc_cell</span> <span class="o">=</span> <span class="n">uc_cell</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_info</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;class&#39;</span><span class="p">:</span><span class="n">StructureTag</span><span class="p">,</span><span class="s">&#39;column&#39;</span><span class="p">:</span><span class="s">&#39;structure&#39;</span><span class="p">,</span><span class="s">&#39;add_method&#39;</span><span class="p">:</span><span class="s">&#39;add_tags&#39;</span><span class="p">},</span>
+                                  <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span><span class="n">StructureRef</span><span class="p">,</span><span class="s">&#39;column&#39;</span><span class="p">:</span><span class="s">&#39;structure&#39;</span><span class="p">,</span><span class="s">&#39;add_method&#39;</span><span class="p">:</span><span class="s">&#39;add_refs&#39;</span><span class="p">}]</span>
+        
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Structure.create"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span>
+               <span class="n">structure</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+
+               <span class="n">uc_cell</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_basis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_lengths</span> <span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">uc_angles</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uc_niggli_matrix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_metric</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">uc_a</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_b</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_c</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">uc_alpha</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_beta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_gamma</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">uc_sites</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> 
+               <span class="n">uc_reduced_coordgroups</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uc_cartesian_coordgroups</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  
+               <span class="n">uc_reduced_coords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uc_cartesian_coords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  
+               <span class="n">uc_reduced_occupationscoords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uc_cartesian_occupationscoords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  
+               <span class="n">uc_occupancies</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_counts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">uc_scale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uc_volume</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+
+               <span class="n">rc_cell</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_basis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_lengths</span> <span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">rc_angles</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rc_niggli_matrix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_metric</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">rc_a</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_b</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_c</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">rc_alpha</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_beta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_gamma</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">rc_sites</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> 
+               <span class="n">rc_reduced_coordgroups</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rc_cartesian_coordgroups</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+               <span class="n">rc_reduced_coords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rc_cartesian_coords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  
+               <span class="n">rc_reduced_occupationscoords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rc_cartesian_occupationscoords</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  
+               <span class="n">rc_occupancies</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_counts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">wyckoff_symbols</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">multiplicities</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">spacegroup</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hall_symbol</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">spacegroupnumber</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setting</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">rc_scale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rc_volume</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+
+               
+               <span class="n">assignments</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               
+               <span class="n">periodicity</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">nonperiodic_vecs</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> 
+               <span class="n">refs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. </span>
+
+<span class="sd">        This is a swiss-army-type constructor that allows a selection between a large number of optional arguments.    </span>
+
+<span class="sd">        To create a new structure, three primary components are:</span>
+<span class="sd">           - cell: defines the basis vectors in which reduced coordinates are expressed, and the </span>
+<span class="sd">                   unit of repetition (*if* the structure has any periodicity - see the &#39;periodicity&#39; parameter)</span>
+<span class="sd">           - assignments: a list of &#39;things&#39; (atoms, ions, etc.) that goes on the sites in the structure</span>
+<span class="sd">           - sites: a sensible representation of location / coordinates of the sites.</span>
+<span class="sd">           </span>
+<span class="sd">           However, two options exists for representing the sites; either as only giving the representative sites, which when the </span>
+<span class="sd">           symmetry operations of the spacegroup are applied generates all sites, or, simply giving the primcell set of sites.</span>
+<span class="sd">           Since conversion between these are computationally expensive and only strictly &#39;approximate&#39;. Hence, sites is divided</span>
+<span class="sd">           accordingly into rc_sites and uc_sites keeping track of the two representations.</span>
+
+<span class="sd">         Input:</span>
+
+<span class="sd">           - ONE OF: &#39;cell&#39;; &#39;basis&#39;, &#39;length_and_angles&#39;; &#39;niggli_matrix&#39;; &#39;metric&#39;; all of: a,b,c, alpha, beta, gamma. </span>
+<span class="sd">             (cell requires a Cell object or a very specific format, so unless you know what you are doing, use one of the others.)</span>
+
+<span class="sd">           - ONE OF: &#39;assignments&#39;, &#39;atomic_numbers&#39;, &#39;occupancies&#39;</span>
+<span class="sd">             (assignments requires an Assignments object or a sequence.), occupations repeats similar site assignments as needed</span>
+<span class="sd">           </span>
+<span class="sd">           - ONE OF: &#39;rc_sites&#39;, &#39;uc_sites&#39;, &#39;rc_coords&#39; (IF rc_occupations OR rc_counts are also given), </span>
+<span class="sd">             &#39;uc_coords&#39; (IF uc_occupations OR uc_counts are also given)</span>
+<span class="sd">             &#39;A_B_C&#39;, where A=representative or primcell, B=reduced or cartesian, C=coordgroups, coords, or occupationscoords</span>
+<span class="sd">             </span>
+<span class="sd">             Notes: </span>
+
+<span class="sd">                  - occupationscoords may differ to coords by *order*, since giving occupations as, e.g., [&#39;H&#39;,&#39;O&#39;,&#39;H&#39;] requires</span>
+<span class="sd">                    a re-ordering of coordinates to the format of counts+coords as (2,1), [&#39;H&#39;,&#39;O&#39;]. </span>
+
+<span class="sd">                  - rc_sites and uc_sites requires a Sites object or a very specific format, so unless you know what you are doing, </span>
+<span class="sd">                    use one of the others.)</span>
+<span class="sd">           </span>
+<span class="sd">           - ONE OF: &#39;spacegroup&#39; or &#39;hall_symbol&#39;, or neither (in which case spacegroup is regarded as unknown)                </span>
+
+<span class="sd">           - ONE OF: scale or volume: </span>
+<span class="sd">             scale = multiply the basis vectors with this scaling factor, </span>
+<span class="sd">             volume = rescale the cell into this volume (overrides &#39;scale&#39; if both are given)</span>
+
+<span class="sd">           - ONE OF periodicity or nonperiodic_vecs</span>
+<span class="sd">           </span>
+<span class="sd">        See help(Structure) for more information on the data format of all these data representations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>                  
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>  
+        <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;cls&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_scale&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_scaling&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_volume&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_scale&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_scaling&#39;</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_volume&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_cell&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_cell&#39;</span><span class="p">]</span>
+
+        <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_cartesian_coordgroups&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_cartesian_coords&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_cartesian_occupationscoords&#39;</span><span class="p">]</span>  
+        <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_cartesian_coordgroups&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_cartesian_coords&#39;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_cartesian_occupationscoords&#39;</span><span class="p">]</span>  
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span><span class="n">Structure</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">structure</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span><span class="n">ScalelessStructure</span><span class="p">):</span>
+            <span class="n">slstruct</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slstruct</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uc_cell</span><span class="p">,</span><span class="n">Cell</span><span class="p">):</span>
+            <span class="n">uc_cell</span> <span class="o">=</span> <span class="n">uc_cell</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>                        
+                <span class="n">uc_cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">uc_cell</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">uc_basis</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">uc_metric</span><span class="p">,</span> 
+                                      <span class="n">niggli_matrix</span><span class="o">=</span><span class="n">uc_niggli_matrix</span><span class="p">,</span> 
+                                      <span class="n">a</span><span class="o">=</span><span class="n">uc_a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">uc_b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">uc_c</span><span class="p">,</span> 
+                                      <span class="n">alpha</span><span class="o">=</span><span class="n">uc_alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">uc_beta</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">uc_gamma</span><span class="p">,</span>
+                                      <span class="n">lengths</span> <span class="o">=</span> <span class="n">uc_lengths</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="n">uc_angles</span><span class="p">,</span> 
+                                      <span class="n">scale</span><span class="o">=</span><span class="n">uc_scale</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="n">uc_scaling</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="n">uc_volume</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">uc_cell</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rc_cell</span><span class="p">,</span><span class="n">Cell</span><span class="p">):</span>
+            <span class="n">rc_cell</span> <span class="o">=</span> <span class="n">rc_cell</span>
+        <span class="k">else</span><span class="p">:</span>                        
+            <span class="k">try</span><span class="p">:</span>                        
+                <span class="n">rc_cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">rc_cell</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">rc_basis</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">rc_metric</span><span class="p">,</span> 
+                                      <span class="n">niggli_matrix</span><span class="o">=</span><span class="n">rc_niggli_matrix</span><span class="p">,</span> 
+                                      <span class="n">a</span><span class="o">=</span><span class="n">rc_a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">rc_b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">rc_c</span><span class="p">,</span> 
+                                      <span class="n">alpha</span><span class="o">=</span><span class="n">rc_alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">rc_beta</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">rc_gamma</span><span class="p">,</span>
+                                      <span class="n">lengths</span> <span class="o">=</span> <span class="n">rc_lengths</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="n">rc_angles</span><span class="p">,</span> 
+                                      <span class="n">scale</span><span class="o">=</span><span class="n">rc_scale</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="n">rc_scaling</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="n">rc_volume</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">rc_cell</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">uc_sites</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">uc_reduced_coordgroups</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> \
+               <span class="n">uc_reduced_coords</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">uc_reduced_occupationscoords</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...</span>
+            <span class="k">if</span> <span class="n">uc_cartesian_coordgroups</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">uc_cartesian_coords</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> \
+                    <span class="n">uc_occupancies</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">uc_cartesian_occupationscoords</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">assignments</span><span class="p">,</span> <span class="n">uc_cartesian_coordgroups</span> <span class="o">=</span> <span class="n">occupations_and_coords_to_assignments_and_coordgroups</span><span class="p">(</span><span class="n">uc_cartesian_occupationscoords</span><span class="p">,</span><span class="n">uc_occupancies</span><span class="p">)</span>
+             
+            <span class="k">if</span> <span class="n">uc_cartesian_coords</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">uc_cartesian_coordgroups</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">uc_cartesian_coordgroups</span> <span class="o">=</span> <span class="n">coords_and_counts_to_coordgroups</span><span class="p">(</span><span class="n">uc_cartesian_coords</span><span class="p">,</span> <span class="n">uc_counts</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">uc_cell</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span> 
+                <span class="n">uc_reduced_coordgroups</span> <span class="o">=</span> <span class="n">coordgroups_cartesian_to_reduced</span><span class="p">(</span><span class="n">uc_cartesian_coordgroups</span><span class="p">,</span><span class="n">uc_cell</span><span class="p">)</span>
+                <span class="n">args</span><span class="p">[</span><span class="s">&#39;uc_reduced_coordgroups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uc_reduced_coordgroups</span>
+
+        <span class="k">if</span> <span class="n">rc_sites</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_reduced_coordgroups</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> \
+               <span class="n">rc_reduced_coords</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_reduced_occupationscoords</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...</span>
+            <span class="k">if</span> <span class="n">rc_cartesian_coordgroups</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_cartesian_coords</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> \
+                    <span class="n">rc_occupancies</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_cartesian_occupationscoords</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">assignments</span><span class="p">,</span> <span class="n">rc_cartesian_coordgroups</span> <span class="o">=</span> <span class="n">occupations_and_coords_to_assignments_and_coordgroups</span><span class="p">(</span><span class="n">rc_cartesian_occupationscoords</span><span class="p">,</span><span class="n">rc_occupancies</span><span class="p">)</span>
+             
+            <span class="k">if</span> <span class="n">rc_cartesian_coords</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_cartesian_coordgroups</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">rc_cartesian_coordgroups</span> <span class="o">=</span> <span class="n">coords_and_counts_to_coordgroups</span><span class="p">(</span><span class="n">rc_cartesian_coords</span><span class="p">,</span> <span class="n">rc_counts</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">rc_cell</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>  
+                <span class="n">rc_reduced_coordgroups</span> <span class="o">=</span> <span class="n">coordgroups_cartesian_to_reduced</span><span class="p">(</span><span class="n">rc_cartesian_coordgroups</span><span class="p">,</span><span class="n">rc_cell</span><span class="p">)</span>
+                <span class="n">args</span><span class="p">[</span><span class="s">&#39;rc_reduced_coordgroups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rc_reduced_coordgroups</span>
+
+        <span class="k">if</span> <span class="n">slstruct</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">slstruct</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="n">rc_sites</span><span class="o">=</span><span class="bp">None</span>
+        <span class="n">uc_sites</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">if</span> <span class="n">slstruct</span><span class="o">.</span><span class="n">has_rc_repr</span><span class="p">:</span>
+            <span class="n">rc_sites</span> <span class="o">=</span> <span class="n">slstruct</span><span class="o">.</span><span class="n">rc_sites</span>
+        <span class="k">if</span> <span class="n">slstruct</span><span class="o">.</span><span class="n">has_uc_repr</span><span class="p">:</span>
+            <span class="n">uc_sites</span> <span class="o">=</span> <span class="n">slstruct</span><span class="o">.</span><span class="n">uc_sites</span>
+        
+        <span class="k">if</span> <span class="n">uc_cell</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">rc_cell</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">rc_cells</span> <span class="o">=</span> <span class="n">slstruct</span><span class="o">.</span><span class="n">get_rc_cells</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc_cells</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">rc_cell</span> <span class="o">=</span> <span class="n">rc_cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            
+        <span class="n">new</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">slstruct</span><span class="o">.</span><span class="n">assignments</span><span class="p">,</span> <span class="n">rc_sites</span><span class="p">,</span> <span class="n">uc_sites</span><span class="p">,</span> <span class="n">uc_cell</span><span class="o">=</span><span class="n">uc_cell</span><span class="p">,</span> <span class="n">rc_cell</span><span class="o">=</span><span class="n">rc_cell</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_tags</span><span class="p">(</span><span class="n">slstruct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">())</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_refs</span><span class="p">(</span><span class="n">slstruct</span><span class="o">.</span><span class="n">get_refs</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">new</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="n">UnitcellSites</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_sites"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_sites">[docs]</a>    <span class="k">def</span> <span class="nf">uc_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc_sites</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_uc_sites</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">coordgroups_reduced_rc_to_unitcellsites</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">reduced_coordgroups</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hall_symbol</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_uc_cell</span> <span class="o">=</span> <span class="n">cell</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc_sites</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="n">Cell</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_cell"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_cell">[docs]</a>    <span class="k">def</span> <span class="nf">uc_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc_cell</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Trigger filling of cell, which should populate self._uc_cell</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fill_cell</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc_cell</span>
+ </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_cell"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_cell">[docs]</a>    <span class="k">def</span> <span class="nf">rc_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rc_cell</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Trigger symmetry finding, which should populate self._rc_cell</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">find_symetry</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rc_cell</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_sites"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_sites">[docs]</a>    <span class="k">def</span> <span class="nf">rc_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rc_sites</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#sys.stderr.write(&quot;Warning: need to run symmetry finder. This may take a while.\n&quot;)</span>
+            <span class="n">newstructure</span> <span class="o">=</span> <span class="n">structure_reduced_uc_to_representative</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rc_sites</span> <span class="o">=</span> <span class="n">newstructure</span><span class="o">.</span><span class="n">rc_sites</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rc_cell</span> <span class="o">=</span> <span class="n">newstructure</span><span class="o">.</span><span class="n">rc_cell</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rc_sites</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.uc_cartesian_occupationscoords"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_cartesian_occupationscoords">[docs]</a>    <span class="k">def</span> <span class="nf">uc_cartesian_occupationscoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Structure.uc_cartesian_occupationscoords: not implemented&quot;</span><span class="p">)</span>
+        <span class="k">return</span> 
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_cartesian_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_cartesian_coordgroups">[docs]</a>    <span class="k">def</span> <span class="nf">rc_cartesian_coordgroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">get_cartesian_coordgroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.uc_cartesian_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_cartesian_coordgroups">[docs]</a>    <span class="k">def</span> <span class="nf">uc_cartesian_coordgroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">get_cartesian_coordgroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_cartesian_coords"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_cartesian_coords">[docs]</a>    <span class="k">def</span> <span class="nf">rc_cartesian_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">get_cartesian_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.uc_cartesian_coords"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_cartesian_coords">[docs]</a>    <span class="k">def</span> <span class="nf">uc_cartesian_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">get_cartesian_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.uc_lengths_and_angles"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_lengths_and_angles">[docs]</a>    <span class="k">def</span> <span class="nf">uc_lengths_and_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_a</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_b</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_c</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_alpha</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_beta</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_gamma</span><span class="p">]</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_lengths_and_angles"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_lengths_and_angles">[docs]</a>    <span class="k">def</span> <span class="nf">rc_lengths_and_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_a</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_b</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_c</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_alpha</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_beta</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rc_gamma</span><span class="p">]</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_a"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_a">[docs]</a>    <span class="k">def</span> <span class="nf">uc_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">a</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_b"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_b">[docs]</a>    <span class="k">def</span> <span class="nf">uc_b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">b</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_c"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_c">[docs]</a>    <span class="k">def</span> <span class="nf">uc_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">c</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_a"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_a">[docs]</a>    <span class="k">def</span> <span class="nf">rc_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">a</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_b"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_b">[docs]</a>    <span class="k">def</span> <span class="nf">rc_b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">b</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_c"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_c">[docs]</a>    <span class="k">def</span> <span class="nf">rc_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">c</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_alpha"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_alpha">[docs]</a>    <span class="k">def</span> <span class="nf">uc_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">alpha</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_beta"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_beta">[docs]</a>    <span class="k">def</span> <span class="nf">uc_beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">beta</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_gamma"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_gamma">[docs]</a>    <span class="k">def</span> <span class="nf">uc_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">gamma</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_alpha"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_alpha">[docs]</a>    <span class="k">def</span> <span class="nf">rc_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">alpha</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_beta"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_beta">[docs]</a>    <span class="k">def</span> <span class="nf">rc_beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">beta</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_gamma"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_gamma">[docs]</a>    <span class="k">def</span> <span class="nf">rc_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">gamma</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.rc_basis"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_basis">[docs]</a>    <span class="k">def</span> <span class="nf">rc_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">basis</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Structure.uc_basis"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_basis">[docs]</a>    <span class="k">def</span> <span class="nf">uc_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">basis</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_volume"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_volume">[docs]</a>    <span class="k">def</span> <span class="nf">uc_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">volume</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_volume"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_volume">[docs]</a>    <span class="k">def</span> <span class="nf">rc_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">volume</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.uc_cell_orientation"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.uc_cell_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">uc_cell_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">orientation</span>
+    </div>
+    <span class="nd">@httk_typed_property</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<div class="viewcode-block" id="Structure.rc_cell_orientation"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.rc_cell_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">rc_cell_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">orientation</span>
+</div>
+    <span class="nd">@httk_typed_property</span><span class="p">((</span><span class="nb">bool</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<div class="viewcode-block" id="Structure.pbc"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.pbc">[docs]</a>    <span class="k">def</span> <span class="nf">pbc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_rc_repr</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">pbc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">pbc</span>
+</div>
+<div class="viewcode-block" id="Structure.build_supercell"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.build_supercell">[docs]</a>    <span class="k">def</span> <span class="nf">build_supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">transformation</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">max_atoms</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+
+        <span class="n">transformation</span><span class="o">=</span><span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">transformation</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">transformation</span><span class="o">.</span><span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Structure.build_supercell requires integer transformation matrix&quot;</span><span class="p">)</span>
+        
+        <span class="n">old_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span>
+        <span class="n">new_cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">transformation</span><span class="o">*</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
+        <span class="n">conversion_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">*</span><span class="n">new_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+
+        <span class="n">volume_ratio</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">new_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">())))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="n">seek_counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">volume_ratio</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">]</span>
+        <span class="n">total_seek_counts</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">seek_counts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_seek_counts</span> <span class="o">&gt;</span> <span class="n">max_atoms</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Structure.build_supercell: more than &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">max_atoms</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; needed. Change limit with max_atoms parameter.&quot;</span><span class="p">)</span>
+    
+        <span class="c">#if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] &gt; max_search_cells:</span>
+        <span class="c">#    raise Exception(&quot;Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()&quot;)</span>
+             
+        <span class="c">### Collect coordinate list of all sites inside the new cell</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_reduced_coordgroups</span>
+        <span class="n">extendedcoordgroups</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="n">max_search_cells</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">max_search</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_search_cells</span><span class="p">,</span><span class="n">max_search_cells</span><span class="p">,</span><span class="n">max_search_cells</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_search</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="n">breath_first_idxs</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">max_search</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="c">#print &quot;X&quot;,offset, seek_counts</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)):</span>
+                <span class="n">coordgroup</span> <span class="o">=</span> <span class="n">coordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">newcoordgroup</span> <span class="o">=</span> <span class="n">coordgroup</span><span class="o">+</span><span class="n">FracVector</span><span class="p">([</span><span class="n">offset</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroup</span><span class="p">))</span>
+                <span class="n">new_reduced</span> <span class="o">=</span> <span class="n">newcoordgroup</span><span class="o">*</span><span class="n">conversion_matrix</span>
+                <span class="c">#print &quot;NEW:&quot;,FracVector.use(new_reduced).to_floats(),</span>
+                <span class="n">new_reduced</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_reduced</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">extendedcoordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">new_reduced</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_reduced</span><span class="p">)</span>
+                <span class="n">seek_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-=</span> <span class="n">c</span>
+                <span class="n">total_seek_counts</span><span class="o">-=</span> <span class="n">c</span>
+                <span class="c">#print &quot;ADD&quot;,str(c)</span>
+                <span class="k">if</span> <span class="n">seek_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c">#print &quot;X&quot;,offset, seek_counts</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Structure.build_supercell safety check error, internal error: too many atoms in supercell.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">total_seek_counts</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">uc_reduced_coordgroups</span><span class="o">=</span><span class="n">extendedcoordgroups</span><span class="p">,</span> <span class="n">uc_basis</span><span class="o">=</span><span class="n">new_cell</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">assignments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments</span><span class="p">)</span>
+
+
+    <span class="c"># TODO: The building of supercells should be moved elsewhere and not be part of this class</span></div>
+<div class="viewcode-block" id="Structure.build_supercell_old"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.build_supercell_old">[docs]</a>    <span class="k">def</span> <span class="nf">build_supercell_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">transformation</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="c">### New basis matrix, note: works in units of old_cell.scale to avoid floating point errors</span>
+        <span class="c">#print &quot;BUILD SUPERCELL&quot;,self.uc_sites.cell.basis.to_floats(), repetitions</span>
+
+        <span class="n">transformation</span><span class="o">=</span><span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">transformation</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">transformation</span><span class="o">.</span><span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Structure.build_supercell requires integer transformation matrix&quot;</span><span class="p">)</span>
+        
+        <span class="n">old_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">get_normalized</span><span class="p">()</span>
+        <span class="n">new_cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">transformation</span><span class="o">*</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
+        <span class="c">#conversion_matrix = (new_cell.inv*old_cell.basis).T().simplify()</span>
+        <span class="n">conversion_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">*</span><span class="n">new_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+
+        <span class="n">volume_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+
+        <span class="c"># Generate the reduced (old cell) coordinates of each corner in the new cell</span>
+        <span class="c"># This determines how far we must loop the old cell to cover all these corners  </span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="n">new_cell</span><span class="o">.</span><span class="n">basis</span>
+        <span class="n">corners</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">nb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">nb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">nb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">nb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">nb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">nb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">nb</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="n">reduced_corners</span> <span class="o">=</span> <span class="n">corners</span><span class="o">*</span><span class="p">(</span><span class="n">old_cell</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">())</span>
+        
+        <span class="n">maxvec</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">minvec</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">reduced_corners</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    
+        <span class="k">if</span> <span class="n">max_search_cells</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">maxvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">maxvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">maxvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_search_cells</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()&quot;</span><span class="p">)</span>
+             
+        <span class="c">### Collect coordinate list of all sites inside the new cell</span>
+        <span class="n">coordgroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_reduced_coordgroups</span>
+        <span class="n">extendedcoordgroups</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">))]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)):</span>
+            <span class="n">coordgroup</span> <span class="o">=</span> <span class="n">coordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minvec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">maxvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minvec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">maxvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minvec</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">maxvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                        <span class="n">newcoordgroup</span> <span class="o">=</span> <span class="n">coordgroup</span><span class="o">+</span><span class="n">FracVector</span><span class="p">(((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">),)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroup</span><span class="p">))</span>
+                        <span class="n">new_reduced</span> <span class="o">=</span> <span class="n">newcoordgroup</span><span class="o">*</span><span class="n">conversion_matrix</span>
+                        <span class="n">new_reduced</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_reduced</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">extendedcoordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">new_reduced</span>
+
+        <span class="c"># Safety check for avoiding bugs that change the ratio of atoms</span>
+        <span class="n">new_counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">extendedcoordgroups</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">volume_ratio</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new_counts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">print</span> <span class="s">&quot;Volume ratio:&quot;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">volume_ratio</span><span class="p">),</span> <span class="n">volume_ratio</span>
+                <span class="k">print</span> <span class="s">&quot;Extended coord groups:&quot;</span><span class="p">,</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">extendedcoordgroups</span><span class="p">)</span><span class="o">.</span><span class="n">to_floats</span><span class="p">()</span>
+                <span class="k">print</span> <span class="s">&quot;Old counts:&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">symbols</span>
+                <span class="k">print</span> <span class="s">&quot;New counts:&quot;</span><span class="p">,</span><span class="n">new_counts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">symbols</span>
+                <span class="c">#raise Exception(&quot;Structure.build_supercell safety check failure. Volume changed by factor &quot;+str(float(volume_ratio))+&quot;, but atoms in group &quot;+str(i)+&quot; changed by &quot;+str(float(new_counts[i])/float(self.uc_counts[i])))</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">uc_reduced_coordgroups</span><span class="o">=</span><span class="n">extendedcoordgroups</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">new_cell</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">assignments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Structure.build_cubic_supercell"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.build_cubic_supercell">[docs]</a>    <span class="k">def</span> <span class="nf">build_cubic_supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tolerance</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">prim_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">basis</span>            
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">prim_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+            <span class="n">transformation</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="o">*</span><span class="n">inv</span><span class="o">.</span><span class="n">denom</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="n">maxtol</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)),</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">bestlen</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">bestortho</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">besttrans</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="c">#TODO: This loop may be possible to do with fewer iterations, since I suppose the only thing that</span>
+            <span class="c">#matter is the prime factors?</span>
+            <span class="k">for</span> <span class="n">tol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">maxtol</span><span class="p">):</span>
+                <span class="n">prim_cell</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">basis</span>        
+                <span class="n">approxinv</span> <span class="o">=</span> <span class="n">prim_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">set_denominator</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">approxinv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">approxinv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">approxinv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">transformation</span> <span class="o">=</span> <span class="p">(</span><span class="n">approxinv</span><span class="o">*</span><span class="n">approxinv</span><span class="o">.</span><span class="n">denom</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">transformation</span><span class="o">*</span><span class="n">prim_cell</span><span class="p">)</span>
+                <span class="n">ortho</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="n">equallen</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> 
+                <span class="k">if</span> <span class="n">ortho</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">equallen</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># Already perfectly cubic, use this</span>
+                    <span class="n">besttrans</span><span class="o">=</span><span class="n">transformation</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">bestlen</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">bestortho</span> <span class="o">&lt;</span> <span class="n">ortho</span> <span class="ow">and</span> <span class="n">bestlen</span> <span class="o">&lt;</span> <span class="n">equallen</span><span class="p">):</span>
+                    <span class="n">bestlen</span><span class="o">=</span><span class="n">equallen</span>
+                    <span class="n">bestortho</span><span class="o">=</span><span class="n">ortho</span>
+                    <span class="n">besttrans</span><span class="o">=</span><span class="n">transformation</span>
+
+            <span class="n">transformation</span> <span class="o">=</span> <span class="n">besttrans</span>
+       
+        <span class="c">#print &quot;Running transformation with:&quot;,transformation     </span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_supercell</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="n">max_search_cells</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Structure.build_orthogonal_supercell"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.build_orthogonal_supercell">[docs]</a>    <span class="k">def</span> <span class="nf">build_orthogonal_supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">ortho</span><span class="o">=</span><span class="p">[</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">]):</span>
+        <span class="n">transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orthogonal_supercell_transformation</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span><span class="n">max_search_cells</span><span class="p">,</span><span class="n">ortho</span><span class="p">)</span>
+        <span class="c">#print &quot;Running transformation with:&quot;,transformation     </span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_supercell</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="n">max_search_cells</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Structure.orthogonal_supercell_transformation"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.orthogonal_supercell_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">orthogonal_supercell_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">max_search_cells</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">ortho</span><span class="o">=</span><span class="p">[</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">]):</span>
+        <span class="c"># TODO: How to solve for exact orthogonal cell?</span>
+        <span class="k">if</span> <span class="n">tolerance</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">prim_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">basis</span>         
+            <span class="k">print</span> <span class="s">&quot;Starting cell:&quot;</span><span class="p">,</span><span class="n">prim_cell</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">prim_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">row0</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">row1</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">row2</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">transformation</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">row0</span><span class="o">*</span><span class="n">row0</span><span class="o">.</span><span class="n">denom</span><span class="p">,</span><span class="n">row1</span><span class="o">*</span><span class="n">row1</span><span class="o">.</span><span class="n">denom</span><span class="p">,</span><span class="n">row2</span><span class="o">*</span><span class="n">row2</span><span class="o">.</span><span class="n">denom</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="n">maxtol</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)),</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">bestval</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">besttrans</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">for</span> <span class="n">tol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">maxtol</span><span class="p">):</span>
+                <span class="n">prim_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">basis</span>   
+                <span class="n">inv</span> <span class="o">=</span> <span class="n">prim_cell</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">set_denominator</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">inv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">inv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">absinv</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">row0</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">absinv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">row1</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">absinv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ortho</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">row2</span> <span class="o">=</span> <span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">absinv</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">transformation</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">row0</span><span class="o">*</span><span class="n">row0</span><span class="o">.</span><span class="n">denom</span><span class="p">,</span><span class="n">row1</span><span class="o">*</span><span class="n">row1</span><span class="o">.</span><span class="n">denom</span><span class="p">,</span><span class="n">row2</span><span class="o">*</span><span class="n">row2</span><span class="o">.</span><span class="n">denom</span><span class="p">])</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">transformation</span><span class="o">*</span><span class="n">prim_cell</span><span class="p">)</span>
+                <span class="n">maxval</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">maxval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">besttrans</span><span class="o">=</span><span class="n">transformation</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">bestval</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">maxval</span> <span class="o">&lt;</span> <span class="n">bestval</span><span class="p">:</span>
+                    <span class="n">bestval</span><span class="o">=</span><span class="n">maxval</span>
+                    <span class="n">besttrans</span><span class="o">=</span><span class="n">transformation</span>
+            <span class="n">transformation</span> <span class="o">=</span> <span class="n">besttrans</span>
+       
+        <span class="k">return</span> <span class="n">transformation</span>
+</div>
+<div class="viewcode-block" id="Structure.clean"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
+        <span class="n">rc_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">uc_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">uc_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uc_cell</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">rc_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rc_cell</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+
+        <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments</span><span class="p">,</span> <span class="n">rc_sites</span><span class="p">,</span> <span class="n">uc_sites</span><span class="p">,</span> <span class="n">uc_cell</span><span class="o">=</span><span class="n">uc_cell</span><span class="p">,</span> <span class="n">rc_cell</span><span class="o">=</span><span class="n">rc_cell</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_tags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_tags</span><span class="p">())</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_refs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_refs</span><span class="p">())</span>               
+        <span class="k">return</span> <span class="n">new</span>
+</div>
+    <span class="k">def</span> <span class="nf">_fill_codependent_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_callbacks</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>            
+
+<div class="viewcode-block" id="Structure.add_tag"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.add_tag">[docs]</a>    <span class="k">def</span> <span class="nf">add_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_codependent_data</span><span class="p">()</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">StructureTag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="o">=</span><span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_data</span> <span class="o">+=</span> <span class="p">[</span><span class="n">new</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Structure.add_tags"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.add_tags">[docs]</a>    <span class="k">def</span> <span class="nf">add_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tags</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span>
+                <span class="n">tagdata</span> <span class="o">=</span> <span class="n">tags</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tagdata</span> <span class="o">=</span> <span class="n">tag</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tagdata</span><span class="p">,</span><span class="n">StructureTag</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="n">tagdata</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span><span class="n">tagdata</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span><span class="n">tagdata</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Structure.get_tags"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.get_tags">[docs]</a>    <span class="k">def</span> <span class="nf">get_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_codependent_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span>
+</div>
+<div class="viewcode-block" id="Structure.get_tag"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.get_tag">[docs]</a>    <span class="k">def</span> <span class="nf">get_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_codependent_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Structure.get_refs"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.get_refs">[docs]</a>    <span class="k">def</span> <span class="nf">get_refs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_codependent_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span>
+</div>
+<div class="viewcode-block" id="Structure.add_ref"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.add_ref">[docs]</a>    <span class="k">def</span> <span class="nf">add_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ref</span><span class="p">):</span>        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_codependent_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="n">StructureRef</span><span class="p">):</span>
+            <span class="n">refobj</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">reference</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">refobj</span> <span class="o">=</span> <span class="n">Reference</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">StructureRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">refobj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">new</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_codependent_data</span> <span class="o">+=</span> <span class="p">[</span><span class="n">new</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Structure.add_refs"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.Structure.add_refs">[docs]</a>    <span class="k">def</span> <span class="nf">add_refs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">refs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_ref</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">print</span> <span class="s">&quot;Test&quot;</span>
+
+<span class="c">#     def httk_typed_property(t):</span>
+<span class="c">#         def wrapfactory(func):</span>
+<span class="c">#             func.property_type = lambda: t</span>
+<span class="c">#             return property(func)</span>
+<span class="c">#         return wrapfactory</span>
+<span class="c"># </span>
+<span class="c">#     def httk_typed_property_delayed(t):</span>
+<span class="c">#         def wrapfactory(func):</span>
+<span class="c">#             func.property_type = t</span>
+<span class="c">#             return property(func)</span>
+<span class="c">#         return wrapfactory</span>
+<span class="c"># </span>
+<span class="c">#     def check_returntype(obj,propname):</span>
+<span class="c">#         for obj in [obj]+obj.__class__.mro():</span>
+<span class="c">#             if propname in obj.__dict__:</span>
+<span class="c">#                 return obj.__dict__[propname].fget.property_type()</span>
+<span class="c">#         raise AttributeError</span>
+
+<span class="c">#     class Horse:</span>
+<span class="c">#         pass</span>
+<span class="c"># </span>
+<span class="c">#     class Gurk(object):</span>
+<span class="c">#         @httk_typed_property(Horse)</span>
+<span class="c">#         def number_seven(self):        </span>
+<span class="c">#             return 7</span>
+<span class="c"># </span>
+<span class="c">#     test = Gurk()</span>
+<span class="c">#     print test.number_seven</span>
+<span class="c">#     print httk_typed_property_resolve(test,&#39;number_seven&#39;)()</span>
+    
+    <span class="c">#from httk.core.fracvector import FracVector</span>
+
+    <span class="c">#class StructureGurkPlugin(object):</span>
+
+    <span class="c">#    name = &#39;gurk&#39;</span>
+                
+    <span class="c">#    def __init__(self, struct):</span>
+    <span class="c">#        self.struct = struct</span>
+
+    <span class="c">#    def print_gurk(self):</span>
+    <span class="c">#        print &quot;HERE:&quot;,self.struct</span>
+
+    <span class="c">#Structure.add_plugin(StructureGurkPlugin)</span>
+    
+    <span class="c">#coords = FracVector.create([[2,3,5],[3,5,4],[4,6,7]])</span>
+    <span class="c">#cell = FracVector.create([[1,1,0],[1,0,1],[0,1,1]])</span>
+    <span class="c">#assignments = [2,5]</span>
+    <span class="c">#counts = [2,1]</span>
+    <span class="c">#a = Structure.create_from_counts_coords(cell, assignments, counts, coords)</span>
+    
+    <span class="c">#print(a)</span>
+    <span class="c">#a.gurk.print_gurk()    </span>
+
+    <span class="c">#easya = a.to_EasyStructure()</span>
+    <span class="c">#print(easya)</span>
+</div>
+<div class="viewcode-block" id="StructureTag"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.StructureTag">[docs]</a><span class="k">class</span> <span class="nc">StructureTag</span><span class="p">(</span><span class="n">HttkObject</span><span class="p">):</span>                               
+    <span class="nd">@httk_typed_init</span><span class="p">({</span><span class="s">&#39;structure&#39;</span><span class="p">:</span><span class="n">Structure</span><span class="p">,</span><span class="s">&#39;tag&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">},</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">,</span> <span class="s">&#39;tag&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;tag&#39;</span><span class="p">,</span><span class="s">&#39;value&#39;</span><span class="p">),(</span><span class="s">&#39;structure&#39;</span><span class="p">,</span><span class="s">&#39;tag&#39;</span><span class="p">,</span><span class="s">&#39;value&#39;</span><span class="p">)],</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;hexhash&#39;</span><span class="p">])</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StructureTag</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;(Tag) &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">+</span><span class="s">&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="StructureRef"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structure.StructureRef">[docs]</a><span class="k">class</span> <span class="nc">StructureRef</span><span class="p">(</span><span class="n">HttkObject</span><span class="p">):</span>
+    <span class="nd">@httk_typed_init</span><span class="p">({</span><span class="s">&#39;structure&#39;</span><span class="p">:</span><span class="n">Structure</span><span class="p">,</span><span class="s">&#39;reference&#39;</span><span class="p">:</span><span class="n">Reference</span><span class="p">},</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">,</span> <span class="s">&#39;reference&#39;</span><span class="p">],</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;hexhash&#39;</span><span class="p">])</span>        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StructureRef</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">reference</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span>
+
+        </div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+    
+    
+<span class="c">#         if isinstance(structure,ScalelessStructure):</span>
+<span class="c">#             rc_sites=None</span>
+<span class="c">#             uc_sites=None</span>
+<span class="c">#             if structure.has_rc_repr:</span>
+<span class="c">#                 rc_sites = structure.rc_sites</span>
+<span class="c">#             if structure.has_uc_repr:</span>
+<span class="c">#                 uc_sites = structure.uc_sites</span>
+<span class="c">#             return cls(structure.assignments, rc_sites = rc_sites, uc_sites = uc_sites)</span>
+<span class="c">#         </span>
+<span class="c">#         if isinstance(spacegroup,Spacegroup):</span>
+<span class="c">#             hall_symbol = spacegroup.hall_symbol</span>
+<span class="c">#         else:</span>
+<span class="c">#             try:</span>
+<span class="c">#                 spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting) </span>
+<span class="c">#                 hall_symbol = spacegroupobj.hall_symbol</span>
+<span class="c">#             except Exception as spacegroup_exception:</span>
+<span class="c">#                 spacegroupobj = None                </span>
+<span class="c">#                 hall_symbol = None</span>
+<span class="c"># </span>
+<span class="c">#         if isinstance(uc_sites,UnitcellSites):</span>
+<span class="c">#             uc_sites = uc_sites</span>
+<span class="c">#         if isinstance(uc_sites,Sites):</span>
+<span class="c">#             uc_sites = UnitcellSites.use(uc_sites)</span>
+<span class="c">#         else:</span>
+<span class="c">#             if uc_reduced_coordgroups == None and uc_cartesian_coordgroups == None and \</span>
+<span class="c">#                     uc_reduced_coords == None and uc_cartesian_coords == None and \</span>
+<span class="c">#                     uc_occupancies != None:</span>
+<span class="c">#                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation</span>
+<span class="c">#                 if uc_reduced_occupationscoords != None:</span>
+<span class="c">#                     assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)</span>
+<span class="c">#                 elif uc_cartesian_occupationscoords != None:</span>
+<span class="c">#                     assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)</span>
+<span class="c">#             </span>
+<span class="c">#             if uc_reduced_coordgroups != None or uc_cartesian_coordgroups != None or \</span>
+<span class="c">#                     uc_reduced_coords != None or uc_cartesian_coords != None:</span>
+<span class="c"># </span>
+<span class="c">#                 if isinstance(uc_cellshape,CellShape):</span>
+<span class="c">#                     uc_cellshapeobj = uc_cellshape</span>
+<span class="c">#                 else:                        </span>
+<span class="c">#                     uc_cellshapeobj = CellShape.create(cellshape=uc_cellshape, basis=uc_basis, metric=uc_metric, </span>
+<span class="c">#                                           niggli_matrix=uc_niggli_matrix, </span>
+<span class="c">#                                           a=uc_a, b=uc_b, c=uc_c, </span>
+<span class="c">#                                           alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,</span>
+<span class="c">#                                           lengths = uc_lengths, angles=uc_angles)</span>
+<span class="c"># </span>
+<span class="c">#                 if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:</span>
+<span class="c">#                     uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)</span>
+<span class="c"># </span>
+<span class="c">#                 if uc_cartesian_coordgroups != None and uc_reduced_coordgroups == None:</span>
+<span class="c">#                     uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_orig_cell)</span>
+<span class="c">#                                 </span>
+<span class="c">#                 uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, </span>
+<span class="c">#                                                reduced_coords=uc_reduced_coords, </span>
+<span class="c">#                                                counts=uc_counts, </span>
+<span class="c">#                                                cellshape=uc_cellshapeobj, periodicity=periodicity, occupancies=uc_occupancies)</span>
+<span class="c">#             else:</span>
+<span class="c">#                 uc_sites = None</span>
+<span class="c"># </span>
+<span class="c">#         if isinstance(rc_sites,RepresentativeSites):</span>
+<span class="c">#             rc_sites = rc_sites</span>
+<span class="c">#         if isinstance(rc_sites,Sites):</span>
+<span class="c">#             rc_sites = RepresentativeSites.use(rc_sites)</span>
+<span class="c">#         else:</span>
+<span class="c">#             if rc_reduced_coordgroups == None and rc_cartesian_coordgroups == None and \</span>
+<span class="c">#                     rc_reduced_coords == None and rc_cartesian_coords == None and \</span>
+<span class="c">#                     rc_occupancies != None:</span>
+<span class="c">#                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation</span>
+<span class="c">#                 if rc_reduced_occupationscoords != None:     </span>
+<span class="c">#                     assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)</span>
+<span class="c">#                 elif rc_cartesian_occupationscoords != None:</span>
+<span class="c">#                     assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)</span>
+<span class="c"># </span>
+<span class="c">#             if rc_reduced_coordgroups != None or rc_cartesian_coordgroups != None or \</span>
+<span class="c">#                     rc_reduced_coords != None or rc_cartesian_coords != None:</span>
+<span class="c">#                 </span>
+<span class="c">#                 if isinstance(rc_cellshape,CellShape):</span>
+<span class="c">#                     rc_cellshapeobj = rc_cellshape</span>
+<span class="c">#                 else:                        </span>
+<span class="c">#                     rc_cellshapeobj = Cell.create(cellshape=rc_cellshape, basis=rc_basis, metric=rc_metric, </span>
+<span class="c">#                                           niggli_matrix=rc_niggli_matrix, </span>
+<span class="c">#                                           a=rc_a, b=rc_b, c=rc_c, </span>
+<span class="c">#                                           alpha=rc_alpha, beta=rc_beta, gamma=rc_gamma,</span>
+<span class="c">#                                           lengths = rc_lengths, angles=rc_angles)</span>
+<span class="c">#                                     </span>
+<span class="c">#                 if rc_cartesian_coords != None and rc_cartesian_coordgroups == None:</span>
+<span class="c">#                     rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)</span>
+<span class="c"># </span>
+<span class="c">#                 if rc_cartesian_coordgroups != None and rc_reduced_coordgroups == None:</span>
+<span class="c">#                     rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_orig_cell)                </span>
+<span class="c">#                                 </span>
+<span class="c">#                 rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, </span>
+<span class="c">#                                                reduced_coords=rc_reduced_coords, </span>
+<span class="c">#                                                counts=rc_counts,</span>
+<span class="c">#                                                cellshape=rc_cellshapeobj,hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,</span>
+<span class="c">#                                                occupancies=rc_occupancies)</span>
+<span class="c">#             else:</span>
+<span class="c">#                 rc_sites = None</span>
+<span class="c">#             </span>
+<span class="c">#         if rc_sites == None and uc_sites == None:</span>
+<span class="c">#             raise Exception(&quot;Structure.create: neither representative, nor primcell, sites specification valid.&quot;)</span>
+<span class="c"># </span>
+<span class="c">#         if assignments != None:</span>
+<span class="c">#             if isinstance(assignments,Assignments):</span>
+<span class="c">#                 assignments = assignments</span>
+<span class="c">#             else:</span>
+<span class="c">#                 assignments = Assignments.create(assignments=assignments)</span>
+<span class="c"># </span>
+<span class="c">#         if uc_sites == None and hall_symbol == None:</span>
+<span class="c">#             raise Exception(&quot;Structure.create: cannot create structure from only representative sites with no spacegroup information. Error was:&quot;+str(spacegroup_exception))</span>
+<span class="c"># </span>
+<span class="c">#         new = cls(assignments, rc_sites, uc_sites)</span>
+<span class="c">#         if tags!=None:</span>
+<span class="c">#             new.add_tags(tags)</span>
+<span class="c">#         if refs!=None:</span>
+<span class="c">#             new.add_refs(refs)               </span>
+<span class="c">#         return new</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../atomistic.html" >httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

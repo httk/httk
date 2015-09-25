@@ -1,0 +1,266 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: ab04cd7e2fc6544080dcb61680b10106
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/05/2100501.cif $
+#------------------------------------------------------------------------------
+data_2100501
+loop_
+_publ_author_name
+'Hansson, Christian'
+'Carlson, Stefan'
+'Giveen, Deborah'
+'Johansson, Maria'
+'Yong, Shen'
+'Oskarsson, \%Ake'
+_publ_section_title
+;
+ <i>Cis</i>/<i>trans</i> isomers of Pt<i>X</i>~2~<i>L</i>~2~ (<i>X</i>
+ = halogen, <i>L</i> = neutral ligand); the crystal structure of
+ <i>trans</i>-dichlorobis(dimethyl sulfide)platinum(II) and the
+ pressure dependence of its unit-cell dimensions
+;
+_journal_coeditor_code           RY5001
+_journal_issue                   3
+_journal_name_full               'Acta Crystallographica Section B'
+_journal_page_first              474
+_journal_page_last               479
+_journal_volume                  62
+_journal_year                    2006
+_computing_data_collection       ' MAR CCD'
+_computing_data_reduction        Fit2D
+_computing_structure_refinement  GSAS
+_diffrn_ambient_temperature      295
+_diffrn_measurement_device_type  'MAR Desktop Beamline'
+_diffrn_radiation_monochromator  'Si 111'
+_diffrn_radiation_type           synchrotron
+_diffrn_radiation_wavelength     0.9249
+_exptl_absorpt_correction_T_max  1.00000
+_exptl_absorpt_correction_T_min  1.00000
+_exptl_absorpt_process_details
+;   GSAS Absorption/surface roughness correction: function number 0
+ No correction is applied.
+;
+_refine_ls_goodness_of_fit_all   2.39
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     9
+_refine_ls_number_restraints     0
+_refine_ls_shift/su_max          0.08
+_refine_ls_shift/su_mean         0.02
+_reflns_number_total             151
+_[local]_cod_data_source_file    ry5001.cif
+_[local]_cod_data_source_block   tptcl2dms2_8.001GPa_publ
+_[local]_cod_cif_authors_sg_H-M  'P 21/n'
+_[local]_cod_chemical_formula_sum_orig 'C4 H12 Cl2 Pt1 S2'
+_cod_original_cell_volume        374.05(6)
+_cod_database_code               2100501
+loop_
+_refln_index_h
+_refln_index_k
+_refln_index_l
+1 0 -1
+1 0 1
+1 1 0
+2 0 0
+0 1 1
+1 1 -1
+1 1 1
+0 0 2
+2 1 -1
+2 1 0
+2 0 -2
+3 0 -1
+1 1 -2
+0 1 2
+2 1 -2
+2 1 1
+0 2 0
+3 1 -1
+1 2 0
+1 1 2
+3 1 0
+0 2 1
+1 2 -1
+1 0 -3
+3 1 -2
+3 0 1
+2 0 2
+1 2 1
+2 2 -1
+2 2 0
+1 1 -3
+3 1 1
+2 1 -3
+4 0 -2
+2 1 2
+3 0 -3
+4 0 0
+1 2 -2
+0 2 2
+0 1 3
+4 1 -1
+1 0 3
+2 2 -2
+2 2 1
+4 1 -2
+3 2 -1
+3 1 -3
+4 1 0
+3 2 -2
+3 1 2
+5 0 -1
+2 0 -4
+1 2 -3
+4 1 -3
+3 2 1
+4 1 1
+2 2 -3
+2 2 2
+1 3 0
+0 2 3
+4 2 -1
+0 3 1
+0 0 4
+1 3 -1
+5 1 -1
+2 1 -4
+2 1 3
+1 1 -4
+5 1 -2
+4 2 -2
+3 2 -3
+4 2 0
+1 3 1
+3 1 -4
+5 0 -3
+2 3 -1
+2 3 0
+5 1 0
+0 1 4
+1 2 3
+4 0 -4
+4 0 2
+1 3 -2
+3 0 3
+0 3 2
+3 2 2
+2 3 -2
+2 3 1
+5 1 -3
+5 0 1
+4 2 -3
+4 1 -4
+4 2 1
+4 1 2
+3 3 -1
+1 1 4
+1 3 2
+3 3 0
+3 1 3
+6 0 -2
+5 2 -1
+2 2 -4
+5 1 1
+2 2 3
+1 2 -4
+5 2 -2
+3 3 -2
+3 2 -4
+2 0 4
+5 2 0
+0 2 4
+6 1 -2
+6 1 -1
+6 0 0
+1 3 -3
+1 0 -5
+3 3 1
+3 0 -5
+2 3 -3
+2 3 2
+5 1 -4
+0 3 3
+5 2 -3
+4 3 -1
+2 1 -5
+2 1 4
+6 1 -3
+6 1 0
+1 1 -5
+4 2 -4
+3 1 -5
+4 2 2
+4 3 -2
+3 3 -3
+4 3 0
+1 2 4
+3 2 3
+1 3 3
+5 2 1
+0 1 5
+5 1 2
+4 1 -5
+4 1 3
+6 0 -4
+0 4 0
+1 4 0
+0 4 1
+6 2 -2
+6 2 -1
+1 4 -1
+3 3 2
+_journal_paper_doi 10.1107/S0108768106004629
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1 21/c 1"
+_symmetry_space_group_name_Hall '-P 2ybc'
+_[local]_omdb_cod_original_Hall '-P 2yn'
+_symmetry_Int_Tables_number 14
+ 
+_cell_length_a    7.53350
+_cell_length_b    5.55450
+_cell_length_c    10.04608
+_cell_angle_alpha 90.00000
+_cell_angle_beta  117.15406
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y+1/2,-z+1/2
+3 -x,-y,-z
+4 x,-y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pt1 Pt 4 e 0.80000 0.30000 0.70000 1.0
+ 
+

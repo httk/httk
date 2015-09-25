@@ -1,0 +1,179 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 6adec6d07718be9c2a36991af14fb3af
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/16/1511678.cif $
+#------------------------------------------------------------------------------
+data_1511678
+loop_
+_publ_author_name
+'Thornley, F.R.'
+'Nelmes, R.J.'
+_publ_section_title
+;
+ Structural studies of boracites: III. The cubic phase of nickel iodine
+ boracite, Ni3 B7 O13 I, at room temperature
+;
+_journal_name_full               'Journal of Physics C'
+_journal_page_first              665
+_journal_page_last               680
+_journal_volume                  9
+_journal_year                    1976
+_chemical_name_systematic        'Ni3 (B7 O13 I)'
+_citation_journal_id_ASTM        JPSOAW
+_[local]_cod_data_source_file    boron4-x_337.cif
+_[local]_cod_data_source_block   B7I1Ni3O13
+_[local]_cod_chemical_formula_sum_orig 'B7 I1 Ni3 O13'
+_cod_database_code               1511678
+_journal_paper_doi 10.1088/0022-3719/9/5/009
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "F -4 3 c"
+_symmetry_space_group_name_Hall 'F -4c 2 3'
+_[local]_omdb_cod_original_Hall 'F -4c 2 3'
+_symmetry_Int_Tables_number 219
+ 
+_cell_length_a    12.04400
+_cell_length_b    12.04400
+_cell_length_c    12.04400
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 y+1/2,x+1/2,z+1/2
+14 y+1/2,-x+1/2,-z+1/2
+15 -y+1/2,x+1/2,-z+1/2
+16 -y+1/2,-x+1/2,z+1/2
+17 x+1/2,z+1/2,y+1/2
+18 x+1/2,-z+1/2,-y+1/2
+19 -x+1/2,z+1/2,-y+1/2
+20 -x+1/2,-z+1/2,y+1/2
+21 z+1/2,y+1/2,x+1/2
+22 z+1/2,-y+1/2,-x+1/2
+23 -z+1/2,y+1/2,-x+1/2
+24 -z+1/2,-y+1/2,x+1/2
+25 x,y+1/2,z+1/2
+26 x,-y+1/2,-z+1/2
+27 -x,y+1/2,-z+1/2
+28 -x,-y+1/2,z+1/2
+29 y,z+1/2,x+1/2
+30 y,-z+1/2,-x+1/2
+31 -y,z+1/2,-x+1/2
+32 -y,-z+1/2,x+1/2
+33 z,x+1/2,y+1/2
+34 z,-x+1/2,-y+1/2
+35 -z,x+1/2,-y+1/2
+36 -z,-x+1/2,y+1/2
+37 y+1/2,x,z
+38 y+1/2,-x,-z
+39 -y+1/2,x,-z
+40 -y+1/2,-x,z
+41 x+1/2,z,y
+42 x+1/2,-z,-y
+43 -x+1/2,z,-y
+44 -x+1/2,-z,y
+45 z+1/2,y,x
+46 z+1/2,-y,-x
+47 -z+1/2,y,-x
+48 -z+1/2,-y,x
+49 x+1/2,y,z+1/2
+50 x+1/2,-y,-z+1/2
+51 -x+1/2,y,-z+1/2
+52 -x+1/2,-y,z+1/2
+53 y+1/2,z,x+1/2
+54 y+1/2,-z,-x+1/2
+55 -y+1/2,z,-x+1/2
+56 -y+1/2,-z,x+1/2
+57 z+1/2,x,y+1/2
+58 z+1/2,-x,-y+1/2
+59 -z+1/2,x,-y+1/2
+60 -z+1/2,-x,y+1/2
+61 y,x+1/2,z
+62 y,-x+1/2,-z
+63 -y,x+1/2,-z
+64 -y,-x+1/2,z
+65 x,z+1/2,y
+66 x,-z+1/2,-y
+67 -x,z+1/2,-y
+68 -x,-z+1/2,y
+69 z,y+1/2,x
+70 z,-y+1/2,-x
+71 -z,y+1/2,-x
+72 -z,-y+1/2,x
+73 x+1/2,y+1/2,z
+74 x+1/2,-y+1/2,-z
+75 -x+1/2,y+1/2,-z
+76 -x+1/2,-y+1/2,z
+77 y+1/2,z+1/2,x
+78 y+1/2,-z+1/2,-x
+79 -y+1/2,z+1/2,-x
+80 -y+1/2,-z+1/2,x
+81 z+1/2,x+1/2,y
+82 z+1/2,-x+1/2,-y
+83 -z+1/2,x+1/2,-y
+84 -z+1/2,-x+1/2,y
+85 y,x,z+1/2
+86 y,-x,-z+1/2
+87 -y,x,-z+1/2
+88 -y,-x,z+1/2
+89 x,z,y+1/2
+90 x,-z,-y+1/2
+91 -x,z,-y+1/2
+92 -x,-z,y+1/2
+93 z,y,x+1/2
+94 z,-y,-x+1/2
+95 -z,y,-x+1/2
+96 -z,-y,x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+I1 I 8 a 0.00000 0.00000 0.00000 1.0
+B1 B 24 c 0.00000 0.25000 0.25000 1.0
+B2 B 32 e 0.17000 0.17000 0.17000 1.0
+O1 O 8 b 0.25000 0.25000 0.25000 1.0
+O2 O 96 h 0.43000 0.23200 0.34800 1.0
+Ni1 Ni 24 d 0.25000 0.00000 0.00000 1.0
+ 
+

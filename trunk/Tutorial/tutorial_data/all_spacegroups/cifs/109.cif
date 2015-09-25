@@ -1,0 +1,101 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 1c25b196be8eb72cdfc2fe89ef80cd38
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/00/1510056.cif $
+#------------------------------------------------------------------------------
+data_1510056
+loop_
+_publ_author_name
+'Salamakha, P.S.'
+'Krol, J.'
+'Sologub, O.L.'
+'Zaplatynsky, O.V.'
+'Ciach, R.'
+_publ_section_title
+;
+ Interaction of neodymium and silicon with gold: phase diagram and
+ structural chemistry of ternary compounds
+;
+_journal_name_full               'Journal of Alloys Compd.'
+_journal_page_first              197
+_journal_page_last               200
+_journal_volume                  264
+_journal_year                    1998
+_chemical_name_systematic        'Nd Si (Si0.8 Au0.2)'
+_citation_journal_id_ASTM        JALCEU
+_[local]_cod_data_source_file    gold_10.cif
+_[local]_cod_data_source_block   Au0.2Nd1Si1.8
+_[local]_cod_chemical_formula_sum_orig 'Au0.2 Nd1 Si1.8'
+_cod_original_cell_volume        244.0525
+_cod_database_code               1510056
+_journal_paper_doi 10.1016/S0925-8388(97)00263-6
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 41 m d"
+_symmetry_space_group_name_Hall 'I 4bw -2'
+_[local]_omdb_cod_original_Hall 'I 4bw -2'
+_symmetry_Int_Tables_number 109
+ 
+_cell_length_a    4.17680
+_cell_length_b    4.17680
+_cell_length_c    13.98930
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x+1/2,z+1/4
+4 y,-x+1/2,z+1/4
+5 -x,y,z
+6 x,-y,z
+7 y,x+1/2,z+1/4
+8 -y,-x+1/2,z+1/4
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y+1/2,z+1/2
+11 -y+1/2,x,z+3/4
+12 y+1/2,-x,z+3/4
+13 -x+1/2,y+1/2,z+1/2
+14 x+1/2,-y+1/2,z+1/2
+15 y+1/2,x,z+3/4
+16 -y+1/2,-x,z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Si1 Si 4 a 0.00000 0.00000 0.33490 1.0
+Si2 Si 4 a 0.00000 0.00000 0.16870 0.799
+Au1 Au 4 a 0.00000 0.00000 0.16870 0.201
+Nd1 Nd 4 a 0.00000 0.00000 0.75000 1.0
+ 
+

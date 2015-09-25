@@ -1,0 +1,26 @@
+The httk package
+****************
+
+This page documents the most relevant features of the httk package. For the full API documentation refer to :doc:`httk_base`.
+
+.. automodule:: httk
+
+
+Members
+=======
+
+Httk members
+
+.. automodule:: httk.citation
+   :members:
+
+Blaha
+=====
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: httk.atomistic
+   :members: 
+
+.. autoclass:: Structure
+   :members: create

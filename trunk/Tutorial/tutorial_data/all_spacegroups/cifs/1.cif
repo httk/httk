@@ -1,0 +1,85 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: c4ac7f061d8ec0a797ca546a1699b627
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/11/2001129.cif $
+#------------------------------------------------------------------------------
+data_2001129
+loop_
+_publ_author_name
+'Garcia, E.'
+'Ryan, R. R.'
+_publ_section_title
+;
+ Structure of the laser host material LiYF~4~
+;
+_journal_issue                   12
+_journal_name_full               'Acta Crystallographica Section C'
+_journal_page_first              2053
+_journal_page_last               2054
+_journal_volume                  49
+_journal_year                    1993
+_diffrn_radiation_type           Mo
+_diffrn_radiation_wavelength     0.7107
+_exptl_absorpt_coefficient_mu    20.4
+_exptl_crystal_density_diffrn    3.99
+_exptl_crystal_F_000             312
+_[local]_cod_data_source_file    hh0619.cif
+_[local]_cod_data_source_block   hh0619a
+_[local]_cod_chemical_formula_sum_orig 'F4 Li1 Y1'
+_cod_original_cell_volume        286.50(10)
+_cod_database_code               2001129
+_journal_paper_doi 10.1107/S0108270193005876
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1"
+_symmetry_space_group_name_Hall 'P 1'
+_[local]_omdb_cod_original_Hall 'I 1'
+_symmetry_Int_Tables_number 1
+ 
+_cell_length_a    5.16400
+_cell_length_b    5.16400
+_cell_length_c    6.49428
+_cell_angle_alpha 113.42701
+_cell_angle_beta  113.42701
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Y1 Y 1 a 0.62500 0.37500 0.25000 1.0
+Li1 Li 1 a 0.12500 0.87500 0.25000 1.0
+F1 F 1 a 0.32540 -0.04180 0.08740 1.0
+ 
+

@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core.htdata import periodictable
+from httk.atomistic.data import periodictable
+from httk.atomistic import Structure
 from httk.core import *
     
 def spglib_out_to_struct(out):

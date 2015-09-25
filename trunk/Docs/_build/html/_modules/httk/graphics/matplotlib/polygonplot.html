@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.graphics.matplotlib.polygonplot &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="httk" href="../../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.graphics.matplotlib.polygonplot</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c">#</span>
+<span class="c"># Uses parts from &#39;dave&#39;, http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots</span>
+
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="PolygonPlot"><a class="viewcode-back" href="../../../../httk.graphics.matplotlib.html#httk.graphics.matplotlib.polygonplot.PolygonPlot">[docs]</a><span class="k">class</span> <span class="nc">PolygonPlot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_angle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">rotate_labels</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;one&#39;</span><span class="p">,</span><span class="s">&#39;two&#39;</span><span class="p">,</span><span class="s">&#39;three&#39;</span><span class="p">),</span><span class="n">sides</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                 <span class="n">label_offset</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span><span class="n">edge_args</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;color&#39;</span><span class="p">:</span><span class="s">&#39;black&#39;</span><span class="p">,</span><span class="s">&#39;linewidth&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">},</span><span class="n">fig_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;figsize&#39;</span><span class="p">:(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span><span class="s">&#39;facecolor&#39;</span><span class="p">:</span><span class="s">&#39;white&#39;</span><span class="p">,</span><span class="s">&#39;edgecolor&#39;</span><span class="p">:</span><span class="s">&#39;white&#39;</span><span class="p">},</span>
+                 <span class="n">text_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;fontsize&#39;</span><span class="p">:</span><span class="mi">24</span><span class="p">,</span><span class="s">&#39;color&#39;</span><span class="p">:</span><span class="s">&#39;black&#39;</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        start_angle (90): Direction of first vertex.</span>
+<span class="sd">        rotate_labels (False): Orient labels perpendicular to vertices.</span>
+<span class="sd">        labels (&#39;one&#39;,&#39;two&#39;,&#39;three&#39;): Labels for vertices.</span>
+<span class="sd">        sides (3): Number of dimensions to accommodate</span>
+<span class="sd">        label_offset (0.10): Offset for label from vertex (percent of distance from origin).</span>
+<span class="sd">        edge_args ({&#39;color&#39;:&#39;black&#39;,&#39;linewidth&#39;:2}): matplotlib keyword args for plots.</span>
+<span class="sd">        fig_args ({&#39;figsize&#39;:(8,8),&#39;facecolor&#39;:&#39;white&#39;,&#39;edgecolor&#39;:&#39;white&#39;}): matplotlib keyword args for figures.</span>
+<span class="sd">        text_args: matplotlib keyword args for axis labels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="p">[</span>
+                                <span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">_</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="n">sides</span> <span class="o">+</span> <span class="n">start_angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">),</span>
+                                <span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">_</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="n">sides</span> <span class="o">+</span> <span class="n">start_angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+                            <span class="p">]</span> 
+                            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sides</span><span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+
+        
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">fig_args</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">sides</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">rotate_labels</span><span class="p">:</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="mi">180</span><span class="o">*</span><span class="n">arctan</span><span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">pi</span> <span class="o">+</span> <span class="mi">90</span>
+                <span class="k">if</span> <span class="n">angle</span> <span class="o">&gt;</span> <span class="mi">90</span> <span class="ow">and</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="mi">270</span><span class="p">:</span>
+                    <span class="n">angle</span> <span class="o">=</span> <span class="n">mod</span><span class="p">(</span><span class="n">angle</span> <span class="o">+</span> <span class="mi">180</span><span class="p">,</span><span class="mi">360</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">label_offset</span><span class="p">),</span>
+                    <span class="n">y</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">label_offset</span><span class="p">),</span>
+                    <span class="n">l</span><span class="p">,</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">verticalalignment</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">rotation</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">text_args</span>
+                <span class="p">)</span>
+    
+        <span class="c"># Clear normal matplotlib axes graphics.</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    
+        <span class="c"># Plot border</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">_</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sides</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">,]],</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">_</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sides</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">,]],</span>
+            <span class="o">**</span><span class="n">edge_args</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+        
+
+<div class="viewcode-block" id="PolygonPlot.translate_coords"><a class="viewcode-back" href="../../../../httk.graphics.matplotlib.html#httk.graphics.matplotlib.polygonplot.PolygonPlot.translate_coords">[docs]</a>    <span class="k">def</span> <span class="nf">translate_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">scaling</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>        
+        
+        <span class="c"># If data is Nxsides, newdata is Nx2.</span>
+        <span class="k">if</span> <span class="n">scaling</span><span class="p">:</span>
+            <span class="c"># Scales data for you.</span>
+            <span class="n">newdata</span> <span class="o">=</span> <span class="n">dot</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Assumes data already sums to 1.</span>
+            <span class="n">newdata</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">newdata</span>
+</div></div>
+<span class="n">__all__</span><span class="o">=</span> <span class="p">[</span><span class="s">&#39;PolygonPlot&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">1000</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">((</span>
+        <span class="n">array</span><span class="p">([</span><span class="n">k</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> 
+        <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> 
+        <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">k</span><span class="p">])</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">))</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="n">s</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="n">s</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">PolygonPlot</span><span class="p">()</span>
+
+    <span class="n">newdata</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">pp</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">newdata</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">newdata</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span>
+        <span class="p">)</span>
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

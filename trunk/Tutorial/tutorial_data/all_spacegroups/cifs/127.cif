@@ -1,0 +1,94 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: c2f2ce7ba62124349618f011b1b8905d
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/50/97/1509728.cif $
+#------------------------------------------------------------------------------
+data_1509728
+loop_
+_publ_author_name
+'Palenzona, A.'
+_publ_section_title
+;
+ The ytterbium-silver system
+;
+_journal_name_full               'Journal of the Less-Common Metals'
+_journal_page_first              443
+_journal_page_last               446
+_journal_volume                  21
+_journal_year                    1970
+_chemical_name_systematic        'Ag2 Yb3'
+_citation_journal_id_ASTM        JCOMAH
+_[local]_cod_data_source_file    silver2-3_205.cif
+_[local]_cod_data_source_block   Ag2Yb3
+_cod_original_cell_volume        284.9341
+_cod_database_code               1509728
+_journal_paper_doi 10.1016/0022-5088(70)90049-4
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/m 21/b 2/m"
+_symmetry_space_group_name_Hall '-P 4 2ab'
+_[local]_omdb_cod_original_Hall '-P 4 2ab'
+_symmetry_Int_Tables_number 127
+ 
+_cell_length_a    8.21900
+_cell_length_b    8.21900
+_cell_length_c    4.21800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x+1/2,y+1/2,-z
+4 -x,-y,z
+5 -y+1/2,-x+1/2,-z
+6 -y,x,z
+7 y,-x,z
+8 y+1/2,x+1/2,-z
+9 -x,-y,-z
+10 -x+1/2,y+1/2,z
+11 x+1/2,-y+1/2,z
+12 x,y,-z
+13 y+1/2,x+1/2,z
+14 y,-x,-z
+15 -y,x,-z
+16 -y+1/2,-x+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Yb1 Yb 2 a 0.00000 0.00000 0.00000 1.0
+Yb2 Yb 4 h 0.68100 0.18100 0.50000 1.0
+Ag1 Ag 4 g 0.88900 0.38900 0.00000 1.0
+ 
+

@@ -1,0 +1,89 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 79dc9bf1a01c649b4c68cbed7ed797b5
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 16:04:56 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120072 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/23/2002340.cif $
+#------------------------------------------------------------------------------
+data_2002340
+_chemical_name_systematic          'Barium dineodymium platinate(II)'
+_publ_section_title
+;
+Isolierte quadratische Koordination von Pt2+ in Ba Nd2 Pt5.
+;
+loop_
+_publ_author_name
+  'Schiffler, S'
+  'Mueller-Buschbaum, Hk'
+_journal_name_full
+;
+Zeitschrift fuer Anorganische und Allgemeine Chemie
+;
+_journal_volume                    523
+_journal_year                      1985
+_journal_page_first                63
+_journal_page_last                 68
+_refine_ls_R_factor_all            0.067
+_cod_database_code 2002340
+_journal_paper_doi 10.1002/zaac.19855230409
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -4 b 2"
+_symmetry_space_group_name_Hall 'P -4 -2ab'
+_[local]_omdb_cod_original_Hall 'P -4 -2ab'
+_symmetry_Int_Tables_number 117
+ 
+_cell_length_a    6.75690
+_cell_length_b    6.75690
+_cell_length_c    5.91191
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y+1/2,-x+1/2,-z
+4 y+1/2,x+1/2,-z
+5 -x+1/2,y+1/2,z
+6 x+1/2,-y+1/2,z
+7 y,-x,-z
+8 -y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ba1 Ba 2 a 0.00000 0.00000 0.00000 1.0
+Nd1 Nd 4 h 0.17440 0.67440 0.50000 1.0
+Pt1 Pt 2 c 0.00000 0.50000 0.00000 1.0
+O1 O 2 b 0.00000 0.00000 0.50000 1.0
+O2 O 8 i 0.36800 0.85000 0.74900 1.0
+ 
+

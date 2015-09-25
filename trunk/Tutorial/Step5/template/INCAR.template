@@ -1,0 +1,32 @@
+LWAVE=.FALSE.
+LCHARG=.TRUE.
+ISTART=0
+ICHARG=2
+LORBIT=11
+LMAXMIX=6
+
+ISPIN=2
+
+ALGO=Normal
+PREC=Normal
+# ENCUT and ENAUG left at default for prerelax step
+LREAL=Auto
+LASPH=.TRUE.
+ADDGRID=.FALSE.
+SYMPREC=1e-4
+
+ISMEAR=-5
+
+# Recommended setup for 
+EDIFF=1E-3
+EDIFFG=-0.3
+NELMIN=5
+IBRION=2
+ISIF=3
+NSW=10
+
+MAGMOM=$VASP_MAGMOM
+# For spin polarized calculation
+NBANDS=$VASP_NBANDS_SPIN
+# For non-spin-polarized calculation
+# NBANDS=$VASP_NBANDS_NOSPIN

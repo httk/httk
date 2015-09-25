@@ -1,0 +1,107 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 768c89140388ae723dd7175e9db4808e
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/85/9008588.cif $
+#------------------------------------------------------------------------------
+data_9008588
+loop_
+_publ_author_name
+'Wyckoff, R. W. G.'
+_publ_section_title
+;
+ Second edition. Interscience Publishers, New York, New York
+ Sample at T = 508 K
+;
+_journal_name_full               'Crystal Structures'
+_journal_page_first              7
+_journal_page_last               83
+_journal_volume                  1
+_journal_year                    1963
+_chemical_name_common            Plutonium-gamma
+_diffrn_ambient_temperature      508
+_exptl_crystal_density_diffrn    17.507
+_[local]_cod_cif_authors_sg_H-M  'F d d d'
+_cod_database_code               9008588
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "F 2/d 2/d 2/d (origin choice 2)"
+_symmetry_space_group_name_Hall '-F 2uv 2vw'
+_[local]_omdb_cod_original_Hall 'F 2 2 -1d'
+_symmetry_Int_Tables_number 70
+ 
+_cell_length_a    3.15870
+_cell_length_b    10.16200
+_cell_length_c    5.76820
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+3/4,-z+3/4
+3 -x+3/4,y,-z+3/4
+4 -x+3/4,-y+3/4,z
+5 -x,-y,-z
+6 -x,y+1/4,z+1/4
+7 x+1/4,-y,z+1/4
+8 x+1/4,y+1/4,-z
+9 x,y+1/2,z+1/2
+10 x,-y+1/4,-z+1/4
+11 -x+3/4,y+1/2,-z+1/4
+12 -x+3/4,-y+1/4,z+1/2
+13 -x,-y+1/2,-z+1/2
+14 -x,y+3/4,z+3/4
+15 x+1/4,-y+1/2,z+3/4
+16 x+1/4,y+3/4,-z+1/2
+17 x+1/2,y,z+1/2
+18 x+1/2,-y+3/4,-z+1/4
+19 -x+1/4,y,-z+1/4
+20 -x+1/4,-y+3/4,z+1/2
+21 -x+1/2,-y,-z+1/2
+22 -x+1/2,y+1/4,z+3/4
+23 x+3/4,-y,z+3/4
+24 x+3/4,y+1/4,-z+1/2
+25 x+1/2,y+1/2,z
+26 x+1/2,-y+1/4,-z+3/4
+27 -x+1/4,y+1/2,-z+3/4
+28 -x+1/4,-y+1/4,z
+29 -x+1/2,-y+1/2,-z
+30 -x+1/2,y+3/4,z+1/4
+31 x+3/4,-y+1/2,z+1/4
+32 x+3/4,y+3/4,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pu1 Pu 8 b 0.12500 0.12500 0.62500 1.0
+ 
+

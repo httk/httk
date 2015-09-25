@@ -1,0 +1,261 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 040c94b66648668c8d872d9ea362a4bd
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 04:06:18 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120112 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/01/95/7019575.cif $
+#------------------------------------------------------------------------------
+data_7019575
+loop_
+_publ_author_name
+'Merkens, Carina'
+'Becker, Nils'
+'Lamberts, Kevin'
+'Englert, Ulli'
+_publ_section_title
+;
+ Bimetallic coordination networks based on Al(acacCN)(3): a building block
+ between inertness and lability.
+;
+_journal_issue                   28
+_journal_name_full
+'Dalton transactions (Cambridge, England : 2003)'
+_journal_page_first              8594
+_journal_page_last               8599
+_journal_volume                  41
+_journal_year                    2012
+_chemical_name_common            3c_100K
+_computing_cell_refinement       'Bruker SAINT'
+_computing_data_collection       'Bruker SMART'
+_computing_data_reduction        'Bruker SAINT'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      100(2)
+_diffrn_measured_fraction_theta_full 0.992
+_diffrn_measured_fraction_theta_max 0.992
+_diffrn_measurement_device_type  'CCD area detector'
+_diffrn_measurement_method       'omega scans'
+_diffrn_radiation_monochromator  'multilayer optics'
+_diffrn_radiation_source         microsource
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0695
+_diffrn_reflns_av_sigmaI/netI    0.0380
+_diffrn_reflns_limit_h_max       9
+_diffrn_reflns_limit_h_min       -9
+_diffrn_reflns_limit_k_max       13
+_diffrn_reflns_limit_k_min       -13
+_diffrn_reflns_limit_l_max       29
+_diffrn_reflns_limit_l_min       -29
+_diffrn_reflns_number            21738
+_diffrn_reflns_theta_full        26.67
+_diffrn_reflns_theta_max         26.67
+_diffrn_reflns_theta_min         1.71
+_exptl_absorpt_coefficient_mu    0.650
+_exptl_absorpt_correction_T_max  0.9379
+_exptl_absorpt_correction_T_min  0.8920
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   SADABS
+_exptl_crystal_colour            colorless
+_exptl_crystal_density_diffrn    1.591
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             972
+_exptl_crystal_size_max          0.18
+_exptl_crystal_size_mid          0.11
+_exptl_crystal_size_min          0.10
+_platon_squeeze_details
+;
+refinement of the expected constituents resulted in
+unsatisfactory agreement, in particular with respect to
+low resoltion reflection. Difference Fourier syntheses
+did not allow to construct a chemically meaningful
+disorder model. Most likely, the voids contain one
+hydroxide counteranion and 11 water molecules per formula
+unit; this assignment is in reasonable agreement with
+electron count, void volume and results from thermal
+analyses.
+;
+_refine_diff_density_max         0.913
+_refine_diff_density_min         -1.024
+_refine_diff_density_rms         0.089
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.085
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     104
+_refine_ls_number_reflns         2114
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.085
+_refine_ls_R_factor_all          0.0832
+_refine_ls_R_factor_gt           0.0615
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0515P)^2^+7.0946P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1444
+_refine_ls_wR_factor_ref         0.1547
+_reflns_number_gt                1636
+_reflns_number_total             2114
+_reflns_threshold_expression     >2sigma(I)
+_iucr_refine_instructions_details
+;
+TITL c11_49 in Pccm
+CELL 0.71073 7.5718 10.8468 23.7714 90.000 90.000 90.000
+ZERR 4.00 0.0010 0.0015 0.0032 0.000 0.000 0.000
+LATT 1
+SYMM -X, -Y, Z
+SYMM -X, Y, 0.5-Z
+SYMM X, -Y, 0.5-Z
+SFAC C N O AL AG H
+UNIT 52 8 44 4 2 106
+TEMP -173.16
+L.S. 10
+ACTA
+SIZE 0.10 0.11 0.18
+BOND
+BOND$H
+FMAP 2
+PLAN -20
+WGHT 0.051500 7.094600
+FVAR 13.05943
+MOLE 1
+AG1 5 0.000000 0.500000 0.250000 10.25000 0.03215 0.03619 =
+0.05952 0.00000 0.00000 0.00000
+AL1 4 0.500000 0.000000 0.439975 10.50000 0.02219 0.04271 =
+0.04075 0.00000 0.00000 0.00613
+O1 3 0.269257 0.067489 0.434217 11.00000 0.01977 0.04276 =
+0.04556 0.00597 0.00042 0.00385
+O2 3 0.576122 0.115667 0.385826 11.00000 0.02303 0.07582 =
+0.05162 0.02783 0.00774 0.01078
+O3 3 0.562371 0.097904 0.500000 10.50000 0.02205 0.02495 =
+0.04968 0.00000 0.00000 0.00056
+C1 1 0.018064 0.182034 0.412399 11.00000 0.02605 0.06605 =
+0.07966 0.01596 0.00252 0.01285
+AFIX 137
+H1A 6 -0.043447 0.161268 0.377385 11.00000 -1.50000
+H1B 6 0.001914 0.269851 0.420613 11.00000 -1.50000
+H1C 6 -0.030499 0.132807 0.443314 11.00000 -1.50000
+AFIX 0
+C2 1 0.209349 0.155024 0.406159 11.00000 0.02384 0.03750 =
+0.04526 -0.00773 -0.00473 0.00680
+C3 1 0.316223 0.224897 0.369089 11.00000 0.03008 0.04442 =
+0.04447 0.00341 -0.00514 0.00720
+C4 1 0.495246 0.205360 0.362240 11.00000 0.03393 0.06299 =
+0.04405 0.01002 -0.00416 0.00306
+C5 1 0.608515 0.288619 0.326487 11.00000 0.04215 0.09745 =
+0.08825 0.05142 0.00195 0.00112
+AFIX 137
+H5A 6 0.667785 0.349218 0.350541 11.00000 -1.50000
+H5B 6 0.534144 0.331541 0.299013 11.00000 -1.50000
+H5C 6 0.697237 0.239212 0.306670 11.00000 -1.50000
+AFIX 0
+C6 1 0.237257 0.319967 0.336956 11.00000 0.03346 0.05969 =
+0.07510 0.01346 0.00697 0.00834
+C7 1 0.616738 0.239378 0.500000 10.50000 0.18004 0.28156 =
+0.15001 0.00000 0.00000 0.17624
+AFIX 3
+H7A 6 0.694437 0.256744 0.532005 11.00000 -1.50000
+H7B 6 0.509364 0.289366 0.500000 10.50000 -1.50000
+AFIX 0
+N1 2 0.169519 0.393434 0.309756 11.00000 0.05227 0.07974 =
+0.10929 0.04905 0.01013 0.02446
+HKLF 4
+;
+_[local]_cod_data_source_file    c2dt30623a.txt
+_[local]_cod_data_source_block   3c_100K
+_[local]_cod_chemical_formula_sum_orig 'C13 H26.50 Ag0.50 Al N2 O11'
+_cod_original_cell_volume        1952.3(5)
+_cod_database_code               7019575
+loop_
+_platon_squeeze_void_nr
+_platon_squeeze_void_average_x
+_platon_squeeze_void_average_y
+_platon_squeeze_void_average_z
+_platon_squeeze_void_volume
+_platon_squeeze_void_count_electrons
+_platon_squeeze_void_content
+1 -0.024 0.000 0.250 122 63 '5 H2O, OH- '
+2 -0.024 0.000 0.750 122 63 '5 H2O, OH- '
+3 -0.041 0.500 0.000 155 61 '6 H2O'
+4 -0.024 0.500 0.500 155 61 '6 H2O'
+_journal_paper_doi 10.1039/c2dt30623a
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 2/c 2/c 2/m"
+_symmetry_space_group_name_Hall '-P 2 2c'
+_[local]_omdb_cod_original_Hall '-P 2 2c'
+_symmetry_Int_Tables_number 49
+ 
+_cell_length_a    7.57180
+_cell_length_b    10.84680
+_cell_length_c    23.77100
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y,z
+5 -x,-y,-z
+6 -x,y,z+1/2
+7 x,-y,z+1/2
+8 x,y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ag1 Ag 2 g 0.00000 0.50000 0.25000 1.0
+Al1 Al 4 p 0.50000 0.00000 0.43998 1.0
+O1 O 8 r 0.26930 0.06750 0.43422 1.0
+O2 O 4 q 0.56240 -0.09790 0.00000 1.0
+O3 O 8 r 0.57610 0.11570 0.38583 1.0
+C1 C 8 r 0.01810 0.18200 0.41240 1.0
+C2 C 8 r 0.20930 0.15500 0.40620 1.0
+C3 C 8 r 0.23730 0.32000 0.33700 1.0
+C4 C 8 r 0.31620 0.22490 0.36910 1.0
+C5 C 8 r 0.49520 0.20540 0.36220 1.0
+C6 C 8 r 0.60850 0.28860 0.32650 1.0
+C7 C 4 q 0.61700 0.76100 0.00000 1.0
+H1 H 8 r -0.03050 0.13280 0.44330 1.0
+H2 H 8 r -0.04340 0.16130 0.37740 1.0
+H3 H 8 r 0.00190 0.26990 0.42060 1.0
+H4 H 4 q 0.50940 0.71060 0.00000 1.0
+H5 H 8 r 0.53410 0.33150 0.29900 1.0
+H6 H 8 r 0.66780 0.34920 0.35050 1.0
+H7 H 8 r 0.69440 0.25670 0.53200 1.0
+H8 H 8 r 0.69720 0.23920 0.30670 1.0
+N1 N 8 r 0.16950 0.39340 0.30980 1.0
+ 
+
