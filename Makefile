@@ -1,4 +1,4 @@
-all:	dist
+all:	docs dist
 
 presentation:
 	( cd Presentation; \
@@ -16,16 +16,15 @@ preclean:
 	rm -f httk_*.tgz
 	rm -f httk_*.md5
 
-# docs
 dist: presentation preclean 
 	echo '$$HTTKVERSION' | Docs/subsvars.sh > VERSION
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
 	rm -f "httk-${VERSION}.tgz"
 	(       cd ..; \
-                tar -zcvf "trunk/httk-$$(cat trunk/VERSION).tgz" trunk/Examples trunk/Tutorial trunk/External trunk/Execution trunk/httk trunk/*.txt trunk/LICENSE trunk/COPYING trunk/httk_overview.pdf trunk/bin \
-		trunk/httk.cfg.default trunk/VERSION \
-                trunk/httk.minimal.files trunk/setup.shell trunk/setup.shell.eval \
-		--exclude=".*" --transform "flags=r;s|httk.cfg.default|httk.cfg|;s|trunk|httk-$$(cat trunk/VERSION)|"\
+                tar -zcvf "httk/httk-$$(cat httk/VERSION).tgz" httk/Examples httk/Tutorial httk/External httk/Execution httk/httk httk/*.txt httk/LICENSE httk/COPYING httk/httk_overview.pdf httk/bin \
+		httk/httk.cfg.default httk/VERSION \
+                httk/httk.minimal.files httk/setup.shell httk/setup.shell.eval \
+		--exclude=".*" --transform "flags=r;s|httk.cfg.default|httk.cfg|;s|httk|httk-$$(cat httk/VERSION)|"\
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
 
