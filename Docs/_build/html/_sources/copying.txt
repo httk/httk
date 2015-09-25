@@ -1,5 +1,0 @@
-httk license
-============
-
-.. literalinclude:: ../COPYING
-
