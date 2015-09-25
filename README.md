@@ -1,5 +1,5 @@
 =====================================================================
-httk main README file
+httk git repository README file
 =====================================================================
 
 The High-Throughput Toolkit (httk)
@@ -9,6 +9,16 @@ For License information see the file COPYING.
 
 Contact: httk [at] openmaterialsdb.se
 =====================================================================
+
+Important temporary notes
+-------------------------
+OBS: The repository is missing an 'External' directory, because I do not
+want to check in all of cif2cell + libraries, especially since we are not
+going to need that as an absolute dependency in the next release. Hence,
+after 'git clone' please copy the 'External' directory from the 1.0 release.
+( It is found at: http://httk.openmaterialsdb.se/downloads.html )
+
+
 
 About the High-Throughput Toolkit
 ---------------------------------
