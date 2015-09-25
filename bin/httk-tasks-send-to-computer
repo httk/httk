@@ -1,0 +1,128 @@
+#!/bin/bash
+DIRNAME="$(dirname "$0")"
+HTTK_BIN_PATH="$(cd "$DIRNAME"; pwd -P)"
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+if [ -z "$HTTK_PROJECT_DIR" ]; then
+    echo "You are not in a subdirectory to a project."
+    echo "If this is a new project, you need to run httk-setup-project"
+    echo "in what you intend to use for project directory."
+    exit 1
+fi
+
+PROJECT="$HTTK_PROJECT_NAME"
+
+PIPE="${1%:*}"
+PIPEPATH1="$HTTK_PROJECT_DIR/ht.project/computers/$PIPE/"
+PIPEPATH2="$HTTK_USER_HOME/computers/$PIPE/"
+
+QUEUE="${1#*:}"
+if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
+    QUEUE="default"
+fi
+
+ASSIGNMENT="${PIPE}--${QUEUE}"
+shift 1
+
+if [ -d "$PIPEPATH1" ]; then
+    PIPEPATH=$PIPEPATH1
+elif [ -d "$PIPEPATH2" ]; then
+    PIPEPATH=$PIPEPATH2
+else
+    echo "Unknown computer: $PIPE"
+    echo "(Please configure with httk-computer-setup <name>)"
+    exit 1
+fi
+
+echo "==== Assigning tasks to computer: $PIPE:$QUEUE"
+echo "Current project: $HTTK_PROJECT_NAME ($HTTK_PROJECT_DIR)"
+COUNT=0
+for DIR in "$@"; do
+    if [ ! -e "$DIR" ]; then
+	echo "Error: $DIR does not exist, skipping." >&2 
+	continue
+    fi
+    find "$DIR" -name "ht.task.*" | ( while read LINE; do
+	    #echo "$LINE" >&2
+	    DIRNAME="$(dirname "$LINE")"	
+	    BASENAME="$(basename "$LINE")"
+	    TASKHOST=$(echo "$BASENAME" | awk -F. '{print $3}')
+	    if [ "$TASKHOST" != "unassigned" ]; then
+		#echo "Already assigned." >&2
+		continue
+	    fi
+    	    
+	    NEWNAME=$(echo "$BASENAME" | awk -F. -v "pipe=$ASSIGNMENT" '{print "ht.task." pipe "." $4 "." $5 "." $6 "." $7 "." $8 "." $9}')
+	    mv "$LINE" "$DIRNAME"/"$NEWNAME" >&2
+	    COUNT="$((COUNT+1))"
+	done 
+	echo "$COUNT"
+	COUNT=0
+    )
+done | awk 'BEGIN {sum=0} {sum+=$1} END {print "\nAssigned",sum,"new runs"}'
+
+cd "$HTTK_PROJECT_DIR"
+
+echo "==== Fetching information about tasks to copy to computer"
+if [ "$1" != "" ]; then
+    COUNT=$((for DIR in "$@"; do
+        if [ ! -e "$DIR" ]; then
+	    echo "Error: $DIR does not exist, skipping." >&2 
+	    continue
+	fi
+	find "$HTTK_REL_DIR/$DIR" -name "ht.task.$ASSIGNMENT.*.waitstart" -o -name "ht.task.$ASSIGNMENT.*.waiting" 
+	done) | tee ht.project/ht.tmp.all | wc -l)
+else
+    COUNT=$(find "$HTTK_REL_DIR/" -name "ht.task.$ASSIGNMENT.*" | tee ht.project/ht.tmp.all | wc -l)
+fi
+echo "Found: $COUNT candidate tasks to push."
+if [ "${COUNT// }" == "0" ];then
+    echo "Nothing more to do."
+    exit 0
+fi
+
+echo "==== Fetching information about tasks already on the computer"
+COUNT=$(cat ht.project/ht.tmp.all | "$PIPEPATH/command" "$QUEUE" "mkdir -p \"ht.tmp.waitstart/$PROJECT/\";while read LINE; do
+	ID=\"\$(echo \"\$LINE\" | awk -F/ '{split(\$NF,a,\".\"); print a[4]}')\"
+	DIR=\"\$(dirname \"\$LINE\")\"
+	LOCAL1=\"\$(ls -d ht.*/\"$PROJECT/\$DIR/ht.task.$ASSIGNMENT.\$ID\".* 2>/dev/null | grep -v \"ht.tmp\")\"
+        LOCAL2=\"\$(ls -d ht.waitstart/[1-5]/\"$PROJECT/\$DIR/ht.task.$ASSIGNMENT.\$ID\".* 2>/dev/null | grep -v \"ht.tmp\")\"
+        #echo \"LOCAL1: \$LOCAL1 LOCAL2: \$LOCAL2\" >&2
+        #echo \"$QUEUE\"/ht.waitstart/[1-5]/\"$PROJECT/\$DIR/ht.task.$ASSIGNMENT.\$ID\".* >&2
+	if [ -z \"\$LOCAL1\" -a -z \"\$LOCAL2\" ]; then
+           echo \"\$LINE\"
+	fi; 
+done" | tee ht.project/ht.tmp.sources | wc -l)
+echo "There are $COUNT tasks remaining to push."
+if [ "${COUNT// }" == "0" ];then
+    echo "Nothing more to do."
+    exit 0
+fi
+
+#if [ ! -s ht.sources ]; then
+#    echo "Nothing to push (perhaps you need to run httk-tasks-assign-to-pipe ?)."
+#    exit 0
+#fi
+
+#echo "==== Fetching information about tasks already in the pipe"
+#"$PIPEPATH/command" "mkdir -p ht.tmp.waitstart; mkdir -p ht.waiting/$PROJECT/; cd ht.waiting/$PROJECT/; find . -name \"ht.task.*\"" 
+
+#exit 0
+
+#| awk -F/ '{split($NF,a,"."); for(i=1;i<NF;i++) {printf("%s/",$i)}; printf("%s\n",a[1] "." a[2] "." a[3] "." a[4] ".*") }' > ht.excludes
+
+#echo "push:" "$PIPEPATH/push" "./" "ht.tmp.waitstart/$PROJECT/" 
+#cat ht.project/ht.tmp.sources
+
+if [ -s ht.project/ht.tmp.sources ]; then
+    echo "==== Pushing new tasks to pipe"
+    cat ht.project/ht.tmp.sources | "$PIPEPATH/push" "$QUEUE" "./" "ht.tmp.waitstart/$PROJECT/" 
+    #./ht.excludes
+fi
+
+echo "==== Moving new tasks into place to be executed"
+"$PIPEPATH/command" "$QUEUE" "find \"ht.tmp.waitstart/$PROJECT/\" -name \"ht.task.*\" | ( while read LINE; do BASENAME=\"\$(basename \"\$LINE\")\"; DIRNAME=\"\$(dirname \"\$LINE\")\"; PROCESS=\${BASENAME%.*}; PRIO=\${PROCESS##*.}; mkdir -p \"ht.waitstart/\$PRIO/\${DIRNAME#ht.tmp.waitstart/}\"; mv \"\$LINE\" \"ht.waitstart/\$PRIO/\${DIRNAME#ht.tmp.waitstart/}\"; done); find \"ht.tmp.waitstart/$PROJECT/\" -type d -depth -empty -exec rmdir \"{}\" \; rmdir \"ht.tmp.waitstart\" 2>/dev/null"
+
+rm -f ht.project/ht.tmp.all
+rm -f ht.project/ht.tmp.sources
+

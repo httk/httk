@@ -1,0 +1,264 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 4e1f1e87832105e0053a362008b44875
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 22:16:09 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120081 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/30/15/4301515.cif $
+#------------------------------------------------------------------------------
+data_4301515
+loop_
+_publ_author_name
+'Min Kyung Kim'
+'Vinna Jo'
+'Il-Wun Shim'
+'Kang Min Ok'
+_publ_contact_author_address
+;
+Department of Chemistry
+Chung-Ang University
+Seoul
+155-756
+Republic of Korea
+;
+_publ_contact_author_email       kmok@cau.ac.kr
+_publ_contact_author_fax         82(2)8254736
+_publ_contact_author_name        'Ok, Kang Min'
+_publ_contact_author_phone       82(2)8205197
+_publ_section_title
+;
+New Inorganic Helical Chain: Synthesis, Structure, Characterization, and
+Interconversion of BaGa2O2(OH)4
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              1275
+_journal_page_last               1277
+_journal_volume                  48
+_journal_year                    2009
+_chemical_absolute_configuration unk
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_diffrn_ambient_temperature      173.0(2)
+_diffrn_measured_fraction_theta_full 1
+_diffrn_measured_fraction_theta_max 1
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.1176
+_diffrn_reflns_av_unetI/netI     0.0429
+_diffrn_reflns_limit_h_max       17
+_diffrn_reflns_limit_h_min       -17
+_diffrn_reflns_limit_k_max       17
+_diffrn_reflns_limit_k_min       -13
+_diffrn_reflns_limit_l_max       17
+_diffrn_reflns_limit_l_min       -17
+_diffrn_reflns_number            6903
+_diffrn_reflns_theta_full        27.92
+_diffrn_reflns_theta_max         27.92
+_diffrn_reflns_theta_min         3.8
+_exptl_absorpt_coefficient_mu    18.66
+_exptl_absorpt_correction_T_max  0.23
+_exptl_absorpt_correction_T_min  0.18
+_exptl_absorpt_correction_type   empirical
+_exptl_absorpt_process_details
+; 
+ SADABS(Blessing, 1995) 
+;
+_exptl_crystal_colour            Colorless
+_exptl_crystal_density_diffrn    3.475
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       Block
+_exptl_crystal_F_000             1840
+_exptl_crystal_size_max          0.10
+_exptl_crystal_size_mid          0.08
+_exptl_crystal_size_min          0.08
+_refine_diff_density_max         1.067
+_refine_diff_density_min         -1.083
+_refine_diff_density_rms         0.277
+_refine_ls_extinction_coef       0.0049(6)
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   1.206
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     16
+_refine_ls_number_reflns         233
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.206
+_refine_ls_R_factor_all          0.0574
+_refine_ls_R_factor_gt           0.0466
+_refine_ls_shift/su_max          0.002
+_refine_ls_shift/su_mean         0.001
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0758P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1138
+_refine_ls_wR_factor_ref         0.1189
+_reflns_number_gt                197
+_reflns_number_total             233
+_reflns_threshold_expression     >2\(I)
+_[local]_cod_data_source_file    ic802187w_si_002_2.cif
+_[local]_cod_data_source_block   Sr3Ga2(OH)12
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+'_symmetry_cell_setting' value 'Cubic' changed to 'cubic' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from
+2010-06-29.
+
+'_exptl_absorpt_correction_type' value 'EMPIRICAL' changed to
+'empirical' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_enum 1527 2010-12-29 10:47:43Z saulius 
+;
+_cod_database_code               4301515
+_journal_paper_doi 10.1021/ic802187w
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 41/a -3 2/d"
+_symmetry_space_group_name_Hall '-I 4bd 2c 3'
+_[local]_omdb_cod_original_Hall '-I 4bd 2c 3'
+_symmetry_Int_Tables_number 230
+ 
+_cell_length_a    13.14670
+_cell_length_b    13.14670
+_cell_length_c    13.14670
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x+1/2,y,-z
+4 -x,-y+1/2,z
+5 y,z,x
+6 y,-z,-x+1/2
+7 -y+1/2,z,-x
+8 -y,-z+1/2,x
+9 z,x,y
+10 z,-x,-y+1/2
+11 -z+1/2,x,-y
+12 -z,-x+1/2,y
+13 -y+1/4,-x+1/4,-z+1/4
+14 -y+1/4,x+3/4,z+1/4
+15 y+1/4,-x+1/4,z+3/4
+16 y+3/4,x+1/4,-z+1/4
+17 -x+1/4,-z+1/4,-y+1/4
+18 -x+1/4,z+3/4,y+1/4
+19 x+1/4,-z+1/4,y+3/4
+20 x+3/4,z+1/4,-y+1/4
+21 -z+1/4,-y+1/4,-x+1/4
+22 -z+1/4,y+3/4,x+1/4
+23 z+1/4,-y+1/4,x+3/4
+24 z+3/4,y+1/4,-x+1/4
+25 -x,-y,-z
+26 -x,y,z+1/2
+27 x+1/2,-y,z
+28 x,y+1/2,-z
+29 -y,-z,-x
+30 -y,z,x+1/2
+31 y+1/2,-z,x
+32 y,z+1/2,-x
+33 -z,-x,-y
+34 -z,x,y+1/2
+35 z+1/2,-x,y
+36 z,x+1/2,-y
+37 y+1/4,x+1/4,z+1/4
+38 y+1/4,-x+3/4,-z+1/4
+39 -y+1/4,x+1/4,-z+3/4
+40 -y+3/4,-x+1/4,z+1/4
+41 x+1/4,z+1/4,y+1/4
+42 x+1/4,-z+3/4,-y+1/4
+43 -x+1/4,z+1/4,-y+3/4
+44 -x+3/4,-z+1/4,y+1/4
+45 z+1/4,y+1/4,x+1/4
+46 z+1/4,-y+3/4,-x+1/4
+47 -z+1/4,y+1/4,-x+3/4
+48 -z+3/4,-y+1/4,x+1/4
+49 x+1/2,y+1/2,z+1/2
+50 x+1/2,-y+1/2,-z
+51 -x,y+1/2,-z+1/2
+52 -x+1/2,-y,z+1/2
+53 y+1/2,z+1/2,x+1/2
+54 y+1/2,-z+1/2,-x
+55 -y,z+1/2,-x+1/2
+56 -y+1/2,-z,x+1/2
+57 z+1/2,x+1/2,y+1/2
+58 z+1/2,-x+1/2,-y
+59 -z,x+1/2,-y+1/2
+60 -z+1/2,-x,y+1/2
+61 -y+3/4,-x+3/4,-z+3/4
+62 -y+3/4,x+1/4,z+3/4
+63 y+3/4,-x+3/4,z+1/4
+64 y+1/4,x+3/4,-z+3/4
+65 -x+3/4,-z+3/4,-y+3/4
+66 -x+3/4,z+1/4,y+3/4
+67 x+3/4,-z+3/4,y+1/4
+68 x+1/4,z+3/4,-y+3/4
+69 -z+3/4,-y+3/4,-x+3/4
+70 -z+3/4,y+1/4,x+3/4
+71 z+3/4,-y+3/4,x+1/4
+72 z+1/4,y+3/4,-x+3/4
+73 -x+1/2,-y+1/2,-z+1/2
+74 -x+1/2,y+1/2,z
+75 x,-y+1/2,z+1/2
+76 x+1/2,y,-z+1/2
+77 -y+1/2,-z+1/2,-x+1/2
+78 -y+1/2,z+1/2,x
+79 y,-z+1/2,x+1/2
+80 y+1/2,z,-x+1/2
+81 -z+1/2,-x+1/2,-y+1/2
+82 -z+1/2,x+1/2,y
+83 z,-x+1/2,y+1/2
+84 z+1/2,x,-y+1/2
+85 y+3/4,x+3/4,z+3/4
+86 y+3/4,-x+1/4,-z+3/4
+87 -y+3/4,x+3/4,-z+1/4
+88 -y+1/4,-x+3/4,z+3/4
+89 x+3/4,z+3/4,y+3/4
+90 x+3/4,-z+1/4,-y+3/4
+91 -x+3/4,z+3/4,-y+1/4
+92 -x+1/4,-z+3/4,y+3/4
+93 z+3/4,y+3/4,x+3/4
+94 z+3/4,-y+1/4,-x+3/4
+95 -z+3/4,y+3/4,-x+1/4
+96 -z+1/4,-y+3/4,x+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sr1 Sr 24 c 0.12500 0.00000 0.25000 1.0
+Ga1 Ga 16 a 0.00000 0.00000 0.00000 1.0
+O1 O 96 h 0.02950 0.55220 0.36100 1.0
+ 
+

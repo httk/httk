@@ -1,0 +1,82 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 42229a1ed7f831a21a22df4bf6e705b8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/25/9012545.cif $
+#------------------------------------------------------------------------------
+data_9012545
+loop_
+_publ_author_name
+'Holseth, H.'
+'Kjekshus, A.'
+_publ_section_title
+;
+ Compounds with the marcasite type crystal structure
+ IV. The crystal structure of FeSb2
+ Locality: synthetic
+ Note: Single crystal X-ray from integrated Weissenberg film
+;
+_journal_name_full               'Acta Chemica Scandinavica'
+_journal_page_first              3043
+_journal_page_last               3050
+_journal_volume                  23
+_journal_year                    1969
+_chemical_name_mineral           Seinajokite
+_exptl_crystal_density_diffrn    8.154
+_cod_database_code               9012545
+_journal_paper_doi 10.3891/acta.chem.scand.23-3043
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P n n 2"
+_symmetry_space_group_name_Hall 'P 2 -2n'
+_[local]_omdb_cod_original_Hall 'P 2 -2n'
+_symmetry_Int_Tables_number 34
+ 
+_cell_length_a    5.83280
+_cell_length_b    6.53760
+_cell_length_c    3.19730
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x+1/2,y+1/2,z+1/2
+4 x+1/2,-y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Fe1 Fe 2 a 0.00000 0.00000 0.50000 1.0
+Sb1 Sb 4 c 0.68810 0.85650 0.00950 1.0
+ 
+

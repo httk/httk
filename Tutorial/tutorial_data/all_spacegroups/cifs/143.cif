@@ -1,0 +1,88 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: a9f4d7c77fc43826e9001d54befed324
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2011-09-28 14:24:46 +0000 (Wed, 28 Sep 2011) $
+#$Revision: 26848 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/21/2002161.cif $
+#------------------------------------------------------------------------------
+data_2002161
+_chemical_name_systematic          'Lanthanum titanium tellurium oxide'
+_[local]_cod_chemical_formula_sum_orig 'La O6 Te.75 Ti1.25'
+_publ_section_title
+;
+Synthese und Kristallstruktur des Lanthan-Titanat-Tellurats La Ti
+(Ti0.25 Te0.75) O6 und seine Verwandtschaft mit Pb Sb2 O6 und Sr (Mn
+Te) O6
+;
+loop_
+_publ_author_name
+  'Wulff, L'
+  'Mueller-Buschbaum, H'
+_journal_name_full
+;
+Zeitschrift fuer Naturforschung, Teil B. Anorganische Chemie,
+Organische Chemie (42,1987-)
+;
+_journal_volume                    53
+_journal_year                      1998
+_journal_page_first                149
+_journal_page_last                 152
+_refine_ls_R_factor_all            0.0473
+_cod_database_code 2002161
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 3"
+_symmetry_space_group_name_Hall 'P 3'
+_[local]_omdb_cod_original_Hall 'P 3'
+_symmetry_Int_Tables_number 143
+ 
+_cell_length_a    5.14100
+_cell_length_b    5.14100
+_cell_length_c    5.21800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+La1 La 1 a 0.00000 0.00000 0.00000 1.0
+Te1 Te 1 c 0.66667 0.33333 0.50120 0.75
+Ti1 Ti 1 c 0.66667 0.33333 0.50120 0.25
+Ti2 Ti 1 b 0.33333 0.66667 0.50260 1.0
+O1 O 3 d 0.38070 0.00250 0.71040 1.0
+O2 O 3 d 0.62760 0.00270 0.29720 1.0
+ 
+

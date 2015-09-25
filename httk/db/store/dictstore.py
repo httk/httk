@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from numpy import *
-import sys
-from httk.db import Storable
+from httk.db.storable import Storable
 
 class DictStore(object):
     """
@@ -67,7 +65,6 @@ class DictStore(object):
         self.store[table]={}
         self.sids[table]=0
         self.types[table] = types
-        print "TYPEDICTS",types
         self.typedicts[table] = dict(types)
 
         column_types = []

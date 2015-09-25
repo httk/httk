@@ -1,0 +1,23 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+
+QUEUE="$1"
+shift 1
+. "$SCRIPT_PATH/config"
+if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
+    . "$SCRIPT_PATH/config.$QUEUE"
+fi
+
+ssh "$USERNAME"@"$REMOTE_HOST" "REMOTE=\"$REMOTE_HTTK_DIR\"; mkdir -p \"\${REMOTE/#~/\$HOME}/Runs/default/ht.taskmgrstats\""
+
+# Saftey check
+if [ -e "$HTTK_DIR/httk" ]; then
+    echo "Please wait while copying files."    
+    rsync --delete -az -r --files-from="$HTTK_DIR/httk.minimal.files"  "$HTTK_DIR" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR/httk/"
+    echo "Installation complete."
+    echo ""
+else
+    echo "Failure to install code due to configuration error ($HTTK_DIR/httk does not exist.)." >&2
+fi

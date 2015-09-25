@@ -1,0 +1,81 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 16b935e93eb4553a83b56ada3e46efb1
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-09 13:53:25 +0000 (Thu, 09 May 2013) $
+#$Revision: 86000 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/50/9015083.cif $
+#------------------------------------------------------------------------------
+data_9015083
+loop_
+_publ_author_name
+'Broch, E.'
+_publ_section_title
+;
+ Untersuchungen ueber Kristallstrukturen des Wolframittypus und des Scheelittypus
+ _cod_database_code 1010642
+;
+_journal_name_full
+'Skrifter utgitt av det Norske Videnskaps-Akademi i Oslo'
+_journal_page_first              1
+_journal_page_last               618
+_journal_volume                  1
+_journal_year                    1929
+_database_code_amcsd             0017524
+_exptl_crystal_density_diffrn    5.305
+_[local]_cod_chemical_formula_sum_orig 'W Mg'
+_cod_database_code               9015083
+_amcsd_formula_title             'Mg O4 W'
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1 2/c 1"
+_symmetry_space_group_name_Hall '-P 2yc'
+_[local]_omdb_cod_original_Hall '-P 2yc'
+_symmetry_Int_Tables_number 13
+ 
+_cell_length_a    4.68000
+_cell_length_b    5.66000
+_cell_length_c    4.92000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.33000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y,-z+1/2
+3 -x,-y,-z
+4 x,-y,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+W1 W 2 e 0.00000 0.18200 0.25000 1.0
+Mg1 Mg 2 f 0.50000 0.68000 0.25000 1.0
+ 
+

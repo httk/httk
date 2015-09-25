@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+QUEUE="$1"
+shift 1
+. "$SCRIPT_PATH/config"
+if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
+    . "$SCRIPT_PATH/config.$QUEUE"
+fi
+
+rsync -az -r --delete --files-from=- "${LOCAL_HTTK_DIR/#\~/$HOME}"/Runs/"$QUEUE"/"$1" "$2"

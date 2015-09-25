@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: ca3f86a3581417aa8ba2c39203c12627
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-03-28 16:17:04 +0000 (Thu, 28 Mar 2013) $
+#$Revision: 77586 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/12/1011217.cif $
+#------------------------------------------------------------------------------
+data_1011217
+loop_
+_publ_author_name
+'Hendricks, S B'
+'Kosting, P R'
+_publ_section_title
+;
+The crystal structure of Fe2 P, Fe2 N, Fe3 N and Fe B.
+;
+_journal_coden_ASTM              ZEKGAX
+_journal_name_full
+;
+Zeitschrift fuer Kristallographie, Kristallgeometrie, Kristallphysik,
+Kristallchemie (-144,1977)
+;
+_journal_page_first              511
+_journal_page_last               533
+_journal_volume                  74
+_journal_year                    1930
+_chemical_compound_source        synthetic
+_chemical_name_mineral           Siderazot
+_chemical_name_systematic        'Iron nitride (3/1)'
+_exptl_crystal_density_meas      7.3
+_cod_database_code               1011217
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 63 2 2"
+_symmetry_space_group_name_Hall 'P 6c 2c'
+_[local]_omdb_cod_original_Hall 'P 3 2'
+_symmetry_Int_Tables_number 182
+ 
+_cell_length_a    4.66800
+_cell_length_b    4.66800
+_cell_length_c    4.36200
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/2
+3 -y,x-y,z
+4 -x,-y,z+1/2
+5 -x+y,-x,z
+6 y,-x+y,z+1/2
+7 x-y,-y,-z
+8 x,x-y,-z+1/2
+9 y,x,-z
+10 -x+y,y,-z+1/2
+11 -x,-x+y,-z
+12 -y,-x,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Fe1 Fe 6 g 0.33333 0.00000 0.00000 1.0
+N1 N 2 d 0.33333 0.66667 0.75000 1.0
+ 
+

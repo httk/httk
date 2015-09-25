@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -30,11 +30,12 @@ except ImportError:
 
 _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
-cfgpathstr = os.path.join(_realpath,'..','httk.cfg')
 config = configparser.ConfigParser()
-config.read(cfgpathstr)
+cfgpathstr = os.path.join(_realpath,'..','httk.cfg')
+config.read([cfgpathstr, os.path.expanduser('~/.httk.cfg')])
 
-
+#: The path to the main httk directory
+httk_dir = os.path.join(_realpath,'..') 
 
 
 

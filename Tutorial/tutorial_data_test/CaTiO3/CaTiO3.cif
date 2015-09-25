@@ -1,0 +1,114 @@
+#------------------------------------------------------------------------------
+#$Date: 2013-03-28 16:17:04 +0000 (Thu, 28 Mar 2013) $
+#$Revision: 77586 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/12/1011211.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1011211
+loop_
+_publ_author_name
+'Barth, T'
+_publ_section_title
+;
+Die Kristallstruktur von Perowskit und verwandter Verbindungen
+;
+_journal_coden_ASTM              NOGTAO
+_journal_name_full               'Norsk Geologisk Tidsskrift'
+_journal_page_first              201
+_journal_page_last               216
+_journal_volume                  8
+_journal_year                    1925
+_chemical_compound_source        'from Zermatt, Swiss Alps'
+_chemical_formula_structural     'Ca (Ti O3)'
+_chemical_formula_sum            'Ca O3 Ti'
+_chemical_name_mineral           Perovskite
+_chemical_name_systematic        'Calcium titanate'
+_symmetry_cell_setting           cubic
+_symmetry_Int_Tables_number      221
+_symmetry_space_group_name_H-M   'P m -3 m'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_formula_units_Z            1
+_cell_length_a                   3.795
+_cell_length_b                   3.795
+_cell_length_c                   3.795
+_cell_volume                     54.7
+_exptl_crystal_density_meas      3.98
+_cod_database_code               1011211
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+y,z,x
+z,x,y
+x,z,y
+y,x,z
+z,y,x
+x,-y,-z
+y,-z,-x
+z,-x,-y
+x,-z,-y
+y,-x,-z
+z,-y,-x
+-x,y,-z
+-y,z,-x
+-z,x,-y
+-x,z,-y
+-y,x,-z
+-z,y,-x
+-x,-y,z
+-y,-z,x
+-z,-x,y
+-x,-z,y
+-y,-x,z
+-z,-y,x
+-x,-y,-z
+-y,-z,-x
+-z,-x,-y
+-x,-z,-y
+-y,-x,-z
+-z,-y,-x
+-x,y,z
+-y,z,x
+-z,x,y
+-x,z,y
+-y,x,z
+-z,y,x
+x,-y,z
+y,-z,x
+z,-x,y
+x,-z,y
+y,-x,z
+z,-y,x
+x,y,-z
+y,z,-x
+z,x,-y
+x,z,-y
+y,x,-z
+z,y,-x
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+_atom_site_calc_flag
+Ca1 Ca2+ 1 a 0. 0. 0. 1. 0 d
+Ti1 Ti4+ 1 b 0.5 0.5 0.5 1. 0 d
+O1 O2- 3 c 0.5 0.5 0. 1. 0 d
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Ca2+ 2.000
+Ti4+ 4.000
+O2- -2.000

@@ -1,0 +1,86 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: f3fabd32ec83a400af0b8f9941e026ab
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-04-29 20:51:51 +0000 (Mon, 29 Apr 2013) $
+#$Revision: 82717 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/50/97/1509714.cif $
+#------------------------------------------------------------------------------
+data_1509714
+loop_
+_publ_author_name
+'Imamov, R.M.'
+'Pinsker, Z.G.'
+'Ching-Liang, C.'
+'Lapidus, E.L.'
+_publ_section_title
+;
+ Determination of the crystal structure of the low-temperature phase
+ alpha-Ag2 Se
+;
+_journal_name_full               Kristallografiya
+_journal_page_first              275
+_journal_page_last               283
+_journal_volume                  10
+_journal_year                    1965
+_chemical_name_systematic        'Ag2 Se'
+_citation_journal_id_ASTM        KRISAJ
+_[local]_cod_data_source_file    silver2-3_185.cif
+_[local]_cod_data_source_block   Ag2Se1
+_[local]_cod_chemical_formula_sum_orig 'Ag2 Se1'
+_cod_database_code               1509714
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 2 2 21"
+_symmetry_space_group_name_Hall 'P 2c 2'
+_[local]_omdb_cod_original_Hall 'P 2c 2'
+_symmetry_Int_Tables_number 17
+ 
+_cell_length_a    7.05000
+_cell_length_b    7.85000
+_cell_length_c    4.33000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z+1/2
+4 -x,-y,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ag1 Ag 4 e 0.12100 0.22500 0.52200 1.0
+Ag2 Ag 2 a 0.60700 0.00000 0.00000 1.0
+Ag3 Ag 2 b 0.62200 0.50000 0.00000 1.0
+Se1 Se 4 e 0.29800 0.27500 0.02200 1.0
+ 
+

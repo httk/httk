@@ -1,0 +1,108 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: a65c378ebacd317ace4c908b59d2cb2b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-02-24 01:06:50 +0000 (Mon, 24 Feb 2014) $
+#$Revision: 102820 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/8/10/13/8101390.cif $
+#------------------------------------------------------------------------------
+data_8101390
+loop_
+_publ_author_name
+'Zheng, Yue-Qing'
+'Zhou, Lin-Xia'
+'Lin, Jian-Li'
+'Zhang, Sun-Wei'
+_publ_section_title
+;
+Refinement of the crystal structure of potassium catena-carbonatoargentate
+(I), K[Ag(CO~3~)]
+;
+_journal_issue                   4
+_journal_name_full
+'Zeitschrift f\"ur Kristallographie - New Crystal Structures'
+_journal_page_first              467
+_journal_page_last               468
+_journal_volume                  215
+_journal_year                    2000
+_diffrn_ambient_temperature      293(2)
+_exptl_crystal_density_diffrn    3.929
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+'_symmetry_cell_setting' value 'Orthorhombic' changed to 'orthorhombic'
+according to '/home/saulius/struct/CIF-dictionaries/cif_core.dic'
+dictionary named 'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_enum 1527 2010-12-29 10:47:43Z saulius 
+;
+_cod_database_code               8101390
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 21/b 21/c 21/a"
+_symmetry_space_group_name_Hall '-I 2b 2c'
+_[local]_omdb_cod_original_Hall '-I 2b 2c'
+_symmetry_Int_Tables_number 73
+ 
+_cell_length_a    5.94400
+_cell_length_b    5.77500
+_cell_length_c    20.38900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x+1/2,y,-z
+4 -x,-y+1/2,z
+5 -x,-y,-z
+6 -x,y,z+1/2
+7 x+1/2,-y,z
+8 x,y+1/2,-z
+9 x+1/2,y+1/2,z+1/2
+10 x+1/2,-y+1/2,-z
+11 -x,y+1/2,-z+1/2
+12 -x+1/2,-y,z+1/2
+13 -x+1/2,-y+1/2,-z+1/2
+14 -x+1/2,y+1/2,z
+15 x,-y+1/2,z+1/2
+16 x+1/2,y,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ag1 Ag 8 c 0.61573 0.00000 0.25000 1.0
+K1 K 8 e 0.00000 0.25000 0.56968 1.0
+C1 C 8 e 0.00000 0.25000 0.87660 1.0
+O1 O 8 e 0.00000 0.25000 -0.06100 1.0
+O2 O 16 f 0.63760 0.11510 0.15327 1.0
+ 
+

@@ -1,0 +1,97 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 94d5d38feb3eeb11674a667372cbe7b1
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 16:04:56 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120072 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/53/2105390.cif $
+#------------------------------------------------------------------------------
+data_2105390
+loop_
+_publ_author_name
+'Sheldrick, G.M.'
+'Jones, P.G.'
+'Schwarzmann, E.'
+'Rumpel, H.'
+_publ_section_title
+;
+ Gold(III) oxide
+;
+_journal_name_full               'Acta Crystallographica B (24,1968-38,1982)'
+_journal_page_first              1435
+_journal_page_last               1437
+_journal_volume                  35
+_journal_year                    1979
+_chemical_name_systematic        'Au2 O3'
+_citation_journal_id_ASTM        ACBCAR
+_[local]_cod_data_source_file    gold_545.cif
+_[local]_cod_data_source_block   Au2O3
+_cod_original_cell_volume        517.8999
+_cod_database_code               2105390
+_journal_paper_doi 10.1107/S0567740879006622
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "F d d 2"
+_symmetry_space_group_name_Hall 'F 2 -2d'
+_[local]_omdb_cod_original_Hall 'F 2 -2d'
+_symmetry_Int_Tables_number 43
+ 
+_cell_length_a    12.82700
+_cell_length_b    10.52000
+_cell_length_c    3.83800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x+1/4,y+1/4,z+1/4
+4 x+1/4,-y+1/4,z+1/4
+5 x,y+1/2,z+1/2
+6 -x,-y+1/2,z+1/2
+7 -x+1/4,y+3/4,z+3/4
+8 x+1/4,-y+3/4,z+3/4
+9 x+1/2,y,z+1/2
+10 -x+1/2,-y,z+1/2
+11 -x+3/4,y+1/4,z+3/4
+12 x+3/4,-y+1/4,z+3/4
+13 x+1/2,y+1/2,z
+14 -x+1/2,-y+1/2,z
+15 -x+3/4,y+3/4,z+1/4
+16 x+3/4,-y+3/4,z+1/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+O1 O 8 a 0.00000 0.00000 0.81070 1.0
+O2 O 16 b 0.66750 0.48340 0.37320 1.0
+Au1 Au 16 b 0.79580 0.38290 0.25000 1.0
+ 
+

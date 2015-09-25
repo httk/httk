@@ -1,0 +1,81 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 5054685237489fb64afd7bb0ccc8e98a
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/40/9004093.cif $
+#------------------------------------------------------------------------------
+data_9004093
+loop_
+_publ_author_name
+'Rowland, J. F.'
+'Gabe, E. J.'
+'Hall, S. R.'
+_publ_section_title
+;
+ The crystal structures of costibite (CoSbS) and paracostibite(CoSbS)
+;
+_journal_name_full               'The Canadian Mineralogist'
+_journal_page_first              188
+_journal_page_last               196
+_journal_volume                  13
+_journal_year                    1975
+_chemical_name_mineral           Costibite
+_exptl_crystal_density_diffrn    6.867
+_[local]_cod_chemical_formula_sum_orig 'Co Sb S'
+_cod_database_code               9004093
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P m n 21"
+_symmetry_space_group_name_Hall 'P 2ac -2'
+_[local]_omdb_cod_original_Hall 'P -2 -2bc'
+_symmetry_Int_Tables_number 31
+ 
+_cell_length_a    3.60800
+_cell_length_b    4.87300
+_cell_length_c    5.85200
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x+1/2,-y,z+1/2
+3 -x,y,z
+4 x+1/2,-y,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Co1 Co 2 a 0.00000 0.28060 0.00000 1.0
+Sb1 Sb 2 a 0.00000 0.04120 0.37400 1.0
+S1 S 2 a 0.00000 0.45400 0.63370 1.0
+ 
+

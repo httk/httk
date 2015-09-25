@@ -1,0 +1,1107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.db.filteredcollection &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk" href="../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.db.filteredcollection</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">inspect</span>
+
+<div class="viewcode-block" id="FilteredCollection"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection">[docs]</a><span class="k">class</span> <span class="nc">FilteredCollection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Main interface for filtered collections.</span>
+
+<span class="sd">    Apart from what is declared here, each subclass should define e.g. &#39;table&#39;, &#39;column&#39;, &#39;function&#39; methods for</span>
+<span class="sd">    defining fields for use for filters (in, e.g., set_filter) and expressions (in, e.g., set_columns).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roottables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postfilterexprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sorts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indirection</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storable_tables</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="FilteredCollection.add"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filterexpr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the </span>
+<span class="sd">        FilteredCollection, a result is only included if it matches all the filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filterexpr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.add_all"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.add_all">[docs]</a>    <span class="k">def</span> <span class="nf">add_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filterexpr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the </span>
+<span class="sd">        FilteredCollection, a result is only included if it matches all the filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postfilterexprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filterexpr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.output"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">expression</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define which columns should be included in the results when iterating over a FilteredCollection. </span>
+<span class="sd">        attributes is a list of tuples consisting of (name,definition) where definition can be any</span>
+<span class="sd">        expression in columns.</span>
+
+<span class="sd">        Default is to show all columns of all tables defined. (See FilteredColleciton.table)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#if isinstance(expression,TableOrColumn):</span>
+        <span class="c">#    expression = TableOrColumn(expression.context,expression.name+&quot;_id&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span><span class="n">expression</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.reset"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear any filtering done on the data source.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roottables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postfilterexprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sorts</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.store_table"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.store_table">[docs]</a>    <span class="k">def</span> <span class="nf">store_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store the result of the filtered collection in a new table named &#39;name&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;store_table not implemented.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.add_sort"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.add_sort">[docs]</a>    <span class="k">def</span> <span class="nf">add_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">expression</span><span class="p">,</span><span class="n">direction</span><span class="o">=</span><span class="s">&#39;ASC&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define which columns should be included in the results when iterating over a FilteredCollection. </span>
+<span class="sd">        attributes is a list of tuples consisting of (name,definition) where definition can be any</span>
+<span class="sd">        expression in columns.</span>
+
+<span class="sd">        Default is to show all columns of all tables defined. (See FilteredColleciton.table)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sorts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">expression</span><span class="p">,</span><span class="n">direction</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.duplicate"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.duplicate">[docs]</a>    <span class="k">def</span> <span class="nf">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">tables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">)</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">roottables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roottables</span><span class="p">)</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">filterexprs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterexpr</span><span class="p">)</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FilteredCollection.variable"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FilteredCollection.variable">[docs]</a>    <span class="k">def</span> <span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">parentkey</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">types</span><span class="p">()</span>
+        <span class="c">#types = {&quot;name&quot;:obj.object_name, &quot;keys&quot;:obj.object_properties, &quot;keydict&quot;:dict(obj.object_properties), &quot;index&quot;:obj.object_index}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">types</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outid</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_storable_tables</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_storable_tables</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="n">parentkey</span><span class="p">,</span> <span class="n">subkey</span><span class="o">=</span><span class="n">subkey</span><span class="p">,</span> <span class="n">indirection</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">classref</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div></div>
+<div class="viewcode-block" id="FCDict"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCDict">[docs]</a><span class="k">class</span> <span class="nc">FCDict</span><span class="p">(</span><span class="n">FilteredCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This implements a filtered collection purely backed by a dictionary and python evaluation. </span>
+
+<span class="sd">    Note: FCSqliteMemory will usually be faster. (However, you need this class if</span>
+<span class="sd">    you need to express filters and expressions using python functions rather than Sqlite functions.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        #Data should be a list of dictionaries, such that [{column1:value1a, column2:value2a, ...},</span>
+<span class="sd">        #{column1:value1b, column2:value2b}, ...] </span>
+
+<span class="sd">        Data should be a list of tuples, such that [([value1a, value2a, ...],[column1, column2]), </span>
+<span class="sd">         ([value1b, value2b, ...],[column1, column2]), ...]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FCDict</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indirection</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="FCDict.copy"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCDict.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">FCDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duplicate</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+        <span class="k">return</span> <span class="n">new</span>
+</div>
+<div class="viewcode-block" id="FCDict.function"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCDict.function">[docs]</a>    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define a python function object for use when expressing filter queries and column expressions.</span>
+<span class="sd">        (You cannot define a filter with a &quot;bare function&quot;, since it would be called</span>
+<span class="sd">        directly at the point of defining the filter.)</span>
+<span class="sd">        Validy/existence of this function is not checked until the collection is iterated over.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeclaredFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FCDict.data"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCDict.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an object where the attributes are accessible as properties. I.e. </span>
+<span class="sd">          data = myFCDict.data</span>
+<span class="sd">          myFCDict.set_filter(data.example == data.otherexample*2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;data&quot;</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over all results matching set filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loops</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="n">loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">loops</span><span class="p">):</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">outdata</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c"># old format with dictionaries, should possibly re-invoke this as an alt repr.</span>
+            <span class="c">#for j in range(len(i)):</span>
+            <span class="c">#    for element in i[j]:</span>
+            <span class="c">#        data[self.tables[j].outid+&quot;.&quot;+element] = i[j][element]</span>
+            <span class="c">#        outdata.append(i[j][element])</span>
+            <span class="c">#        headers.append(self.tables[j].outid+&quot;.&quot;+element)</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>                                        
+                    <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">outdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+                    <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+
+            <span class="c"># Need to check subtable criteria </span>
+            <span class="c"># (needed here if someone uses the table as its own subtable, which seems weird but is possible)</span>
+            <span class="c"># E.g., roads(fromcity:name, tocity:name) can be subtabled with itself to see where you can get in two hops.</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="o">.</span><span class="n">check_subtable_on</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># This is executed if all subtable checks come out True.</span>
+                <span class="c"># The awkward flow with this inside the else: on a for, is due to Python missing &quot;break 2&quot;</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">for</span> <span class="n">filterexpr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">filterexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">outdata</span><span class="p">,</span><span class="n">headers</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="FCMultiDict"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiDict">[docs]</a><span class="k">class</span> <span class="nc">FCMultiDict</span><span class="p">(</span><span class="n">FilteredCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class allows you to combine a number of filtered collections and put filters on any combination</span>
+<span class="sd">    of them together. Just create a separate FilteredCollection from each data source, and pass them in </span>
+<span class="sd">    a list to the constructor of this class.</span>
+
+<span class="sd">    Filters that only apply to one of the FilteredCollections can be put on those collections instead,</span>
+<span class="sd">    while a filter that applies to more than one must be set on this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Data is a dictionary of filtered collections on form data={name1:fc1, name2:fc2, ...}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FCMultiDict</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+
+<div class="viewcode-block" id="FCMultiDict.copy"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiDict.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">FCMultiDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duplicate</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+        <span class="k">return</span> <span class="n">new</span>
+</div>
+<div class="viewcode-block" id="FCMultiDict.add"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiDict.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filterexpr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the </span>
+<span class="sd">        FilteredCollection, a result is only included if it matches all the filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">filterexpr</span><span class="o">.</span><span class="n">get_srctable_context</span><span class="p">()</span>
+        <span class="c"># If context comes back as &#39;MIXED&#39;, this is a mixed context expression. That means the MultiDict needs</span>
+        <span class="c"># to perform the search itself.</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;add cannot add context-less expressions, i.e., at least one column must be present in the expression.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s">&#39;MIXED&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filterexpr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">filterexpr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FCMultiDict.data"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiDict.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an object where the attributes of respective filtered collection is</span>
+<span class="sd">        accessible as attributes. An example:</span>
+<span class="sd">        </span>
+<span class="sd">          languagereview = FCMultiDict(&#39;programming&#39;:programming_fc, &#39;review&#39;:review_fc)</span>
+<span class="sd">          language = languagereview.data(&#39;programming&#39;).language</span>
+<span class="sd">          review = languagereview.data(&#39;review&#39;)</span>
+<span class="sd">          myFCMultiDict.set_filter(language.name == &quot;python&quot; &amp; review.goodness &gt; 9)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outid</span> <span class="o">=</span> <span class="s">&quot;data_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+        <span class="n">srctable</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">],</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="n">srctable</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div>
+<div class="viewcode-block" id="FCMultiDict.subdata"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiDict.subdata">[docs]</a>    <span class="k">def</span> <span class="nf">subdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="s">&#39;rowid&#39;</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an object where the attributes of respective filtered collection is</span>
+<span class="sd">        accessible as attributes. An example:</span>
+
+<span class="sd">          languagereview = FCMultiDict(&#39;programming&#39;:programming_fc, &#39;review&#39;:review_fc)</span>
+<span class="sd">          language = languagereview.data(&#39;programming&#39;).language</span>
+<span class="sd">          review = languagereview.data(&#39;review&#39;)</span>
+<span class="sd">          myFCMultiDict.set_filter(language.name == &quot;python&quot; &amp; review.goodness &gt; 9)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outid</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">table</span><span class="o">.</span><span class="n">context</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="n">srctable</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">],</span><span class="n">name</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="n">subkey</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">srctable</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">],</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="n">subkey</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="n">srctable</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over all results matching set filters.</span>
+
+<span class="sd">        This can be made highly more optimized by doing the itertools.product only for proper tables (not subtables),</span>
+<span class="sd">        and then set filters to handle the subtables. However, what happens when we have subtables of subtables?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loops</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="n">loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">loops</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">outdata</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>                                        
+                    <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">outdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+                    <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="o">.</span><span class="n">check_subtable_on</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># This is executed if all subtable checks come out True.</span>
+                <span class="c"># The awkward flow with this inside the else: on a for, is due to Python missing &quot;break 2&quot;</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">for</span> <span class="n">filterexpr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">filterexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">outdata</span><span class="p">,</span><span class="n">headers</span><span class="p">)</span>
+
+<span class="c"># Micro sqlite api to make sure all open databases gets closed on program termination</span>
+<span class="c">#from pysqlite2 import dbapi2 as sqlite</span>
+<span class="c"># import sqlite3 as sqlite</span>
+<span class="c"># sqliteconnections = set()</span>
+<span class="c"># database_debug = 0</span>
+<span class="c"># def sqlite_open_protected(filename):</span>
+<span class="c">#     global sqliteconnections</span>
+<span class="c">#     connection = sqlite.connect(filename)</span>
+<span class="c">#     sqliteconnections.add(connection)</span>
+<span class="c">#     return connection</span>
+<span class="c"># </span>
+<span class="c"># def sqlite_close_protected(connection):</span>
+<span class="c">#     global sqliteconnections</span>
+<span class="c">#     sqliteconnections.remove(connection)</span>
+<span class="c">#     connection.close()</span>
+<span class="c"># </span>
+<span class="c"># def sqlite_close_all():</span>
+<span class="c">#     global sqliteconnections</span>
+<span class="c">#     for connection in sqliteconnections:</span>
+<span class="c">#         connection.close()</span>
+<span class="c"># </span>
+<span class="c"># def sqlite_execute(cursor, sql, values=[]):</span>
+<span class="c">#     global database_debug</span>
+<span class="c">#     if os.environ.has_key(&#39;DATABASE_DEBUG&#39;) or database_debug:</span>
+<span class="c">#         print &gt;&gt; sys.stderr, &quot;SQL:&quot;+sql</span>
+<span class="c">#     try:</span>
+<span class="c">#         cursor.execute(sql,values)</span>
+<span class="c">#     except:</span>
+<span class="c">#         raise Exception(&quot;Error executing SQL:&quot;+sql)</span>
+<span class="c"># </span>
+<span class="c"># import atexit</span>
+<span class="c"># atexit.register(sqlite_close_all)</span>
+<span class="c">###############################################################</span>
+</div>
+<div class="viewcode-block" id="instantiate_from_store"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.instantiate_from_store">[docs]</a><span class="k">def</span> <span class="nf">instantiate_from_store</span><span class="p">(</span><span class="n">classobj</span><span class="p">,</span><span class="n">store</span><span class="p">,</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">classobj</span><span class="o">.</span><span class="n">types</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">types</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="s">&#39;init_keydict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">calldict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c">#print &quot;ARGS&quot;,args, output, id</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">calldict</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span><span class="o">=</span><span class="n">output</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="c">#print &quot;CALLDICT&quot;,classobj,calldict</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">newobj</span> <span class="o">=</span> <span class="n">classobj</span><span class="p">(</span><span class="o">**</span><span class="n">calldict</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Error when trying to create a new object&quot;</span><span class="p">,</span><span class="n">classobj</span><span class="p">,</span><span class="n">calldict</span>
+        <span class="k">raise</span>
+    <span class="n">newobj</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="nb">id</span>
+    <span class="c"># TODO: The handling of codependent data is a mess and really should be better abstracted up in HttkObject</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">newobj</span><span class="p">,</span><span class="s">&#39;_codependent_callbacks&#39;</span><span class="p">):</span>
+        <span class="n">newobj</span><span class="o">.</span><span class="n">_codependent_callbacks</span> <span class="o">+=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">store</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">fetch_codependent_data</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">newobj</span>
+</div>
+<div class="viewcode-block" id="FCSqlite"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite">[docs]</a><span class="k">class</span> <span class="nc">FCSqlite</span><span class="p">(</span><span class="n">FilteredCollection</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sqlstore</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FCSqlite</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sqliteconnection</span> <span class="o">=</span> <span class="n">sqlstore</span><span class="o">.</span><span class="n">db</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">sqlstore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indirection</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="FCSqlite.table"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite.table">[docs]</a>    <span class="k">def</span> <span class="nf">table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines a table object to use in filters (for add) and expressions (in set_columns).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outid</span> <span class="o">=</span> <span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div>
+<div class="viewcode-block" id="FCSqlite.subtable"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite.subtable">[docs]</a>    <span class="k">def</span> <span class="nf">subtable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="s">&#39;rowid&#39;</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines a table object to use in filters (for add) and expressions (in set_columns).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outid</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="n">subkey</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">indirection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table</span>
+</div>
+<div class="viewcode-block" id="FCSqlite.function"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite.function">[docs]</a>    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define a function object for expressing functions in filter queries. Validity/existence of this function</span>
+<span class="sd">        may not be tested until an iteration over matching entries is performed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DeclaredFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FCSqlite.store_table"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite.store_table">[docs]</a>    <span class="k">def</span> <span class="nf">store_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s">&quot;CREATE TABLE &quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot; AS &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">sql</span><span class="p">()</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sqliteconnection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DROP TABLE IF EXISTS &quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;PRAGMA full_column_names = true;&quot;</span><span class="p">)</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;PRAGMA short_column_names = false;&quot;</span><span class="p">)</span>       
+        <span class="c">#sqlstr = self.sql()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>        
+</div>
+<div class="viewcode-block" id="FCSqlite.sql"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCSqlite.sql">[docs]</a>    <span class="k">def</span> <span class="nf">sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sqlstr</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;SELECT</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot; *</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;  &quot;</span><span class="o">+</span><span class="s">&quot;, </span><span class="se">\n</span><span class="s">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_sql</span><span class="p">()</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span><span class="o">+</span><span class="s">&quot; </span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;FROM</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">tablelist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">groupset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="n">tablelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">_declare</span><span class="p">())</span>
+            <span class="n">groupby</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">_groupby</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">groupby</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">groupset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">groupby</span><span class="p">)</span>
+        <span class="c">#tablelist = [table.tablename+&quot; &quot;+table.outid for table in self.tables]</span>
+        <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;  &quot;</span><span class="o">+</span><span class="s">&quot; LEFT OUTER JOIN </span><span class="se">\n</span><span class="s">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tablelist</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;WHERE</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;  (</span><span class="se">\n</span><span class="s">    &quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">  )  AND  (</span><span class="se">\n</span><span class="s">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">_sql</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterexprs</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">  )</span><span class="se">\n</span><span class="s">&quot;</span>     
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groupset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;GROUP BY</span><span class="se">\n</span><span class="s">  &quot;</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;,</span><span class="se">\n</span><span class="s">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">groupset</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postfilterexprs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;HAVING</span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;  ( SUM ( NOT (</span><span class="se">\n</span><span class="s">    &quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">    )) = 0</span><span class="se">\n</span><span class="s">  ) AND (SUM ( NOT (</span><span class="se">\n</span><span class="s">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">_sql</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postfilterexprs</span><span class="p">])</span> <span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">    )) = 0</span><span class="se">\n</span><span class="s">  )</span><span class="se">\n</span><span class="s">&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sorts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;ORDER BY</span><span class="se">\n</span><span class="s">  &quot;</span>
+            <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;,</span><span class="se">\n</span><span class="s">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_sql</span><span class="p">()</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorts</span><span class="p">])</span><span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        
+        <span class="n">sqlstr</span> <span class="o">+=</span> <span class="s">&quot;;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">return</span> <span class="n">sqlstr</span><span class="p">;</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sql</span><span class="p">()</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sqliteconnection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="c">#cursor.execute(&quot;PRAGMA full_column_names = true;&quot;)</span>
+        <span class="c">#cursor.execute(&quot;PRAGMA short_column_names = false;&quot;)</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">description</span><span class="p">])</span>
+            <span class="n">mustreplace</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span>
+            <span class="n">mustreplace</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)):</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_classref</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">mustreplace</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_classref</span><span class="p">,))</span>
+
+        <span class="c">#description = cursor.description</span>
+        <span class="c">#for entry in cursor:</span>
+        <span class="c">#    data = {}</span>
+        <span class="c">#    for i in range(len(description)):</span>
+        <span class="c">#        data[description[i][0]] = entry[i]</span>
+        <span class="c">#    yield data</span>
+
+        <span class="c">#cursor.row_factory = sqlite.Row</span>
+            
+        <span class="c">#cursor.text_factory = str</span>
+
+        <span class="c"># A bit of premature optimization</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustreplace</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>        
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">:</span>            
+                <span class="k">yield</span> <span class="p">(</span><span class="n">entry</span><span class="p">,</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">:</span>    
+                <span class="n">entry</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>                
+                <span class="k">for</span> <span class="n">replace</span> <span class="ow">in</span> <span class="n">mustreplace</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="n">replace</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">instantiate_from_store</span><span class="p">(</span><span class="n">replace</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span><span class="n">entry</span><span class="p">[</span><span class="n">replace</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="c">#entry[replace[0]] = replace[1].instantiate_from_store(self.store,entry[replace[0]])</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">entry</span><span class="p">,</span><span class="n">headers</span><span class="p">)</span>
+
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="FCMultiSqlite"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.FCMultiSqlite">[docs]</a><span class="k">class</span> <span class="nc">FCMultiSqlite</span><span class="p">(</span><span class="n">FilteredCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class allows you to combine a number of filtered collections and put filters on any combination</span>
+<span class="sd">    of them together. Just create a separate FilteredCollection from each data source, and pass them in </span>
+<span class="sd">    a list to the constructor of this class.</span>
+
+<span class="sd">    Filters that only apply to one of the FilteredCollections should preferably be put on those collections,</span>
+<span class="sd">    while a filter that applies to more than one must be set on this class, *using field definitions made</span>
+<span class="sd">    with this class*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dicts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FCMultiSqlite</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dicts</span> <span class="o">=</span> <span class="n">dicts</span>
+
+</div>
+<div class="viewcode-block" id="fc_eval"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.fc_eval">[docs]</a><span class="k">def</span> <span class="nf">fc_eval</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span><span class="s">&#39;_evaluate&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span>
+</div>
+<div class="viewcode-block" id="fc_sql"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.fc_sql">[docs]</a><span class="k">def</span> <span class="nf">fc_sql</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span><span class="s">&#39;_sql&#39;</span><span class="p">):</span>
+        <span class="c">#print &quot;HERE&quot;,expr._sql(), expr.__class__</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">_sql</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="nb">unicode</span><span class="p">)):</span>
+        <span class="c"># TODO: Fix quoting system</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;&#39;&quot;</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span>
+
+<span class="c">#    try:</span>
+<span class="c">#        return &quot;\&quot;&quot;+str(expr.hexhash)+&quot;\&quot;&quot;</span>
+<span class="c">#    except Exception:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">sid</span><span class="p">)</span> 
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="fc_get_srctable_context"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.fc_get_srctable_context">[docs]</a><span class="k">def</span> <span class="nf">fc_get_srctable_context</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">firstcontext</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="s">&#39;_get_srctable_context&#39;</span><span class="p">):</span>
+            <span class="n">newcontext</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">_get_srctable_context</span><span class="p">()</span>        
+            <span class="k">if</span> <span class="n">firstcontext</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">firstcontext</span> <span class="o">=</span> <span class="n">newcontext</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">firstcontext</span> <span class="o">!=</span> <span class="n">newcontext</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s">&#39;MIXED&#39;</span>
+    <span class="k">return</span> <span class="n">firstcontext</span>
+</div>
+<div class="viewcode-block" id="fc_checkcontext"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.fc_checkcontext">[docs]</a><span class="k">def</span> <span class="nf">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="o">*</span><span class="n">exprs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span><span class="s">&#39;_evaluate&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">expr</span><span class="o">.</span><span class="n">_context</span> <span class="o">!=</span> <span class="n">context</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Cannot relate expressions from different contexts!&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Expression"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.Expression">[docs]</a><span class="k">class</span> <span class="nc">Expression</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">exprtype</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exprtype should be &#39;bool&#39;,&#39;value&#39;,&#39;unknown&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_context</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="o">=</span> <span class="n">exprtype</span>
+
+    <span class="c">#def eval(self,data):        </span>
+    <span class="c">#    evaledargs = [fc_eval(arg,data) for arg in self.args]</span>
+    <span class="c">#    return eval(self.name+&quot;(&quot; + &quot;,&quot;.join([str(x) for x in self.evaledargs]) + &quot;)&quot;)</span>
+
+<div class="viewcode-block" id="Expression.get_srctable_context"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.Expression.get_srctable_context">[docs]</a>    <span class="k">def</span> <span class="nf">get_srctable_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fc_get_srctable_context</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">)</span>
+
+    <span class="c">#def sql(self):</span>
+    <span class="c">#    return self.name+&quot;(&quot; + &quot;,&quot;.join([fc_sql(x) for x in self.args]) + &quot;)&quot;</span>
+</div>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: equality test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;=&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: not equal test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;!=&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: greater than test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;&gt;&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: less than test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;&lt;&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: greater equal test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;&gt;=&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: less equal test with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryComparison</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;&lt;=&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: add operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;+&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: sub operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: sub operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;-&quot;</span><span class="p">,</span><span class="n">other</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: mul operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: div operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: div operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__floordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: strcat operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="c"># This depends on the SQL server...</span>
+        <span class="c"># For ORACLE MYSQL etc</span>
+        <span class="c"># return Function(self._context,&quot;CONCAT&quot;,self,other)</span>
+        <span class="c"># Sqlite</span>
+        <span class="k">return</span> <span class="n">BinaryOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;||&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Expression.is_in"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.Expression.is_in">[docs]</a>    <span class="k">def</span> <span class="nf">is_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: is_in operator with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryBooleanOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;IN&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">args</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: and with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryBooleanOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;and&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: or with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryBooleanOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;or&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__xor__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: xor with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BinaryBooleanOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;xor&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprtype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: invert with expression of wrong type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnaryBooleanOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="s">&quot;not&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Function"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.Function">[docs]</a><span class="k">class</span> <span class="nc">Function</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">srctable</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;unknown&#39;</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">=</span> <span class="n">srctable</span>
+
+    <span class="c"># get_srctable_context needs to be overridden, because a functions context can ony ever be the</span>
+    <span class="c"># context it was declared in.</span>
+    <span class="k">def</span> <span class="nf">_get_srctable_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;(&quot;</span> <span class="o">+</span> <span class="s">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fc_sql</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;)&quot;</span>
+</div>
+<div class="viewcode-block" id="UnaryBooleanOp"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.UnaryBooleanOp">[docs]</a><span class="k">class</span> <span class="nc">UnaryBooleanOp</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="n">right</span><span class="p">):</span>
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="n">operator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">right</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;not&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;not&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="o">+</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BinaryBooleanOp"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.BinaryBooleanOp">[docs]</a><span class="k">class</span> <span class="nc">BinaryBooleanOp</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">):</span>
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="n">operator</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;and&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;or&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;xor&#39;</span><span class="p">:</span>
+            <span class="c"># python doesn&#39;t have &quot;xor&quot;? Maybe ^ would do, though.</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">l</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">r</span><span class="p">))</span> <span class="ow">or</span> <span class="p">((</span><span class="ow">not</span> <span class="n">l</span><span class="p">)</span> <span class="ow">and</span> <span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;and&#39;</span><span class="p">,</span><span class="s">&#39;or&#39;</span><span class="p">,</span><span class="s">&#39;xor&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;(&quot;</span><span class="o">+</span><span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="o">+</span><span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s">&quot;)&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;IN&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;(&quot;</span><span class="o">+</span><span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; IN (&quot;</span> <span class="o">+</span> <span class="s">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fc_sql</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span><span class="o">+</span><span class="s">&quot;))&quot;</span>            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error generating SQL for operator: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BinaryComparison"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.BinaryComparison">[docs]</a><span class="k">class</span> <span class="nc">BinaryComparison</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">):</span>
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;bool&#39;</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="n">operator</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;&lt;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;&gt;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;&gt;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;&lt;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;!=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span>
+        <span class="n">leftarg</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">rightarg</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">leftarg</span> <span class="o">=</span> <span class="s">&#39;NULL&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">leftarg</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">leftarg</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">leftarg</span> <span class="o">=</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">rightarg</span> <span class="o">=</span> <span class="s">&#39;NULL&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">rightarg</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">rightarg</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rightarg</span> <span class="o">=</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">leftarg</span> <span class="o">==</span> <span class="s">&#39;NULL&#39;</span> <span class="ow">or</span> <span class="n">rightarg</span> <span class="o">==</span> <span class="s">&#39;NULL&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;=&#39;</span><span class="p">:</span>
+                <span class="n">op</span> <span class="o">=</span> <span class="s">&#39;IS&#39;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;!=&#39;</span><span class="p">:</span>
+                <span class="n">op</span> <span class="o">=</span> <span class="s">&#39;IS NOT&#39;</span>            
+            <span class="k">if</span> <span class="n">leftarg</span> <span class="o">==</span> <span class="s">&#39;NULL&#39;</span> <span class="ow">and</span> <span class="n">rightarg</span> <span class="o">!=</span> <span class="s">&#39;NULL&#39;</span><span class="p">:</span> 
+                <span class="n">leftarg</span><span class="p">,</span> <span class="n">rightarg</span> <span class="o">=</span> <span class="n">rightarg</span><span class="p">,</span> <span class="n">leftarg</span>                
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">,</span><span class="s">&#39;&lt;&#39;</span><span class="p">,</span><span class="s">&#39;&gt;&#39;</span><span class="p">,</span><span class="s">&#39;&gt;=&#39;</span><span class="p">,</span><span class="s">&#39;&lt;=&#39;</span><span class="p">,</span><span class="s">&#39;!=&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;(&quot;</span><span class="o">+</span><span class="n">leftarg</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="o">+</span><span class="n">op</span><span class="o">+</span><span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">rightarg</span><span class="o">+</span><span class="s">&quot;)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="p">)</span>
+        
+<span class="c">#         if self._operator == &#39;=&#39; and self._args[0] is None and self._args[1] is None:</span>
+<span class="c">#             return &quot;(NULL IS NULL)&quot;</span>
+<span class="c">#         elif self._operator == &#39;=&#39; and self._args[0] is None:</span>
+<span class="c">#             return &quot;(&quot;+fc_sql(self._args[1])+&quot; IS NULL)&quot;</span>
+<span class="c">#         elif self._operator == &#39;=&#39; and self._args[1] is None:</span>
+<span class="c">#             return &quot;(&quot;+fc_sql(self._args[1])+&quot; IS NULL)&quot;</span>
+<span class="c">#         if self._operator == &#39;!=&#39; and self._args[0] is None and self._args[1] is None:</span>
+<span class="c">#             return &quot;(NULL IS NOT NULL)&quot;</span>
+<span class="c">#         elif self._operator == &#39;!=&#39; and self._args[0] is None:</span>
+<span class="c">#             return &quot;(&quot;+fc_sql(self._args[1])+&quot; IS NOT NULL)&quot;</span>
+<span class="c">#         elif self._operator == &#39;!=&#39; and self._args[1] is None:</span>
+<span class="c">#             return &quot;(&quot;+fc_sql(self._args[1])+&quot; IS NOT NULL)&quot;</span>
+<span class="c">#         elif self._operator in (&#39;=&#39;,&#39;&lt;&#39;,&#39;&gt;&#39;,&#39;&gt;=&#39;,&#39;&lt;=&#39;,&#39;!=&#39;):</span>
+<span class="c">#             return &quot;(&quot;+fc_sql(self._args[0]) + &quot; &quot;+self._operator+&quot; &quot; + fc_sql(self._args[1])+&quot;)&quot;</span>
+<span class="c">#         else:</span>
+<span class="c">#             raise Exception(&quot;Syntax Error&quot; + self._operator)</span>
+</div>
+<div class="viewcode-block" id="BinaryOp"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.BinaryOp">[docs]</a><span class="k">class</span> <span class="nc">BinaryOp</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">operator</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">):</span>
+        <span class="n">fc_checkcontext</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;value&#39;</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="n">operator</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;||&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;+&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;-&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">==</span> <span class="s">&#39;/&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="n">fc_eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">,</span><span class="s">&#39;-&#39;</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="s">&#39;||&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&quot;(&quot;</span> <span class="o">+</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="o">+</span><span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">fc_sql</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax Error&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TableOrColumn"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.TableOrColumn">[docs]</a><span class="k">class</span> <span class="nc">TableOrColumn</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">srctable</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">indirection</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">classref</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="s">&#39;value&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iscolumn</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">=</span> <span class="n">outid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">=</span> <span class="n">srctable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subtables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span> <span class="o">=</span> <span class="n">indirection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classref</span> <span class="o">=</span> <span class="n">classref</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subkey</span> <span class="o">=</span> <span class="bp">None</span>
+       
+        <span class="c"># If key is set, this is a subtable, joined on the key column</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#print &quot;TABLE OR COLUMN WITH KEY&quot;,subkey</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="k">if</span> <span class="n">subkey</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_subkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_subkey</span> <span class="o">=</span> <span class="n">subkey</span>
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Cannot set key, and still not give a parent.&quot;</span><span class="p">)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">_add_subtable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="c">#context.tables.append(self)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_declare_as_table</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_declare_as_column</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error, trying to access subattribute of column.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_subtable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">subtable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subtables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subtable</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_declare_as_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="o">.</span><span class="n">declare_as_table</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">=</span> <span class="s">&quot;t_&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">=</span> <span class="s">&quot;t&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+                    
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">roottables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span> <span class="o">=</span> <span class="bp">True</span>
+        
+    <span class="k">def</span> <span class="nf">_declare_as_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="o">.</span><span class="n">_declare_as_column</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iscolumn</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_declare_as_table</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classref</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">typedict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classref</span><span class="o">.</span><span class="n">types</span><span class="p">()[</span><span class="s">&#39;keys&#39;</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_classref</span><span class="o">.</span><span class="n">types</span><span class="p">()[</span><span class="s">&#39;derived&#39;</span><span class="p">])</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">typex</span> <span class="o">=</span> <span class="n">typedict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="c">#if isinstance(typex,Storable):</span>
+                <span class="c"># Workaround to check if the object is storable without having to do a circular import...</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typex</span><span class="p">,</span><span class="s">&#39;types&#39;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span> <span class="n">typex</span><span class="o">.</span><span class="n">types</span><span class="p">()[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&quot;_sid&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">classref</span><span class="o">=</span><span class="n">typex</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typex</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">typex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">basics</span><span class="p">:</span> 
+                        <span class="n">subname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">name</span>
+                        <span class="n">outid</span> <span class="o">=</span> <span class="n">subname</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+                        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="n">subname</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_id&quot;</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_sid&quot;</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">table</span><span class="o">.</span><span class="n">_declare_as_table</span><span class="p">()</span>
+                        <span class="n">column</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="n">outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">column</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">tuple</span><span class="p">):</span> 
+                        <span class="n">subname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">name</span>
+                        <span class="n">outid</span> <span class="o">=</span> <span class="n">subname</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+                        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="n">subname</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_id&quot;</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_sid&quot;</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">table</span><span class="o">.</span><span class="n">_declare_as_table</span><span class="p">()</span>
+                        <span class="c">#column = TableOrColumn(self._context,outid + &quot;.&quot; + name,parent=table,outid=outid,key=None,subkey=None,indirection=self._indirection-1)</span>
+                        <span class="k">return</span> <span class="n">table</span>
+                        <span class="c"># Handle tuple</span>
+                        <span class="c">#print name, self._outid, self._classref</span>
+                        <span class="c">#raise Exception(&quot;Not implemented yet&quot;)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">typex</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;types&#39;</span><span class="p">):</span>
+                        <span class="n">subname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">name</span>
+                        <span class="n">outid</span> <span class="o">=</span> <span class="n">subname</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="o">.</span><span class="n">tables</span><span class="p">))</span>
+                        <span class="n">table</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="n">subname</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_id&quot;</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_sid&quot;</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">table</span><span class="o">.</span><span class="n">_declare_as_table</span><span class="p">()</span>
+                        <span class="n">column</span> <span class="o">=</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="n">outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span> <span class="n">typex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">types</span><span class="p">()[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&quot;_sid&quot;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">table</span><span class="p">,</span><span class="n">outid</span><span class="o">=</span><span class="n">outid</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">subkey</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">column</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># Handle other defined Storable type</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Not implemented yet&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Field &quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot; does not exist:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TableOrColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="p">,</span><span class="n">indirection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indirection</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iscolumn</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: asked to eval column on non-column.&quot;</span><span class="p">)</span>        
+
+        <span class="c">#disolve = self.name.rsplit(&#39;.&#39;,1)</span>
+        <span class="c">#if len(disolve)==2:</span>
+        <span class="c">#    return data[disolve[0]][disolve[1]]</span>
+        <span class="c">#else:</span>
+        <span class="c">#    return data[self.name]</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_declare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: asked to sql_declare non-table.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">+</span> <span class="s">&quot; ON (&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_subkey</span><span class="o">+</span><span class="s">&quot; = &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">+</span><span class="s">&quot;)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span>
+
+    <span class="k">def</span> <span class="nf">_groupby</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span><span class="p">:</span>         
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: asked to sql_groupby non-table.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_srctable_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="o">.</span><span class="n">context</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_check_subtable_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_istable</span><span class="p">:</span>         
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Syntax error: asked to check_subtable_on non-table.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_subkey</span><span class="p">]</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_outid</span><span class="o">+</span><span class="s">&quot;.&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_sql</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iscolumn</span><span class="p">:</span>
+            <span class="c">#print &quot;HUH&quot;,self._outid, &quot;.&quot;, self._name, &quot;_id&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outid</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s">&quot;_id&quot;</span>
+            <span class="c">#raise Exception(&quot;Syntax error: asked to generate column sql on non-column.&quot;)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+</div>
+<div class="viewcode-block" id="DeclaredFunction"><a class="viewcode-back" href="../../../httk.db.html#httk.db.filteredcollection.DeclaredFunction">[docs]</a><span class="k">class</span> <span class="nc">DeclaredFunction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">srctable</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_context</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span> <span class="o">=</span> <span class="n">srctable</span>
+        
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_srctable</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

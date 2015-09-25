@@ -1,0 +1,135 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: f8f9d55b8988723ee913026e6940d7f6
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-14 09:29:08 +0000 (Mon, 14 Jul 2014) $
+#$Revision: 120335 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/56/4315654.cif $
+#------------------------------------------------------------------------------
+data_4315654
+loop_
+_publ_author_name
+'Yaroslav Filinchuk'
+'Alexandr V. Talyzin'
+'Hans Hagemann'
+'Vladimir Dmitriev'
+'Dmitry Chernyshov'
+'Bertil Sundqvist'
+_publ_section_title
+;
+ Cation Size and Anion Anisotropy in Structural Chemistry of Metal
+ Borohydrides. The Peculiar Pressure Evolution of RbBH4
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              5285
+_journal_page_last               5292
+_journal_paper_doi               10.1021/ic100359v
+_journal_volume                  49
+_journal_year                    2010
+_chemical_name_systematic        ' ?'
+_computing_structure_refinement  FULLPROF
+_diffrn_ambient_temperature      295
+_diffrn_detector_area_resol_mean 6.67
+_diffrn_measurement_device_type  'MAR345 Image plate'
+_diffrn_measurement_method       \f-scan
+_diffrn_radiation_monochromator  'Si (111)'
+_diffrn_radiation_source         'Beamline BM1A, SNBL, ESRF, Grenoble, France'
+_diffrn_radiation_type           synchrotron
+_diffrn_radiation_wavelength     0.722870
+_pd_char_colour                  white
+_pd_instr_location               ' ?'
+_pd_meas_2theta_range_inc        0.031050
+_pd_meas_2theta_range_max        41.34095
+_pd_meas_2theta_range_min        3.18007
+_pd_meas_number_of_points        1231
+_pd_proc_2theta_range_inc        0.031050
+_pd_proc_2theta_range_max        41.3663
+_pd_proc_2theta_range_min        3.2055
+_pd_proc_ls_pref_orient_corr     ' ?'
+_pd_proc_ls_prof_R_factor        0.6664
+_pd_proc_ls_prof_wR_expected     0.0369
+_pd_proc_ls_prof_wR_factor       1.0530
+_pd_proc_wavelength              0.722870
+_pd_spec_mounting                ' ?'
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_number_parameters     12
+_refine_ls_number_reflns         72
+_refine_ls_number_restraints     4
+_refine_ls_R_I_factor            5.8354
+_[local]_cod_data_source_file    ic100359v_si_001_3.cif
+_[local]_cod_data_source_block   3_HP2
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Orthorhombic' changed to
+'orthorhombic' according to the built-in table from CIF Core
+dictionary named 'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1646 2011-03-28 12:23:43Z adriana 
+;
+_cod_database_code               4315654
+_pd_proc_ls_prof_cr_factor       13.7428
+_pd_proc_ls_prof_cwr_factor      10.9178
+_pd_proc_ls_prof_cwr_expected    0.3824
+_pd_proc_ls_prof_chi2            815.2296
+_pd_proc_ls_prof_echi2           878.8807
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 2 2 2"
+_symmetry_space_group_name_Hall 'C 2 2'
+_[local]_omdb_cod_original_Hall 'C 2 2'
+_symmetry_Int_Tables_number 21
+ 
+_cell_length_a    5.36790
+_cell_length_b    5.13430
+_cell_length_c    3.90980
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 x+1/2,y+1/2,z
+6 x+1/2,-y+1/2,-z
+7 -x+1/2,y+1/2,-z
+8 -x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Rb1 Rb 2 a 0.00000 0.00000 0.00000 1.0
+B1 B 2 c 0.50000 0.00000 0.50000 1.0
+H1 H 8 l 0.38000 0.12100 0.32700 1.0
+ 
+

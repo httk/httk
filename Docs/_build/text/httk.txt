@@ -1,0 +1,1051 @@
+
+httk package
+************
+
+
+Subpackages
+===========
+
+* httk.analysis package
+
+  * Subpackages
+
+    * httk.analysis.matsci package
+
+      * Subpackages
+
+        * httk.analysis.matsci.vis package
+
+          * Submodules
+
+          *
+            httk.analysis.matsci.vis.matplotlibphasediagramvisualizer
+            module
+
+          * httk.analysis.matsci.vis.phasediagramvisualizerplugin
+            module
+
+          * Module contents
+
+      * Submodules
+
+      * httk.analysis.matsci.phasediagram module
+
+      * Module contents
+
+  * Module contents
+
+* httk.atomistic package
+
+  * Subpackages
+
+    * httk.atomistic.data package
+
+      * Submodules
+
+      * httk.atomistic.data.periodictable module
+
+      * httk.atomistic.data.spacegroups module
+
+      * Module contents
+
+    * httk.atomistic.io package
+
+      * Submodules
+
+      * httk.atomistic.io.structure_cif_io module
+
+      * httk.atomistic.io.structure_io module
+
+      * httk.atomistic.io.structureioplugin module
+
+      * Module contents
+
+    * httk.atomistic.results package
+
+      * Submodules
+
+      * httk.atomistic.results.relaxedcellresult module
+
+      * httk.atomistic.results.totalenergyresult module
+
+      * Module contents
+
+    * httk.atomistic.vis package
+
+      * Submodules
+
+      * httk.atomistic.vis.asestructurevisualizer module
+
+      * httk.atomistic.vis.jmolstructurevisualizer module
+
+      * httk.atomistic.vis.structurephasediagramvisualizerplugin
+        module
+
+      * httk.atomistic.vis.structurevisualizerplugin module
+
+      * Module contents
+
+  * Submodules
+
+  * httk.atomistic.assignment module
+
+  * httk.atomistic.assignments module
+
+  * httk.atomistic.cell module
+
+  * httk.atomistic.cellshape module
+
+  * httk.atomistic.cellutils module
+
+  * httk.atomistic.compound module
+
+  * httk.atomistic.representativesites module
+
+  * httk.atomistic.scalelessstructure module
+
+  * httk.atomistic.siteassignment module
+
+  * httk.atomistic.sites module
+
+  * httk.atomistic.sitesutils module
+
+  * httk.atomistic.spacegroup module
+
+  * httk.atomistic.spacegrouputils module
+
+  * httk.atomistic.structure module
+
+  * httk.atomistic.structurephasediagram module
+
+  * httk.atomistic.structureutils module
+
+  * httk.atomistic.unitcellsites module
+
+  * httk.atomistic.unitcellstructure module
+
+  * Module contents
+
+* httk.core package
+
+  * Submodules
+
+  * httk.core.basic module
+
+  * httk.core.citation module
+
+  * httk.core.code module
+
+  * httk.core.computation module
+
+  * httk.core.crypto module
+
+  * httk.core.ed25519 module
+
+  * httk.core.fracvector module
+
+  * httk.core.geometry module
+
+  * httk.core.httkobject module
+
+  * httk.core.ioadapters module
+
+  * httk.core.mutablefracvector module
+
+  * httk.core.project module
+
+  * httk.core.reference module
+
+  * httk.core.signature module
+
+  * httk.core.template module
+
+  * Module contents
+
+* httk.db package
+
+  * Subpackages
+
+    * httk.db.backend package
+
+      * Submodules
+
+      * httk.db.backend.sqlite module
+
+      * Module contents
+
+    * httk.db.store package
+
+      * Submodules
+
+      * httk.db.store.dictstore module
+
+      * httk.db.store.sqlstore module
+
+      * httk.db.store.trivialstore module
+
+      * Module contents
+
+  * Submodules
+
+  * httk.db.filteredcollection module
+
+  * httk.db.httkobjdbplugin module
+
+  * httk.db.storable module
+
+  * Module contents
+
+* httk.external package
+
+  * Submodules
+
+  * httk.external.aflow_ext module
+
+  * httk.external.ase_glue module
+
+  * httk.external.cif2cell_ext module
+
+  * httk.external.command module
+
+  * httk.external.gulp_ext module
+
+  * httk.external.isotropy_ext module
+
+  * httk.external.jmol module
+
+  * httk.external.numpy_ext module
+
+  * httk.external.platon_ext module
+
+  * httk.external.pymatgen_glue module
+
+  * httk.external.pyspglib_ext module
+
+  * httk.external.subimport module
+
+  * Module contents
+
+* httk.graphics package
+
+  * Subpackages
+
+    * httk.graphics.matplotlib package
+
+      * Submodules
+
+      * httk.graphics.matplotlib.arrowplot module
+
+      * httk.graphics.matplotlib.polygonplot module
+
+      * Module contents
+
+  * Module contents
+
+* httk.iface package
+
+  * Submodules
+
+  * httk.iface.ase_if module
+
+  * httk.iface.cif2cell_if module
+
+  * httk.iface.gulp_if module
+
+  * httk.iface.isotropy_if module
+
+  * httk.iface.jmol_if module
+
+  * httk.iface.openbabel_if_notstable module
+
+  * httk.iface.platon_if module
+
+  * httk.iface.spglib_if module
+
+  * httk.iface.vasp_if module
+
+  * Module contents
+
+* httk.io package
+
+  * Submodules
+
+  * httk.io.cif module
+
+  * httk.io.load module
+
+  * httk.io.save module
+
+  * Module contents
+
+* httk.task package
+
+  * Submodules
+
+  * httk.task.reader module
+
+  * httk.task.taskmgr module
+
+  * Module contents
+
+
+Submodules
+==========
+
+
+httk.config module
+==================
+
+Reads the file httk.cfg in the root of the httk tree
+
+httk.config.httk_dir
+
+   The path to the main httk directory
+
+
+Module contents
+===============
+
+The high-throughput toolkit (httk)
+
+A set of tools and utilities meant to help with:
+   * Project management, preparation of large-scale computational
+     project.
+
+   * Execution of large-scale computational projects
+
+        * interface with supercomputer cluster queuing systems, etc.
+
+        * aid with scripting multi-stage runs
+
+        * retrieval of data from supercomputers
+
+   * Storage of data in databases
+
+   * Search, retrieval and 'processing' of data in storage
+
+   * Analysis (especially as a helpful interface against 3:rd party
+     software)
+
+httk.httk_dir
+
+   The path to the main httk directory
+
+httk.load(ioa, ext=None)
+
+   A *very* generic file reader method.
+
+   Load a file into a suitable httk object. Try to do the most sane
+   thing possible given the input file. If you know what to expect
+   from the input file, it may be safer to use a targeted method for
+   that file type.
+
+httk.save(obj, ioa, ext=None)
+
+   A *very* generic file writer method.
+
+   Load a file into a suitable httk object. Try to do the most sane
+   thing possible given the input file. If you know what to expect
+   from the input file, it may be safer to use a targeted method for
+   that file type.
+
+httk.version
+
+   The version of httk (if you make signifcant changes to httk, please
+   update with a personal suffix, e.g., 1.0.4.rickard.2)
+
+class class httk.Code(name, version)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Object for keeping track of httk data about a computer software or
+   script
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   classmethod create(name, version, refs=None, tags=None)
+
+      Create a Computation object.
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+class class httk.Computation(computation_date, description, code, manifest_hash, signatures, keys, relpath, project_counter, added_date=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Object for keeping track of httk data about a specific computation
+   run
+
+   add_project(project)
+
+   add_projects(projects)
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   added_date
+
+   classmethod create(computation_date, description, code, manifest_hash, signatures, keys, project_counter, relpath, added_date=None)
+
+      Create a Computation object.
+
+   get_projects()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+class class httk.Result(computation)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Intended as a base class for results tables for computations
+
+   classmethod create(computation)
+
+      Create a Computation object.
+
+class class httk.ComputationRelated(main_computation, other_computation, relation)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Object for keeping track of httk data about a specific computation
+   run
+
+   classmethod create(main_computation, other_computation, relation)
+
+      Create a Computation object.
+
+class class httk.ComputationProject(computation, project)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(computation, project)
+
+      Create a Computation object.
+
+class class httk.Author(last_name, given_names)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Object for keeping track of tags for other objects
+
+   classmethod create(last_name, given_names)
+
+      Create a Author object.
+
+class class httk.Reference(ref, authors=None, editors=None, journal=None, journal_issue=None, journal_volume=None, page_first=None, page_last=None, title=None, year=None, book_publisher=None, book_publisher_city=None, book_title=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   A reference citation
+
+   classmethod create(ref=None, authors=None, editors=None, journal=None, journal_issue=None, journal_volume=None, page_first=None, page_last=None, title=None, year=None, book_publisher=None, book_publisher_city=None, book_title=None)
+
+      Create a Reference object.
+
+class class httk.Project(name, description, project_key, keys)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   classmethod create(name, description, project_key, keys)
+
+      Create a Project object.
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+class class httk.ProjectRef(project, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.ProjectTag(project, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.FracVector(noms, denom=1)
+
+   Bases: "object"
+
+   FracVector is a general *immutable* N-dimensional vector (tensor)
+   class for performing linear algebra with fractional numbers.
+
+   A FracVector consists of a multidimensional tuple of integer
+   nominators, and a single shared integer denominator.
+
+   Since FracVectors are immutable, every operation on a FracVector
+   returns a new FracVector with the result of the operation.  A
+   created FracVector never changes. Hence, they are safe to use as
+   keys in dictionaries, to use in sets, etc.
+
+   Note: most methods returns FracVector results that are not
+   simplified (i.e., the FracVector returned does *not* have the
+   smallest possible integer denominator). To return a FracVector with
+   the smallest possible denominator, just call  FracVector.simplify()
+   at the last step.
+
+   T()
+
+      Returns the transpose, A^T.
+
+   argmax()
+
+      Return the index of the maximum element across all dimensions in
+      the FracVector.
+
+   argmin()
+
+      Return the index of the minimum element across all dimensions in
+      the FracVector.
+
+   ceil()
+
+      Returns the integer that is equal to or just below the value
+      stored in a scalar FracVector.
+
+   classmethod chain_vecs(vecs)
+
+      Optimized chaining of FracVectors.
+
+      vecs: a list (or tuple) of fracvectors.
+
+      Returns the same thing as
+         FracVector.create(vecs,chain=True)
+
+      i.e., removes outermost dimension and chain the sub-sequences.
+      If input=[[1 2 3],[4,5,6]], then
+         FracVector.chain(input) -> [1,2,3,4,5,6]
+
+      but this method assumes all vectors share the same denominator
+      (it raises an exception if this is not true)
+
+   classmethod create(noms, denom=None, simplify=True, chain=False)
+
+      Create a FracVector from various types of sequences.
+
+      Simplest use:
+
+         FracVector.create(some_kind_of_sequence)
+
+      where 'some_kind_of_sequence' can be any nested list or tuple of
+      objects that can be used in the constructor  of the Python
+      Fraction class (also works with strings!). If any object found
+      while traveling the items has a  .to_fractions() method, it will
+      be called and is expected to return a fraction or list or tuple
+      of fractions.
+
+      Optional parameters:
+
+      * Invocation with denominator:
+        FracVector.create(nominators,denominator)   nominators is any
+        sequence, and denominator a common denominator to divide all
+        nominators with
+
+      * simplify: boolean, return a FracVector with the smallest
+        possible denominator.
+
+      * chain: boolean, remove outermost dimension and chain the
+        sub- sequences. I.e., if input=[[1 2 3],[4,5,6]], then
+        FracVector.create(input) -> [1,2,3,4,5,6]
+
+      Relevant: FracVector itself implements .to_fractions(), and
+      hence, the same constructor allows stacking several FracVector
+      objects like this:
+
+         vertical_fracvector = FracVector([[fracvector1],[fracvector2]])
+         horizontal_fracvector = FracVector([fracvector1,fracvector2],chain=True)
+
+   cross(other)
+
+      Returns the vector cross product of the 3-element 1D vector with
+      the 3-element 1D vector 'other', i.e., A x B.
+
+   det()
+
+      Returns the determinant of the FracVector as a scalar
+      FracVector.
+
+   dim
+
+      This property returns a tuple with the dimensionality of each
+      dimension of the FracVector  (the noms are assumed to be a
+      nested list of rectangular shape).
+
+   dot(other)
+
+      Returns the vector dot product of the 1D vector with the 1D
+      vector 'other', i.e., A . B or A cdot B. The same as A * B.T().
+
+   classmethod eye(dims)
+
+      Create a diagonal one-matrix with the given dimensions
+
+   flatten()
+
+      Returns a FracVector that has been flattened out to a single
+      rowvector
+
+   floor()
+
+      Returns the integer that is equal to or just below the value
+      stored in a scalar FracVector.
+
+   classmethod from_floats(l, resolution=4294967296)
+
+      Create a FracVector from a (nested) list or tuple of floats. You
+      can convert a numpy array with this method if you use A.tolist()
+
+      resolution: the resolution used for interpreting the given
+      floating point numbers. Default is 2^32.
+
+   classmethod from_tuple(t)
+
+      Return a FracVector created from the tuple representation:
+      (denom, ...noms...), returned by the to_tuple() method.
+
+   ged_prestacked(other)
+
+   ged_stackedinsert(pos, other)
+
+   get_append(other)
+
+   get_extend(other)
+
+   get_insert(pos, other)
+
+   get_prepend(other)
+
+   get_prextend(other)
+
+   get_stacked(other)
+
+   inv()
+
+      Returns the matrix inverse, A^-1
+
+   lengthsqr()
+
+      Returns the square of the length of the vector. The same as A *
+      A.T()
+
+   limit_denominator(max_denom=1000000000)
+
+      Returns a FracVector of reduced resolution.
+
+      resolution: each element in the returned FracVector is the
+      closest numerical approximation that can is allowed by  a
+      fraction with maximally this denominator. Note: since all
+      elements must be put on a common denominator, the result may
+      have a larger denominator than max_denom
+
+   max()
+
+      Return the maximum element across all dimensions in the
+      FracVector. max(fracvector) works for a 1D vector.
+
+   metric_product(vecA, vecB)
+
+      Returns the result of the metric product using the present
+      square FracVector as the metric matrix. The same as
+         vecA*self*vecB.T().
+
+   min()
+
+      Return the minimum element across all dimensions in the
+      FracVector. max(fracvector) works for a 1D vector.
+
+   mul(other)
+
+      Returns the result of multiplying the vector with 'other' using
+      matrix multiplication.
+
+      Note that for two 1D FracVectors, A.dot(B) is *not* the same as
+      A.mul(B), but rather: A.mul(B.T()).
+
+   nargmax()
+
+      Return a list of indices of all maximum elements across all
+      dimensions in the FracVector.
+
+   nargmin()
+
+      Return a list of indices for all minimum elements across all
+      dimensions in the FracVector.
+
+   static nested_map(op, *ls)
+
+      Map an operator over a nested tuple. (i.e., the same as the
+      built-in map(), but works recursively on a nested tuple)
+
+   static nested_map_fractions(op, *ls)
+
+      Map an operator over a nested tuple, but checks every element
+      for a method to_fractions()  and uses this to further convert
+      objects into tuples of Fraction.
+
+   nom
+
+      Returns the integer nominator of a scalar FracVector.
+
+   normalize()
+
+      Add/remove an integer +/-N to each element to place it in the
+      range [0,1)
+
+   normalize_half()
+
+      Add/remove an integer +/-N to each element to place it in the
+      range [-1/2,1/2)
+
+      This is useful to find the shortest vector C between two points
+      A, B in a space with periodic boundary conditions [0,1):
+         C = (A-B).normalize_half()
+
+   classmethod random(dims, minnom=-100, maxnom=100, denom=100)
+
+      Create a zero matrix with the given dimensions
+
+   reciprocal()
+
+   classmethod set_common_denom(A, B)
+
+      Used internally to combine two different FracVectors.
+
+      Returns a tuple (A2,B2,denom) where A2 is numerically equal to
+      A, and B2 is numerically equal to B, but A2 and B2 are both  set
+      on the same shared denominator 'denom' which is the *product* of
+      the denominator of A and B.
+
+   set_denominator(set_denom=1000000000)
+
+      Returns a FracVector of reduced resolution where every element
+      is the closest numerical approximation using this denominator.
+
+   sign()
+
+      Returns the sign of the scalar FracVector: -1, 0 or 1.
+
+   simplify()
+
+      Returns a reduced FracVector. I.e., each element has the same
+      numerical value  but the new FracVector represents them using
+      the smallest possible shared denominator.
+
+   classmethod stack_vecs(vecs)
+
+      Optimized stacking of FracVectors.
+
+      vecs = a list (or tuple) of fracvectors.
+
+      Returns the same thing as:
+
+         FracVector.create(vecs)
+
+      but only works if all vectors share the same denominator (raises
+      an exception if this is not true)
+
+   to_float()
+
+      Converts a scalar ExactVector to a single float.
+
+   to_floats()
+
+      Converts the ExactVector to a list of floats.
+
+   to_fraction()
+
+      Converts scalar FracVector to a fraction.
+
+   to_fractions()
+
+      Converts the FracVector to a list of fractions.
+
+   to_int()
+
+      Converts scalar FracVector to an integer (truncating as
+      necessary).
+
+   to_ints()
+
+      Converts the FracVector to a list of integers, rounded off as
+      best possible.
+
+   to_tuple()
+
+      Return a FracVector on tuple representation: (denom,
+      ...noms...).
+
+   classmethod use(old)
+
+      Make sure variable is a FracVector, and if not, convert it.
+
+   validate()
+
+   classmethod zeros(dims)
+
+      Create a zero matrix with the given dimensions
+
+class class httk.FracScalar(nom, denom)
+
+   Bases: "httk.core.fracvector.FracVector"
+
+   Represents the fractional number nom/denom. This is a subclass of
+   FracVector with the purpose of making  it clear when a scalar
+   fracvector is needed/used.
+
+   classmethod create(nom, denom=None, simplify=True)
+
+      Create a FracScalar.
+
+      FracScalar(something)
+         something may be any object that can be used in the
+         constructor of the Python Fraction class (also works with
+         strings!).
+
+class class httk.MutableFracVector(noms, denom)
+
+   Bases: "httk.core.fracvector.FracVector"
+
+   Same as FracVector, only, this version allow assignment of
+   elements, e.g.,
+
+      mfracvec[2,7] = 5
+
+   and, e.g.,
+
+      mfracvec[:,7] = [1,2,3,4] 
+
+   Other than this, the FracVector methods exist and do the same,
+   i.e., they return *copies* of the fracvector, rather  than
+   modifying it.
+
+   However, methods have also been added named with set_* prefixes
+   which performs mutating operations, e.g.,
+
+      A.set_T()
+
+   replaces A with its own transpose, whereas
+
+      A.T()
+
+   just returns a new MutableFracVector that is the transpose of A,
+   leaving A unmodified.
+
+   classmethod from_FracVector(other)
+
+      Create a MutableFracVector from a FracVector.
+
+   invalidate()
+
+      Internal method to call when MutableFracVector is changed in
+      such a way that cached properties are invalidated (e.g., _dim)
+
+   static nested_inmap(op, *ls)
+
+      Like inmap, but work for nested lists
+
+   static nested_map(op, *ls)
+
+      Map an operator over a nested list. (i.e., the same as the
+      built-in map(), but works recursively on a nested list)
+
+   static nested_map_fractions(op, *ls)
+
+      Map an operator over a nested list, but checks every element for
+      a method to_fractions()  and uses this to further convert
+      objects into lists of Fraction.
+
+   set_T()
+
+      Changes MutableFracVector inline into own transpose: self ->
+      self.T
+
+   set_inv()
+
+      Changes MutableFracVector inline into own inverse: self ->
+      self^-1
+
+   set_negative()
+
+      Changes MutableFracVector inline into own negative: self ->
+      -self
+
+   set_normalize()
+
+      Add/remove an integer +/-N to each element to place it in the
+      range [0,1)
+
+   set_normalize_half()
+
+      Add/remove an integer +/-N to each element to place it in the
+      range [-1/2,1/2)
+
+      This is useful to find the shortest vector C between two points
+      A, B in a space with periodic boundary conditions [0,1):
+         C = (A-B).normalize_half()
+
+   set_set_denominator(resolution=1000000000)
+
+      Changes MutableFracVector; reduces resolution.
+
+         resolution is the new denominator, each element becomes the
+         closest numerical approximation using this denominator.
+
+   set_simplify()
+
+      Changes MutableFracVector; reduces any common factor between
+      denominator and all nominators
+
+   to_FracVector()
+
+      Return a FracVector with the values of this MutableFracVector.
+
+   classmethod use(old)
+
+      Make sure variable is a MutableFracVector, and if not, convert
+      it.
+
+   validate()
+
+class class httk.IoAdapterFileReader(f, name=None, deletefilename=None, close=False)
+
+   Bases: "object"
+
+   Io adapter for easy handling of io.
+
+   close()
+
+   classmethod use(other)
+
+class class httk.IoAdapterFileWriter(f, name=None, close=False)
+
+   Bases: "object"
+
+   Io adapter for access to data as a python file object
+
+   close()
+
+   classmethod use(other)
+
+class class httk.IoAdapterFileAppender(f, name=None)
+
+   Bases: "object"
+
+   Io adapter for access to data as a python file object
+
+   close()
+
+   classmethod use(other)
+
+class class httk.IoAdapterString(string=None, name=None)
+
+   Bases: "object"
+
+   Universal io adapter, helps handling the passing of filenames,
+   files, and strings to functions that deal with io
+
+   close()
+
+   string
+
+   classmethod use(other)
+
+class class httk.IoAdapterStringList(stringlist, name=None)
+
+   Bases: "object"
+
+   Universal io adapter, helps handling the passing of filenames,
+   files, and strings to functions that deal with io
+
+   classmethod use(other)
+
+class class httk.IoAdapterStringList(stringlist, name=None)
+
+   Bases: "object"
+
+   Universal io adapter, helps handling the passing of filenames,
+   files, and strings to functions that deal with io
+
+   classmethod use(other)
+
+class class httk.HttkObject
+
+   Bases: "object"
+
+   get_codependent_data()
+
+   hexhash
+
+   classmethod new_from(other)
+
+   to(newtype)
+
+   to_tuple(use_hexhash=False)
+
+   classmethod types()
+
+   classmethod use(old)
+
+httk.httk_typed_property(t)
+
+httk.httk_typed_init(t, **kargs)
+
+httk.httk_typed_property_delayed(t)
+
+httk.httk_typed_init_delayed(t, **kargs)
+
+class class httk.HttkPluginWrapper(plugin=None)
+
+   Bases: "object"
+
+class class httk.HttkPlugin
+
+   Bases: "object"
+
+class class httk.HttkPluginPlaceholder(plugininfo=None)
+
+   Bases: "object"
+
+class class httk.Signature(signature_data, key)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(signature_data, key)
+
+      Create a Computation object.
+
+class class httk.SignatureKey(keydata, description)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(keydata, description)
+
+      Create a Computation object.

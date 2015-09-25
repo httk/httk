@@ -1,0 +1,32 @@
+
+httk.analysis package
+*********************
+
+
+Subpackages
+===========
+
+* httk.analysis.matsci package
+
+  * Subpackages
+
+    * httk.analysis.matsci.vis package
+
+      * Submodules
+
+      * httk.analysis.matsci.vis.matplotlibphasediagramvisualizer
+        module
+
+      * httk.analysis.matsci.vis.phasediagramvisualizerplugin module
+
+      * Module contents
+
+  * Submodules
+
+  * httk.analysis.matsci.phasediagram module
+
+  * Module contents
+
+
+Module contents
+===============

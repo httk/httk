@@ -1,0 +1,195 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: c8db9d6e1f90daa79c8ae0a115e5bd37
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-29 11:49:26 +0000 (Sun, 29 Dec 2013) $
+#$Revision: 91935 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/32/68/4326839.cif $
+#------------------------------------------------------------------------------
+data_4326839
+loop_
+_publ_author_name
+'Shinji Tanaka'
+'Kazushi Mashima'
+_publ_contact_author_address
+;
+Department of Chemistry
+Graduate School of Engineering Science
+Osaka University
+;
+_publ_contact_author_email       mashima@chem.es.osaka-u.ac.jp
+_publ_contact_author_fax         +81-(0)6-6850-6249
+_publ_contact_author_name        'Kazushi Mashima'
+_publ_contact_author_phone       +81-(0)6-6850-6247
+_publ_section_title
+;
+ Interaction of Ferrocene Moieties Across a Square Pt4 Unit: Synthesis,
+ Characterization, and Electrochemical Properties of Carboxylate-Bridged
+ Bimetallic Pt4Fen (n= 2, 3, and 4) Complexes
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              11384
+_journal_page_last               11393
+_journal_volume                  50
+_journal_year                    2011
+_computing_cell_refinement       PROCESS-AUTO
+_computing_data_collection       PROCESS-AUTO
+_computing_data_reduction        PROCESS-AUTO
+_computing_molecular_graphics    'CrystalStructure 4.0'
+_computing_publication_material  'CrystalStructure 4.0 (Rigaku, 2010)'
+_computing_structure_refinement  'SHELXL97 (Sheldrick, 2008)'
+_computing_structure_solution    'SHELXS97 (Sheldrick, 2008)'
+_diffrn_ambient_temperature      113
+_diffrn_detector_area_resol_mean 10.000
+_diffrn_measured_fraction_theta_full 0.995
+_diffrn_measured_fraction_theta_max 0.995
+_diffrn_measurement_device_type  'Rigaku R-AXIS RAPID'
+_diffrn_measurement_method       \w
+_diffrn_radiation_type           'Mo K\a'
+_diffrn_radiation_wavelength     0.71075
+_diffrn_reflns_av_R_equivalents  0.1341
+_diffrn_reflns_limit_h_max       21
+_diffrn_reflns_limit_h_min       -21
+_diffrn_reflns_limit_k_max       21
+_diffrn_reflns_limit_k_min       -18
+_diffrn_reflns_limit_l_max       17
+_diffrn_reflns_limit_l_min       -17
+_diffrn_reflns_number            39145
+_diffrn_reflns_theta_full        27.42
+_diffrn_reflns_theta_max         27.42
+_diffrn_standards_number         0
+_exptl_absorpt_coefficient_mu    8.745
+_exptl_absorpt_correction_T_max  0.916
+_exptl_absorpt_correction_T_min  0.516
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'CrystalClear (Rigaku, ????)'
+_exptl_crystal_colour            red
+_exptl_crystal_density_diffrn    1.868
+_exptl_crystal_description       block
+_exptl_crystal_F_000             1858.00
+_exptl_crystal_size_max          0.100
+_exptl_crystal_size_mid          0.050
+_exptl_crystal_size_min          0.010
+_refine_diff_density_max         2.900
+_refine_diff_density_min         -4.800
+_refine_ls_abs_structure_details
+'Flack, H. D. (1983), Acta Cryst. A39, 876-881.  1686 Friedel Pairs'
+_refine_ls_abs_structure_Flack   0.97(4)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.185
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_number_parameters     144
+_refine_ls_number_reflns         4024
+_refine_ls_number_restraints     2
+_refine_ls_R_factor_gt           0.0925
+_refine_ls_shift/su_max          0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'w = 1/[\s^2^(Fo^2^)+(0.0529P)^2^+160.6930P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_ref         0.1861
+_reflns_number_gt                3493
+_reflns_number_total             4024
+_reflns_threshold_expression     F^2^>2.0\s(F^2^)
+_[local]_cod_data_source_file    ic201012m_si_002_2.cif
+_[local]_cod_data_source_block   complex6
+_[local]_cod_chemical_formula_sum_orig 'C55.50 H52 Fe4 O16 Pt4'
+_cod_original_cell_volume        3517.0(4)
+_cod_database_code               4326839
+_journal_paper_doi 10.1021/ic201012m
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4 2 2"
+_symmetry_space_group_name_Hall 'P 4 2'
+_[local]_omdb_cod_original_Hall 'P 4 2'
+_symmetry_Int_Tables_number 89
+ 
+_cell_length_a    16.25030
+_cell_length_b    16.25030
+_cell_length_c    13.31840
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 -y,-x,-z
+6 -y,x,z
+7 y,-x,z
+8 y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pt1 Pt 4 i 0.00000 0.50000 0.86772 1.0
+Pt2 Pt 4 o 0.10962 0.50000 0.00000 1.0
+Fe1 Fe 8 p 0.26760 0.34630 0.69430 1.0
+O1 O 8 p -0.01460 0.37680 0.86230 1.0
+O2 O 8 p 0.09600 0.48890 0.76140 1.0
+O3 O 8 p 0.11430 0.37500 0.01770 1.0
+O4 O 8 p 0.19650 0.48690 0.88030 1.0
+C1 C 8 p -0.06960 0.34350 -0.08400 1.0
+C2 C 8 p -0.07800 0.25120 -0.09700 1.0
+C3 C 8 p 0.17090 0.48500 0.78930 1.0
+C4 C 8 p 0.17900 0.26500 0.73300 1.0
+C5 C 8 p 0.21460 0.43830 0.61250 1.0
+C6 C 8 p 0.23340 0.46270 0.71030 1.0
+C7 C 8 p 0.23400 0.22600 0.66100 1.0
+C8 C 8 p 0.23600 0.28700 0.81800 1.0
+C9 C 8 p 0.28850 0.41600 0.56310 1.0
+C10 C 8 p 0.31110 0.22750 0.69600 1.0
+C11 C 8 p 0.31480 0.26160 0.79400 1.0
+C12 C 8 p 0.32060 0.45790 0.72090 1.0
+C13 C 8 p 0.35400 0.42420 0.63230 1.0
+C14 C 8 p -0.00300 0.23800 0.55800 0.5
+C15 C 8 p -0.00400 0.37800 0.54900 0.5
+C16 C 8 p -0.00600 0.16500 0.60000 0.25
+C17 C 8 p -0.01000 0.30900 0.59300 0.25
+H1 H 8 p -0.04060 0.23270 0.84960 1.0
+H2 H 8 p -0.06390 0.22350 -0.03420 1.0
+H3 H 8 p 0.11770 0.27150 0.72900 1.0
+H4 H 8 p 0.15820 0.43670 0.58240 1.0
+H5 H 8 p 0.21710 0.20590 0.59300 1.0
+H6 H 8 p 0.21850 0.31290 0.88250 1.0
+H7 H 8 p 0.29290 0.39360 0.49330 1.0
+H8 H 8 p 0.35250 0.47320 0.78230 1.0
+H9 H 8 p 0.36020 0.20820 0.65770 1.0
+H10 H 8 p 0.36510 0.26830 0.83680 1.0
+H11 H 8 p 0.41320 0.41120 0.61960 1.0
+H12 H 8 p 0.86520 0.23780 0.88430 1.0
+H13 H 8 p -0.00500 0.42770 0.58580 0.5
+H14 H 8 p -0.00150 0.12250 0.54870 0.25
+H15 H 8 p -0.02050 0.31190 0.66300 0.25
+H16 H 8 p -0.05880 0.15940 0.63540 0.25
+H17 H 8 p 0.03910 0.16010 0.64800 0.25
+ 
+

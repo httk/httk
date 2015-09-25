@@ -1,0 +1,73 @@
+
+httk.analysis.matsci package
+****************************
+
+
+Subpackages
+===========
+
+* httk.analysis.matsci.vis package
+
+  * Submodules
+
+  * httk.analysis.matsci.vis.matplotlibphasediagramvisualizer module
+
+  * httk.analysis.matsci.vis.phasediagramvisualizerplugin module
+
+  * Module contents
+
+
+Submodules
+==========
+
+
+httk.analysis.matsci.phasediagram module
+========================================
+
+class class httk.analysis.matsci.phasediagram.PhaseDiagram
+
+   Bases: "object"
+
+   add_phase(symbols, counts, id, energy)
+
+      Handles energy=None, for a phase we don't know the energy of.
+
+   competing_indices
+
+   coord_system
+
+   coords()
+
+   classmethod create()
+
+   hull_competing_indices
+
+   hull_competing_phase_lines()
+
+   hull_distances
+
+   hull_indices
+
+   hull_point_coords()
+
+   hull_points()
+
+   hull_to_interior_competing_phase_lines()
+
+   interior_competing_phase_lines()
+
+   interior_point_coords()
+
+   line_coords()
+
+   other_point_coords()
+
+   phase_lines
+
+   set_hull_data(hull_indices, competing_indices, hull_competing_indices, hull_distances, coord_system, phase_lines)
+
+   vis
+
+
+Module contents
+===============

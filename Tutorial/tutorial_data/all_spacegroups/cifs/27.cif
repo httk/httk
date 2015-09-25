@@ -1,0 +1,184 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 207368ddafec4145d89c7b24ca2c02c1
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 07:07:06 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91932 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/50/40/1504039.cif $
+#------------------------------------------------------------------------------
+data_1504039
+loop_
+_publ_author_name
+'Pawlu\'c, Piotr'
+'Hreczycho, Grzegorz'
+'Szudkowska, Justyna'
+'Kubicki, Maciej'
+'Marciniec, Bogdan'
+_publ_contact_author
+;
+Maciej Kubicki   
+Faculty of Chemistry 
+Adam Mickiewicz University
+Grunwaldzka 6              
+60-780 Pozna\'n   
+Poland             
+;
+_publ_section_title
+;
+ New one-pot synthesis of (E)-beta-aryl vinyl halides from styrenes.
+;
+_journal_issue                   15
+_journal_name_full               'Organic letters'
+_journal_page_first              3390
+_journal_page_last               3393
+_journal_volume                  11
+_journal_year                    2009
+_computing_cell_refinement       'CrysAlis RED (Oxford Diffraction (2007))'
+_computing_data_collection       'CrysAlis CCD (Oxford Diffraction (2007))'
+_computing_data_reduction        'CrysAlis RED (Oxford Diffraction (2007))'
+_computing_molecular_graphics
+;
+XP (Siemens, 1989), Mercury (Macrae et al, 2008)
+;
+_computing_publication_material  'SHELXL-97 (Sheldrick, 2008)'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 2008)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 2008)'
+_diffrn_ambient_temperature      100(1)
+_diffrn_measured_fraction_theta_full 0.999
+_diffrn_measured_fraction_theta_max 0.970
+_diffrn_measurement_device_type  'KUMA KM4CCD diffractometer'
+_diffrn_measurement_method       \w-scan
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0499
+_diffrn_reflns_av_sigmaI/netI    0.0254
+_diffrn_reflns_limit_h_max       9
+_diffrn_reflns_limit_h_min       -9
+_diffrn_reflns_limit_k_max       24
+_diffrn_reflns_limit_k_min       -26
+_diffrn_reflns_limit_l_max       7
+_diffrn_reflns_limit_l_min       -7
+_diffrn_reflns_number            10292
+_diffrn_reflns_theta_full        25.00
+_diffrn_reflns_theta_max         27.96
+_diffrn_reflns_theta_min         2.00
+_exptl_absorpt_coefficient_mu    8.276
+_exptl_absorpt_correction_T_max  0.437
+_exptl_absorpt_correction_T_min  0.166
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details
+;
+CrysAlis RED, Oxford Diffraction Ltd.,
+Version 1.171.32.5 (release 08-05-2007 CrysAlis171 .NET)
+(compiled May  8 2007,13:10:02)
+Empirical absorption correction using spherical harmonics,
+ implemented in SCALE3 ABSPACK scaling algorithm.
+;
+_exptl_crystal_colour            colourless
+_exptl_crystal_density_diffrn    2.382
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             568
+_exptl_crystal_size_max          0.3
+_exptl_crystal_size_mid          0.1
+_exptl_crystal_size_min          0.1
+_refine_diff_density_max         0.786
+_refine_diff_density_min         -0.841
+_refine_diff_density_rms         0.202
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.198(19)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.106
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     91
+_refine_ls_number_reflns         1924
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.106
+_refine_ls_R_factor_all          0.0335
+_refine_ls_R_factor_gt           0.0306
+_refine_ls_shift/su_max          0.005
+_refine_ls_shift/su_mean         0.001
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0612P)^2^+0.7608P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0861
+_refine_ls_wR_factor_ref         0.0903
+_reflns_number_gt                1795
+_reflns_number_total             1924
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ol901233j_si_002.cif
+_[local]_cod_data_source_block   1
+_[local]_cod_cif_authors_sg_H-M  Pcc2
+_cod_database_code               1504039
+_journal_paper_doi 10.1021/ol901233j
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P c c 2"
+_symmetry_space_group_name_Hall 'P 2 -2c'
+_[local]_omdb_cod_original_Hall 'P 2 -2c'
+_symmetry_Int_Tables_number 27
+ 
+_cell_length_a    7.24210
+_cell_length_b    20.32200
+_cell_length_c    5.85380
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x,y,z+1/2
+4 x,-y,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+C1 C 4 e 0.66920 0.31450 0.84470 1.0
+C2 C 4 e 0.69540 0.37050 -0.02380 1.0
+C3 C 4 e 0.69890 0.19590 0.76470 1.0
+C4 C 4 e 0.72420 0.25250 -0.08020 1.0
+C5 C 4 e 0.76770 0.13590 0.79010 1.0
+C6 C 4 e 0.77510 0.36280 0.19270 1.0
+C7 C 4 e 0.80160 0.24660 0.13850 1.0
+C8 C 4 e 0.82900 0.30220 0.27300 1.0
+H1 H 4 e 0.61220 0.31860 0.69930 1.0
+H2 H 4 e 0.62560 0.20330 0.63270 1.0
+H3 H 4 e 0.66060 0.41270 -0.07870 1.0
+H4 H 4 e 0.83240 0.12540 -0.07360 1.0
+H5 H 4 e 0.83540 0.20440 0.19500 1.0
+H6 H 4 e 0.88460 0.29840 0.41940 1.0
+I1 I 4 e 0.73794 0.06383 0.53955 1.0
+Br1 Br 4 e 0.80663 0.43799 0.37936 1.0
+ 
+

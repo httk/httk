@@ -1,0 +1,84 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: d5ede2afdc5e018b06f6e43932c28db8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/22/9012233.cif $
+#------------------------------------------------------------------------------
+data_9012233
+loop_
+_publ_author_name
+'Fayos, J.'
+_publ_section_title
+;
+ Possible 3D carbon structures as progressive intermediates in graphite
+ to diamond phase transition
+ Note: mathematical model, phase: gra_crbl43_ch
+;
+_journal_name_full               'Journal of Solid State Chemistry'
+_journal_page_first              278
+_journal_page_last               285
+_journal_volume                  148
+_journal_year                    1999
+_chemical_name_mineral           Graphite
+_exptl_crystal_density_diffrn    2.553
+_cod_database_code               9012233
+_journal_paper_doi 10.1006/jssc.1999.8448
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 21/c 2/c 2/a"
+_symmetry_space_group_name_Hall '-P 2a 2ac'
+_[local]_omdb_cod_original_Hall '-P 2a 2ac'
+_symmetry_Int_Tables_number 54
+ 
+_cell_length_a    4.70000
+_cell_length_b    5.97800
+_cell_length_c    4.44800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x+1/2,-y,z
+5 -x,-y,-z
+6 -x+1/2,y,z+1/2
+7 x,-y,z+1/2
+8 x+1/2,y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+C1 C 8 f 0.16140 0.12970 0.33570 1.0
+C2 C 8 f 0.36130 0.24690 0.15890 1.0
+ 
+

@@ -1,0 +1,148 @@
+
+httk.external package
+*********************
+
+
+Submodules
+==========
+
+
+httk.external.aflow_ext module
+==============================
+
+httk.external.aflow_ext.aflow(ioa_in, args, timeout=30)
+
+httk.external.aflow_ext.standard_primitive(struct)
+
+
+httk.external.ase_glue module
+=============================
+
+class class httk.external.ase_glue.StructureAsePlugin
+
+   Bases: "httk.core.httkobject.HttkPlugin"
+
+   classmethod from_Atoms(atoms)
+
+   name = 'ase'
+
+   plugin_init(struct)
+
+   to_Atoms()
+
+httk.external.ase_glue.ase_atoms_to_structure(atoms, hall_symbol)
+
+httk.external.ase_glue.ase_read_structure(f)
+
+httk.external.ase_glue.ase_write_struct(struct, ioa, format=None)
+
+httk.external.ase_glue.coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, reduce=False)
+
+httk.external.ase_glue.primitive_from_conventional_cell(atoms, spacegroup=1, setting=1)
+
+   Returns primitive cell given an Atoms object for a conventional
+   cell and it's spacegroup.
+
+   Code snippet kindly posted by Jesper Friis,
+      https://listserv.fysik.dtu.dk/pipermail/ase-
+      users/2011-January/000911.html
+
+httk.external.ase_glue.structure_to_ase_atoms(struct)
+
+
+httk.external.cif2cell_ext module
+=================================
+
+httk.external.cif2cell_ext.cif2cell(cwd, args, timeout=30)
+
+httk.external.cif2cell_ext.cif_to_structure_noreduce(f)
+
+httk.external.cif2cell_ext.cif_to_structure_reduce(f)
+
+httk.external.cif2cell_ext.coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol)
+
+
+httk.external.command module
+============================
+
+class class httk.external.command.Command(cmd, args, cwd=None, inputstr=None, stophook=None)
+
+   Bases: "object"
+
+   receive()
+
+   run(timeout, debug=False)
+
+   send(command)
+
+   start()
+
+   stdin
+
+   stop()
+
+   wait_finish(timeout=None)
+
+
+httk.external.gulp_ext module
+=============================
+
+httk.external.gulp_ext.jmol(cwd, args, timeout=10)
+
+httk.external.gulp_ext.show(struct)
+
+
+httk.external.isotropy_ext module
+=================================
+
+httk.external.isotropy_ext.isotropy(cwd, args, inputstr, timeout=30)
+
+httk.external.isotropy_ext.struct_process_with_isotropy(struct)
+
+httk.external.isotropy_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroup, cell, get_wyckoff=False)
+
+
+httk.external.jmol module
+=========================
+
+
+httk.external.numpy_ext module
+==============================
+
+
+httk.external.platon_ext module
+===============================
+
+httk.external.platon_ext.addsym(struct)
+
+httk.external.platon_ext.addsym_spacegroup(struct)
+
+httk.external.platon_ext.cif_to_sgstructure(ioa)
+
+httk.external.platon_ext.platon(cwd, args, timeout=60)
+
+httk.external.platon_ext.structure_addsym_and_tidy(struct)
+
+httk.external.platon_ext.structure_tidy(struct)
+
+httk.external.platon_ext.structure_tidy_old(struct)
+
+httk.external.platon_ext.structure_to_sgstructure(struct)
+
+
+httk.external.pymatgen_glue module
+==================================
+
+
+httk.external.pyspglib_ext module
+=================================
+
+
+httk.external.subimport module
+==============================
+
+httk.external.subimport.submodule_import_external(modulepath, pkg)
+
+
+Module contents
+===============

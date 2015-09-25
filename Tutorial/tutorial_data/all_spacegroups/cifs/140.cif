@@ -1,0 +1,111 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 6fe234c15ab165f1385ebab91303cf1f
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-03-18 01:41:40 +0000 (Tue, 18 Mar 2014) $
+#$Revision: 107141 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/8/10/01/8100157.cif $
+#------------------------------------------------------------------------------
+data_8100157
+loop_
+_publ_author_name
+'Armbr\"uster, Marc'
+'Grin, Yuri'
+_publ_section_title
+;
+Refinement of the crystal structures of titanium diantimonide, TiSb~2~, 
+and vanadium diantimonide, V~0.96~Sb~2~
+;
+_journal_issue                   3
+_journal_name_full
+'Zeitschrift f\"ur Kristallographie - New Crystal Structures'
+_journal_page_first              209
+_journal_page_last               210
+_journal_volume                  219
+_journal_year                    2004
+_diffrn_ambient_temperature      293(2)
+_exptl_crystal_density_diffrn    8.078
+_exptl_crystal_density_meas      8.04(3)
+_[local]_cod_chemical_formula_sum_orig 'Sb2 V1'
+_cod_database_code               8100157
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4/m 2/c 2/m"
+_symmetry_space_group_name_Hall '-I 4 2c'
+_[local]_omdb_cod_original_Hall '-I 4 2c'
+_symmetry_Int_Tables_number 140
+ 
+_cell_length_a    6.55380
+_cell_length_b    6.55380
+_cell_length_c    5.63660
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y,z
+5 -y,-x,-z+1/2
+6 -y,x,z
+7 y,-x,z
+8 y,x,-z+1/2
+9 -x,-y,-z
+10 -x,y,z+1/2
+11 x,-y,z+1/2
+12 x,y,-z
+13 y,x,z+1/2
+14 y,-x,-z
+15 -y,x,-z
+16 -y,-x,z+1/2
+17 x+1/2,y+1/2,z+1/2
+18 x+1/2,-y+1/2,-z
+19 -x+1/2,y+1/2,-z
+20 -x+1/2,-y+1/2,z+1/2
+21 -y+1/2,-x+1/2,-z
+22 -y+1/2,x+1/2,z+1/2
+23 y+1/2,-x+1/2,z+1/2
+24 y+1/2,x+1/2,-z
+25 -x+1/2,-y+1/2,-z+1/2
+26 -x+1/2,y+1/2,z
+27 x+1/2,-y+1/2,z
+28 x+1/2,y+1/2,-z+1/2
+29 y+1/2,x+1/2,z
+30 y+1/2,-x+1/2,-z+1/2
+31 -y+1/2,x+1/2,-z+1/2
+32 -y+1/2,-x+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sb1 Sb 8 h 0.65568 0.15568 0.00000 1.0
+V1 V 4 a 0.00000 0.00000 0.25000 1.0
+ 
+

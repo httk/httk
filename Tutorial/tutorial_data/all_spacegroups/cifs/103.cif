@@ -1,0 +1,98 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: a9aa6c53c606f3b78cdb09c2d40d4ff0
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/15/2101589.cif $
+#------------------------------------------------------------------------------
+data_2101589
+loop_
+_publ_author_name
+'Abrahams, S. C.'
+_publ_section_title
+;
+ New ferroelectric inorganic materials predicted in point group
+ 4<i>mm</i>
+;
+_journal_issue                   5
+_journal_name_full               'Acta Crystallographica Section B'
+_journal_page_first              790
+_journal_page_last               805
+_journal_volume                  52
+_journal_year                    1996
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71069
+_[local]_cod_data_source_file    an0527.cif
+_[local]_cod_data_source_block   AN0527o
+_[local]_cod_chemical_formula_sum_orig 'O6 Se2 V1'
+_cod_database_code               2101589
+_journal_paper_doi 10.1107/S0108768196004594
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4 c c"
+_symmetry_space_group_name_Hall 'P 4 -2c'
+_[local]_omdb_cod_original_Hall 'P 4 -2c'
+_symmetry_Int_Tables_number 103
+ 
+_cell_length_a    11.22000
+_cell_length_b    11.22000
+_cell_length_c    7.86000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+5 -x,y,z+1/2
+6 x,-y,z+1/2
+7 y,x,z+1/2
+8 -y,-x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Se1 Se 8 d 0.10330 0.24050 -0.05150 1.0
+Se2 Se 8 d 0.36710 0.28180 0.05150 1.0
+V1 V 2 a 0.00000 0.00000 0.12000 1.0
+V2 V 4 c 0.00000 0.50000 0.04570 1.0
+V3 V 2 b 0.50000 0.50000 0.37590 1.0
+O1 O 2 a 0.00000 0.00000 0.32600 1.0
+O2 O 4 c 0.00000 0.50000 0.34000 1.0
+O3 O 8 d 0.09190 0.35110 0.09500 1.0
+O4 O 8 d 0.12330 0.12000 0.07900 1.0
+O5 O 8 d 0.25460 0.25500 0.38900 1.0
+O6 O 8 d 0.32710 0.47590 0.41700 1.0
+O7 O 8 d 0.40590 0.14320 0.09900 1.0
+O8 O 2 b 0.50000 0.50000 0.17200 1.0
+ 
+

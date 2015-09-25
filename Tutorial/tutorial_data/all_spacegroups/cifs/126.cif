@@ -1,0 +1,179 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: d60cfa3648aeef357dfa93658b4bbafd
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 01:47:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120105 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/32/35/4323514.cif $
+#------------------------------------------------------------------------------
+data_4323514
+loop_
+_publ_author_name
+'Zhen-Chao Dong'
+'Robert W. Henning'
+'John D. Corbett'
+_publ_contact_author
+;
+ John D. Corbett
+ 353 Spedding Hall
+ Department of Chemistry
+ Iowa State University
+ Ames, IA 50011
+;
+_publ_contact_author_email       jdc@ameslab.gov
+_publ_contact_author_fax         '(515) 295-5718'
+_publ_contact_author_phone       '(515) 294-3086'
+_publ_section_title
+;
+ K8Tl10Zn: A Zintl Phase Containing the Zinc-Centered Thallium Polyanion
+ Tl10Zn8-
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              3559
+_journal_page_last               3561
+_journal_volume                  36
+_journal_year                    1997
+_computing_cell_refinement       'MSC/AFC Diffractometer Control'
+_computing_data_collection       'MSC/AFC Diffractometer Control'
+_computing_data_reduction        teXsan
+_computing_publication_material  teXsan
+_computing_structure_refinement  teXsan
+_computing_structure_solution    Shelxs86
+_diffrn_ambient_temperature      296.2
+_diffrn_measurement_device       AFC6R
+_diffrn_measurement_method       'omega/2-theta scans'
+_diffrn_orient_matrix_UB_11      0.01875
+_diffrn_orient_matrix_UB_12      0.02420
+_diffrn_orient_matrix_UB_13      0.06913
+_diffrn_orient_matrix_UB_21      0.09123
+_diffrn_orient_matrix_UB_22      0.02460
+_diffrn_orient_matrix_UB_23      -0.01848
+_diffrn_orient_matrix_UB_31      -0.02952
+_diffrn_orient_matrix_UB_32      0.09139
+_diffrn_orient_matrix_UB_33      -0.01331
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'Rigaku rotating anode'
+_diffrn_radiation_type           MoKalpha
+_diffrn_radiation_wavelength     0.7107
+_diffrn_reflns_av_R_equivalents  26.81
+_diffrn_reflns_limit_h_max       0
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       0
+_diffrn_reflns_limit_k_min       0
+_diffrn_reflns_limit_l_max       0
+_diffrn_reflns_limit_l_min       0
+_diffrn_reflns_number            3700
+_diffrn_reflns_theta_max         27.55
+_diffrn_standards_decay_%        -0.60
+_diffrn_standards_interval_count 150
+_diffrn_standards_number         3
+_exptl_absorpt_coefficient_mu    56.867
+_exptl_absorpt_correction_T_max  1.152
+_exptl_absorpt_correction_T_min  0.749
+_exptl_absorpt_correction_type   refdelf
+_exptl_absorpt_process_details   Walker&Stuart_DIFABS
+_exptl_crystal_colour            grey
+_exptl_crystal_density_diffrn    5.450
+_exptl_crystal_density_meas      0.000
+_exptl_crystal_description       brittle
+_exptl_crystal_F_000             1984.00
+_exptl_crystal_size_max          0.130
+_exptl_crystal_size_mid          0.130
+_exptl_crystal_size_min          0.110
+_refine_diff_density_max         -2.41
+_refine_diff_density_min         1.91
+_refine_ls_extinction_coef       0.51684
+_refine_ls_extinction_method     Zachariasen_type_2_Gaussian_isotropic
+_refine_ls_goodness_of_fit_obs   1.070
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     25
+_refine_ls_number_reflns         300
+_refine_ls_number_restraints     0
+_refine_ls_R_factor_obs          0.0366
+_refine_ls_shift/esd_max         0.0028
+_refine_ls_structure_factor_coef F
+_refine_ls_weighting_scheme      sigma
+_refine_ls_wR_factor_obs         0.0364
+_reflns_number_observed          300
+_reflns_number_total             3700
+_reflns_observed_criterion       3.00
+_[local]_cod_data_source_file    ic970309s.cif
+_[local]_cod_data_source_block   K8Tl10Zn_IC970309S
+_[local]_cod_cif_authors_sg_H-M  'P 4/n n c '
+_cod_original_cell_volume        1475.7(6)
+_cod_database_code               4323514
+loop_
+_diffrn_standard_refln_index_h
+_diffrn_standard_refln_index_k
+_diffrn_standard_refln_index_l
+? ? ?
+? ? ?
+? ? ?
+_journal_paper_doi 10.1021/ic970309s
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/n 2/n 2/c (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4a 2bc'
+_[local]_omdb_cod_original_Hall '-P 4a 2bc'
+_symmetry_Int_Tables_number 126
+ 
+_cell_length_a    10.31900
+_cell_length_b    10.31900
+_cell_length_c    13.85900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z+1/2
+3 -x+1/2,y,-z+1/2
+4 -x+1/2,-y+1/2,z
+5 -y+1/2,-x+1/2,-z+1/2
+6 -y+1/2,x,z
+7 y,-x+1/2,z
+8 y,x,-z+1/2
+9 -x,-y,-z
+10 -x,y+1/2,z+1/2
+11 x+1/2,-y,z+1/2
+12 x+1/2,y+1/2,-z
+13 y+1/2,x+1/2,z+1/2
+14 y+1/2,-x,-z
+15 -y,x+1/2,-z
+16 -y,-x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Tl1 Tl 4 e 0.25000 0.25000 0.03980 1.0
+Tl2 Tl 16 k 0.84480 -0.01080 0.83917 1.0
+Zn1 Zn 2 a 0.25000 0.25000 0.25000 1.0
+K1 K 16 k 0.82230 0.04600 0.10580 1.0
+ 
+

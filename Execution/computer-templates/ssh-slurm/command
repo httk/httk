@@ -1,0 +1,12 @@
+#!/bin/bash
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+
+QUEUE="$1"
+shift 1
+. "$SCRIPT_PATH/config"
+if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
+    . "$SCRIPT_PATH/config.$QUEUE"
+fi
+
+ssh "$USERNAME"@"$REMOTE_HOST" "mkdir -p \"${REMOTE_HTTK_DIR/#\~\//}/Runs/$QUEUE/\"; cd \"${REMOTE_HTTK_DIR/#\~\//}/Runs/$QUEUE/\"; $@"

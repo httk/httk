@@ -1,0 +1,613 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.iface package &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="index.html" />
+    <link rel="up" title="httk package" href="httk.html" />
+    <link rel="next" title="httk.io package" href="httk.io.html" />
+    <link rel="prev" title="httk.graphics.matplotlib package" href="httk.graphics.matplotlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="httk.io.html" title="httk.io package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="httk.graphics.matplotlib.html" title="httk.graphics.matplotlib package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="httk_base.html" >Full httk API documentation</a> &raquo;</li>
+          <li><a href="httk.html" accesskey="U">httk package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="httk-iface-package">
+<h1>httk.iface package<a class="headerlink" href="#httk-iface-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-httk.iface.ase_if">
+<span id="httk-iface-ase-if-module"></span><h2>httk.iface.ase_if module<a class="headerlink" href="#module-httk.iface.ase_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions">
+<tt class="descclassname">httk.iface.ase_if.</tt><tt class="descname">rc_structure_to_symbols_and_scaled_positions</tt><big>(</big><em>struct</em><big>)</big><a class="reference internal" href="_modules/httk/iface/ase_if.html#rc_structure_to_symbols_and_scaled_positions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions">
+<tt class="descclassname">httk.iface.ase_if.</tt><tt class="descname">uc_structure_to_symbols_and_scaled_positions</tt><big>(</big><em>struct</em><big>)</big><a class="reference internal" href="_modules/httk/iface/ase_if.html#uc_structure_to_symbols_and_scaled_positions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.cif2cell_if">
+<span id="httk-iface-cif2cell-if-module"></span><h2>httk.iface.cif2cell_if module<a class="headerlink" href="#module-httk.iface.cif2cell_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.cif2cell_if.out_to_struct">
+<tt class="descclassname">httk.iface.cif2cell_if.</tt><tt class="descname">out_to_struct</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/cif2cell_if.html#out_to_struct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.cif2cell_if.out_to_struct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<div class="highlight-python"><div class="highlight"><pre>OUTPUT CELL INFORMATION
+Symmetry information:
+Trigonal crystal system.
+Space group number     : 165
+Hall symbol            : -P 3 2&quot;c
+Hermann-Mauguin symbol : P-3c1
+
+Bravais lattice vectors :
+  0.8660254  -0.5000000   0.0000000 
+  0.0000000   1.0000000   0.0000000 
+  0.0000000   0.0000000   1.0231037 
+All sites, (lattice coordinates):
+Atom           a1          a2          a3 
+La      0.6609000   0.0000000   0.2500000
+La      0.3391000   0.0000000   0.7500000
+...
+F       0.0000000   0.0000000   0.2500000
+F       0.0000000   0.0000000   0.7500000
+
+Unit cell volume  : 328.6477016 A^3
+Unit cell density :   3.5764559 u/A^3 =   5.9388437 g/cm^3
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.gulp_if">
+<span id="httk-iface-gulp-if-module"></span><h2>httk.iface.gulp_if module<a class="headerlink" href="#module-httk.iface.gulp_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.gulp_if.generate_fake_potentials">
+<tt class="descclassname">httk.iface.gulp_if.</tt><tt class="descname">generate_fake_potentials</tt><big>(</big><em>species</em><big>)</big><a class="reference internal" href="_modules/httk/iface/gulp_if.html#generate_fake_potentials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.gulp_if.generate_fake_potentials" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.gulp_if.generate_fake_potentials_try2">
+<tt class="descclassname">httk.iface.gulp_if.</tt><tt class="descname">generate_fake_potentials_try2</tt><big>(</big><em>species</em><big>)</big><a class="reference internal" href="_modules/httk/iface/gulp_if.html#generate_fake_potentials_try2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.gulp_if.generate_fake_potentials_try2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.gulp_if.structure_to_gulp">
+<tt class="descclassname">httk.iface.gulp_if.</tt><tt class="descname">structure_to_gulp</tt><big>(</big><em>iof</em>, <em>struct</em>, <em>runspec='single conp'</em>, <em>postcards=</em>, <span class="optional">[</span><span class="optional">]</span><em>potentials=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/gulp_if.html#structure_to_gulp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.gulp_if.structure_to_gulp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a file on gulp input format.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.isotropy_if">
+<span id="httk-iface-isotropy-if-module"></span><h2>httk.iface.isotropy_if module<a class="headerlink" href="#module-httk.iface.isotropy_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.isotropy_if.out_to_cif">
+<tt class="descclassname">httk.iface.isotropy_if.</tt><tt class="descname">out_to_cif</tt><big>(</big><em>ioa</em>, <em>assignments</em>, <em>getwyckoff=False</em><big>)</big><a class="reference internal" href="_modules/httk/iface/isotropy_if.html#out_to_cif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.isotropy_if.out_to_cif" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.isotropy_if.reduced_coordgroups_to_input">
+<tt class="descclassname">httk.iface.isotropy_if.</tt><tt class="descname">reduced_coordgroups_to_input</tt><big>(</big><em>coordgroups</em>, <em>cell</em>, <em>comment='FINDSYM input'</em>, <em>accuracy=0.001</em><big>)</big><a class="reference internal" href="_modules/httk/iface/isotropy_if.html#reduced_coordgroups_to_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.isotropy_if.reduced_coordgroups_to_input" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.isotropy_if.struct_to_input">
+<tt class="descclassname">httk.iface.isotropy_if.</tt><tt class="descname">struct_to_input</tt><big>(</big><em>struct</em><big>)</big><a class="reference internal" href="_modules/httk/iface/isotropy_if.html#struct_to_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.isotropy_if.struct_to_input" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.jmol_if">
+<span id="httk-iface-jmol-if-module"></span><h2>httk.iface.jmol_if module<a class="headerlink" href="#module-httk.iface.jmol_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.jmol_if.structure_to_jmol">
+<tt class="descclassname">httk.iface.jmol_if.</tt><tt class="descname">structure_to_jmol</tt><big>(</big><em>iof</em>, <em>struct</em>, <em>extbonds=True</em>, <em>repeat=None</em>, <em>copies=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/jmol_if.html#structure_to_jmol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.jmol_if.structure_to_jmol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure into jmol format.</p>
+<dl class="docutils">
+<dt>Example output format::</dt>
+<dd>load data &#8216;model&#8217;
+1
+Computation1
+Al 0 0 0
+end &#8216;model&#8217; { 4 4 4 } supercell &#8220;x, y, z &#8221; unitcell [
+2.025 2.025 0
+2.025 0 2.025
+0 2.025 2.025
+]
+set slabByAtom TRUE
+unitcell {1/1 1/1 1/1}
+delete (NOT (unitcell OR connected(unitcell)))
+{connected(unitcell) AND NOT unitcell}.radius = 0
+restrict cell={2 2 2}
+center visible
+zoom 0</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.openbabel_if_notstable">
+<span id="httk-iface-openbabel-if-notstable-module"></span><h2>httk.iface.openbabel_if_notstable module<a class="headerlink" href="#module-httk.iface.openbabel_if_notstable" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.openbabel_if_notstable.readstruct">
+<tt class="descclassname">httk.iface.openbabel_if_notstable.</tt><tt class="descname">readstruct</tt><big>(</big><em>ioa</em>, <em>struct</em>, <em>importers=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/openbabel_if_notstable.html#readstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.openbabel_if_notstable.readstruct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.platon_if">
+<span id="httk-iface-platon-if-module"></span><h2>httk.iface.platon_if module<a class="headerlink" href="#module-httk.iface.platon_if" title="Permalink to this headline">¶</a></h2>
+<p>This module is a mess and in need of heavy cleanup.</p>
+<dl class="function">
+<dt id="httk.iface.platon_if.get_stidy_spacegroup">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">get_stidy_spacegroup</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#get_stidy_spacegroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.get_stidy_spacegroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_lis_to_struct_broken">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_lis_to_struct_broken</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_lis_to_struct_broken"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_lis_to_struct_broken" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input format:</p>
+<div class="highlight-python"><div class="highlight"><pre>                                                       ============
+====================================================== Crystal Data ================================================================
+                                                       ============
+                        Input Cell  (Lattice Type: P)   -   Temp =   0K             Reduced Cell     (Acta Cryst.(1976),A32,297-298)
+---------------------------------------------------------------------------------   ------------------------------------------------
+a =       3.47100  Angstrom                alpha =            90 Degree             a  =    3.471     alpha  =   90.00  V  =    79.6
+b =       3.47100                           beta =            90                    b  =    3.471     beta   =   90.00              
+c =       6.60300                          gamma =            90                    c  =    6.603     gamma  =   90.00              
+
+...
+
+------------------------------------------------------------------------------------------------------------------------------------
+Flags Label         Fractional Coordinates (x,y,z)          Orthogonal Coordinates (XO,YO,ZO)   Site SSN*SSOF =    S.O.F   Move Type
+------------------------------------------------------------------------------------------------------------------------------------
+-     Ag(1)              1/4            1/4        0.61200      0.8677      0.8677      4.0410   4mm  8   1/8          1    -    Met
+-     Zr(2)              1/4            1/4        0.13700      0.8677      0.8677      0.9046   4mm  8   1/8          1    -    Met
+-     Ag(1)a            -1/4           -1/4       -0.61200     -0.8677     -0.8677     -4.0410   4mm  8   1/8          1   5.455 Met
+-     Zr(2)a            -1/4           -1/4       -0.13700     -0.8677     -0.8677     -0.9046   4mm  8   1/8          1   5.455 Met
+-     Ag(1)b            -1/4           -1/4        0.38800     -0.8678     -0.8678      2.5620   4mm  8   1/8          1   5.456 Met
+-     Zr(2)b            -1/4           -1/4        0.86300     -0.8678     -0.8678      5.6984   4mm  8   1/8          1   5.456 Met
+-     Ag(1)c            -1/4            3/4       -0.61200     -0.8677      2.6033     -4.0410   4mm  8   1/8          1   5.465 Met
+-     Zr(2)c            -1/4            3/4       -0.13700     -0.8678      2.6033     -0.9046   4mm  8   1/8          1   5.465 Met
+-     Ag(1)d            -1/4            3/4        0.38800     -0.8678      2.6033      2.5620   4mm  8   1/8          1   5.466 Met
+-     Zr(2)d            -1/4            3/4        0.86300     -0.8678      2.6032      5.6984   4mm  8   1/8          1   5.466 Met
+-     Ag(1)e             3/4           -1/4       -0.61200      2.6033     -0.8677     -4.0410   4mm  8   1/8          1   5.555 Met
+-     Zr(2)e             3/4           -1/4       -0.13700      2.6033     -0.8677     -0.9046   4mm  8   1/8          1   5.555 Met
+-     Ag(1)f             3/4           -1/4        0.38800      2.6033     -0.8678      2.5620   4mm  8   1/8          1   5.556 Met
+-     Zr(2)f             3/4           -1/4        0.86300      2.6032     -0.8678      5.6984   4mm  8   1/8          1   5.556 Met
+-     Ag(1)g             3/4            3/4       -0.61200      2.6033      2.6033     -4.0410   4mm  8   1/8          1   5.565 Met
+-     Zr(2)g             3/4            3/4       -0.13700      2.6033      2.6033     -0.9046   4mm  8   1/8          1   5.565 Met
+-     Ag(1)h             3/4            3/4        0.38800      2.6033      2.6033      2.5620   4mm  8   1/8          1   5.566 Met
+-     Zr(2)h             3/4            3/4        0.86300      2.6032      2.6032      5.6984   4mm  8   1/8          1   5.566 Met
+====================================================================================================================================
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_lis_to_struct_broken2">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_lis_to_struct_broken2</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_lis_to_struct_broken2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_lis_to_struct_broken2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<div class="highlight-python"><div class="highlight"><pre>                                                       ============
+====================================================== Crystal Data ================================================================
+                                                       ============
+                        Input Cell  (Lattice Type: P)   -   Temp =   0K             Reduced Cell     (Acta Cryst.(1976),A32,297-298)
+---------------------------------------------------------------------------------   ------------------------------------------------
+a =       3.47100  Angstrom                alpha =            90 Degree             a  =    3.471     alpha  =   90.00  V  =    79.6
+b =       3.47100                           beta =            90                    b  =    3.471     beta   =   90.00              
+c =       6.60300                          gamma =            90                    c  =    6.603     gamma  =   90.00              
+
+...
+
+====================================================================================================================================
+10.0 Angstrom Coordination Sphere Around Atom I = Ag(1)  [ARU = 1555.01]             1/4      1/4  0.61200    0.8677  0.8677  4.0410
+------------------------------------------------------------------------------------------------------------------------------------
+ Nr     d(I,J) To  Atom J  Symm_Oper. on Atom J    ARU(J)  Type     Phi     Mu         X        Y        Z        XO      YO      ZO
+------------------------------------------------------------------------------------------------------------------------------------
+ 1      2.9615 --  Zr(4)  [                    =         ] Intra-135.00  34.03      -1/4     -1/4  0.86300   -0.8678 -0.8678  5.6984
+ 2      2.9615 --  Zr(4)n [1+x,1+y,z           =  1665.01] Intra  45.00  34.03       3/4      3/4  0.86300    2.6032  2.6032  5.6984
+ 3      2.9615 --  Zr(4)j [x,1+y,z             =  1565.01] Intra 135.00  34.03      -1/4      3/4  0.86300   -0.8678  2.6032  5.6984
+ 4      2.9615 --  Zr(4)l [1+x,y,z             =  1655.01] Intra -45.00  34.03       3/4     -1/4  0.86300    2.6032 -0.8678  5.6984
+ 5      3.1364 --  Zr(3)  [                    =         ] Intra   0.00 -90.00       1/4      1/4  0.13700    0.8677  0.8677  0.9046
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_sites_to_styin">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_sites_to_styin</tt><big>(</big><em>ioa</em>, <em>sites</em>, <em>cell</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_sites_to_styin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_sites_to_styin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<div class="highlight-python"><div class="highlight"><pre>P 4 B M              
+    5.5179    5.5179    3.9073   90.0000   90.0000   90.0000
+Bi1       0.50000   0.00000   0.54500   0.50000
+Ti1       0.00000   0.00000   0.00000
+Na1       0.50000   0.00000   0.54500   0.50000
+O1        0.00000   0.00000   0.51000
+O2        0.72900   0.22900   0.01500
+END
+END
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_styin_to_sgstruct">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_styin_to_sgstruct</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_styin_to_sgstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_styin_to_sgstruct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<blockquote>
+<div>F -4 3 M        id=[0] dblock_code=[44325-ICSD] formula=
+5.5000    5.5000    5.5000   90.0000   90.0000   90.0000
+N
+Sb1       0.25000   0.25000   0.25000
+Al1       0.00000   0.00000   0.00000
+END
+END</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_styout_to_sgstruct">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_styout_to_sgstruct</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_styout_to_sgstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_styout_to_sgstruct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<div class="highlight-python"><div class="highlight"><pre>Results for  id=[0] dblock_code=[44325-I New: F-43m 
+=====================================================
+
+Pearson code : cF   8  Sb  4.0  Al  4.0
+Cell parameters :   7.7782  7.7782  7.7782   90.000   90.000   90.000
+Space group symbol : F -4 3 m   Number in IT : 216
+
+Setting x,y,z             Origin ( 0.0000 0.0000 0.0000)  Gamma =  0.4330
+
+       Al1       4(c)  1/4     1/4     1/4                             Al   1
+      Sb1        4(a)  0       0       0                               Sb   1
+
+Wyckoff sequence : c a                                                                                                         
+
+Volume of Unit Cell :   470.5842
+
+
+OTHER Standardization with Similar Gamma :
+
+Setting -x,-y,-z          Origin ( 0.7500 0.7500 0.7500)  Gamma =  0.4330
+
+      Sb1        4(c)  1/4     1/4     1/4                             Sb   1
+       Al1       4(a)  0       0       0                               Al   1
+
+Wyckoff sequence : c a                                                                                                         
+
+Volume of Unit Cell :   470.5842
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.platon_styout_to_structure">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">platon_styout_to_structure</tt><big>(</big><em>ioa</em>, <em>based_on_struct=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#platon_styout_to_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.platon_styout_to_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example input:</p>
+<div class="highlight-python"><div class="highlight"><pre>Results for  id=[0] dblock_code=[44325-I New: F-43m 
+=====================================================
+
+Pearson code : cF   8  Sb  4.0  Al  4.0
+Cell parameters :   7.7782  7.7782  7.7782   90.000   90.000   90.000
+Space group symbol : F -4 3 m   Number in IT : 216
+
+Setting x,y,z             Origin ( 0.0000 0.0000 0.0000)  Gamma =  0.4330
+
+       Al1       4(c)  1/4     1/4     1/4                             Al   1
+      Sb1        4(a)  0       0       0                               Sb   1
+
+Wyckoff sequence : c a                                                                                                         
+
+Volume of Unit Cell :   470.5842
+
+
+OTHER Standardization with Similar Gamma :
+
+Setting -x,-y,-z          Origin ( 0.7500 0.7500 0.7500)  Gamma =  0.4330
+
+      Sb1        4(c)  1/4     1/4     1/4                             Sb   1
+       Al1       4(a)  0       0       0                               Al   1
+
+Wyckoff sequence : c a                                                                                                         
+
+Volume of Unit Cell :   470.5842
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.sites_to_platon">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">sites_to_platon</tt><big>(</big><em>ioa</em>, <em>sites</em>, <em>cell</em>, <em>precards</em>, <em>postcards</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#sites_to_platon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.sites_to_platon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a file on PLATONS input format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.platon_if.structure_to_platon">
+<tt class="descclassname">httk.iface.platon_if.</tt><tt class="descname">structure_to_platon</tt><big>(</big><em>ioa</em>, <em>struct</em>, <em>precards</em>, <em>postcards</em><big>)</big><a class="reference internal" href="_modules/httk/iface/platon_if.html#structure_to_platon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.platon_if.structure_to_platon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a file on PLATONS input format.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.spglib_if">
+<span id="httk-iface-spglib-if-module"></span><h2>httk.iface.spglib_if module<a class="headerlink" href="#module-httk.iface.spglib_if" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="httk.iface.spglib_if.spglib_out_to_struct">
+<tt class="descclassname">httk.iface.spglib_if.</tt><tt class="descname">spglib_out_to_struct</tt><big>(</big><em>out</em><big>)</big><a class="reference internal" href="_modules/httk/iface/spglib_if.html#spglib_out_to_struct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.spglib_if.spglib_out_to_struct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface.vasp_if">
+<span id="httk-iface-vasp-if-module"></span><h2>httk.iface.vasp_if module<a class="headerlink" href="#module-httk.iface.vasp_if" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="httk.iface.vasp_if.OutcarReader">
+<em class="property">class </em><tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">OutcarReader</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#OutcarReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.OutcarReader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="httk.iface.vasp_if.OutcarReader.parse">
+<tt class="descname">parse</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#OutcarReader.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.OutcarReader.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.calculate_kpoints">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">calculate_kpoints</tt><big>(</big><em>struct</em>, <em>dens=20</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#calculate_kpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.calculate_kpoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.copy_template">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">copy_template</tt><big>(</big><em>dirtemplate</em>, <em>dirname</em>, <em>templatename</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#copy_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.copy_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.get_magmom">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">get_magmom</tt><big>(</big><em>symbol</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#get_magmom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.get_magmom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.get_magnetizations">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">get_magnetizations</tt><big>(</big><em>ionlist</em>, <em>high</em>, <em>low</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#get_magnetizations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.get_magnetizations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.get_pseudopotential">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">get_pseudopotential</tt><big>(</big><em>species</em>, <em>poscarspath=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#get_pseudopotential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.get_pseudopotential" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.is_dualmagnetic">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">is_dualmagnetic</tt><big>(</big><em>ion</em>, <em>ionlist</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#is_dualmagnetic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.is_dualmagnetic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.magnetization_recurse">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">magnetization_recurse</tt><big>(</big><em>basemags</em>, <em>dualmags</em>, <em>high</em>, <em>low</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#magnetization_recurse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.magnetization_recurse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.poscar_to_strs">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">poscar_to_strs</tt><big>(</big><em>fio</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#poscar_to_strs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.poscar_to_strs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Parses a file on VASPs POSCAR format. Returns </dt>
+<dd>(cell, scale, vol, coords, coords_reduced, counts, occupations, comment)</dd>
+<dt>where</dt>
+<dd>cell: 3x3 nested list of <em>strings</em> designating the cell
+scale: <em>string</em> representing the overall scale of the cell
+vol: <em>string</em> representing the volume of the cell (only one of scale and vol will be set, the other one = None)
+coords: Nx3 nested list of <em>strings</em> designating the coordinates
+coords_reduced: bool, true = coords are given in reduced coordinate (in vasp D or Direct), false = coords are given in cartesian coordinates
+counts: how many atoms of each type
+occupations: which species of each atom type (integers), or -1, ... -N if no species are given.
+comment: the comment string given at the top of the file</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.poscar_to_structure">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">poscar_to_structure</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#poscar_to_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.poscar_to_structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.prepare_single_run">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">prepare_single_run</tt><big>(</big><em>dirpath</em>, <em>struct</em>, <em>poscarspath=None</em>, <em>template='t:/vasp/single/static'</em>, <em>overwrite=False</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#prepare_single_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.prepare_single_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.read_outcar">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">read_outcar</tt><big>(</big><em>ioa</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#read_outcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.read_outcar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.structure_to_comment">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">structure_to_comment</tt><big>(</big><em>struct</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#structure_to_comment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.structure_to_comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.structure_to_poscar">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">structure_to_poscar</tt><big>(</big><em>f</em>, <em>struct</em>, <em>fix_negative_determinant=False</em>, <em>comment=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#structure_to_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.structure_to_poscar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.write_generic_kpoints_file">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">write_generic_kpoints_file</tt><big>(</big><em>fio</em>, <em>comment=None</em>, <em>mp=True</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#write_generic_kpoints_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.write_generic_kpoints_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.write_kpoints_file">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">write_kpoints_file</tt><big>(</big><em>fio</em>, <em>kpoints</em>, <em>comment=None</em>, <em>mp=True</em>, <em>gamma_centered=False</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#write_kpoints_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.write_kpoints_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.iface.vasp_if.write_poscar">
+<tt class="descclassname">httk.iface.vasp_if.</tt><tt class="descname">write_poscar</tt><big>(</big><em>fio</em>, <em>cell</em>, <em>coords</em>, <em>coords_reduced</em>, <em>counts</em>, <em>occupations</em>, <em>comment='Comment'</em>, <em>scale='1'</em>, <em>vol=None</em><big>)</big><a class="reference internal" href="_modules/httk/iface/vasp_if.html#write_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.iface.vasp_if.write_poscar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a file on VASPs POSCAR format. Where it says <em>string</em> below, any type that works with str(x) is also ok.</p>
+<dl class="docutils">
+<dt>Input arguments  </dt>
+<dd>f: file stream to put output on  
+cell: 3x3 nested list of <em>strings</em> designating the cell
+coords: Nx3 nested list of <em>strings</em> designating the coordinates
+coords_reduced: bool, true = coords are given in reduced coordinate (in vasp D or Direct), false = coords are given in cartesian coordinates
+counts: how many atoms of each type
+occupations: which species of each atom type
+comment: (optional) the comment string given at the top of the file
+scale: (optional) <em>string</em> representing the overall scale of the cell
+vol: <em>string</em> representing the volume of the cell (only one of scale and vol can be set)</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.iface">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-httk.iface" title="Permalink to this headline">¶</a></h2>
+<p>httk Interface module</p>
+<blockquote>
+<div><ul class="simple">
+<li>The interface between httk and other software. Note: the idea is that this module should be useable without
+the other software installed. E.g., generation of input files to gulp shouldn&#8217;t require gulp installed.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">httk.iface package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-httk.iface.ase_if">httk.iface.ase_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.cif2cell_if">httk.iface.cif2cell_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.gulp_if">httk.iface.gulp_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.isotropy_if">httk.iface.isotropy_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.jmol_if">httk.iface.jmol_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.openbabel_if_notstable">httk.iface.openbabel_if_notstable module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.platon_if">httk.iface.platon_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.spglib_if">httk.iface.spglib_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface.vasp_if">httk.iface.vasp_if module</a></li>
+<li><a class="reference internal" href="#module-httk.iface">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="httk.io.html" title="httk.io package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="httk.graphics.matplotlib.html" title="httk.graphics.matplotlib package"
+             >previous</a> |</li>
+        <li><a href="index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="httk_base.html" >Full httk API documentation</a> &raquo;</li>
+          <li><a href="httk.html" >httk package</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

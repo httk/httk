@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 from httk.core import citation
 citation.add_ext_citation('Platon', "A. L. Spek, Utrecht University, Padualaan 8, 3584 CH Utrecht, The Netherlands.")
 
-import os, StringIO
+import os, StringIO, tempfile
 
 from httk import config
 from command import Command
@@ -30,19 +30,20 @@ except Exception:
     platon_path = None
     raise Exception("httk.external.platon imported with no platon path set in httk.cfg")
 
-def platon(cwd, args, timeout=10):
+def platon(cwd, args, timeout=60):
     #p = subprocess.Popen([platon_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #out, err = p.communicate()
     #print "COMMAND PLATON"
-    raise Exception("PLATON")
+    #raise Exception("PLATON")
+    #print "EXECUTING PLATON",platon_path,args
     out,err,completed = Command(platon_path,args,cwd=cwd).run(timeout)
-    #print "COMMAND PLATON END"
+    #print "COMMAND PLATON END", out, err, completed, cwd
     return out, err, completed
 
 def addsym(struct):    
     path = "/tmp/platon/atom.spf"
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open(path,'w')
@@ -83,7 +84,7 @@ def addsym(struct):
 
 def structure_addsym_and_tidy(struct):    
     #TODO: use mktmpdir here
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open("/tmp/platon/atom.spf",'w')
@@ -133,7 +134,7 @@ def structure_addsym_and_tidy(struct):
 
 def addsym_spacegroup(struct):    
     path = "/tmp/platon/atom.spf"
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open(path,'w')
@@ -144,15 +145,15 @@ def addsym_spacegroup(struct):
     
     def grab(results,match):
         results[0] = match.group(1)
-    out = httk.utils.micro_pyawk(StringIO(result),[['^Space Group ([^ ]+) ',None,grab]])
+    out = httk.basic.micro_pyawk(StringIO(result),[['^Space Group ([^ ]+) ',None,grab]])
     try:
         return out[0]
     except AttributeError:
         return None
 
-def structure_tidy(struct):    
+def structure_tidy_old(struct):    
     #TODO: use mktmpdir here
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open("/tmp/platon/atom.spf",'w')
@@ -200,7 +201,7 @@ def structure_tidy(struct):
 def structure_to_sgstructure(struct):
     #TODO: use mktmpdir here
     
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open("/tmp/platon/atom.spf",'w')
@@ -248,7 +249,7 @@ def cif_to_sgstructure(ioa):
     fin=ioa.file 
         
     #TODO: use mktmpdir here
-    httk.utils.mkdir_p("/tmp/platon")
+    httk.basic.mkdir_p("/tmp/platon")
     f = False
     try:
         f = open("/tmp/platon/atom.cif",'w')
@@ -318,3 +319,79 @@ def cif_to_sgstructure(ioa):
 #     
 #     return struct
     
+
+# def structure_tidy(struct):    
+#     #TODO: use mktmpdir here
+#     tmpdir = tempfile.mkdtemp(suffix='httk_platon')
+#     f = False
+#     try:
+#         f = open(os.path.join(tmpdir,"atom.spf"),'w')
+#         httk.iface.platon_if.structure_to_platon(f,struct,[],["STIDY","END"])
+#         #structure_to_platon(f,struct,["NOMOVE OFF"],[])
+#     finally:
+#         if f: f.close()
+#     if os.path.exists(os.path.join(tmpdir,"atom.res")):
+#         os.unlink(os.path.join(tmpdir,"atom.res"))
+#     out, err = platon(tmpdir,["atom.spf"])
+#     #out, err = platon("/tmp/platon",["-n","atom.spf"])
+#     if err != "":
+#         print err
+#  
+#     if os.path.exists("/tmp/platon/atom.sty"):
+#         os.unlink("/tmp/platon/atom.sty")
+#     out, err = platon("/tmp/platon",["atom.res"])
+#     if err != "":
+#         print err
+#     out, err = platon("/tmp/platon",["-Y","atom.sty"])
+#     if err != "":
+#         print err
+# 
+#     sgtidystruct = httk.iface.platon_if.platon_styout_to_sgstruct(StringIO(out))
+#     sgtidystruct.nonequiv.tags['platon_sg'] = sgtidystruct.hall_symbol
+#     
+#     return sgtidystruct.to_structure()
+
+
+def structure_tidy(struct):
+    #TODO: use mktmpdir here
+    tmpdir = tempfile.mkdtemp(prefix='ht.tmp.platon_')
+    f = False
+    try:
+        f = open(os.path.join(tmpdir,"atom.sty"),'w')
+        httk.iface.platon_if.platon_sites_to_styin(f,struct.rc_sites,struct.rc_cell)
+        #structure_to_platon(f,struct,["NOMOVE OFF"],[])
+    finally:
+        if f: f.close()
+
+    #f = open(os.path.join(tmpdir,"atom.sty"))
+    #print "PLATON INPUT:",f.read()
+    #f.close()
+    
+    out, err, completed = platon(tmpdir,["-Y","atom.sty"])
+
+    # Clean up
+    try:
+        os.unlink(os.path.join(tmpdir,'atom.lis'))
+    except (IOError, OSError):
+        pass
+    try:
+        os.unlink(os.path.join(tmpdir,'atom.sty'))
+    except (IOError, OSError):
+        pass
+    try:
+        os.rmdir(tmpdir)
+    except (IOError, OSError):
+        pass
+    
+    if err != "":
+        print err
+    elif completed == None:
+        #print "OUT:",out
+        print "Platon did not run to completion."
+        return None
+
+    tidystruct = httk.iface.platon_if.platon_styout_to_structure(StringIO.StringIO(out),based_on_struct=struct)
+
+    return tidystruct
+
+

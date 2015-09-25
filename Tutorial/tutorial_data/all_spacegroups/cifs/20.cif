@@ -1,0 +1,92 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: cace5ce68f312ff933c15fa8d5cefdca
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-04-29 18:12:27 +0000 (Mon, 29 Apr 2013) $
+#$Revision: 82365 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/20/93/7209345.cif $
+#------------------------------------------------------------------------------
+data_7209345
+loop_
+_publ_author_name
+'Schaefer, H.'
+'Savelsberg, G.'
+_publ_section_title
+;
+ Darstellung und kristallstruktur von Na2 Cu P, K2 Ag As, K2 Ag Sb und K2
+ Ag Bi
+;
+_journal_name_full
+;
+Zeitschrift fuer Naturforschung, Teil B. Anorganische Chemie, Organische
+ Chemie (2,1947-32,1977)
+;
+_journal_page_first              745
+_journal_page_last               748
+_journal_volume                  32
+_journal_year                    1977
+_chemical_name_systematic        'Ag K2 Sb'
+_citation_journal_id_ASTM        ZENBAX
+_[local]_cod_data_source_file    silver1-2_376.cif
+_[local]_cod_data_source_block   Ag1K2Sb1
+_[local]_cod_chemical_formula_sum_orig 'Ag1 K2 Sb1'
+_cod_original_cell_volume        543.5189
+_cod_database_code               7209345
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 2 2 21"
+_symmetry_space_group_name_Hall 'C 2c 2'
+_[local]_omdb_cod_original_Hall 'C 2c 2'
+_symmetry_Int_Tables_number 20
+ 
+_cell_length_a    10.44000
+_cell_length_b    8.29000
+_cell_length_c    6.28000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z+1/2
+4 -x,-y,z+1/2
+5 x+1/2,y+1/2,z
+6 x+1/2,-y+1/2,-z
+7 -x+1/2,y+1/2,-z+1/2
+8 -x+1/2,-y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+K1 K 8 c 0.32830 0.35390 0.74000 1.0
+Ag1 Ag 4 a 0.49770 0.00000 0.00000 1.0
+Sb1 Sb 4 b 0.00000 0.76300 0.25000 1.0
+ 
+

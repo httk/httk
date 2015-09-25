@@ -1,0 +1,82 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 50543876690c1989d521d33b5fcd3473
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/63/9016326.cif $
+#------------------------------------------------------------------------------
+data_9016326
+loop_
+_publ_author_name
+'Asbrink, S.'
+'Waskowska, A.'
+_publ_section_title
+;
+ CuO: x-ray single-crystal structure determination at 196 K and room temperature
+ Note: T = room temperature
+;
+_journal_name_full               'Journal of Physics: Condensed Matter'
+_journal_page_first              8173
+_journal_page_last               8180
+_journal_volume                  3
+_journal_year                    1991
+_chemical_compound_source        Synthetic
+_chemical_name_mineral           Tenorite
+_database_code_amcsd             0018822
+_exptl_crystal_density_diffrn    6.483
+_cod_database_code               9016326
+_journal_paper_doi 10.1088/0953-8984/3/42/012
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 1 c 1"
+_symmetry_space_group_name_Hall 'C -2yc'
+_[local]_omdb_cod_original_Hall 'C -2yc'
+_symmetry_Int_Tables_number 9
+ 
+_cell_length_a    4.69270
+_cell_length_b    3.42830
+_cell_length_c    5.13700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  99.54600
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,z+1/2
+3 x+1/2,y+1/2,z
+4 x+1/2,-y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cu1 Cu 4 a 0.25000 0.24670 0.00000 1.0
+O1 O 4 a -0.01040 0.41770 0.26020 1.0
+ 
+

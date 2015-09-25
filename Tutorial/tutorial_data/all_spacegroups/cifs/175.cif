@@ -1,0 +1,125 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 33b3286884db35c4d2cb05cd1459b0b6
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-03-15 11:45:36 +0000 (Sat, 15 Mar 2014) $
+#$Revision: 106525 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/10/17/7101735.cif $
+#------------------------------------------------------------------------------
+data_7101735
+loop_
+_publ_author_name
+'Beekman, Matt'
+'Kaduk, James A'
+'Huang, Qing'
+'Wong-Ng, Winnie'
+'Yang, Zhi'
+'Wang, Dongli'
+'Nolas, George S'
+_publ_section_title
+;
+ Synthesis and crystal structure of Na1-xGe3+z: a novel zeolite-like
+ framework phase in the Na-Ge system.
+;
+_journal_issue                   8
+_journal_name_full
+'Chemical communications (Cambridge, England)'
+_journal_page_first              837
+_journal_page_last               839
+_journal_year                    2007
+_chemical_name_common            'Na Ge3'
+_chemical_name_systematic        ' ?'
+_computing_structure_refinement  GSAS
+_pd_block_id                     2006-06-17T08:48|NAGE3|James_A._Kaduk|ID32
+_pd_phase_name                   'Na Ge3'
+_refine_ls_goodness_of_fit_all   1.47
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     28
+_refine_ls_number_restraints     8
+_refine_ls_shift/su_max          0.04
+_refine_ls_shift/su_mean         0.01
+_[local]_cod_data_source_file    b614048c.txt
+_[local]_cod_data_source_block   compound_1
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+'_geom_bond_publ_flag' value 'N' changed to 'n' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29 (56
+times).
+
+'_geom_angle_publ_flag' value 'N' changed to 'n' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29 (106 times).
+
+Automatic conversion script
+Id: cif_fix_enum 1527 2010-12-29 10:47:43Z saulius 
+;
+_cod_database_code               7101735
+_journal_paper_doi 10.1039/b614048c
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 6/m"
+_symmetry_space_group_name_Hall '-P 6'
+_[local]_omdb_cod_original_Hall '-P 6'
+_symmetry_Int_Tables_number 175
+ 
+_cell_length_a    15.05399
+_cell_length_b    15.05399
+_cell_length_c    3.96845
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z
+3 -y,x-y,z
+4 -x,-y,z
+5 -x+y,-x,z
+6 y,-x+y,z
+7 -x,-y,-z
+8 -x+y,-x,-z
+9 y,-x+y,-z
+10 x,y,-z
+11 x-y,x,-z
+12 -y,x-y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ge1 Ge 6 j 0.37332 0.26958 0.00000 1.0
+Ge2 Ge 6 j 0.40826 0.44914 0.00000 1.0
+Ge3 Ge 6 k 0.48411 0.30138 0.50000 1.0
+Ge4 Ge 6 k 0.52012 0.15164 0.50000 1.0
+Na1 Na 2 c 0.33333 0.66667 0.00000 1.0
+Na2 Na 6 k 0.25390 0.06390 0.50000 0.617
+Ge5 Ge 1 b 0.00000 0.00000 0.50000 0.617
+ 
+

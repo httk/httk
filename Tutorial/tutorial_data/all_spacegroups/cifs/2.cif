@@ -1,0 +1,83 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: dc222013753bc63c96642d6ef494d111
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/82/1008205.cif $
+#------------------------------------------------------------------------------
+data_1008205
+_chemical_name_systematic          'Antimony telluride iodide'
+_publ_section_title
+;
+Sur les Chalcogeno-iodures d'antimoine SbXI (X=S,Se,Te):Structures et
+spectroscopie Moessbauer de ^121^Sb
+;
+loop_
+_publ_author_name
+  'Ibanez, A'
+  'Jumas, J C'
+  'Olivier-Fourcade, J'
+  'Philippot, E'
+  'Maurin, M'
+_journal_name_full                 'Journal of Solid State Chemistry'
+_journal_coden_ASTM                JSSCBI
+_journal_volume                    48
+_journal_year                      1983
+_journal_page_first                272
+_journal_page_last                 283
+_refine_ls_R_factor_all            0.035
+_cod_database_code 1008205
+_journal_paper_doi 10.1016/0022-4596(83)90082-8
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -1"
+_symmetry_space_group_name_Hall '-P 1'
+_[local]_omdb_cod_original_Hall '-P 1'
+_symmetry_Int_Tables_number 2
+ 
+_cell_length_a    4.22800
+_cell_length_b    7.15583
+_cell_length_c    7.57000
+_cell_angle_alpha 93.27762
+_cell_angle_beta  106.18000
+_cell_angle_gamma 107.13800
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sb1 Sb 2 i 0.61913 0.48493 0.75337 1.0
+Te1 Te 2 i -0.07952 0.74648 0.09445 1.0
+I1 I 2 i 0.21804 0.79964 0.63647 1.0
+ 
+

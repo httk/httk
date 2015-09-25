@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -26,4 +26,4 @@ httk Interface module
 from httk.core import citation
 citation.add_src_citation("httk","Rickard Armiento")
 
-import ase_if, cif2cell_if, gulp_if, isotropy_if, openbabel_if, platon_if, prototypeid_if, spglib_if, vasp_if
+import ase_if, cif2cell_if, gulp_if, isotropy_if, jmol_if, spglib_if, vasp_if, platon_if

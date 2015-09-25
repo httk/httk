@@ -1,0 +1,615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.io.cif &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk" href="../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.io.cif</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">string</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">httk</span>
+
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">_read_cif_rewind_if_needed</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">done_fields</span><span class="p">):</span>
+    <span class="n">splitstr</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">done_fields</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splitstr</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">splitstr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rest</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">!=</span><span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">_read_cif_loop</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">pragmatic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">use_types</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c">#print &quot;Read cif loop&quot;</span>
+    <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">loop_data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">striprow</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">lowrow</span> <span class="o">=</span> <span class="n">striprow</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>        
+        <span class="k">if</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">):</span>
+            <span class="n">loop_data</span><span class="p">[</span><span class="n">lowrow</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span><span class="o">=</span><span class="p">[]</span>
+            <span class="n">header</span> <span class="o">+=</span> <span class="p">[</span><span class="n">lowrow</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+            <span class="n">noteol</span> <span class="o">=</span> <span class="n">_read_cif_rewind_if_needed</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+            <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loop_data</span><span class="p">)):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">striprow</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">lowrow</span> <span class="o">=</span> <span class="n">striprow</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">row</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;data_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;loop_&quot;</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+            <span class="n">val</span><span class="p">,</span> <span class="n">noteol</span> <span class="o">=</span> <span class="n">_read_cif_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">pragmatic</span><span class="p">,</span><span class="n">use_types</span><span class="p">,</span><span class="n">inloop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">loop_data</span><span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">break</span>
+    <span class="k">return</span> <span class="n">loop_data</span>
+
+<span class="k">def</span> <span class="nf">_read_cif_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">pragmatic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">use_types</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">inloop</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c">#print &quot;Read cif data value&quot;</span>
+    <span class="n">data_value</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c">#print &quot;read_cif_data_value_row:&quot;,row</span>
+        <span class="n">striprow</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">striprow</span><span class="o">==</span><span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">noteol</span><span class="p">)</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">):</span>
+            <span class="n">folded</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">newline</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">data_value</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">==</span><span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">folded</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">pragmatic</span><span class="p">:</span>
+                    <span class="n">data_value</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+                    <span class="n">newline</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_value</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+                <span class="n">newline</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">stripirow</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">stripirow</span> <span class="o">=</span> <span class="n">irow</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">irow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">newline</span><span class="p">:</span>
+                    <span class="n">data_value</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="n">newline</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">folded</span> <span class="ow">and</span> <span class="n">irow</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">):</span>
+                    <span class="n">data_value</span> <span class="o">+=</span> <span class="n">irow</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">)</span>
+                    <span class="n">newline</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_value</span> <span class="o">+=</span> <span class="n">irow</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+                    <span class="n">newline</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stripirow</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">(</span><span class="n">stripirow</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="n">noteol</span><span class="o">=</span><span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noteol</span><span class="o">=</span><span class="bp">False</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">striprow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">striprow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">):</span>
+            <span class="c"># The cif quoting rules are ... weird. Quotes are &quot;escaped&quot; if they are not followed by whitespace.</span>
+            <span class="n">quote</span> <span class="o">=</span> <span class="n">striprow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+            <span class="n">starti</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">chari</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">striprow</span><span class="p">[</span><span class="n">chari</span><span class="p">]</span> <span class="o">==</span> <span class="n">quote</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">striprow</span><span class="p">[</span><span class="n">chari</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                    <span class="n">endi</span> <span class="o">=</span> <span class="n">chari</span>
+                    <span class="n">endq</span> <span class="o">=</span> <span class="n">chari</span><span class="o">+</span><span class="mi">1</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">striprow</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">quote</span><span class="p">:</span>
+                    <span class="n">starti</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">endi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">)</span>
+                    <span class="n">endq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">endi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+                    <span class="n">endq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">)</span>
+            <span class="n">data_value</span> <span class="o">=</span> <span class="n">striprow</span><span class="p">[</span><span class="n">starti</span><span class="p">:</span><span class="n">endi</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">endq</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">striprow</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">(</span><span class="n">striprow</span><span class="p">[</span><span class="n">endq</span><span class="p">:])</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Unquoted string</span>
+            <span class="k">if</span> <span class="n">pragmatic</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inloop</span><span class="p">:</span>
+                <span class="c"># In pragmatic mode, if we are not in a loop and there is more than one data value</span>
+                <span class="c"># separated by whitespace, read all of it. This should always be ok to do, since </span>
+                <span class="c"># multiple data values in this situation would be an</span>
+                <span class="c"># error in the file otherwise, but if there is whitespace + underscore/data_/loop_ we parse that</span>
+                <span class="c"># as a new symbol, since otherwise we COULD misread valid files (with very weird formatting...).</span>
+                <span class="n">splitstr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;\s+_|\s+data_|\s+loop_&quot;</span><span class="p">,</span><span class="n">striprow</span><span class="p">,</span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">splitstr</span> <span class="o">=</span> <span class="n">striprow</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">data_value</span> <span class="o">=</span> <span class="n">splitstr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">rightside</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splitstr</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">rightside</span> <span class="o">=</span> <span class="n">splitstr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">rightside</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">(</span><span class="n">rightside</span><span class="p">)</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">break</span>
+            <span class="k">if</span> <span class="n">use_types</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_cif_is_int</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+                    <span class="n">data_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;)&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">_cif_is_float</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+                    <span class="n">data_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;)&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">))</span>
+            
+    <span class="k">return</span> <span class="n">data_value</span><span class="p">,</span> <span class="n">noteol</span>
+
+<span class="k">def</span> <span class="nf">_read_cif_data_block</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">pragmatic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">use_types</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c">#print &quot;Read cif data block&quot;</span>
+    <span class="n">data_items</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">loops</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c">#print &quot;Read data block read:&quot;,row</span>
+        <span class="n">striprow</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">lowrow</span> <span class="o">=</span> <span class="n">striprow</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">striprow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;data_&quot;</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">data_items</span>
+        <span class="k">elif</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;loop_&quot;</span><span class="p">):</span>
+            <span class="n">_read_cif_rewind_if_needed</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">loopdata</span> <span class="o">=</span> <span class="n">_read_cif_loop</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">pragmatic</span><span class="p">,</span><span class="n">use_types</span><span class="p">)</span>
+            <span class="n">data_items</span><span class="p">[</span><span class="s">&#39;loop_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">loops</span><span class="p">)]</span> <span class="o">=</span> <span class="n">loopdata</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">loops</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">data_items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">loopdata</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">striprow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">):</span>
+            <span class="c"># Multi-line string that we&#39;ve failed to tie to a name, lets just skip it, maybe we should warn</span>
+            <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">irow</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;;&quot;</span><span class="p">:</span>
+                    <span class="k">break</span> 
+        <span class="k">elif</span> <span class="n">striprow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">):</span>
+            <span class="n">lowsplit</span> <span class="o">=</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">data_name</span> <span class="o">=</span> <span class="n">lowsplit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lowsplit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">rightside</span> <span class="o">=</span> <span class="n">striprow</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">(</span><span class="n">rightside</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">data_value</span><span class="p">,</span> <span class="n">noteol</span> <span class="o">=</span> <span class="n">_read_cif_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">pragmatic</span><span class="p">,</span><span class="n">use_types</span><span class="p">,</span><span class="n">inloop</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">data_items</span><span class="p">[</span><span class="n">data_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_value</span>
+    <span class="k">return</span> <span class="n">data_items</span>
+
+<div class="viewcode-block" id="read_cif"><a class="viewcode-back" href="../../../httk.io.html#httk.io.cif.read_cif">[docs]</a><span class="k">def</span> <span class="nf">read_cif</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">pragmatic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">use_types</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic cif reader, given a filename / ioadapter it places all data in a python dictionary.</span>
+
+<span class="sd">    It returns a tuple: (header, list) </span>
+<span class="sd">    Where list are pairs of data blocks names and data blocks</span>
+<span class="sd">     </span>
+<span class="sd">    Each data block is a dictionary with tag_name:value</span>
+<span class="sd">    </span>
+<span class="sd">    For loops, value is another dictionary with format column_name:value</span>
+
+<span class="sd">    The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where</span>
+<span class="sd">    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means </span>
+<span class="sd">    to read the cif file precisely according to the spec. For example, in a multiline text field:</span>
+<span class="sd">        ;</span>
+<span class="sd">        some text</span>
+<span class="sd">        ;</span>
+<span class="sd">    Means the string &#39;\nsome text&#39;. For this specific case pragmatic=True removes the leading newline. </span>
+
+<span class="sd">    set use_types to True to convert things that look like floats and integers to those respective types</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">IoAdapterFileReader</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">rewindable_iterator</span><span class="p">(</span><span class="n">ioa</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">datalist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+            <span class="n">header</span><span class="o">+=</span><span class="n">row</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+            <span class="k">break</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lowrow</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;data_&quot;</span><span class="p">):</span>
+            <span class="n">data_block_name</span> <span class="o">=</span> <span class="n">lowrow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">_read_cif_rewind_if_needed</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">data_block</span> <span class="o">=</span> <span class="n">_read_cif_data_block</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">pragmatic</span><span class="p">,</span><span class="n">use_types</span><span class="p">)</span>
+            <span class="n">datalist</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">data_block_name</span><span class="p">,</span> <span class="n">data_block</span><span class="p">)]</span>
+
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">datalist</span><span class="p">,</span> <span class="n">header</span>
+    </div>
+<span class="n">_cif_ordinary_char</span> <span class="o">=</span>  <span class="s">&quot;!%&amp;()*+,-./0123456789:&lt;=&gt;?@ABCDEFGHIHJKLMNOPQRSTUVWXYZ\^`abcdefghijklmnopqrstuvwxyz{|}~&quot;</span>
+<span class="n">_cif_non_blank_char</span> <span class="o">=</span> <span class="n">_cif_ordinary_char</span><span class="o">+</span><span class="s">&#39;&quot;&#39;</span><span class="o">+</span><span class="s">&quot;#$&quot;</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="s">&quot;;[]&quot;</span>
+<span class="n">_cif_text_lead_char</span> <span class="o">=</span> <span class="n">_cif_ordinary_char</span><span class="o">+</span><span class="s">&#39;&quot;&#39;</span><span class="o">+</span><span class="s">&quot;#$&quot;</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="s">&quot;_ </span><span class="se">\t</span><span class="s">[]&quot;</span>
+<span class="n">_cif_any_print_char</span> <span class="o">=</span> <span class="n">_cif_ordinary_char</span><span class="o">+</span><span class="s">&#39;&quot;&#39;</span><span class="o">+</span><span class="s">&quot;#$&quot;</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="s">&quot;_ </span><span class="se">\t</span><span class="s">;[]&quot;</span>
+
+<span class="n">_cif_non_blank_char_table</span>  <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="n">_cif_non_blank_char</span><span class="p">,</span> <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_cif_non_blank_char</span><span class="p">))</span>
+<span class="n">_cif_helper_table</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">_cif_integer_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^[+-]?[0-9]+$&#39;</span><span class="p">)</span>
+<span class="n">_cif_float_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$&#39;</span><span class="p">)</span>
+<span class="n">_cif_simplestring_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^[A-Za-z0-9()][A-Za-z0-9()+-]*$&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cif_validate_name</span><span class="p">(</span><span class="n">name_unfiltered</span><span class="p">,</span><span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">context</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="o">+</span><span class="n">name_unfiltered</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">_cif_validate_non_blank_char</span><span class="p">(</span><span class="n">name_unfiltered</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">75</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Warning: write_cif: name length &gt; 75, surplus characters removed in &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="o">+</span><span class="n">name_unfiltered</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="mi">75</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">name</span>
+
+<span class="k">def</span> <span class="nf">_cif_is_float</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_cif_float_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span><span class="o">!=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cif_is_simplestring</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_cif_simplestring_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span><span class="o">!=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cif_is_int</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_cif_integer_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span><span class="o">!=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cif_validate_non_blank_char</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">_cif_helper_table</span><span class="p">,</span><span class="n">_cif_non_blank_char_table</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">out</span> <span class="o">!=</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Warning: write_cif: non-permitted characters in &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">+</span><span class="s">&quot; removed.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Warning: write_cif: non-permitted characters removed.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">def</span> <span class="nf">_cif_write_semicolontextfield</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">lines</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">noteol</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>            
+        <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;;&#39;</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Warning: write_cif: had to insert space before semicolon at the start of a line of a multi-line string to fulfill arcane quoting rules.&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">+</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">&gt;</span><span class="n">max_line_length</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;;</span><span class="se">\\</span><span class="s">&quot;</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>            
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>            
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">&gt;</span><span class="n">max_line_length</span><span class="p">:</span>
+            <span class="n">sublines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">max_line_length</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">max_line_length</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+            <span class="c"># Handle a wonderful corner case: the line splitting for length creates lines that start with one, or more, semi-colons..., sigh...</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sublines</span><span class="p">)):</span>                
+                <span class="k">if</span> <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;;&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="s">&quot;;&quot;</span><span class="p">:</span>
+                        <span class="c"># If its just a single semi-colon, move it to the previous line, which we saved space for by splitting at max_line_length-2</span>
+                        <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+=</span><span class="s">&quot;;&quot;</span>
+                        <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># Multiple semi-colons in a row, or a semi-colon + newline, this is a possibly unresolvable case (think long string of only semi-colons)</span>
+                        <span class="c"># fudge a solution by inserting a space</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Warning: write_cif: had to insert space before semicolon in a long string to fulfill arcane quoting rules.&quot;</span><span class="p">)</span>
+                        <span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">+</span><span class="n">sublines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">subline</span> <span class="ow">in</span> <span class="n">sublines</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subline</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">_cif_write_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">orig_data_value</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">,</span><span class="n">use_types</span><span class="p">,</span><span class="n">inloop</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">orig_data_value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data_value</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">orig_data_value</span><span class="p">)</span>
+    <span class="n">has_whitespace</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_value</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">1</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">data_value</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">has_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span>
+    <span class="n">has_single_quote</span> <span class="o">=</span> <span class="n">data_value</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span><span class="o">!=-</span><span class="mi">1</span>
+    <span class="n">has_double_quote</span> <span class="o">=</span> <span class="n">data_value</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">!=-</span><span class="mi">1</span>
+    <span class="n">too_long</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">max_line_length</span>
+    <span class="k">if</span> <span class="n">has_lines</span> <span class="ow">or</span> <span class="p">(</span><span class="n">has_single_quote</span> <span class="ow">and</span> <span class="n">has_double_quote</span><span class="p">)</span> <span class="ow">or</span> <span class="n">too_long</span><span class="p">:</span>
+        <span class="n">noteol</span> <span class="o">=</span> <span class="n">_cif_write_semicolontextfield</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">lines</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">noteol</span>
+    <span class="k">elif</span> <span class="n">has_double_quote</span> <span class="ow">or</span> <span class="p">(</span><span class="n">has_whitespace</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_single_quote</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data_value</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">data_value</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">has_single_quote</span> <span class="ow">or</span> <span class="p">(</span><span class="n">has_whitespace</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_double_quote</span><span class="p">):</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="o">+</span><span class="n">data_value</span><span class="o">+</span><span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">use_types</span><span class="p">:</span>
+        <span class="c"># Skip quotes if it looks like a number or is a simple string used in a loop</span>
+        <span class="k">if</span> <span class="n">_cif_is_float</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">_cif_is_int</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">inloop</span> <span class="ow">and</span> <span class="n">_cif_is_simplestring</span><span class="p">(</span><span class="n">data_value</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">data_value</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Always quote when a string, never quote otherwise</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">orig_data_value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">data_value</span><span class="o">+</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>    
+
+<span class="k">def</span> <span class="nf">_cif_write_data_block</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">data_block</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">,</span><span class="n">use_types</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data_block</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">data_block</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;loop_&quot;</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;loop_</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">outdata_columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">unfiltered_column</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">_cif_validate_non_blank_char</span><span class="p">(</span><span class="n">unfiltered_column</span><span class="p">,</span><span class="s">&quot;column name: &quot;</span><span class="o">+</span><span class="n">unfiltered_column</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">column</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">outdata_columns</span> <span class="o">+=</span> <span class="p">[</span><span class="n">data_block</span><span class="p">[</span><span class="n">unfiltered_column</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outdata_columns</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outdata_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                    <span class="n">column_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outdata_columns</span><span class="p">)):</span>
+                        <span class="n">column_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">outdata_columns</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span><span class="o">+</span><span class="mi">2</span>
+                        <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="n">max_line_length</span> <span class="ow">and</span> <span class="n">noteol</span><span class="p">:</span>
+                            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                            <span class="n">column_count</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="n">noteol</span> <span class="o">=</span> <span class="n">_cif_write_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">outdata_columns</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">],</span><span class="n">noteol</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">,</span><span class="n">use_types</span><span class="p">,</span><span class="n">inloop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">noteol</span><span class="p">:</span>
+                            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+                            <span class="n">column_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">column_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="n">noteol</span><span class="p">:</span>
+                        <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">basic</span><span class="o">.</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_name</span> <span class="o">=</span> <span class="n">_cif_validate_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="c"># Do we have space _ + key + space + quote + the whole data value + quote?, if not, preemptively break line</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">data_name</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_name</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span><span class="o">+</span><span class="mi">4</span> <span class="o">&gt;</span> <span class="n">max_line_length</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">noteol</span> <span class="o">=</span> <span class="n">_cif_write_data_value</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">val</span><span class="p">,</span><span class="n">noteol</span><span class="p">,</span><span class="n">max_line_length</span><span class="p">,</span><span class="n">use_types</span><span class="p">,</span><span class="n">inloop</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">noteol</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">noteol</span> <span class="o">=</span> <span class="bp">False</span>
+    
+<div class="viewcode-block" id="write_cif"><a class="viewcode-back" href="../../../httk.io.html#httk.io.cif.write_cif">[docs]</a><span class="k">def</span> <span class="nf">write_cif</span><span class="p">(</span><span class="n">ioa</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">max_line_length</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">use_types</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic cif writer, given a filename / ioadapter </span>
+
+<span class="sd">    data = the cif data to write as an (ordered) dictionary of tag_name:value</span>
+<span class="sd">    </span>
+<span class="sd">    header = the header (comment) segment</span>
+
+<span class="sd">    max_line_length = the maximum number of characters allowed on each line. This should not be set &lt; 80</span>
+<span class="sd">    (there is no point, and the length calculating algorithm breaks down at some small line length)</span>
+
+<span class="sd">    use_types = </span>
+<span class="sd">        if True: always quote values that are of string type. Numeric values are put in the file unquoted (as they should)</span>
+<span class="sd">        if False (default): also strings that look like cif numbers are put in the file unquoted</span>
+<span class="sd">    </span>
+<span class="sd">    For loops, value is another dictionary with format column_name:value</span>
+
+<span class="sd">    The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where</span>
+<span class="sd">    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means </span>
+<span class="sd">    to read the cif file precisely according to the spec. For example, in a multiline text field:</span>
+<span class="sd">        ;</span>
+<span class="sd">        some text</span>
+<span class="sd">        ;</span>
+<span class="sd">    Means the string &#39;\nsome text&#39;. For this specific case pragmatic=True removes the leading newline. </span>
+
+<span class="sd">    set use_types to True to convert things that look like floats and integers to those respective types</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">ioa</span><span class="o">.</span><span class="n">file</span>
+
+    <span class="k">if</span> <span class="n">header</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">&gt;</span><span class="n">max_line_length</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;#</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">header</span><span class="p">;</span>                
+                <span class="k">break</span>            
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">&gt;</span><span class="n">max_line_length</span><span class="p">:</span>
+                <span class="n">sublines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">79</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="mi">79</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">subline</span> <span class="ow">in</span> <span class="n">sublines</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subline</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="n">data_block_count</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">data_block</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data_block_count</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">data_block_name_unfiltered</span> <span class="o">=</span> <span class="n">data_block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">data_block_name_unfiltered</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data_block_name</span> <span class="o">=</span> <span class="s">&quot;data_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">data_block_count</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_block_name</span> <span class="o">=</span> <span class="n">_cif_validate_name</span><span class="p">(</span><span class="n">data_block_name_unfiltered</span><span class="p">,</span> <span class="s">&quot;data block name&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_block_name</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">data_block_name</span> <span class="o">=</span> <span class="s">&quot;data_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">data_block_count</span><span class="p">)</span>
+                    
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;data_&quot;</span><span class="o">+</span><span class="n">data_block_name</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">_cif_write_data_block</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">data_block</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">max_line_length</span><span class="p">,</span><span class="n">use_types</span><span class="p">)</span>
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        </div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../httk.io.html#httk.io.cif.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">gurk</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;/tmp/gurk.cif&quot;</span><span class="p">,</span><span class="s">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">datalist</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="n">read_cif</span><span class="p">(</span><span class="n">gurk</span><span class="p">)</span>
+    
+    <span class="n">gurk</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;/tmp/gurk2.cif&quot;</span><span class="p">,</span><span class="s">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">write_cif</span><span class="p">(</span><span class="n">gurk</span><span class="p">,</span><span class="n">datalist</span><span class="p">,</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">gurk</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">datalist2</span><span class="p">,</span> <span class="n">header2</span> <span class="o">=</span> <span class="n">read_cif</span><span class="p">(</span><span class="s">&quot;/tmp/gurk2.cif&quot;</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;MATCH1&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">==</span><span class="n">header2</span>
+    <span class="k">print</span> <span class="s">&quot;MATCH2&quot;</span><span class="p">,</span><span class="n">datalist</span><span class="o">==</span><span class="n">datalist2</span>
+    
+    <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

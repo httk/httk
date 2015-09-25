@@ -1,0 +1,226 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+URL="$1"
+
+if [ -z "$URL" ]; then
+    URL="http://openmaterialsdb.se/upload"
+fi
+
+echo "==== httk-project-submit"
+echo ""
+
+if [ -z "$HTTK_PROJECT_DIR" ]; then
+    echo "You are not in a subdirectory to a project."
+    echo "If this is a new project, you need to run httk-project"
+    echo "in your project directory."
+    exit 1
+fi
+
+cd "$HTTK_PROJECT_DIR"
+
+if [ "$URL" == "http://openmaterialsdb.se/upload" ]; then
+    echo "*******************************************************************"
+    echo "********************** WARNING! WARNING! **************************"
+    echo "*******************************************************************"
+    echo ""
+    echo "You are about to contribute as OPEN ACCESS the following project to a"
+    echo "PUBLICLY AVAILABLE DATABASE:"
+    echo "==================================================================="
+    echo "Project name: $HTTK_PROJECT_NAME"
+    echo "Project dir: $HTTK_PROJECT_DIR"
+    echo "==================================================================="
+    echo "If you do this, anyone will be able to find, download, read and browse your data."
+    echo
+    echo "PLEASE MAKE SURE YOU HAVE THE AGREEMENT OF ANYONE CO-AUTHORING THIS DATA!"
+    echo ""
+    echo "By an affirmative answer to the question below you agree that you and all data co-authors"
+    echo "are in agreement to make this data publicly available according to the license terms at"
+    echo "    http://openmaterialsdb.se/contributorinfo.html"
+    echo ""
+    echo "DO YOU AGREE TO THIS? [Y/N]"
+   read YESNO
+    if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+	echo "User cancelled. Nothing uploaded."
+	exit 0
+    fi
+    echo ""
+fi
+
+# Manifest format:
+# project public key
+# other public key
+# ...
+#
+# salt hash file
+# salt hash file
+#
+# signature of all data except the last two lines in the file using the project public key
+# (signatures of other keys allowed, but not required.)
+
+# Put all owning keys, all files and their hashes
+if [ ! -e "ht.project/manifest.bz2" ]; then
+    echo "==== Generating project manifests (this make take a long time, especially if your project contains many files)"
+
+    "${HTTK_BIN_PATH}/internal/update_project_manifest.py" "$HTTK_PROJECT_DIR"
+    echo ""
+else
+    echo "Project manifest already exists. (Remove ht.project/manifest.bz2 to force regenerating it)" 
+    echo ""
+fi
+
+echo "Locking project."
+touch ht.project/locked
+
+#echo ""
+#echo "Uploading of files to:"
+#echo "  $URL"
+#echo "is about to begin. NOTE: You may stop this process at any time by ctrl+c. You can restart the process as many times as you like."
+#echo "Only files not already sucessfully uploaded are being transferred."
+#echo
+echo ""
+echo "Ready to start uploading."
+echo "Do you want to start uploading your data files now? [Y/N]"
+read YESNO
+if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+    echo "User cancelled. Nothing uploaded."
+    exit 0
+fi
+
+echo ""
+echo "Uploading the project manifest (manifest verification takes some time, please be patient)"
+"${HTTK_BIN_PATH}/internal/post.py" -t "(main project maifest)" "$URL/manifest.php" "$HTTK_PROJECT_DIR/ht.project/manifest.bz2" 
+if [ "$?" != "0" ]; then
+    echo "Failed to upload the project manifest file. Cannot continue."
+    echo "Return code: $?"
+    exit 1
+fi
+echo ""
+echo "Manifest uploaded successfully."
+
+ERRORS=0
+function CHECKERRORS() {
+    if [ "$?" != "0" ]; then
+	ERRORS=$((ERRORS+1))
+    fi
+}
+
+function sendmanifest() {
+    local INDIRECTION
+    local TOTLINES
+    local PREPEND_PROGRESS
+    local realcount
+    local count 
+    local LASTCHAR
+    local SHA
+    local RESULT
+    local LINE
+
+    local BASEDIR="$1"
+    local FILE="$2"
+
+    if [ -z "$3" ]; then
+	INDIRECTION=""
+    else
+	INDIRECTION="$3 "
+    fi
+
+    local INFO
+    if [ -z "$4" ]; then
+	INFO=""
+    else
+	INFO="$4 "
+    fi
+
+    TOTLINES=$(bzcat "$BASEDIR/$FILE" | awk '/^$/ {start+=1} start==1 {count+=1} END{print count-1}')
+    bzcat "$BASEDIR/$FILE" | sed 's/^[^ ]\{1,\} //' | (
+	count=0
+	while read LINE; do
+	    count=$((count+1))
+	    if [ "$LINE" == "" ]; then
+		break;
+	    fi
+	done
+	realcount=0
+	while read LINE; do	    
+	    realcount=$((realcount+1))
+	    if [ "$LINE" == "" ]; then
+		break;
+	    fi
+	    BASENAME=$(basename "$LINE")
+	    PREPEND_PROGRESS="$INFO[$realcount / $TOTLINES] ($BASENAME)"
+	    LASTCHAR=$(echo "$LINE" | sed 's/^.*\(.\)$/\1/')
+	    if [ "$LASTCHAR" == "/" ]; then
+		SHA=$("${HTTK_BIN_PATH}/internal/sha256sum.py" "$BASEDIR/$LINE/ht.manifest.bz2" | awk '{print $1}')
+		RESULT=$("${HTTK_BIN_PATH}/internal/get.py" "$URL/check.php" manifest-line "${INDIRECTION}$count" public-key "$(cat ht.project/keys/key1.pub)" sha "$SHA")
+		#echo "CHECK MANIFEST RESULT===${RESULT}==="
+		if [ "$RESULT" == "UPLOAD" ]; then
+		    #echo "UPLOADING:" "$BASEDIR/LINE/ht.manifest.bz2"
+		    "${HTTK_BIN_PATH}/internal/post.py" -t "$PREPEND_PROGRESS" "$URL/upload.php" "$BASEDIR/$LINE/ht.manifest.bz2" manifest-line "${INDIRECTION}$count" public-key "$(cat ht.project/keys/key1.pub)" 
+		    CHECKERRORS
+		fi
+		sendmanifest "$BASEDIR/$LINE" "ht.manifest.bz2" "${INDIRECTION}$count" "$PREPEND_PROGRESS"
+	    else
+		SHA=$("${HTTK_BIN_PATH}/internal/sha256sum.py" "$BASEDIR/$LINE" | awk '{print $1}')
+		RESULT=$("${HTTK_BIN_PATH}/internal/get.py" "$URL/check.php" manifest-line "${INDIRECTION}$count" public-key "$(cat ht.project/keys/key1.pub)" sha "$SHA")
+		#echo "RESULT===${RESULT}==="
+		if [ "$RESULT" == "UPLOAD" ]; then
+		    #echo "UPLOADING:" "$BASEDIR/$LINE"
+		    "${HTTK_BIN_PATH}/internal/post.py" -t "$PREPEND_PROGRESS" "$URL/upload.php" "$BASEDIR/$LINE" manifest-line "${INDIRECTION}$count" public-key "$(cat ht.project/keys/key1.pub)"
+		    CHECKERRORS
+		else
+		    echo -e -n "\r\033[KAlready uploaded $PREPEND_PROGRESS"
+		fi
+	    fi
+
+	    count=$((count+1))
+	done
+    )
+}
+
+sendmanifest "$HTTK_PROJECT_DIR" "ht.project/manifest.bz2" "" ""
+echo ""
+
+if [ "$ERRORS" != "0" ]; then
+    echo "There were $ERRORS errors during upload."
+    echo "Please restart 'httk-project-submit' to retry uploading failed files."
+    echo "If you get repeated errors and do not understand why, please consult:"
+    echo "  http://openmaterialsdb.se/help"
+    exit 1
+fi
+
+if [ -e "ht.project/references" ]; then
+    echo ""
+    echo "Now attempting to send ht.project/references (verification of signature takes some time, please be patient)"
+    echo ""
+    PUBSIGNATURE=$(cat ht.project/references | "${HTTK_BIN_PATH}/internal/ed25519_sign.py" ht.project/keys/key1.priv)
+    "${HTTK_BIN_PATH}/internal/post.py" "$URL/references.php" "ht.project/references" project-signature "$PUBSIGNATURE" public-key "$(cat ht.project/keys/key1.pub)"
+    echo ""
+    if [ "$?" != "0" ]; then
+	echo "There was an error updating the references."
+	echo "Please restart 'httk-project-submit' to retry uploading failed files."
+	echo "If you get repeated errors and do not understand why, please consult:"
+	echo "  http://openmaterialsdb.se/help"
+	exit 1
+    else
+	echo "Successfully sent project references."
+    fi
+fi
+
+echo ""
+echo "Upload of files finished."
+echo
+echo "Signing finalization request with project key. (this takes a moment)"
+SIGNATURE=$(echo "finalize $(cat ht.project/keys/key1.pub)" | "${HTTK_BIN_PATH}/internal/ed25519_sign.py" ht.project/keys/key1.priv)
+
+"${HTTK_BIN_PATH}/internal/get.py" "$URL/finalize.php" project-signature "$SIGNATURE" public-key "$(cat ht.project/keys/key1.pub)"
+if [ "$?" != "0" ]; then
+    echo "Project finalizing failed."
+    exit 1
+fi
+echo ""
+echo "Project uploaded and finalized."
+

@@ -1,0 +1,98 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: aee56ae94b1e7efc0af5d835b83f0b86
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/33/2103359.cif $
+#------------------------------------------------------------------------------
+data_2103359
+loop_
+_publ_author_name
+'Marsh, Richard E.'
+_publ_section_title
+;
+ The space groups of point group <i>C</i>~3~: some corrections, some
+ comments
+;
+_journal_issue                   5
+_journal_name_full               'Acta Crystallographica Section B'
+_journal_page_first              893
+_journal_page_last               899
+_journal_volume                  58
+_journal_year                    2002
+_[local]_cod_data_source_file    bk0117.cif
+_[local]_cod_data_source_block   HINVOP
+_cod_database_code               2103359
+_journal_paper_doi 10.1107/S0108768102011758
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 64"
+_symmetry_space_group_name_Hall 'P 64'
+_[local]_omdb_cod_original_Hall 'P 64'
+_symmetry_Int_Tables_number 172
+ 
+_cell_length_a    8.12180
+_cell_length_b    8.12180
+_cell_length_c    5.81960
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+2/3
+3 -y,x-y,z+1/3
+4 -x,-y,z
+5 -x+y,-x,z+2/3
+6 y,-x+y,z+1/3
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+W1 W 3 b 0.50000 0.50000 0.00000 1.0
+O1 O 6 c 0.33260 0.31740 0.04420 1.0
+O2 O 6 c 0.57890 0.42940 -0.09700 1.0
+N1 N 6 c 0.40010 0.54920 0.18560 1.0
+C1 C 6 c -0.01960 0.19500 0.19180 1.0
+C2 C 6 c 0.00920 0.30860 0.27040 1.0
+C3 C 6 c 0.08480 0.19460 0.11520 1.0
+C4 C 6 c 0.14800 0.42940 0.27370 1.0
+C5 C 6 c 0.22320 0.31320 0.12030 1.0
+C6 C 6 c 0.25280 0.43050 0.19440 1.0
+C7 C 6 c 0.48100 0.56020 0.30580 1.0
+H1 H 6 c -0.06480 0.30600 0.32460 1.0
+H2 H 6 c 0.06440 0.11420 0.06030 1.0
+H3 H 6 c 0.16960 0.50900 0.32990 1.0
+H4 H 6 c 0.39960 0.63180 0.17290 1.0
+H5 H 6 c 0.42270 0.54900 0.38070 1.0
+H6 H 6 c 0.56580 0.65320 0.31050 1.0
+H7 H 6 c 0.88440 0.11480 0.19000 1.0
+ 
+

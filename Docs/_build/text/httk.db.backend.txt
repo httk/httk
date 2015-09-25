@@ -1,0 +1,74 @@
+
+httk.db.backend package
+***********************
+
+
+Submodules
+==========
+
+
+httk.db.backend.sqlite module
+=============================
+
+This provides a thin abstraction layer for SQL queries, implemented on
+top of sqlite,3 to make it easier to exchange between SQL databases.
+
+class class httk.db.backend.sqlite.Sqlite(filename)
+
+   Bases: "object"
+
+   class class SqliteCursor(db)
+
+      Bases: "object"
+
+      close()
+
+      description
+
+      execute(sql, values=[])
+
+      fetchall()
+
+      fetchone()
+
+   Sqlite.alter(sql, values, cursor=None)
+
+   Sqlite.close()
+
+   Sqlite.commit()
+
+   Sqlite.create_table(name, primkey, columnnames, columntypes, cursor=None, index=None)
+
+   Sqlite.cursor()
+
+   Sqlite.get_row(table, primkeyname, primkey, columnnames, cursor=None)
+
+   Sqlite.get_rows(table, primkeyname, primkeys, columnnames, cursor=None)
+
+   Sqlite.get_val(table, primkeyname, primkey, columnname, cursor=None)
+
+   Sqlite.insert(sql, values, cursor=None)
+
+   Sqlite.insert_row(name, columnnames, columnvalues, cursor=None)
+
+   Sqlite.modify_structure(sql, values, cursor=None)
+
+   Sqlite.query(sql, values, cursor=None)
+
+   Sqlite.rollback()
+
+   Sqlite.table_exists(name, cursor=None)
+
+   Sqlite.update(sql, values, cursor=None)
+
+   Sqlite.update_row(name, primkeyname, primkey, columnnames, columnvalues, cursor=None)
+
+httk.db.backend.sqlite.db_close(connection)
+
+httk.db.backend.sqlite.db_open(filename)
+
+httk.db.backend.sqlite.db_sqlite_close_all()
+
+
+Module contents
+===============

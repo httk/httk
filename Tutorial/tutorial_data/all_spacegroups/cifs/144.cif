@@ -1,0 +1,86 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 20a8a47e56ec69b5e9e767be97c35918
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 16:04:56 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120072 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/54/2105404.cif $
+#------------------------------------------------------------------------------
+data_2105404
+loop_
+_publ_author_name
+'Gorres, B.T.'
+'Montgomery, P.W.'
+'Knutson, C.D.'
+'Gurr, G.E.'
+_publ_section_title
+;
+ The crystal structure of trigonal diboron trioxide
+;
+_journal_name_full               'Acta Crystallographica B (24,1968-38,1982)'
+_journal_page_first              906
+_journal_page_last               915
+_journal_volume                  26
+_journal_year                    1970
+_chemical_name_systematic        'B2 O3'
+_citation_journal_id_ASTM        ACBCAR
+_[local]_cod_data_source_file    boron_297.cif
+_[local]_cod_data_source_block   B2O3
+_cod_original_cell_volume        135.7749
+_cod_database_code               2105404
+_journal_paper_doi 10.1107/S0567740870003369
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 31"
+_symmetry_space_group_name_Hall 'P 31'
+_[local]_omdb_cod_original_Hall 'P 31'
+_symmetry_Int_Tables_number 144
+ 
+_cell_length_a    4.33580
+_cell_length_b    4.33580
+_cell_length_c    8.33970
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z+1/3
+3 -x+y,-x,z+2/3
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+O1 O 3 a 0.00450 0.16080 0.87090 1.0
+O2 O 3 a 0.14850 0.60040 0.07750 1.0
+O3 O 3 a 0.54680 0.39720 0.00000 1.0
+B1 B 3 a 0.22290 0.39260 -0.01980 1.0
+B2 B 3 a 0.82810 0.60310 0.09210 1.0
+ 
+

@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,31 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core.htdata import periodictable
+#from httk.core.htdata import periodictable
+from httk.atomistic.data import periodictable
 from httk.core import *
 
-def structure_to_symbols_and_scaled_positions(struct):
+def rc_structure_to_symbols_and_scaled_positions(struct):
 
     symbols = []
-    for i in range(len(struct.sgcoordgroups)):
-        name = htdata.periodictable.atomic_symbol(struct.sgassignments[i])
-        symbols += [name]*struct.sgcounts[i]
+    for i in range(len(struct.rc_reduced_coordgroups)):
+        name = struct.assignments.symbols[i]
+        symbols += [name]*struct.rc_counts[i]
 
-    scaled_positions = struct.sgcoords
+    scaled_positions = struct.rc_reduced_coords
+
+    return symbols, scaled_positions
+
+def uc_structure_to_symbols_and_scaled_positions(struct):
+
+    symbols = []
+    for i in range(len(struct.uc_reduced_coordgroups)):
+        name = struct.assignments.symbols[i]
+        symbols += [name]*struct.uc_counts[i]
+
+    scaled_positions = struct.uc_reduced_coords
 
     return symbols, scaled_positions
         
-def ase_atoms_to_structure(atoms,hall_symbol=None):
-    occupancies = [periodictable.atomic_number(x) for x in atoms.get_chemical_symbols()]
-    coords = atoms.get_scaled_positions()
-    cell = atoms.get_cell()
-    struct = Structure.create(cell=cell, coords=coords, occupancies=occupancies, hall_symbol=hall_symbol)
-    return struct
 
 

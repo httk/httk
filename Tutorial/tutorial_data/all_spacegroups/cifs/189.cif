@@ -1,0 +1,200 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 2e8cc15504ebaa53a109fa0d361aa0c0
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/98/2009810.cif $
+#------------------------------------------------------------------------------
+data_2009810
+loop_
+_publ_author_name
+'Reuter, Gert'
+'Frenzen, Gerlinde'
+_publ_contact_author
+;
+Gert Reuter
+FB 19 Anorganische Chemie
+Univ. Gh Kassel
+Heinrich-Plett-Str. 40
+34109 Kassel
+Germany
+;
+_publ_section_title
+;
+ Struktur der hexagonalen Modifikation von Lanthan(III) trichlorid
+ trihydrat
+;
+_journal_issue                   6
+_journal_name_full               'Acta Crystallographica Section C'
+_journal_page_first              844
+_journal_page_last               845
+_journal_volume                  50
+_journal_year                    1994
+_chemical_name_common            'Lanthan Trichloride Trihydrate'
+_computing_cell_refinement       'CELDIM  (Enraf-Nonius)'
+_computing_data_collection       'Enraf-Nonius CAD4'
+_computing_data_reduction        'XCAD4PC (Harms, 1993)'
+_computing_molecular_graphics    'SCHAKAL92 (Keller, 1993)'
+_computing_publication_material  'SHELXL-93 (Sheldrick, 1993)'
+_computing_structure_refinement  'SHELXL-93 (Sheldrick, 1993)'
+_computing_structure_solution    'SHELXS-86 (Sheldrick, 1985)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_measurement_device       'Enraf-Nonius CAD4'
+_diffrn_measurement_method       \w-scan
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.109
+_diffrn_reflns_av_sigmaI/netI    0.0413
+_diffrn_reflns_limit_h_max       8
+_diffrn_reflns_limit_h_min       -8
+_diffrn_reflns_limit_k_max       8
+_diffrn_reflns_limit_k_min       -8
+_diffrn_reflns_limit_l_max       5
+_diffrn_reflns_limit_l_min       -5
+_diffrn_reflns_number            1252
+_diffrn_reflns_theta_max         24.90
+_diffrn_reflns_theta_min         3.42
+_diffrn_standards_interval_count 250
+_diffrn_standards_interval_time  120
+_diffrn_standards_number         2
+_exptl_absorpt_coefficient_mu    6.927
+_exptl_absorpt_correction_T_max  0.39
+_exptl_absorpt_correction_T_min  0.12
+_exptl_absorpt_correction_type   'numerisch, SHELX76 (Sheldrick, 1976)'
+_exptl_crystal_colour            farblos
+_exptl_crystal_density_diffrn    2.747
+_exptl_crystal_description       'Gestalt ?'
+_exptl_crystal_F_000             138
+_exptl_crystal_size_max          0.78
+_exptl_crystal_size_mid          0.28
+_exptl_crystal_size_min          0.14
+_refine_diff_density_max         0.626
+_refine_diff_density_min         -0.813
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   -0.03(11)
+_refine_ls_extinction_method     nein
+_refine_ls_goodness_of_fit_all   1.352
+_refine_ls_goodness_of_fit_obs   1.352
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     11
+_refine_ls_number_reflns         141
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.352
+_refine_ls_restrained_S_obs      1.352
+_refine_ls_R_factor_all          0.0222
+_refine_ls_R_factor_obs          0.0222
+_refine_ls_shift/esd_max         0.013
+_refine_ls_shift/esd_mean        0.004
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_scheme
+; Berechnetes Wichtungsschema w = 1/[\s^2^(F~o~^2^) + (0.0388P)^2^ + 0.0000P]
+mit P = (F~o~^2^ + 2F~c~^2^)/3
+;
+_refine_ls_wR_factor_all         0.0677
+_refine_ls_wR_factor_obs         0.0677
+_reflns_number_observed          141
+_reflns_number_total             141
+_reflns_observed_criterion       >2\s(I)
+_[local]_cod_data_source_file    se1038.cif
+_[local]_cod_data_source_block   se1038
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+'_symmetry_cell_setting' value 'Hexagonal' changed to 'hexagonal'
+according to '/home/saulius/struct/CIF-dictionaries/cif_core.dic'
+dictionary named 'cif_core.dic' version 2.4.1 from
+2010-06-29.
+
+'_geom_bond_publ_flag' value 'Y' changed to 'y' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29 (2 times).
+
+Automatic conversion script
+Id: cif_fix_enum 1527 2010-12-29 10:47:43Z saulius 
+
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Hexagonal' changed to 'hexagonal'
+according to /home/saulius/struct/CIF-dictionaries/cif_core.dic
+dictionary named 'cif_core.dic' version 2.4.1 from
+2010-06-29.
+
+'_geom_bond_publ_flag' value 'Y' changed to 'y'
+according to /home/saulius/struct/CIF-dictionaries/cif_core.dic
+dictionary named 'cif_core.dic' version 2.4.1 from 2010-06-29 (2
+times).
+
+'_geom_angle_publ_flag' value 'Y' changed to 'y' according
+to /home/saulius/struct/CIF-dictionaries/cif_core.dic dictionary
+named 'cif_core.dic' version 2.4.1 from 2010-06-29 (6 times).
+
+Automatic conversion script
+Id: cif_fix_values 1715 2011-07-08 13:25:40Z adriana 
+;
+_cod_database_code               2009810
+_journal_paper_doi 10.1107/S0108270193012570
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -6 2 m"
+_symmetry_space_group_name_Hall 'P -6 -2'
+_[local]_omdb_cod_original_Hall 'P -6 -2'
+_symmetry_Int_Tables_number 189
+ 
+_cell_length_a    6.87800
+_cell_length_b    6.87800
+_cell_length_c    4.41700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 x-y,-y,-z
+5 y,x,-z
+6 -x,-x+y,-z
+7 -x+y,-x,-z
+8 x,y,-z
+9 -y,x-y,-z
+10 -x,-x+y,z
+11 x-y,-y,z
+12 y,x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+La1 La 1 a 0.00000 0.00000 0.00000 1.0
+Cl1 Cl 3 g 0.70900 0.00000 0.50000 1.0
+O1 O 3 f 0.36500 0.00000 0.00000 1.0
+ 
+

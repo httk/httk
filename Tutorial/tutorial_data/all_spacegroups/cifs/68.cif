@@ -1,0 +1,118 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: cabf2f64b3eefad6d89c00c7fa2782f8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/20/73/2207380.cif $
+#------------------------------------------------------------------------------
+data_2207380
+loop_
+_publ_author_name
+'Smolentsev, Anton I.'
+'Naumov, Dmitry Yu.'
+_publ_section_title
+;
+ Strontium chlorite, Sr(ClO~2~)~2~, from X-ray powder diffraction data
+;
+_journal_coeditor_code           WM6101
+_journal_issue                   11
+_journal_name_full               'Acta Crystallographica Section E'
+_journal_page_first              i249
+_journal_page_last               i250
+_journal_volume                  61
+_journal_year                    2005
+_chemical_name_common            'strontium chlorite'
+_computing_cell_refinement       'FULLPROF2k (Rodriguez-Carvajal, 2004)'
+_computing_data_collection       'APD1700 Software (Philips, 1989)'
+_computing_publication_material
+'WINPLOTR (Roisnel & Rodriguez-Carvajal, 2005)'
+_computing_structure_refinement  FULLPROF2k
+_diffrn_ambient_temperature      293(2)
+_diffrn_measurement_device_type  'Philips PW1700 powder diffractometer'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_wavelength     1.54178
+_exptl_crystal_density_diffrn    3.242
+_exptl_crystal_density_method    'not measured'
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_all   3.03
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     28
+_refine_ls_number_restraints     1
+_refine_ls_shift/su_max          0.01
+_refine_ls_weighting_details     'w = 1/[\s^2^(Y~i~)]'
+_refine_ls_weighting_scheme      sigma
+_[local]_cod_data_source_file    wm6101.cif
+_[local]_cod_data_source_block   II
+_cod_original_cell_volume        455.92(11)
+_cod_database_code               2207380
+loop_
+_diffrn_radiation_type
+CuK\a
+_journal_paper_doi 10.1107/S1600536805034161
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 2/c 2/c 2/a (origin choice 2)"
+_symmetry_space_group_name_Hall '-C 2b 2bc'
+_[local]_omdb_cod_original_Hall '-C 2b 2bc'
+_symmetry_Int_Tables_number 68
+ 
+_cell_length_a    12.75190
+_cell_length_b    5.97990
+_cell_length_c    5.97870
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y+1/2,z
+5 -x+1/2,-y+1/2,-z
+6 -x+1/2,y,z+1/2
+7 x+1/2,-y+1/2,z+1/2
+8 x+1/2,y,-z
+9 x+1/2,y+1/2,z
+10 x+1/2,-y,-z+1/2
+11 -x+1/2,y+1/2,-z+1/2
+12 -x+1/2,-y,z
+13 -x,-y,-z
+14 -x,y+1/2,z+1/2
+15 x,-y,z+1/2
+16 x,y+1/2,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sr1 Sr 4 b 0.00000 0.25000 0.75000 1.0
+Cl1 Cl 8 e 0.82460 0.25000 0.25000 1.0
+O1 O 16 i 0.89470 0.40570 0.10050 1.0
+ 
+

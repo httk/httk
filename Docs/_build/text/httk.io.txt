@@ -1,0 +1,117 @@
+
+httk.io package
+***************
+
+
+Submodules
+==========
+
+
+httk.io.cif module
+==================
+
+httk.io.cif.main()
+
+httk.io.cif.read_cif(ioa, pragmatic=True, use_types=False)
+
+      Generic cif reader, given a filename / ioadapter it places all
+      data in a python dictionary.
+
+      It returns a tuple: (header, list)  Where list are pairs of data
+      blocks names and data blocks
+
+      Each data block is a dictionary with tag_name:value
+
+      For loops, value is another dictionary with format
+      column_name:value
+
+      The optional parameter pragmatic regulates handling of some
+      counter-intuitive aspects of the cif specification, where the
+      default pragmatic=True handles these features the way people
+      usually use them, whereas pragmatic=False means  to read the cif
+      file precisely according to the spec. For example, in a
+      multiline text field:
+
+         ; some text ;
+
+      Means the string '
+
+   some text'. For this specific case pragmatic=True removes the
+   leading newline.
+
+      set use_types to True to convert things that look like floats
+      and integers to those respective types
+
+httk.io.cif.write_cif(ioa, data, header=None, max_line_length=80, use_types=False)
+
+      Generic cif writer, given a filename / ioadapter
+
+      data = the cif data to write as an (ordered) dictionary of
+      tag_name:value
+
+      header = the header (comment) segment
+
+      max_line_length = the maximum number of characters allowed on
+      each line. This should not be set < 80 (there is no point, and
+      the length calculating algorithm breaks down at some small line
+      length)
+
+      use_types =
+         if True: always quote values that are of string type. Numeric
+         values are put in the file unquoted (as they should) if False
+         (default): also strings that look like cif numbers are put in
+         the file unquoted
+
+      For loops, value is another dictionary with format
+      column_name:value
+
+      The optional parameter pragmatic regulates handling of some
+      counter-intuitive aspects of the cif specification, where the
+      default pragmatic=True handles these features the way people
+      usually use them, whereas pragmatic=False means  to read the cif
+      file precisely according to the spec. For example, in a
+      multiline text field:
+
+         ; some text ;
+
+      Means the string '
+
+   some text'. For this specific case pragmatic=True removes the
+   leading newline.
+
+      set use_types to True to convert things that look like floats
+      and integers to those respective types
+
+
+httk.io.load module
+===================
+
+httk.io.load.load(ioa, ext=None)
+
+   A *very* generic file reader method.
+
+   Load a file into a suitable httk object. Try to do the most sane
+   thing possible given the input file. If you know what to expect
+   from the input file, it may be safer to use a targeted method for
+   that file type.
+
+
+httk.io.save module
+===================
+
+httk.io.save.save(obj, ioa, ext=None)
+
+   A *very* generic file writer method.
+
+   Load a file into a suitable httk object. Try to do the most sane
+   thing possible given the input file. If you know what to expect
+   from the input file, it may be safer to use a targeted method for
+   that file type.
+
+
+Module contents
+===============
+
+httk Io module
+
+   General methods for reading and writing of data, conversions, etc.

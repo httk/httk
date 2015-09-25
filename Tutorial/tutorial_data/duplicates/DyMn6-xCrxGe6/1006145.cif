@@ -1,0 +1,106 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: b73f83ebf0e87d8cd525b25c8ecd6957
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/61/1006145.cif $
+#------------------------------------------------------------------------------
+data_1006145
+_publ_section_title
+;
+A neutron diffraction study of magnetic ordering in Dy Mn6-x Crx Ge6
+compounds
+;
+loop_
+_publ_author_name
+  'Schobinger-Papamantellos, P'
+  'Rodriguez-Carvajal, J'
+  'Andre, G'
+  'Buschow, K H J'
+_journal_name_full                 'Journal of Alloys Compd.'
+_journal_coden_ASTM                JALCEU
+_journal_volume                    265
+_journal_year                      1998
+_journal_page_first                56
+_journal_page_last                 60
+_refine_ls_R_factor_all            0.033
+_cod_database_code 1006145
+_journal_paper_doi 10.1016/S0925-8388(97)00312-5
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 6/m 2/m 2/m"
+_symmetry_space_group_name_Hall '-P 6 2'
+_[local]_omdb_cod_original_Hall '-P 6 2'
+_symmetry_Int_Tables_number 191
+ 
+_cell_length_a    5.21550
+_cell_length_b    5.21550
+_cell_length_c    8.20180
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z
+3 -y,x-y,z
+4 -x,-y,z
+5 -x+y,-x,z
+6 y,-x+y,z
+7 x-y,-y,-z
+8 x,x-y,-z
+9 y,x,-z
+10 -x+y,y,-z
+11 -x,-x+y,-z
+12 -y,-x,-z
+13 -x,-y,-z
+14 -x+y,-x,-z
+15 y,-x+y,-z
+16 x,y,-z
+17 x-y,x,-z
+18 -y,x-y,-z
+19 -x+y,y,z
+20 -x,-x+y,z
+21 -y,-x,z
+22 x-y,-y,z
+23 x,x-y,z
+24 y,x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Dy1 Dy 1 a 0.00000 0.00000 0.00000 1.0
+Ge1 Ge 2 e 0.00000 0.00000 0.34720 1.0
+Ge2 Ge 2 c 0.33333 0.66667 0.00000 1.0
+Ge3 Ge 2 d 0.33333 0.66667 0.50000 1.0
+Cr1 Cr 6 i 0.50000 0.00000 0.25500 0.25
+Mn1 Mn 6 i 0.50000 0.00000 0.25500 0.75
+ 
+

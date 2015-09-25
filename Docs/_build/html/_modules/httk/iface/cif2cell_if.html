@@ -1,0 +1,432 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.iface.cif2cell_if &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk" href="../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.iface.cif2cell_if</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
+
+<span class="kn">from</span> <span class="nn">httk.atomistic.data</span> <span class="kn">import</span> <span class="n">periodictable</span>
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="n">FracVector</span>
+<span class="kn">import</span> <span class="nn">httk</span>  
+<span class="kn">from</span> <span class="nn">httk.atomistic</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="out_to_struct"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.cif2cell_if.out_to_struct">[docs]</a><span class="k">def</span> <span class="nf">out_to_struct</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example input::</span>
+<span class="sd">    </span>
+<span class="sd">        OUTPUT CELL INFORMATION</span>
+<span class="sd">        Symmetry information:</span>
+<span class="sd">        Trigonal crystal system.</span>
+<span class="sd">        Space group number     : 165</span>
+<span class="sd">        Hall symbol            : -P 3 2&quot;c</span>
+<span class="sd">        Hermann-Mauguin symbol : P-3c1</span>
+<span class="sd">        </span>
+<span class="sd">        Bravais lattice vectors :</span>
+<span class="sd">          0.8660254  -0.5000000   0.0000000 </span>
+<span class="sd">          0.0000000   1.0000000   0.0000000 </span>
+<span class="sd">          0.0000000   0.0000000   1.0231037 </span>
+<span class="sd">        All sites, (lattice coordinates):</span>
+<span class="sd">        Atom           a1          a2          a3 </span>
+<span class="sd">        La      0.6609000   0.0000000   0.2500000</span>
+<span class="sd">        La      0.3391000   0.0000000   0.7500000</span>
+<span class="sd">        ...</span>
+<span class="sd">        F       0.0000000   0.0000000   0.2500000</span>
+<span class="sd">        F       0.0000000   0.0000000   0.7500000</span>
+<span class="sd">        </span>
+<span class="sd">        Unit cell volume  : 328.6477016 A^3</span>
+<span class="sd">        Unit cell density :   3.5764559 u/A^3 =   5.9388437 g/cm^3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;output_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;input_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;sgcoords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;sgoccupancies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_bib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;seen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;sgseen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">results</span><span class="p">[</span><span class="s">&#39;sgidx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">read_cell</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;input_cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))])</span>
+        <span class="k">elif</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;output_cell&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))])</span>
+
+    <span class="k">def</span> <span class="nf">read_coords_occs</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]:</span>
+            <span class="n">coordstr</span> <span class="o">=</span> <span class="s">&#39;sgcoords&#39;</span>
+            <span class="n">occstr</span> <span class="o">=</span> <span class="s">&#39;sgoccupancies&#39;</span>
+            <span class="n">seenstr</span> <span class="o">=</span> <span class="s">&#39;sgseen&#39;</span>
+            <span class="n">idxstr</span> <span class="o">=</span> <span class="s">&#39;sgidx&#39;</span>
+        <span class="k">elif</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]:</span>
+            <span class="n">coordstr</span> <span class="o">=</span> <span class="s">&#39;coords&#39;</span>
+            <span class="n">occstr</span> <span class="o">=</span> <span class="s">&#39;occupancies&#39;</span>
+            <span class="n">seenstr</span> <span class="o">=</span> <span class="s">&#39;seen&#39;</span>
+            <span class="n">idxstr</span> <span class="o">=</span> <span class="s">&#39;idx&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">newcoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="c">#newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+        <span class="n">occups</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)):</span>        
+            <span class="n">occup</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;atom&#39;</span><span class="p">:</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">species</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span><span class="s">&#39;ratio&#39;</span><span class="p">:</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">occups</span><span class="p">[</span><span class="n">j</span><span class="p">]),}</span>
+    
+            <span class="k">if</span> <span class="n">newcoord</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">]:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span>
+                <span class="c">#print &quot;OLD&quot;,results[occstr],idx</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">occstr</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occup</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">idxstr</span><span class="p">]</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">coordstr</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoord</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">occstr</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">occup</span><span class="p">])</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">idxstr</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c">#print &quot;NEW&quot;,results[occstr],results[idxstr]</span>
+                          
+    <span class="k">def</span> <span class="nf">read_coords</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]:</span>
+            <span class="n">coordstr</span> <span class="o">=</span> <span class="s">&#39;sgcoords&#39;</span>
+            <span class="n">occstr</span> <span class="o">=</span> <span class="s">&#39;sgoccupancies&#39;</span>
+            <span class="n">seenstr</span> <span class="o">=</span> <span class="s">&#39;sgseen&#39;</span>
+            <span class="n">idxstr</span> <span class="o">=</span> <span class="s">&#39;sgidx&#39;</span>
+        <span class="k">elif</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]:</span>
+            <span class="n">coordstr</span> <span class="o">=</span> <span class="s">&#39;coords&#39;</span>
+            <span class="n">occstr</span> <span class="o">=</span> <span class="s">&#39;occupancies&#39;</span>
+            <span class="n">seenstr</span> <span class="o">=</span> <span class="s">&#39;seen&#39;</span>
+            <span class="n">idxstr</span> <span class="o">=</span> <span class="s">&#39;idx&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">newcoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="c">#newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">occup</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;atom&#39;</span><span class="p">:</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">species</span><span class="p">)}</span>        
+
+        <span class="k">if</span> <span class="n">newcoord</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">]:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span>
+            <span class="c">#print &quot;XOLD&quot;,results[occstr],idx</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">occstr</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occup</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">seenstr</span><span class="p">][</span><span class="n">newcoord</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">idxstr</span><span class="p">]</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">coordstr</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoord</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">occstr</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">occup</span><span class="p">])</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">idxstr</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c">#print &quot;XNEW&quot;,results[occstr],results[&#39;idx&#39;]</span>
+
+        <span class="c">#if results[&#39;in_input&#39;]:</span>
+        <span class="c">#    results[&#39;sgcoords&#39;].append(newcoord)</span>
+        <span class="c">#    results[&#39;sgoccupancies&#39;].append(periodictable.atomic_symbol(match.group(1)))</span>
+        <span class="c">#elif results[&#39;in_output&#39;]:</span>
+        <span class="c">#    results[&#39;coords&#39;].append(newcoord)</span>
+        <span class="c">#    results[&#39;occupancies&#39;].append(periodictable.atomic_symbol(match.group(1)))</span>
+ 
+    <span class="k">def</span> <span class="nf">read_volume</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read_hall</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;sghall&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;hall&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read_id</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">coords_stop</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">coords_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">cell_stop</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">input_cell_stop</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">cell_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">input_cell_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">output_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>        
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">read_version</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">read_name</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">parse_parexpr</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c"># Grab the last, nested, parenthesed expression </span>
+        <span class="n">p</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+    <span class="k">def</span> <span class="nf">read_bib</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;Failed to get author information, No journal information&#39;</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">bib_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_bib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">bib_stop_input_start</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_bib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">read_source</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>        
+        <span class="n">results</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                
+    <span class="n">out</span> <span class="o">=</span> <span class="n">httk</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">micro_pyawk</span><span class="p">(</span><span class="n">ioa</span><span class="p">,[</span>
+            <span class="p">[</span><span class="s">&#39;^ *INPUT CELL INFORMATION *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">bib_stop_input_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *CIF2CELL ([0-9.]*)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_version</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Output for (.*\)) *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_name</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Database reference code: *([0-9]+)&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_id</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *All sites, (lattice coordinates): *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_cell&#39;</span><span class="p">],</span><span class="n">cell_stop</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Representative sites *: *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_cell&#39;</span><span class="p">],</span><span class="n">input_cell_stop</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">],</span><span class="n">coords_stop</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_cell&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_cell&#39;</span><span class="p">],</span><span class="n">read_cell</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_coords&#39;</span><span class="p">],</span><span class="n">read_coords</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_coords&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input_coords&#39;</span><span class="p">],</span><span class="n">read_coords_occs</span><span class="p">],</span>
+<span class="c">#            [&#39;^ *Hermann-Mauguin symbol *: *(.*)$&#39;,lambda results,match: results[&#39;in_output&#39;],read_spacegroup],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Hall symbol *: *(.*)$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">],</span><span class="n">read_hall</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">],</span><span class="n">read_volume</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Bravais lattice vectors : *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">],</span><span class="n">cell_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Lattice parameters: *$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">],</span><span class="n">input_cell_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *Atom +a1 +a2 +a3&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_output&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_input&#39;</span><span class="p">],</span><span class="n">coords_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *OUTPUT CELL INFORMATION *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">output_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^([^</span><span class="se">\n</span><span class="s">]*)$&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;in_bib&#39;</span><span class="p">],</span><span class="n">read_bib</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;^ *BIBLIOGRAPHIC INFORMATION *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">bib_start</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;CIF file exported from +(.*) *$&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_source</span><span class="p">]</span>
+          
+          <span class="p">],</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="n">out</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="n">rc_a</span><span class="p">,</span><span class="n">rc_b</span><span class="p">,</span><span class="n">rc_c</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;input_cell&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">rc_alpha</span><span class="p">,</span><span class="n">rc_beta</span><span class="p">,</span><span class="n">rc_gamma</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;input_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">uc_a</span><span class="p">,</span><span class="n">uc_b</span><span class="p">,</span><span class="n">uc_c</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;output_cell&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">uc_alpha</span><span class="p">,</span><span class="n">uc_beta</span><span class="p">,</span><span class="n">uc_gamma</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;output_cell&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">rc_cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;input_cell&#39;</span><span class="p">])</span>
+    <span class="n">uc_cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;output_cell&#39;</span><span class="p">])</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;coords&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span><span class="mi">5000000</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="n">sgcoords</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;sgcoords&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span><span class="mi">5000000</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+
+    <span class="n">hall_symbol</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;hall&#39;</span><span class="p">]</span>
+    <span class="n">sghall_symbol</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;sghall&#39;</span><span class="p">]</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s">&#39;source&#39;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+        <span class="n">tags</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&quot;:&quot;</span><span class="o">+</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s">&#39;bib&#39;</span> <span class="ow">in</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">refs</span><span class="o">=</span><span class="p">[</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;bib&#39;</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="s">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+        <span class="n">tags</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+
+    <span class="c"># This is to handle a weird corner case, where atoms in a disordered structure</span>
+    <span class="c"># are placed on equivalent but different sites in the representative representation; then</span>
+    <span class="c"># they will be mapped to the same sites in the filled cell. Our solution in that case is</span>
+    <span class="c"># to throw away the rc_cell, since it is incorrect - it has equivalent sites that appear</span>
+    <span class="c"># different even though they are the same.</span>
+    <span class="n">remaining_filled_sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;sgoccupancies&#39;</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;sgoccupancies&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">remaining_filled_sites</span><span class="p">:</span>
+            <span class="n">remaining_filled_sites</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">out</span><span class="p">[</span><span class="s">&#39;sgoccupancies&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">remaining_filled_sites</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining_filled_sites</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rc_cell_broken</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rc_cell_broken</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rc_cell_broken</span><span class="p">:</span>    
+        <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rc_lengths</span><span class="o">=</span><span class="n">rc_cell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">rc_angles</span><span class="o">=</span><span class="n">rc_cell</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                  <span class="n">rc_reduced_occupationscoords</span><span class="o">=</span><span class="n">sgcoords</span><span class="p">,</span> 
+                                  <span class="n">uc_cell</span><span class="o">=</span><span class="n">uc_cell</span><span class="p">,</span>
+                                  <span class="n">uc_reduced_occupationscoords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> 
+                                  <span class="n">uc_volume</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;volume&#39;</span><span class="p">],</span>
+                                  <span class="n">rc_occupancies</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;sgoccupancies&#39;</span><span class="p">],</span> 
+                                  <span class="n">uc_occupancies</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">],</span> 
+                                  <span class="n">spacegroup</span><span class="o">=</span><span class="n">sghall_symbol</span><span class="p">,</span> 
+                                  <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">refs</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">uc_cell</span><span class="o">=</span><span class="n">uc_cell</span><span class="p">,</span>
+                                  <span class="n">uc_reduced_occupationscoords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> 
+                                  <span class="n">uc_volume</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;volume&#39;</span><span class="p">],</span>
+                                  <span class="n">uc_occupancies</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">&#39;occupancies&#39;</span><span class="p">],</span> 
+                                  <span class="n">spacegroup</span><span class="o">=</span><span class="n">sghall_symbol</span><span class="p">,</span> 
+                                  <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">refs</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span> <span class="n">periodicity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>        
+
+    <span class="c"># A bit of santiy check to trigger on possible bugs from cif2cell</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">counts</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">counts</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span><span class="n">struct</span><span class="o">.</span><span class="n">rc_sites</span><span class="o">.</span><span class="n">counts</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;cif2cell_if.out_to_struct: non-sensible parsing of cif2cell output.&quot;</span><span class="p">)</span>
+
+    <span class="c">#if &#39;volume&#39; in out:</span>
+    <span class="c">#    vol = FracVector.create(out[&#39;volume&#39;])</span>
+    <span class="c">#else:</span>
+    <span class="c">#    volstruct = httk.Structure.create(a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma, occupancies=out[&#39;sgoccupancies&#39;], coords=sgcoords, hall_symbol=sghall_symbol, refs=refs)</span>
+    <span class="c">#    vol = volstruct.volume</span>
+
+    <span class="c">#struct = httk.Structure.create(cell,occupancies=out[&#39;occupancies&#39;],coords=coords,volume=vol,tags=tags,hall_symbol=hall_symbol, refs=refs)</span>
+    <span class="c">#struct._sgstructure = httk.SgStructure.create(a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma, occupancies=out[&#39;sgoccupancies&#39;], coords=sgcoords, hall_symbol=sghall_symbol)</span>
+    <span class="c">#print &quot;HERE WE ARE:&quot;,out[&#39;sgoccupancies&#39;],sgcoords,sghall_symbol</span>
+    <span class="c">#print &quot;HERE WE ARE:&quot;,out[&#39;occupancies&#39;],coords</span>
+    <span class="c">#struct = httk.Structure.create(cell, volume=vol, unique_occupations=out[&#39;sgoccupancies&#39;], uc_occupations=out[&#39;occupancies&#39;], unique_reduced_occupationscoords=sgcoords, uc_reduced_occupationscoords=coords, spacegroup=sghall_symbol, tags=tags, refs=refs, periodicity=0)</span>
+    <span class="c">#print &quot;HERE&quot;,sgcoords, coords</span>
+    <span class="c">#counts = [len(x) for x in out[&#39;occupancies&#39;]]</span>
+    <span class="c">#p1structure = httk.Structure.create(cell,occupancies=out[&#39;occupancies&#39;],coords=coords,volume=vol,tags=tags, refs=refs, periodicity=0)</span>
+    <span class="c">#struct.set_p1structure(p1structure)</span>
+
+    <span class="k">return</span> <span class="n">struct</span>
+    
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

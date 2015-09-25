@@ -1,0 +1,110 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 2286937ed9f8cc1781b703a8696296f8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/8/10/30/8103030.cif $
+#------------------------------------------------------------------------------
+data_8103030
+loop_
+_publ_author_name
+'Katrin Meier'
+'Alexander Kerkau'
+'Ulrich Schwarz'
+_publ_section_title
+;
+ Crystal structures of gadolinium pentagermanide, GdGe5 and neodymium
+ pentagermanide, NdGe5
+;
+_journal_issue                   3
+_journal_name_full
+'Zeitschrift f\"ur Kristallographie - New Crystal Structures'
+_journal_page_first              373
+_journal_volume                  224
+_journal_year                    2009
+_computing_cell_refinement       WinCSD
+_computing_data_reduction        WinCSD
+_computing_structure_refinement  WinCSD
+_diffrn_radiation_detector       'nine crystal multi-analyser stage'
+_diffrn_radiation_monochromator  'Si 111 double-crystal monochromator'
+_diffrn_radiation_source         'synchrotron ID31 ESRF'
+_diffrn_radiation_type           x-ray
+_diffrn_radiation_wavelength     0.39987841
+_diffrn_reflns_theta_max         22.7
+_exptl_absorpt_coefficient_mu    10.26
+_exptl_crystal_density_diffrn    6.8942(2)
+_exptl_crystal_F_000             440
+_pd_char_colour                  black
+_pd_char_particle_morphology     'size < 0.063mm'
+_pd_meas_2theta_range_inc        0.002000
+_pd_meas_2theta_range_max        45.04000
+_pd_meas_2theta_range_min        2.48800
+_pd_meas_number_of_points        21275
+_refine_ls_matrix_type           fullcycle
+_refine_ls_number_parameters     14
+_refine_ls_number_reflns         540
+_refine_ls_R_factor_gt           0.1071
+_refine_ls_structure_factor_coef Inet
+_refine_ls_weighting_scheme      1/[Y~i~+\s(Y~i~)]
+_refine_ls_wR_factor_ref         0.1233
+_[local]_cod_data_source_file    710017.cff
+_[local]_cod_data_source_block   NdGe5
+_[local]_cod_cif_authors_sg_H-M  'I m m m'
+_[local]_cod_chemical_formula_sum_orig 'Nd1 Ge5'
+_cod_original_cell_volume        243.91(8)
+_cod_database_code               8103030
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P m m 2"
+_symmetry_space_group_name_Hall 'P 2 -2'
+_[local]_omdb_cod_original_Hall 'P 2 -2'
+_symmetry_Int_Tables_number 25
+ 
+_cell_length_a    3.98940
+_cell_length_b    6.19880
+_cell_length_c    9.86300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x,y,z
+4 x,-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Nd1 Nd 1 a 0.00000 0.00000 0.00000 1.0
+Ge1 Ge 1 b 0.00000 0.50000 0.00000 1.0
+Ge2 Ge 2 h 0.50000 0.29524 0.82960 1.0
+ 
+

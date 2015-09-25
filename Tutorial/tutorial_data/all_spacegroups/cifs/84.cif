@@ -1,0 +1,89 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 21c6842ffdb8344ea8fb3f9f811677c3
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2011-09-28 14:24:46 +0000 (Wed, 28 Sep 2011) $
+#$Revision: 26848 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/00/2100003.cif $
+#------------------------------------------------------------------------------
+data_2100003
+_journal_name_full  'Acta Crystallographica, Section B'
+_journal_year  2005
+_journal_volume  61
+_journal_page_first 01
+_journal_page_last  10
+_publ_section_title
+;
+Anti-KSbF~6~ structure of CaTbF~6~ and CdTbF~6~ :
+a confirmation of the singular crystal chemistry of Tb^4+^ in fluorides.
+;
+loop_
+_publ_author_name
+  'Josse, Micha\"el'
+  'El-Ghozzi, Malika'
+  "Dubois, Marc"
+  "Cellier, Jo\"el"
+  'Avignant, Daniel'
+_[local]_cod_chemical_formula_sum_orig 'F6 Cd Tb'
+_exptl_crystal_density_diffrn  6.18
+_diffrn_ambient_temperature  295
+_cod_database_code 2100003
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42/m"
+_symmetry_space_group_name_Hall '-P 4c'
+_[local]_omdb_cod_original_Hall '-P 4c'
+_symmetry_Int_Tables_number 84
+ 
+_cell_length_a    5.18770
+_cell_length_b    5.18770
+_cell_length_c    7.69451
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z+1/2
+4 y,-x,z+1/2
+5 -x,-y,-z
+6 x,y,-z
+7 y,-x,-z+1/2
+8 -y,x,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ca1 Ca 2 a 0.00000 0.00000 0.00000 1.0
+Tb1 Tb 2 f 0.50000 0.50000 0.25000 1.0
+F1 F 8 k 0.20000 0.26200 0.82240 1.0
+F2 F 4 j 0.35100 0.69300 0.00000 1.0
+ 
+

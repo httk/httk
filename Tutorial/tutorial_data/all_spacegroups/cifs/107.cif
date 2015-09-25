@@ -1,0 +1,164 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 11148bef4a8f6e29fa2bf3301fa7a3aa
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/20/49/2204979.cif $
+#------------------------------------------------------------------------------
+data_2204979
+loop_
+_publ_author_name
+'Tkachuk, Andriy V.'
+'Mar, Arthur'
+_publ_section_title
+;
+ Lanthanum iron trigermanide, LaFeGe~3~
+;
+_journal_issue                   1
+_journal_name_full               'Acta Crystallographica Section E'
+_journal_page_first              i1
+_journal_page_last               i2
+_journal_volume                  61
+_journal_year                    2005
+_chemical_name_common            'lanthanum iron trigermanide'
+_chemical_name_systematic        'lanthanum iron trigermanide'
+_computing_cell_refinement       'SAINT (Bruker, 2004)'
+_computing_data_collection       'SMART (Bruker, 1999)'
+_computing_data_reduction        SAINT
+_computing_molecular_graphics    'ATOMS (Dowty, 1999)'
+_computing_publication_material  SHELXTL
+_computing_structure_refinement  SHELXTL
+_computing_structure_solution    'SHELXTL (Sheldrick, 2001)'
+_diffrn_ambient_temperature      295(2)
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'Bruker Platform/SMART 1000 CCD'
+_diffrn_measurement_method       '\w scans (0.2\%)'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0462
+_diffrn_reflns_av_sigmaI/netI    0.0367
+_diffrn_reflns_limit_h_max       6
+_diffrn_reflns_limit_h_min       -6
+_diffrn_reflns_limit_k_max       6
+_diffrn_reflns_limit_k_min       -6
+_diffrn_reflns_limit_l_max       15
+_diffrn_reflns_limit_l_min       -15
+_diffrn_reflns_number            1248
+_diffrn_reflns_theta_full        32.90
+_diffrn_reflns_theta_max         32.90
+_diffrn_reflns_theta_min         4.09
+_exptl_absorpt_coefficient_mu    37.907
+_exptl_absorpt_correction_T_max  0.650
+_exptl_absorpt_correction_T_min  0.084
+_exptl_absorpt_correction_type   numerical
+_exptl_absorpt_process_details   '(SHELXTL; Sheldrick, 2001)'
+_exptl_crystal_colour            silver
+_exptl_crystal_density_diffrn    7.207
+_exptl_crystal_density_meas      'not measured'
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       plate
+_exptl_crystal_F_000             358
+_exptl_crystal_size_max          0.10
+_exptl_crystal_size_mid          0.08
+_exptl_crystal_size_min          0.01
+_refine_diff_density_max         1.953
+_refine_diff_density_min         -1.984
+_refine_ls_abs_structure_details 'Flack (1983), 117 Friedel pairs'
+_refine_ls_abs_structure_Flack   0.58(6)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.075
+_refine_ls_hydrogen_treatment    none
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     15
+_refine_ls_number_reflns         248
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.072
+_refine_ls_R_factor_all          0.0313
+_refine_ls_R_factor_gt           0.0307
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'w=1/[\s^2^(Fo^2^)+(0.0523P)^2^] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0749
+_refine_ls_wR_factor_ref         0.0752
+_reflns_number_gt                244
+_reflns_number_total             248
+_reflns_threshold_expression     I>2\s(I)
+_[local]_cod_data_source_file    wm6044.cif
+_[local]_cod_data_source_block   I
+_cod_database_code               2204979
+_cod_database_fobs_code 2204979
+_journal_paper_doi 10.1107/S1600536804031253
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4 m m"
+_symmetry_space_group_name_Hall 'I 4 -2'
+_[local]_omdb_cod_original_Hall 'I 4 -2'
+_symmetry_Int_Tables_number 107
+ 
+_cell_length_a    4.36600
+_cell_length_b    4.36600
+_cell_length_c    9.97260
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+5 -x,y,z
+6 x,-y,z
+7 y,x,z
+8 -y,-x,z
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y+1/2,z+1/2
+11 -y+1/2,x+1/2,z+1/2
+12 y+1/2,-x+1/2,z+1/2
+13 -x+1/2,y+1/2,z+1/2
+14 x+1/2,-y+1/2,z+1/2
+15 y+1/2,x+1/2,z+1/2
+16 -y+1/2,-x+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+La1 La 2 a 0.00000 0.00000 0.00000 1.0
+Fe1 Fe 2 a 0.00000 0.00000 0.33640 1.0
+Ge1 Ge 2 a 0.00000 0.00000 0.56693 1.0
+Ge2 Ge 4 b 0.00000 0.50000 0.24314 1.0
+ 
+

@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.db package &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="index.html" />
+    <link rel="up" title="httk package" href="httk.html" />
+    <link rel="next" title="httk.db.backend package" href="httk.db.backend.html" />
+    <link rel="prev" title="httk.core package" href="httk.core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="httk.db.backend.html" title="httk.db.backend package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="httk.core.html" title="httk.core package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="httk_base.html" >Full httk API documentation</a> &raquo;</li>
+          <li><a href="httk.html" accesskey="U">httk package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="httk-db-package">
+<h1>httk.db package<a class="headerlink" href="#httk-db-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="httk.db.backend.html">httk.db.backend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.backend.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.backend.html#module-httk.db.backend.sqlite">httk.db.backend.sqlite module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.backend.html#module-httk.db.backend">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="httk.db.store.html">httk.db.store package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.store.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.store.html#module-httk.db.store.dictstore">httk.db.store.dictstore module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.store.html#module-httk.db.store.sqlstore">httk.db.store.sqlstore module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.store.html#module-httk.db.store.trivialstore">httk.db.store.trivialstore module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="httk.db.store.html#module-httk.db.store">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-httk.db.filteredcollection">
+<span id="httk-db-filteredcollection-module"></span><h2>httk.db.filteredcollection module<a class="headerlink" href="#module-httk.db.filteredcollection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="httk.db.filteredcollection.BinaryBooleanOp">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">BinaryBooleanOp</tt><big>(</big><em>context</em>, <em>operator</em>, <em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#BinaryBooleanOp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.BinaryBooleanOp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.BinaryComparison">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">BinaryComparison</tt><big>(</big><em>context</em>, <em>operator</em>, <em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#BinaryComparison"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.BinaryComparison" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.BinaryOp">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">BinaryOp</tt><big>(</big><em>context</em>, <em>operator</em>, <em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#BinaryOp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.BinaryOp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.DeclaredFunction">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">DeclaredFunction</tt><big>(</big><em>context</em>, <em>name</em>, <em>srctable=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#DeclaredFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.DeclaredFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.Expression">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">Expression</tt><big>(</big><em>context</em>, <em>exprtype</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#Expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.Expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="httk.db.filteredcollection.Expression.get_srctable_context">
+<tt class="descname">get_srctable_context</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#Expression.get_srctable_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.Expression.get_srctable_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.Expression.is_in">
+<tt class="descname">is_in</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#Expression.is_in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.Expression.is_in" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.FCDict">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">FCDict</tt><big>(</big><em>data=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.FilteredCollection" title="httk.db.filteredcollection.FilteredCollection"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.FilteredCollection</span></tt></a></p>
+<p>This implements a filtered collection purely backed by a dictionary and python evaluation.</p>
+<p>Note: FCSqliteMemory will usually be faster. (However, you need this class if
+you need to express filters and expressions using python functions rather than Sqlite functions.)</p>
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCDict.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCDict.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCDict.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCDict.data">
+<tt class="descname">data</tt><big>(</big><em>outid=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCDict.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCDict.data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return an object where the attributes are accessible as properties. I.e. </dt>
+<dd>data = myFCDict.data
+myFCDict.set_filter(data.example == data.otherexample*2)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCDict.function">
+<tt class="descname">function</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCDict.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCDict.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a python function object for use when expressing filter queries and column expressions.
+(You cannot define a filter with a &#8220;bare function&#8221;, since it would be called
+directly at the point of defining the filter.)
+Validy/existence of this function is not checked until the collection is iterated over.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.FCMultiDict">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">FCMultiDict</tt><big>(</big><em>data=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.FilteredCollection" title="httk.db.filteredcollection.FilteredCollection"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.FilteredCollection</span></tt></a></p>
+<p>This class allows you to combine a number of filtered collections and put filters on any combination
+of them together. Just create a separate FilteredCollection from each data source, and pass them in 
+a list to the constructor of this class.</p>
+<p>Filters that only apply to one of the FilteredCollections can be put on those collections instead,
+while a filter that applies to more than one must be set on this class.</p>
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCMultiDict.add">
+<tt class="descname">add</tt><big>(</big><em>filterexpr</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiDict.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiDict.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+FilteredCollection, a result is only included if it matches all the filters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCMultiDict.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiDict.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiDict.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCMultiDict.data">
+<tt class="descname">data</tt><big>(</big><em>name</em>, <em>outid=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiDict.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiDict.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an object where the attributes of respective filtered collection is
+accessible as attributes. An example:</p>
+<blockquote>
+<div>languagereview = FCMultiDict(&#8216;programming&#8217;:programming_fc, &#8216;review&#8217;:review_fc)
+language = languagereview.data(&#8216;programming&#8217;).language
+review = languagereview.data(&#8216;review&#8217;)
+myFCMultiDict.set_filter(language.name == &#8220;python&#8221; &amp; review.goodness &gt; 9)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCMultiDict.subdata">
+<tt class="descname">subdata</tt><big>(</big><em>name</em>, <em>table</em>, <em>outid=None</em>, <em>key='rowid'</em>, <em>subkey=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiDict.subdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiDict.subdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an object where the attributes of respective filtered collection is
+accessible as attributes. An example:</p>
+<blockquote>
+<div>languagereview = FCMultiDict(&#8216;programming&#8217;:programming_fc, &#8216;review&#8217;:review_fc)
+language = languagereview.data(&#8216;programming&#8217;).language
+review = languagereview.data(&#8216;review&#8217;)
+myFCMultiDict.set_filter(language.name == &#8220;python&#8221; &amp; review.goodness &gt; 9)</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.FCMultiSqlite">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">FCMultiSqlite</tt><big>(</big><em>dicts=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCMultiSqlite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCMultiSqlite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.FilteredCollection" title="httk.db.filteredcollection.FilteredCollection"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.FilteredCollection</span></tt></a></p>
+<p>This class allows you to combine a number of filtered collections and put filters on any combination
+of them together. Just create a separate FilteredCollection from each data source, and pass them in 
+a list to the constructor of this class.</p>
+<p>Filters that only apply to one of the FilteredCollections should preferably be put on those collections,
+while a filter that applies to more than one must be set on this class, <em>using field definitions made
+with this class</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.FCSqlite">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">FCSqlite</tt><big>(</big><em>sqlstore</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.FilteredCollection" title="httk.db.filteredcollection.FilteredCollection"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.FilteredCollection</span></tt></a></p>
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCSqlite.function">
+<tt class="descname">function</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a function object for expressing functions in filter queries. Validity/existence of this function
+may not be tested until an iteration over matching entries is performed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCSqlite.sql">
+<tt class="descname">sql</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite.sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite.sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCSqlite.store_table">
+<tt class="descname">store_table</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite.store_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite.store_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCSqlite.subtable">
+<tt class="descname">subtable</tt><big>(</big><em>name</em>, <em>table</em>, <em>outid=None</em>, <em>key='rowid'</em>, <em>subkey=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite.subtable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite.subtable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a table object to use in filters (for add) and expressions (in set_columns).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FCSqlite.table">
+<tt class="descname">table</tt><big>(</big><em>name</em>, <em>outid=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FCSqlite.table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FCSqlite.table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a table object to use in filters (for add) and expressions (in set_columns).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.FilteredCollection">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">FilteredCollection</tt><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Main interface for filtered collections.</p>
+<p>Apart from what is declared here, each subclass should define e.g. &#8216;table&#8217;, &#8216;column&#8217;, &#8216;function&#8217; methods for
+defining fields for use for filters (in, e.g., set_filter) and expressions (in, e.g., set_columns).</p>
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.add">
+<tt class="descname">add</tt><big>(</big><em>filterexpr</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+FilteredCollection, a result is only included if it matches all the filters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.add_all">
+<tt class="descname">add_all</tt><big>(</big><em>filterexpr</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.add_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.add_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+FilteredCollection, a result is only included if it matches all the filters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.add_sort">
+<tt class="descname">add_sort</tt><big>(</big><em>expression</em>, <em>direction='ASC'</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.add_sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.add_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which columns should be included in the results when iterating over a FilteredCollection. 
+attributes is a list of tuples consisting of (name,definition) where definition can be any
+expression in columns.</p>
+<p>Default is to show all columns of all tables defined. (See FilteredColleciton.table)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.duplicate">
+<tt class="descname">duplicate</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.duplicate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.duplicate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.output">
+<tt class="descname">output</tt><big>(</big><em>expression</em>, <em>name=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which columns should be included in the results when iterating over a FilteredCollection. 
+attributes is a list of tuples consisting of (name,definition) where definition can be any
+expression in columns.</p>
+<p>Default is to show all columns of all tables defined. (See FilteredColleciton.table)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear any filtering done on the data source.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.store_table">
+<tt class="descname">store_table</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.store_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.store_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store the result of the filtered collection in a new table named &#8216;name&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.filteredcollection.FilteredCollection.variable">
+<tt class="descname">variable</tt><big>(</big><em>obj</em>, <em>outid=None</em>, <em>parent=None</em>, <em>parentkey=None</em>, <em>subkey=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#FilteredCollection.variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.FilteredCollection.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.Function">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">Function</tt><big>(</big><em>context</em>, <em>name</em>, <em>srctable</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#Function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.Function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.TableOrColumn">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">TableOrColumn</tt><big>(</big><em>context</em>, <em>name</em>, <em>parent=None</em>, <em>outid=None</em>, <em>key=None</em>, <em>subkey=None</em>, <em>srctable=None</em>, <em>indirection=1</em>, <em>classref=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#TableOrColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.TableOrColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.filteredcollection.UnaryBooleanOp">
+<em class="property">class </em><tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">UnaryBooleanOp</tt><big>(</big><em>context</em>, <em>operator</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#UnaryBooleanOp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.UnaryBooleanOp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#httk.db.filteredcollection.Expression" title="httk.db.filteredcollection.Expression"><tt class="xref py py-class docutils literal"><span class="pre">httk.db.filteredcollection.Expression</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.db.filteredcollection.fc_checkcontext">
+<tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">fc_checkcontext</tt><big>(</big><em>context</em>, <em>*exprs</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#fc_checkcontext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.fc_checkcontext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.db.filteredcollection.fc_eval">
+<tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">fc_eval</tt><big>(</big><em>expr</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#fc_eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.fc_eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.db.filteredcollection.fc_get_srctable_context">
+<tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">fc_get_srctable_context</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#fc_get_srctable_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.fc_get_srctable_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.db.filteredcollection.fc_sql">
+<tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">fc_sql</tt><big>(</big><em>expr</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#fc_sql"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.fc_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.db.filteredcollection.instantiate_from_store">
+<tt class="descclassname">httk.db.filteredcollection.</tt><tt class="descname">instantiate_from_store</tt><big>(</big><em>classobj</em>, <em>store</em>, <em>id</em><big>)</big><a class="reference internal" href="_modules/httk/db/filteredcollection.html#instantiate_from_store"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.filteredcollection.instantiate_from_store" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.db.httkobjdbplugin">
+<span id="httk-db-httkobjdbplugin-module"></span><h2>httk.db.httkobjdbplugin module<a class="headerlink" href="#module-httk.db.httkobjdbplugin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="httk.db.httkobjdbplugin.HttkObjDbPlugin">
+<em class="property">class </em><tt class="descclassname">httk.db.httkobjdbplugin.</tt><tt class="descname">HttkObjDbPlugin</tt><a class="reference internal" href="_modules/httk/db/httkobjdbplugin.html#HttkObjDbPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.httkobjdbplugin.HttkObjDbPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="httk.core.html#httk.core.httkobject.HttkPlugin" title="httk.core.httkobject.HttkPlugin"><tt class="xref py py-class docutils literal"><span class="pre">httk.core.httkobject.HttkPlugin</span></tt></a></p>
+<dl class="method">
+<dt id="httk.db.httkobjdbplugin.HttkObjDbPlugin.fetch_codependent_data">
+<tt class="descname">fetch_codependent_data</tt><big>(</big><em>store</em><big>)</big><a class="reference internal" href="_modules/httk/db/httkobjdbplugin.html#HttkObjDbPlugin.fetch_codependent_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.httkobjdbplugin.HttkObjDbPlugin.fetch_codependent_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.httkobjdbplugin.HttkObjDbPlugin.plugin_init">
+<tt class="descname">plugin_init</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="_modules/httk/db/httkobjdbplugin.html#HttkObjDbPlugin.plugin_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.httkobjdbplugin.HttkObjDbPlugin.plugin_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.httkobjdbplugin.HttkObjDbPlugin.store">
+<tt class="descname">store</tt><big>(</big><em>store</em>, <em>avoid_duplicate=True</em><big>)</big><a class="reference internal" href="_modules/httk/db/httkobjdbplugin.html#HttkObjDbPlugin.store"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.httkobjdbplugin.HttkObjDbPlugin.store" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.httkobjdbplugin.HttkObjDbPlugin.store_codependent_data">
+<tt class="descname">store_codependent_data</tt><big>(</big><em>store</em><big>)</big><a class="reference internal" href="_modules/httk/db/httkobjdbplugin.html#HttkObjDbPlugin.store_codependent_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.httkobjdbplugin.HttkObjDbPlugin.store_codependent_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-httk.db.storable">
+<span id="httk-db-storable-module"></span><h2>httk.db.storable module<a class="headerlink" href="#module-httk.db.storable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="httk.db.storable.Storable">
+<em class="property">class </em><tt class="descclassname">httk.db.storable.</tt><tt class="descname">Storable</tt><big>(</big><em>types=None</em>, <em>index=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#Storable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.Storable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Superclass for handling various forms of data storage, retreival, etc. Class object representing data should inherit from Storable.</p>
+<p>All public variables must be initalized in a call to storable_init() inside __init__().
+Other member variables are OK, but must begin with &#8216;_&#8217;, and all methods must handle these variables not being initialized.
+For private variables that needs to be preserved: let them start with &#8216;_&#8217; AND declare them in storable_init().</p>
+<dl class="classmethod">
+<dt id="httk.db.storable.Storable.find_all">
+<em class="property">classmethod </em><tt class="descname">find_all</tt><big>(</big><em>obj</em>, <em>store</em>, <em>member</em>, <em>value</em>, <em>types</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#Storable.find_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.Storable.find_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convinience method to do a very simple search of type: find all entries where member = value.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="httk.db.storable.Storable.find_one">
+<em class="property">classmethod </em><tt class="descname">find_one</tt><big>(</big><em>obj</em>, <em>store</em>, <em>member</em>, <em>value</em>, <em>types</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#Storable.find_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.Storable.find_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convinience^2 method to do a very simple search of type: find one entry where member = value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="httk.db.storable.Storable.storable_init">
+<tt class="descname">storable_init</tt><big>(</big><em>store</em>, <em>updatesid=None</em>, <em>**keyvals</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#Storable.storable_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.Storable.storable_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>All Storable objects need to call this method in __init__(). Name should be a &#8216;somewhat qualified&#8217; class name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="httk.db.storable.Storable.trivialstore">
+<tt class="descname">trivialstore</tt><em class="property"> = &lt;httk.db.storable.TrivialStore object at 0x2ab184e72350&gt;</em><a class="headerlink" href="#httk.db.storable.Storable.trivialstore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="httk.db.storable.Storable.variable">
+<em class="property">classmethod </em><tt class="descname">variable</tt><big>(</big><em>searcher</em>, <em>name</em>, <em>types</em>, <em>outid=None</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#Storable.variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.Storable.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="httk.db.storable.TrivialStore">
+<em class="property">class </em><tt class="descclassname">httk.db.storable.</tt><tt class="descname">TrivialStore</tt><a class="reference internal" href="_modules/httk/db/storable.html#TrivialStore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.TrivialStore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Very simple storage class that just stores everything into an individual dictionary, just like regular python objects work</p>
+<dl class="method">
+<dt id="httk.db.storable.TrivialStore.new">
+<tt class="descname">new</tt><big>(</big><em>table</em>, <em>types</em>, <em>keyvals</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#TrivialStore.new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.TrivialStore.new" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="httk.db.storable.TrivialStore.retrieve">
+<tt class="descname">retrieve</tt><big>(</big><em>table</em>, <em>types</em>, <em>sid</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#TrivialStore.retrieve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.TrivialStore.retrieve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="httk.db.storable.storable_props">
+<tt class="descclassname">httk.db.storable.</tt><tt class="descname">storable_props</tt><big>(</big><em>*props</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#storable_props"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.storable_props" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="httk.db.storable.storable_types">
+<tt class="descclassname">httk.db.storable.</tt><tt class="descname">storable_types</tt><big>(</big><em>name</em>, <em>*keyvals</em>, <em>**flags</em><big>)</big><a class="reference internal" href="_modules/httk/db/storable.html#storable_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#httk.db.storable.storable_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-httk.db">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-httk.db" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">httk.db package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-httk.db.filteredcollection">httk.db.filteredcollection module</a></li>
+<li><a class="reference internal" href="#module-httk.db.httkobjdbplugin">httk.db.httkobjdbplugin module</a></li>
+<li><a class="reference internal" href="#module-httk.db.storable">httk.db.storable module</a></li>
+<li><a class="reference internal" href="#module-httk.db">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="httk.db.backend.html" title="httk.db.backend package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="httk.core.html" title="httk.core package"
+             >previous</a> |</li>
+        <li><a href="index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="httk_base.html" >Full httk API documentation</a> &raquo;</li>
+          <li><a href="httk.html" >httk package</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

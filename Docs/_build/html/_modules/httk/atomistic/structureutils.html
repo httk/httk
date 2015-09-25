@@ -1,0 +1,807 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.atomistic.structureutils &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk.atomistic" href="../atomistic.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../atomistic.html" accesskey="U">httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.atomistic.structureutils</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">httk.core.basic</span> <span class="kn">import</span> <span class="n">is_sequence</span>
+<span class="kn">from</span> <span class="nn">httk.core.fracvector</span> <span class="kn">import</span> <span class="n">FracVector</span><span class="p">,</span> <span class="n">FracScalar</span>
+<span class="kn">from</span> <span class="nn">httk.core.mutablefracvector</span> <span class="kn">import</span> <span class="n">MutableFracVector</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">acos</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">data</span> <span class="kn">import</span> <span class="n">periodictable</span>
+
+<div class="viewcode-block" id="sort_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.sort_coordgroups">[docs]</a><span class="k">def</span> <span class="nf">sort_coordgroups</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">individual_data</span><span class="p">):</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">]</span>
+    <span class="n">newcoordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">newindividual_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)):</span> 
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">group</span><span class="p">]),</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">newcoordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">order</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">individual_data</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">newindividual_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span> <span class="n">individual_data</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">individual_data</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coordgroups</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">newcoordgroups</span><span class="p">),</span> <span class="n">newindividual_data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coordgroups</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">newcoordgroups</span><span class="p">),</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="niggli_to_metric"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_to_metric">[docs]</a><span class="k">def</span> <span class="nf">niggli_to_metric</span><span class="p">(</span><span class="n">niggli</span><span class="p">):</span>    
+    <span class="n">m</span> <span class="o">=</span> <span class="n">niggli</span><span class="o">.</span><span class="n">noms</span>
+    <span class="c"># Since the niggli matrix contains 2*the product of the off diagonal elements, we increase the denominator by cell.denom*2</span>
+    <span class="k">return</span> <span class="n">FracVector</span><span class="p">(((</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])),</span><span class="n">niggli</span><span class="o">.</span><span class="n">denom</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="metric_to_niggli"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.metric_to_niggli">[docs]</a><span class="k">def</span> <span class="nf">metric_to_niggli</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">noms</span>
+    <span class="k">return</span> <span class="n">FracVector</span><span class="p">(((</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]),(</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])),</span><span class="n">cell</span><span class="o">.</span><span class="n">denom</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="coords_and_occupancies_to_coordgroups_and_assignments"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coords_and_occupancies_to_coordgroups_and_assignments">[docs]</a><span class="k">def</span> <span class="nf">coords_and_occupancies_to_coordgroups_and_assignments</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">occupancies</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">occupancies</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Occupations and coords needs to be of the same length.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">occupancies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[],</span><span class="n">FracVector</span><span class="p">((),</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">group_occupancies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">occupancies</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">group_occupancies</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">occupancies</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_occupancies</span><span class="p">)</span>
+            <span class="n">group_occupancies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occupancies</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">coordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">coordgroups</span><span class="p">,</span> <span class="n">group_occupancies</span>
+        </div>
+<div class="viewcode-block" id="coords_to_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coords_to_coordgroups">[docs]</a><span class="k">def</span> <span class="nf">coords_to_coordgroups</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="n">coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+        <span class="n">coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">count</span><span class="o">+</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="n">count</span>
+    
+    <span class="k">return</span> <span class="n">coordgroups</span>
+</div>
+<div class="viewcode-block" id="coordgroups_to_coords"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_to_coords">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_to_coords</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">):</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coordgroups</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)):</span>
+            <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">stack_vecs</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">counts</span>
+</div>
+<div class="viewcode-block" id="niggli_to_cell_old"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_to_cell_old">[docs]</a><span class="k">def</span> <span class="nf">niggli_to_cell_old</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">,</span><span class="n">orientation</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">)</span>
+    <span class="n">niggli_matrix</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="o">.</span><span class="n">to_floats</span><span class="p">()</span>
+
+    <span class="n">s11</span><span class="p">,</span><span class="n">s22</span><span class="p">,</span><span class="n">s33</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s23</span><span class="p">,</span><span class="n">s13</span><span class="p">,</span><span class="n">s12</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
+    
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s11</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s22</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s33</span><span class="p">)</span>
+    <span class="n">alpha_rad</span><span class="p">,</span> <span class="n">beta_rad</span><span class="p">,</span> <span class="n">gamma_rad</span> <span class="o">=</span> <span class="n">acos</span><span class="p">(</span><span class="n">s23</span><span class="o">/</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="p">)),</span> <span class="n">acos</span><span class="p">(</span><span class="n">s13</span><span class="o">/</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">a</span><span class="p">)),</span> <span class="n">acos</span><span class="p">(</span><span class="n">s12</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="n">iv</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)</span>
+
+    <span class="c"># Handle that iv may be very, very slightly &lt; 0 by the floating point accuracy limit</span>
+    <span class="k">if</span> <span class="n">iv</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">if</span> <span class="n">c</span><span class="o">*</span><span class="n">v</span> <span class="o">&lt;</span> <span class="mf">1e-14</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;niggli_to_cell: Physically unreasonable cell, cell vectors degenerate or very close to degenerate.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="n">a</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">),</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">))</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="p">[[</span><span class="n">a</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">b</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="n">b</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">c</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">),</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">))</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="n">c</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)]]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span><span class="mi">14</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cell</span>
+
+
+</div>
+<div class="viewcode-block" id="niggli_to_basis"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_to_basis">[docs]</a><span class="k">def</span> <span class="nf">niggli_to_basis</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">,</span><span class="n">orientation</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c">#cell = FracVector.use(niggli_matrix)</span>
+    <span class="n">niggli_matrix</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="o">.</span><span class="n">to_floats</span><span class="p">()</span>
+
+    <span class="n">s11</span><span class="p">,</span><span class="n">s22</span><span class="p">,</span><span class="n">s33</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s23</span><span class="p">,</span><span class="n">s13</span><span class="p">,</span><span class="n">s12</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
+    
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s11</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s22</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s33</span><span class="p">)</span>
+    <span class="n">alpha_rad</span><span class="p">,</span> <span class="n">beta_rad</span><span class="p">,</span> <span class="n">gamma_rad</span> <span class="o">=</span> <span class="n">acos</span><span class="p">(</span><span class="n">s23</span><span class="o">/</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="p">)),</span> <span class="n">acos</span><span class="p">(</span><span class="n">s13</span><span class="o">/</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">a</span><span class="p">)),</span> <span class="n">acos</span><span class="p">(</span><span class="n">s12</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="n">iv</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)</span>
+
+    <span class="c"># Handle that iv may be very, very slightly &lt; 0 by the floating point accuracy limit</span>
+    <span class="k">if</span> <span class="n">iv</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">if</span> <span class="n">c</span><span class="o">*</span><span class="n">v</span> <span class="o">&lt;</span> <span class="mf">1e-14</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;niggli_to_cell: Physically unreasonable cell, cell vectors degenerate or very close to degenerate.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="n">a</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">),</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">))</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">[[</span><span class="n">a</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">b</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="n">b</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">c</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">),</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha_rad</span><span class="p">)</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">beta_rad</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">))</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">),</span><span class="n">c</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma_rad</span><span class="p">)]]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span><span class="mi">14</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">basis</span>
+
+
+
+</div>
+<div class="viewcode-block" id="basis_to_niggli"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.basis_to_niggli">[docs]</a><span class="k">def</span> <span class="nf">basis_to_niggli</span><span class="p">(</span><span class="n">basis</span><span class="p">):</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
+    
+    <span class="n">A</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">noms</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">det</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;basis_to_niggli: singular cell matrix.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">det</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">s11</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s22</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s33</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">s23</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s13</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s12</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">new</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(((</span><span class="n">s11</span><span class="p">,</span><span class="n">s22</span><span class="p">,</span><span class="n">s33</span><span class="p">),(</span><span class="mi">2</span><span class="o">*</span><span class="n">s23</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">s13</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">s12</span><span class="p">)),</span><span class="n">denom</span><span class="o">=</span><span class="n">basis</span><span class="o">.</span><span class="n">denom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">new</span><span class="p">,</span> <span class="n">orientation</span>
+</div>
+<div class="viewcode-block" id="basis_determinant"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.basis_determinant">[docs]</a><span class="k">def</span> <span class="nf">basis_determinant</span><span class="p">(</span><span class="n">basis</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">basis</span>
+        <span class="n">det</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">det</span>
+</div>
+<div class="viewcode-block" id="basis_vol_to_scale"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.basis_vol_to_scale">[docs]</a><span class="k">def</span> <span class="nf">basis_vol_to_scale</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span><span class="n">vol</span><span class="p">):</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">basis_determinant</span><span class="p">(</span><span class="n">basis</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">det</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;basis_to_niggli: Too singular cell matrix.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">det</span><span class="p">)))</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="basis_scale_to_vol"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.basis_scale_to_vol">[docs]</a><span class="k">def</span> <span class="nf">basis_scale_to_vol</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span><span class="n">scale</span><span class="p">):</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">basis_determinant</span><span class="p">(</span><span class="n">basis</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">det</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;basis_to_niggli: Too singular cell matrix.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(((</span><span class="n">scale</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">det</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="niggli_vol_to_scale"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_vol_to_scale">[docs]</a><span class="k">def</span> <span class="nf">niggli_vol_to_scale</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">,</span><span class="n">vol</span><span class="p">):</span>
+    <span class="n">niggli_matrix</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">)</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">niggli_to_metric</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">)</span>
+    <span class="n">volsqr</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">volsqr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;niggli_vol_to_scale: singular cell matrix.&quot;</span><span class="p">)</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">volsqr</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span><span class="o">/</span><span class="n">det</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="niggli_scale_to_vol"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_scale_to_vol">[docs]</a><span class="k">def</span> <span class="nf">niggli_scale_to_vol</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">,</span><span class="n">scale</span><span class="p">):</span>
+    <span class="n">niggli_matrix</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">)</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">niggli_to_metric</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">)</span>
+    <span class="n">volsqr</span><span class="o">=</span><span class="n">metric</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">volsqr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;niggli_vol_to_scale: singular cell matrix.&quot;</span><span class="p">)</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">volsqr</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">det</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;niggli_scale_to_vol: singular cell matrix.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(((</span><span class="n">scale</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">det</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="niggli_to_lengths_angles"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.niggli_to_lengths_angles">[docs]</a><span class="k">def</span> <span class="nf">niggli_to_lengths_angles</span><span class="p">(</span><span class="n">niggli_matrix</span><span class="p">):</span>
+        
+    <span class="n">s11</span><span class="p">,</span><span class="n">s22</span><span class="p">,</span><span class="n">s33</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">s23</span><span class="p">,</span><span class="n">s13</span><span class="p">,</span><span class="n">s12</span> <span class="o">=</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
+    
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s11</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s22</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s33</span><span class="p">)</span>
+    <span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">acos</span><span class="p">(</span><span class="n">s23</span><span class="o">/</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="p">))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">acos</span><span class="p">(</span><span class="n">s13</span><span class="o">/</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">a</span><span class="p">))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">acos</span><span class="p">(</span><span class="n">s12</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span>
+        
+    <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">],</span> <span class="p">[</span><span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">gamma</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="lengths_angles_to_niggli"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.lengths_angles_to_niggli">[docs]</a><span class="k">def</span> <span class="nf">lengths_angles_to_niggli</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span><span class="n">angles</span><span class="p">):</span>
+    <span class="n">niggli_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">lengths</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">2.0</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">2.0</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+    <span class="n">niggli_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">2.0</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">niggli_matrix</span>
+</div>
+<div class="viewcode-block" id="cartesian_to_reduced"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.cartesian_to_reduced">[docs]</a><span class="k">def</span> <span class="nf">cartesian_to_reduced</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="n">coordgroups</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+    <span class="n">cellinv</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+
+    <span class="n">newcoordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">coordgroup</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">:</span>
+        <span class="n">newcoordgroup</span> <span class="o">=</span> <span class="n">coordgroup</span><span class="o">*</span><span class="n">cellinv</span>
+        <span class="n">newcoordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoordgroup</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">newcoordgroups</span>
+</div>
+<div class="viewcode-block" id="structure_to_p1structure"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.structure_to_p1structure">[docs]</a><span class="k">def</span> <span class="nf">structure_to_p1structure</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;ase&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;ase&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">ase_ext</span>        
+                <span class="k">return</span> <span class="n">ase_ext</span><span class="o">.</span><span class="n">structure_to_p1structure</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_to_p1structure: None of the available backends available.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="structure_to_sgstructure"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.structure_to_sgstructure">[docs]</a><span class="k">def</span> <span class="nf">structure_to_sgstructure</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;platon&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;platon&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">platon</span>        
+                <span class="k">return</span> <span class="n">platon</span><span class="o">.</span><span class="n">structure_to_sgstructure</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_to_sgstructure: None of the available backends available.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="reduced_to_cartesian"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.reduced_to_cartesian">[docs]</a><span class="k">def</span> <span class="nf">reduced_to_cartesian</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="n">coordgroups</span><span class="p">):</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="n">newcoordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">coordgroup</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">:</span>
+        <span class="n">newcoordgroup</span> <span class="o">=</span> <span class="n">coordgroup</span><span class="o">*</span><span class="n">cell</span>
+        <span class="n">newcoordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoordgroup</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">newcoordgroups</span>
+</div>
+<div class="viewcode-block" id="normalized_formula_parts"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.normalized_formula_parts">[docs]</a><span class="k">def</span> <span class="nf">normalized_formula_parts</span><span class="p">(</span><span class="n">assignments</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>    
+        
+    <span class="n">formula</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">alloccs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">maxc</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)):</span>
+        <span class="n">assignment</span> <span class="o">=</span> <span class="n">assignments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">assignment</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assignment</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">assignment</span> <span class="o">=</span> <span class="n">assignment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="n">ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">occ</span><span class="o">=</span><span class="n">ratio</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">assignment</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span><span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">assignment</span><span class="p">,</span><span class="n">ratio</span><span class="p">)])</span>
+                <span class="n">occ</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">occ</span><span class="o">=</span><span class="n">ratio</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="n">formula</span><span class="p">:</span>
+            <span class="n">formula</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">alloccs</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">formula</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span> <span class="o">+=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">occ</span><span class="o">*</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">alloccs</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span> <span class="o">+=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">alloccs</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxc</span><span class="p">:</span>
+            <span class="n">maxc</span> <span class="o">=</span> <span class="n">alloccs</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span>
+
+    <span class="n">alloccs</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">alloccs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">alloccs</span> <span class="o">=</span> <span class="p">(</span><span class="n">alloccs</span><span class="o">/</span><span class="n">maxc</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>        
+
+    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">formula</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">formula</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span><span class="o">*</span><span class="n">alloccs</span><span class="o">.</span><span class="n">denom</span><span class="o">/</span><span class="n">maxc</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>         
+    <span class="c">#    if abs(value-int(value))&lt;1e-6:</span>
+    <span class="c">#        formula[symbol] = int(value) </span>
+    <span class="c">#    elif int(100*(value-(int(value)))) &gt; 1:</span>
+    <span class="c">#        formula[symbol] = float(&quot;%d.%.2e&quot; % (value, 100*(value-(int(value))))) </span>
+    <span class="c">#    else:</span>
+    <span class="c">#        formula[symbol] = float(&quot;%d&quot; % (value,))</span>
+
+    <span class="k">return</span> <span class="n">formula</span>
+</div>
+<div class="viewcode-block" id="normalized_formula"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.normalized_formula">[docs]</a><span class="k">def</span> <span class="nf">normalized_formula</span><span class="p">(</span><span class="n">assignments</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">normalized_formula_parts</span><span class="p">(</span><span class="n">assignments</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
+
+    <span class="n">normalized_formula</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">formula</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+            <span class="n">totval</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">totval</span><span class="o">=</span><span class="n">formula</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">totval</span> <span class="o">=</span> <span class="n">totval</span><span class="o">.</span><span class="n">set_denominator</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">totval</span><span class="o">.</span><span class="n">denom</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">totval</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;(&quot;</span> 
+                    <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">subkey</span><span class="p">):</span>
+<span class="c">#                           normalized_formula += &quot;&quot;.join([(&quot;%s%d.%02d&quot;%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) </span>
+                            <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">subkey</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span> 
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subkey</span><span class="p">,)</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;)&quot;</span> 
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
+            <span class="c">#if is_sequence(xval):</span>
+            <span class="c">#    totval = sum(xval)</span>
+            <span class="c">#else:</span>
+            <span class="c">#    totval = xval</span>
+                <span class="c">#if len(xval)&gt;1:</span>
+                    <span class="c">#normalized_formula += &quot;%s&quot; % (key,) + &quot;(&quot; + &quot;,&quot;.join([(&quot;%d&quot; % x.floor()) for x in xval]) + &quot;)&quot;</span>
+                <span class="c">#else:</span>
+                <span class="c">#    normalized_formula += &quot;%s%d&quot; % (key, xval[0].floor())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;(&quot;</span> 
+                    <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">subkey</span><span class="p">):</span>
+<span class="c">#                           normalized_formula += &quot;&quot;.join([(&quot;%s%d.%02d&quot;%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) </span>
+                            <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">subkey</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subkey</span><span class="p">,)</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;)</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">totval</span><span class="p">,)</span>
+                                        
+<span class="c">#                    normalized_formula += &quot;(&quot; + &quot;&quot;.join([&quot;%s%d&quot; % (x,y.floor()) for x,y in zip(key,totval)]) + &quot;)&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">totval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="c">#if len(xval)&gt;1:</span>
+                <span class="c">#    normalized_formula += &quot;(&quot; + &quot;,&quot;.join([(&quot;%d.%02d&quot; % (x.floor(),((x-x.floor())*100).floor())) for x in xval]) + &quot;)&quot;</span>
+                <span class="c">#else:</span>
+                <span class="c">#    normalized_formula += &quot;%s%d.%02d&quot; % (key, xval[0].floor(),((xval[0]-xval[0].floor())*100).floor())</span>
+            <span class="c">#else:</span>
+            <span class="c">#normalized_formula += &quot;%s%d.%02d&quot; % (key, xval.floor(),((xval-xval.floor())*100).floor())</span>
+            <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;(&quot;</span> 
+                <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">subkey</span><span class="p">):</span>
+<span class="c">#                       normalized_formula += &quot;&quot;.join([(&quot;%s%d.%02d&quot;%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) </span>
+                        <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">subkey</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">subkey</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span> 
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subkey</span><span class="p">,)</span>
+                <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;)</span><span class="si">%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">totval</span><span class="p">,((</span><span class="n">totval</span><span class="o">-</span><span class="n">totval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+<span class="c">#                normalized_formula += &quot;(&quot;+ &quot;&quot;.join([&quot;%s%d.%02d&quot; % (x, y.floor(),((y-y.floor())*100).floor()) for x,y in zip(key,totval)]) + &quot;)&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">normalized_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">totval</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">totval</span><span class="o">-</span><span class="n">totval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">normalized_formula</span>
+</div>
+<div class="viewcode-block" id="abstract_symbol"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.abstract_symbol">[docs]</a><span class="k">def</span> <span class="nf">abstract_symbol</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">count</span><span class="o">&lt;</span><span class="mi">27</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">64</span><span class="o">+</span><span class="n">count</span><span class="p">)</span>
+    <span class="n">my</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">26</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">26</span>
+    <span class="k">return</span> <span class="n">abstract_symbol</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span><span class="o">+</span><span class="nb">chr</span><span class="p">(</span><span class="mi">97</span><span class="o">+</span><span class="n">my</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="abstract_formula"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.abstract_formula">[docs]</a><span class="k">def</span> <span class="nf">abstract_formula</span><span class="p">(</span><span class="n">filled_counts</span><span class="p">):</span>
+    
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">normalized_formula_parts</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_counts</span><span class="p">)),[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_counts</span><span class="p">),</span> <span class="n">filled_counts</span><span class="p">)</span>
+
+    <span class="n">idx</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">abstract_formula</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">formula</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>        
+        <span class="n">idx</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">abstract_symbol</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="n">xval</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_denominator</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xval</span><span class="o">.</span><span class="n">denom</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xval</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">xval</span><span class="o">-</span><span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+        
+        <span class="c">#abstract_formula += &quot;%s%g&quot; % (c,val[1])</span>
+        
+    <span class="k">return</span> <span class="n">abstract_formula</span>
+
+</div>
+<div class="viewcode-block" id="prototype_formula"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.prototype_formula">[docs]</a><span class="k">def</span> <span class="nf">prototype_formula</span><span class="p">(</span><span class="n">proto</span><span class="p">):</span>
+    <span class="n">sorted_counts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">counts</span><span class="p">)</span>
+    <span class="n">fake_assignments</span> <span class="o">=</span> <span class="p">[((</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="p">),)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sorted_counts</span><span class="p">))]</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">normalized_formula_parts</span><span class="p">(</span><span class="n">fake_assignments</span><span class="p">,</span> <span class="n">sorted_counts</span><span class="p">)</span>
+
+    <span class="n">idx</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">abstract_formula</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">formula</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>        
+        <span class="n">idx</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">abstract_symbol</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="n">xval</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_denominator</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xval</span><span class="o">.</span><span class="n">denom</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xval</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abstract_formula</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s%d</span><span class="s">.</span><span class="si">%02d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">(),((</span><span class="n">xval</span><span class="o">-</span><span class="n">xval</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span><span class="p">())</span>
+        
+        <span class="c">#abstract_formula += &quot;%s%g&quot; % (c,val[1])</span>
+        
+    <span class="k">return</span> <span class="n">abstract_formula</span>
+
+<span class="c"># def parse_assignment(assignment):    </span>
+<span class="c">#     if isinstance(assignment,(tuple,list)):</span>
+<span class="c">#         if len(assignment)&gt;=3:</span>
+<span class="c">#             return FracVector.use(assignment[2])</span>
+<span class="c">#         return FracVector.use(assignment[1])</span>
+<span class="c">#     return FracVector.create(1)</span>
+
+<span class="c">#def assignments_tidy(assignments):</span>
+<span class="c">#    newassignments=[]</span>
+<span class="c">#    for assignment in assignments:</span>
+<span class="c">#        newassignments.append((periodictable.atomic_symbol(assignment),periodictable.atomic_number(assignment),parse_assignment(assignment),))</span>
+<span class="c">#    return tuple(newassignments)</span>
+</div>
+<div class="viewcode-block" id="coordgroups_cartesian_to_reduced"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_cartesian_to_reduced">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_cartesian_to_reduced</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
+    <span class="n">cellinv</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+
+    <span class="n">newcoordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">coordgroup</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">:</span>
+        <span class="n">newcoordgroup</span> <span class="o">=</span> <span class="n">coordgroup</span><span class="o">*</span><span class="n">cellinv</span>
+        <span class="n">newcoordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcoordgroup</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">newcoordgroups</span>
+</div>
+<div class="viewcode-block" id="coords_and_counts_to_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coords_and_counts_to_coordgroups">[docs]</a><span class="k">def</span> <span class="nf">coords_and_counts_to_coordgroups</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="n">coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+        <span class="n">coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">count</span><span class="o">+</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="n">count</span>
+    
+    <span class="k">return</span> <span class="n">coordgroups</span>
+</div>
+<div class="viewcode-block" id="coordgroups_and_assignments_to_coords_and_occupancies"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_and_assignments_to_coords_and_occupancies">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_and_assignments_to_coords_and_occupancies</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">assignments</span><span class="p">):</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">coordgroups_to_coords</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)</span>
+    <span class="n">occupancies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)):</span>
+        <span class="n">occupancies</span> <span class="o">+=</span> <span class="p">[</span><span class="n">assignments</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">occupancies</span>
+</div>
+<div class="viewcode-block" id="structure_reduced_uc_to_representative"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.structure_reduced_uc_to_representative">[docs]</a><span class="k">def</span> <span class="nf">structure_reduced_uc_to_representative</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;isotropy&#39;</span><span class="p">,</span><span class="s">&#39;fake&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;isotropy&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">isotropy_ext</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Warning: need to run symmetry finder. This may take a while.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">struct</span> <span class="o">=</span> <span class="n">isotropy_ext</span><span class="o">.</span><span class="n">struct_process_with_isotropy</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">struct</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span> 
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;fake&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.atomistic</span> <span class="kn">import</span> <span class="n">Structure</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Warning: using &#39;fake&#39; symmetry finder that never finds any symmetry.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="n">newstruct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                                  <span class="n">assignments</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="p">,</span>
+                                  <span class="n">rc_cell</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_cell</span><span class="p">,</span>
+                                  <span class="n">rc_reduced_coords</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_reduced_coords</span><span class="p">,</span>
+                                  <span class="n">rc_counts</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">,</span>
+                                  <span class="n">uc_cell</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_cell</span><span class="p">,</span>
+                                  <span class="n">uc_reduced_coords</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_reduced_coords</span><span class="p">,</span> 
+                                  <span class="n">uc_counts</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">,</span>
+                                  <span class="n">spacegroup</span><span class="o">=</span><span class="s">&#39;P 1&#39;</span><span class="p">,</span>
+                                  <span class="n">tags</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">(),</span> <span class="n">refs</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">get_refs</span><span class="p">(),</span> <span class="n">periodicity</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_sites</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">newstruct</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span> 
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_to_sgstructure: None of the available backends available.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="coordgroups_reduced_uc_to_representative"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_reduced_uc_to_representative">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_reduced_uc_to_representative</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;isotropy&#39;</span><span class="p">]):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;WARNING: coordgroups_reduced_uc_to_representative: running untested code...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;isotropy&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">isotropy_ext</span>
+                <span class="n">struct</span> <span class="o">=</span> <span class="n">isotropy_ext</span><span class="o">.</span><span class="n">uc_reduced_coordgroups_process_with_isotropy</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span><span class="n">basis</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">struct</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span> 
+                <span class="k">pass</span>
+        <span class="c">#if backend ==  &#39;platon&#39;:</span>
+        <span class="c">#    try:</span>
+        <span class="c">#        from httk.external import platon_ext        </span>
+        <span class="c">#        return platon_ext.coordgroups_reduced_uc_to_representative(coordgroups, basis, hall_symbol)</span>
+        <span class="c">#    except ImportError:</span>
+        <span class="c">#        raise </span>
+        <span class="c">#        pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_to_sgstructure: None of the available backends available.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="coordgroups_reduced_rc_to_unitcellsites"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_reduced_rc_to_unitcellsites">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_reduced_rc_to_unitcellsites</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span><span class="n">basis</span><span class="p">,</span><span class="n">hall_symbol</span><span class="p">,</span> <span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cif2cell&#39;</span><span class="p">,</span><span class="s">&#39;ase&#39;</span><span class="p">]):</span>
+    <span class="c"># TODO: Make own, or use cif2cell to generate reduced unitcell</span>
+    <span class="k">if</span> <span class="n">hall_symbol</span> <span class="o">==</span> <span class="s">&#39;P 1&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coordgroups</span><span class="p">,</span><span class="n">FracScalar</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;cif2cell&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">cif2cell_ext</span>        
+                <span class="k">return</span> <span class="n">cif2cell_ext</span><span class="o">.</span><span class="n">coordgroups_reduced_rc_to_unitcellsites</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span><span class="n">basis</span><span class="p">,</span><span class="n">hall_symbol</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;ase&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">ase_glue</span>        
+                <span class="k">return</span> <span class="n">ase_glue</span><span class="o">.</span><span class="n">coordgroups_reduced_rc_to_unitcellsites</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span><span class="n">basis</span><span class="p">,</span><span class="n">hall_symbol</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_to_p1structure: None of the available backends available.&quot;</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="coordswap"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordswap">[docs]</a><span class="k">def</span> <span class="nf">coordswap</span><span class="p">(</span><span class="n">fromidx</span><span class="p">,</span><span class="n">toidx</span><span class="p">,</span><span class="n">cell</span><span class="p">,</span><span class="n">coordgroups</span><span class="p">):</span>
+    <span class="n">new_coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">coordgroups</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">MutableFracVector</span><span class="o">.</span><span class="n">from_FracVector</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="n">toidx</span><span class="p">]</span>
+        <span class="n">coords</span><span class="p">[:,</span><span class="n">toidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="n">fromidx</span><span class="p">]</span>
+        <span class="n">coords</span><span class="p">[:,</span><span class="n">fromidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>        
+        <span class="n">new_coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">to_FracVector</span><span class="p">())</span>
+    <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_coordgroups</span><span class="p">)</span>
+    
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">MutableFracVector</span><span class="o">.</span><span class="n">from_FracVector</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">cell</span><span class="p">[</span><span class="n">toidx</span><span class="p">]</span>
+    <span class="n">cell</span><span class="p">[</span><span class="n">toidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell</span><span class="p">[</span><span class="n">fromidx</span><span class="p">]</span>
+    <span class="n">cell</span><span class="p">[</span><span class="n">fromidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_FracVector</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">coordgroups</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="clean_coordgroups_and_assignments"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.clean_coordgroups_and_assignments">[docs]</a><span class="k">def</span> <span class="nf">clean_coordgroups_and_assignments</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">assignments</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assignments</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Occupations and coords needs to be of the same length.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assignments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[],</span><span class="n">FracVector</span><span class="p">((),</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">new_coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_assignments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assignments</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_assignments</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">assignments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">new_assignments</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">j</span> 
+                <span class="n">new_coordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">chain_vecs</span><span class="p">([</span><span class="n">new_coordgroups</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">new_assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assignments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">new_coordgroups</span><span class="p">,</span> <span class="n">new_assignments</span>
+
+</div>
+<div class="viewcode-block" id="occupations_and_coords_to_assignments_and_coordgroups"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.occupations_and_coords_to_assignments_and_coordgroups">[docs]</a><span class="k">def</span> <span class="nf">occupations_and_coords_to_assignments_and_coordgroups</span><span class="p">(</span><span class="n">occupationscoords</span><span class="p">,</span> <span class="n">occupations</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">occupationscoords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[],</span><span class="n">FracVector</span><span class="p">((),</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">occupationscoords</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">occupationscoords</span><span class="p">)</span>
+
+    <span class="n">new_coordgroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_assignments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">occupations</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_assignments</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">occupations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">new_assignments</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="n">new_coordgroups</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occupationscoords</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_coordgroups</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">occupationscoords</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">new_assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">occupations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">new_coordgroups</span><span class="o">=</span><span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_coordgroups</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_assignments</span><span class="p">,</span> <span class="n">new_coordgroups</span>
+</div>
+<div class="viewcode-block" id="coordgroups_and_assignments_to_symbols"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.coordgroups_and_assignments_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">coordgroups_and_assignments_to_symbols</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">,</span> <span class="n">assignmentobj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of atomic symbols, repeated as needed </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">)):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">assignmentobj</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">symbols</span> <span class="o">+=</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">coordgroups</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">symbols</span>
+</div>
+<div class="viewcode-block" id="structure_tidy"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.structure_tidy">[docs]</a><span class="k">def</span> <span class="nf">structure_tidy</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">backends</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;platon&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span>  <span class="s">&#39;platon&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">httk.external</span> <span class="kn">import</span> <span class="n">platon_ext</span>        
+                <span class="k">return</span> <span class="n">platon_ext</span><span class="o">.</span><span class="n">structure_tidy</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;structure_tidy: None of the available backends available.&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../httk.atomistic.html#httk.atomistic.structureutils.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">([[[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">]],[[</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">]]])</span>
+    <span class="n">assignments</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="k">print</span> <span class="n">cell</span><span class="p">,</span> <span class="n">coordgroups</span>
+    <span class="n">cell</span><span class="p">,</span> <span class="n">coordgroups</span> <span class="o">=</span> <span class="n">coordswap</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">cell</span><span class="p">,</span><span class="n">coordgroups</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">cell</span><span class="p">,</span> <span class="n">coordgroups</span>
+    
+    <span class="k">pass</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+
+
+
+
+
+
+
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li>
+          <li><a href="../atomistic.html" >httk.atomistic</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

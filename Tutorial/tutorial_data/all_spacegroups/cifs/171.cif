@@ -1,0 +1,218 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 06bef99d44c7eb09efb8ce338f9b5573
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-05 09:06:05 +0000 (Sat, 05 Jul 2014) $
+#$Revision: 119058 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/51/08/4510885.cif $
+#------------------------------------------------------------------------------
+data_4510885
+loop_
+_publ_author_name
+'Croitor, Lilia'
+'Coropceanu, Eduard B.'
+'Chisca, Diana'
+'Baca, Svetlana G.'
+'van Leusen, Jan'
+'K\"ogerler, Paul'
+'Bourosh, Polina'
+'Kravtsov, Victor Ch.'
+'Grabco, Daria'
+'Pyrtsac, Constantin'
+'Fonari, Marina S.'
+_publ_section_title
+;
+ Effects of Anion and Bipyridyl Bridging Ligand Identity on the Co(II)
+ Coordination Networks
+;
+_journal_issue                   6
+_journal_name_full               'Crystal Growth &amp; Design'
+_journal_page_first              3015
+_journal_paper_doi               10.1021/cg500646r
+_journal_volume                  14
+_journal_year                    2014
+_computing_cell_refinement
+;
+CrysAlisPro, Agilent Technologies,
+Version 1.171.35.21b (release 03-02-2012 CrysAlis171 .NET)
+(compiled Feb  3 2012,10:37:01)
+;
+_computing_data_collection
+;
+CrysAlisPro, Agilent Technologies,
+Version 1.171.35.21b (release 03-02-2012 CrysAlis171 .NET)
+(compiled Feb  3 2012,10:37:01)
+;
+_computing_data_reduction
+;
+CrysAlisPro, Agilent Technologies,
+Version 1.171.35.21b (release 03-02-2012 CrysAlis171 .NET)
+(compiled Feb  3 2012,10:37:01)
+;
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_measured_fraction_theta_full 0.996
+_diffrn_measured_fraction_theta_max 0.996
+_diffrn_measurement_device_type  'Xcalibur, Eos'
+_diffrn_measurement_method       '\w scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0285
+_diffrn_reflns_av_sigmaI/netI    0.0412
+_diffrn_reflns_limit_h_max       11
+_diffrn_reflns_limit_h_min       -5
+_diffrn_reflns_limit_k_max       6
+_diffrn_reflns_limit_k_min       -12
+_diffrn_reflns_limit_l_max       32
+_diffrn_reflns_limit_l_min       -19
+_diffrn_reflns_number            4437
+_diffrn_reflns_theta_full        26.00
+_diffrn_reflns_theta_max         26.00
+_diffrn_reflns_theta_min         3.27
+_exptl_absorpt_coefficient_mu    0.628
+_exptl_absorpt_correction_T_max  1.00000
+_exptl_absorpt_correction_T_min  0.86677
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details
+;
+CrysAlisPro, Agilent Technologies,
+Version 1.171.35.21b (release 03-02-2012 CrysAlis171 .NET)
+(compiled Feb  3 2012,10:37:01)
+Empirical absorption correction using spherical harmonics,
+ implemented in SCALE3 ABSPACK scaling algorithm.
+;
+_exptl_crystal_colour            orange-red
+_exptl_crystal_density_diffrn    1.426
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       prism
+_exptl_crystal_F_000             1023
+_exptl_crystal_size_max          0.45
+_exptl_crystal_size_mid          0.30
+_exptl_crystal_size_min          0.15
+_refine_diff_density_max         0.361
+_refine_diff_density_min         -0.195
+_refine_diff_density_rms         0.045
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.04(4)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.064
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     231
+_refine_ls_number_reflns         2230
+_refine_ls_number_restraints     25
+_refine_ls_restrained_S_all      1.063
+_refine_ls_R_factor_all          0.0685
+_refine_ls_R_factor_gt           0.0478
+_refine_ls_shift/su_max          0.003
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0586P)^2^+0.5872P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1132
+_refine_ls_wR_factor_ref         0.1269
+_reflns_number_gt                1667
+_reflns_number_total             2230
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    cg500646r_si_001.cif
+_[local]_cod_data_source_block   comp_4
+_cod_depositor_comments
+'Adding full bibliography for 4510882--4510886.cif.'
+_cod_original_cell_volume        2338.54(13)
+_cod_database_code               4510885
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 62"
+_symmetry_space_group_name_Hall 'P 62'
+_[local]_omdb_cod_original_Hall 'P 62'
+_symmetry_Int_Tables_number 171
+ 
+_cell_length_a    10.02830
+_cell_length_b    10.02830
+_cell_length_c    26.85100
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/3
+3 -y,x-y,z+2/3
+4 -x,-y,z
+5 -x+y,-x,z+1/3
+6 y,-x+y,z+2/3
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Co1 Co 3 a 0.00000 0.00000 0.81435 1.0
+C1 C 6 c -0.03070 0.64170 -0.05294 1.0
+C2 C 6 c -0.04920 0.53190 -0.01120 1.0
+C3 C 6 c -0.05040 0.62790 0.68390 1.0
+C4 C 6 c -0.06400 0.52140 0.64320 1.0
+C5 C 6 c 0.06070 0.78090 0.68160 1.0
+C6 C 6 c 0.06780 0.87810 0.71880 1.0
+C7 C 6 c 0.07940 0.69070 -0.09000 1.0
+C8 C 6 c 0.08240 0.78910 0.87340 1.0
+C9 C 6 c 0.63600 0.83550 0.79760 1.0
+C10 C 6 c 0.85920 0.58170 0.72581 1.0
+C11 C 6 c 0.86570 0.69640 -0.05570 1.0
+C12 C 6 c 0.87530 0.68730 0.76119 1.0
+C13 C 6 c 0.87980 0.79480 -0.09310 1.0
+F1 F 6 c 0.38900 0.79100 0.80690 0.56
+F2 F 6 c 0.42800 0.61110 0.82380 0.56
+F3 F 6 c 0.50400 0.79900 0.87270 0.56
+C14 C 6 c 0.48600 0.75800 0.82690 0.56
+F4 F 6 c 0.36300 0.68400 0.81530 0.44
+F5 F 6 c 0.50500 0.66100 0.86200 0.44
+F6 F 6 c 0.51900 0.87300 0.86200 0.44
+C15 C 6 c 0.50000 0.76200 0.83333 0.44
+O1 O 3 b 0.50000 0.50000 0.02513 1.0
+O2 O 6 c 0.60810 0.82020 0.75270 1.0
+O3 O 6 c 0.75820 0.89550 0.81937 1.0
+N1 N 6 c -0.01460 0.84240 0.87111 1.0
+N2 N 6 c -0.02010 0.83570 0.75865 1.0
+H1 H 6 c -0.03470 0.58570 0.02010 1.0
+H2 H 6 c -0.06210 0.56870 0.61150 1.0
+H3 H 6 c 0.13020 0.81790 0.65530 1.0
+H4 H 6 c 0.14050 -0.01800 0.71550 1.0
+H5 H 6 c 0.15110 0.65760 -0.09030 1.0
+H6 H 6 c 0.15740 0.81980 0.84880 1.0
+H7 H 6 c 0.78680 0.47820 0.73020 1.0
+H8 H 6 c 0.78760 0.66590 -0.03220 1.0
+H9 H 6 c 0.80920 0.65300 0.78840 1.0
+H10 H 6 c 0.81070 0.83100 -0.09360 1.0
+H11 H 6 c 0.83710 0.42770 0.64610 1.0
+H12 H 6 c 0.84530 0.44730 -0.01180 1.0
+ 
+

@@ -1,0 +1,2176 @@
+
+httk.atomistic package
+**********************
+
+
+Subpackages
+===========
+
+* httk.atomistic.data package
+
+  * Submodules
+
+  * httk.atomistic.data.periodictable module
+
+  * httk.atomistic.data.spacegroups module
+
+  * Module contents
+
+* httk.atomistic.io package
+
+  * Submodules
+
+  * httk.atomistic.io.structure_cif_io module
+
+  * httk.atomistic.io.structure_io module
+
+  * httk.atomistic.io.structureioplugin module
+
+  * Module contents
+
+* httk.atomistic.results package
+
+  * Submodules
+
+  * httk.atomistic.results.relaxedcellresult module
+
+  * httk.atomistic.results.totalenergyresult module
+
+  * Module contents
+
+* httk.atomistic.vis package
+
+  * Submodules
+
+  * httk.atomistic.vis.asestructurevisualizer module
+
+  * httk.atomistic.vis.jmolstructurevisualizer module
+
+  * httk.atomistic.vis.structurephasediagramvisualizerplugin module
+
+  * httk.atomistic.vis.structurevisualizerplugin module
+
+  * Module contents
+
+
+Submodules
+==========
+
+
+httk.atomistic.assignment module
+================================
+
+class class httk.atomistic.assignment.Assignment(atomic_number, weight, ratio, magnetic_moment)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a possible vector of assignments
+
+   classmethod create(siteassignment=None, atom=None, weight=None, ratio=None, magnetic_moment=[None, None, None])
+
+      Create a new siteassignment object
+         site: integer for the site number that this atom is assigned
+         to atomic number or symbol
+
+   get_extensions()
+
+   get_weight()
+
+   symbol
+
+   classmethod use(old)
+
+httk.atomistic.assignment.main()
+
+
+httk.atomistic.assignments module
+=================================
+
+class class httk.atomistic.assignments.Assignments(siteassignments, extensions=[])
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a possible vector of assignments
+
+   atomic_numbers
+
+   classmethod create(assignments=None)
+
+         Create a new assignment object,
+
+      assignments: a list-style object with one entry per 'atom type'.
+      Any sensible type accepted, most notably,
+         integers (for atom number)
+
+   extended
+
+   ratios
+
+   ratioslist
+
+   symbollists
+
+   symbols
+
+   to_basis()
+
+   classmethod use(old)
+
+httk.atomistic.assignments.main()
+
+
+httk.atomistic.cell module
+==========================
+
+class class httk.atomistic.cell.Cell(niggli_matrix, orientation=1, basis=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a cell (e.g., a unitcell, but also possibly just the
+   basis vectors of a non-periodic system)
+
+   basis
+
+   clean()
+
+   coordgroups_cartesian_to_reduced(coordgroups)
+
+   coordgroups_reduced_to_cartesian(coordgroups)
+
+   coords_cartesian_to_reduced(coords)
+
+   coords_reduced_to_cartesian(coords)
+
+   classmethod create(cell=None, basis=None, metric=None, niggli_matrix=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, lengths=None, angles=None, scale=None, scaling=None, volume=None, periodicity=None, nonperiodic_vecs=None, orientation=1, lattice_system=None)
+
+      Create a new cell object,
+
+      cell: any one of the following:
+
+         * a 3x3 array with (in rows) the three basis vectors of the
+           cell (a non-periodic system should conventionally use an
+           identity matrix)
+
+         * a dict with a single key 'niggli_matrix' with a 3x2 array
+           with the Niggli Matrix representation of the cell
+
+         * a dict with 6 keys, 'a', 'b', 'c', 'alpha', 'beta',
+           'gamma' giving the cell parameters as floats
+
+      scaling: free form input parsed for a scale.
+         positive value = multiply basis vectors by this value
+         negative value = rescale basis vectors so that cell volume
+         becomes abs(value).
+
+      scale: set to non-None to multiply all cell vectors with this
+      factor
+
+      volume: set to non-None if the basis vectors only give
+      directions, and the volume of the cell should be this value
+      (overrides scale)
+
+      periodicity: free form input parsed for periodicity
+         sequence: True/False for each basis vector being periodic
+         integer: number of non-periodic basis vectors
+
+   get_normalized()
+
+   is_point_inside(cartesian_coord)
+
+   normalization_scale
+
+      Get the factor with which a normalized version of this cell
+      needs to be multiplied to reproduce this cell.
+
+      I.e. self = (normalization_scale)*self.get_normalized()
+
+   scaling()
+
+   volume
+
+httk.atomistic.cell.main()
+
+
+httk.atomistic.cellshape module
+===============================
+
+class class httk.atomistic.cellshape.CellShape(niggli_matrix, orientation=1, basis=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a cell (e.g., a unitcell, but also possibly just the
+   basis vectors of a non-periodic system)
+
+   basis
+
+   clean()
+
+   coordgroups_cartesian_to_reduced(coordgroups)
+
+   coordgroups_reduced_to_cartesian(coordgroups)
+
+   coords_cartesian_to_reduced(coords)
+
+   coords_reduced_to_cartesian(coords)
+
+   classmethod create(cellshape=None, basis=None, metric=None, niggli_matrix=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, lengths=None, angles=None, scale=None, scaling=None, volume=None, periodicity=None, nonperiodic_vecs=None, orientation=1)
+
+      Create a new cell object,
+
+      cell: any one of the following:
+
+         * a 3x3 array with (in rows) the three basis vectors of the
+           cell (a non-periodic system should conventionally use an
+           identity matrix)
+
+         * a dict with a single key 'niggli_matrix' with a 3x2 array
+           with the Niggli Matrix representation of the cell
+
+         * a dict with 6 keys, 'a', 'b', 'c', 'alpha', 'beta',
+           'gamma' giving the cell parameters as floats
+
+      scaling: free form input parsed for a scale.
+         positive value = multiply basis vectors by this value
+         negative value = rescale basis vectors so that cell volume
+         becomes abs(value).
+
+      scale: set to non-None to multiply all cell vectors with this
+      factor
+
+      volume: set to non-None if the basis vectors only give
+      directions, and the volume of the cell should be this value
+      (overrides scale)
+
+      periodicity: free form input parsed for periodicity
+         sequence: True/False for each basis vector being periodic
+         integer: number of non-periodic basis vectors
+
+   is_point_inside(cartesian_coord)
+
+   scaling()
+
+httk.atomistic.cellshape.main()
+
+
+httk.atomistic.cellutils module
+===============================
+
+httk.atomistic.cellutils.basis_determinant(basis)
+
+httk.atomistic.cellutils.basis_to_niggli(basis)
+
+httk.atomistic.cellutils.cell_to_basis(cell)
+
+httk.atomistic.cellutils.lengths_angles_to_niggli(lengths, angles)
+
+httk.atomistic.cellutils.main()
+
+httk.atomistic.cellutils.metric_to_niggli(cell)
+
+httk.atomistic.cellutils.niggli_scale_to_vol(niggli_matrix, scale)
+
+httk.atomistic.cellutils.niggli_to_basis(niggli_matrix, orientation=1)
+
+httk.atomistic.cellutils.niggli_to_lengths_angles(niggli_matrix)
+
+httk.atomistic.cellutils.niggli_to_metric(niggli)
+
+httk.atomistic.cellutils.scale_to_vol(basis, scale)
+
+httk.atomistic.cellutils.scaling_to_volume(basis, scaling)
+
+httk.atomistic.cellutils.vol_to_scale(basis, vol)
+
+
+httk.atomistic.compound module
+==============================
+
+class class httk.atomistic.compound.Compound(element_wyckoff_sequence, formula, spacegroup_number, extended, extensions, wyckoff_sequence, anonymous_wyckoff_sequence, anonymous_formula, formula_symbols, formula_counts, pbc)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   add_name(name)
+
+   add_names(names)
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   anonymous_wyckoff_sequence
+
+   classmethod create(base_on_structure=None, lift_tags=True, lift_refs=True)
+
+      struct: Structure object which forms the basis of this object
+
+   formula_counts
+
+   formula_symbols
+
+   get_names()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   number_of_elements
+
+   wyckoff_sequence
+
+class class httk.atomistic.compound.CompoundName(compound, name)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.compound.CompoundRef(compound, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.compound.CompoundStructure(compound, structure)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(compound, structure)
+
+class class httk.atomistic.compound.CompoundTag(compound, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.compound.ComputationRelatedCompound(computation, compound)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(computation, compound)
+
+httk.atomistic.compound.main()
+
+
+httk.atomistic.representativesites module
+=========================================
+
+class class httk.atomistic.representativesites.RepresentativeSites(reduced_coordgroups=None, cartesian_coordgroups=None, reduced_coords=None, cartesian_coords=None, counts=None, hall_symbol=None, pbc=None, wyckoff_symbols=None, multiplicities=None)
+
+   Bases: "httk.atomistic.sites.Sites"
+
+   Represents any collection of sites in a unitcell
+
+   anonymous_wyckoff_sequence
+
+   clean()
+
+   classmethod create(sites=None, reduced_coordgroups=None, reduced_coords=None, counts=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None)
+
+   multiplicities
+
+   tidy()
+
+   wyckoff_sequence
+
+httk.atomistic.representativesites.main()
+
+
+httk.atomistic.scalelessstructure module
+========================================
+
+class class httk.atomistic.scalelessstructure.ScalelessStructure(assignments, rc_sites=None, uc_sites=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   A ScalelessStructure is the same as a Structre object, only that it
+   does NOT carry information about the cell (no rc_cell or uc_cell).
+
+   add_rc_cell(cell)
+
+   add_rc_cells(cells)
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   anonymous_wyckoff_sequence
+
+   clean()
+
+   classmethod create(structure=None, uc_cellshape=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_reduced_coords=None, uc_reduced_occupationscoords=None, uc_occupancies=None, uc_counts=None, rc_cellshape=None, rc_basis=None, rc_lengths=None, rc_angles=None, rc_niggli_matrix=None, rc_metric=None, rc_a=None, rc_b=None, rc_c=None, rc_alpha=None, rc_beta=None, rc_gamma=None, rc_sites=None, rc_reduced_coordgroups=None, rc_reduced_coords=None, rc_reduced_occupationscoords=None, rc_occupancies=None, rc_counts=None, wyckoff_symbols=None, multiplicities=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A Structure represents N sites of, e.g., atoms or ions, in any
+      periodic or non-periodic arrangement.
+
+      This is a swiss-army-type constructor that allows a selection
+      between a large number of optional arguments.
+
+      To create a new structure, three primary components are:
+            * cell: defines the basis vectors in which reduced
+              coordinates are expressed, and the
+
+                 unit of repetition (*if* the structure has any
+                 periodicity - see the 'periodicity' parameter)
+
+            * assignments: a list of 'things' (atoms, ions, etc.)
+              that goes on the sites in the structure
+
+            * sites: a sensible representation of location /
+              coordinates of the sites.
+
+            However, two options exists for representing the sites;
+            either as only giving the representative sites, which when
+            the  symmetry operations of the spacegroup are applied
+            generates all sites, or, simply giving the primcell set of
+            sites. Since conversion between these are computationally
+            expensive and only strictly 'approximate'. Hence, sites is
+            divided accordingly into rc_sites and uc_sites keeping
+            track of the two representations.
+
+         Input:
+
+            * ONE OF: 'cell'; 'basis', 'length_and_angles';
+              'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+              gamma.  (cell requires a Cell object or a very specific
+              format, so unless you know what you are doing, use one
+              of the others.)
+
+            * ONE OF: 'assignments', 'atomic_numbers', 'occupancies'
+              (assignments requires an Assignments object or a
+              sequence.), occupations repeats similar site assignments
+              as needed
+
+            * ONE OF: 'rc_sites', 'uc_sites', 'rc_coords' (IF
+              rc_occupations OR rc_counts are also given), 'uc_coords'
+              (IF uc_occupations OR uc_counts are also given) 'A_B_C',
+              where A=representative or primcell, B=reduced or
+              cartesian, C=coordgroups, coords, or occupationscoords
+
+              Notes:
+
+                 * occupationscoords may differ to coords by
+                   *order*, since giving occupations as, e.g.,
+                   ['H','O','H'] requires a re-ordering of coordinates
+                   to the format of counts+coords as (2,1), ['H','O'].
+
+                 * rc_sites and uc_sites requires a Sites object or
+                   a very specific format, so unless you know what you
+                   are doing,  use one of the others.)
+
+            * ONE OF: 'spacegroup' or 'hall_symbol', or neither (in
+              which case spacegroup is regarded as unknown)
+
+            * ONE OF: scale or volume:  scale = multiply the basis
+              vectors with this scaling factor,  volume = rescale the
+              cell into this volume (overrides 'scale' if both are
+              given)
+
+            * ONE OF periodicity or nonperiodic_vecs
+
+      See help(Structure) for more information on the data format of
+      all these data representations.
+
+   element_wyckoff_sequence
+
+   extended
+
+   extensions
+
+   fill_cell()
+
+      Make sure this structure has a unitcell representation. I.e.,
+      run an algorithm to copy the representative atoms throughout the
+      unitcell.
+
+      (This method exists as a user friendly name for simply asking
+      for the property self.uc_sites, which does the same; i.e. fills
+      the cell if this representation is not yet known.)
+
+   find_symetry()
+
+      Make sure this structure has a representative cell
+      representation. I.e., run an algorithm to find symmetries.
+
+      (This method exists as a user friendly name for simply asking
+      for the property self.rc_sites, which does the same. i.e. finds
+      the crystal symmetries if this representation is not yet known.)
+
+   formula
+
+   formula_counts
+
+   formula_symbols
+
+   get_rc_cells()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   hall_symbol
+
+   has_rc_repr
+
+      Returns True if the structure already contains the
+      representative coordinates + spacegroup, and thus can be queried
+      for this data without launching an expensive symmetry finder
+      operation.
+
+   has_uc_repr
+
+      Returns True if the structure contains the primcell coordinate
+      representation, and thus can be queried for this data without
+      launching a somewhat expensive cell filling operation.
+
+   io
+
+   number_of_elements
+
+   rc_counts
+
+   rc_formula
+
+   rc_nbr_atoms
+
+   rc_occupancies
+
+   rc_occupationssymbols
+
+   rc_reduced_coordgroups
+
+   rc_reduced_coords
+
+   rc_sites
+
+   spacegroup_number
+
+   spacegroup_number_and_setting
+
+   spacegroupobj
+
+   symbols
+
+   tidy()
+
+   uc_counts
+
+   uc_formula
+
+   uc_formula_counts
+
+   uc_formula_parts
+
+   uc_formula_spaceseparated
+
+   uc_formula_symbols
+
+   uc_nbr_atoms
+
+   uc_occupancies
+
+   uc_occupationssymbols
+
+   uc_reduced_coordgroups
+
+   uc_reduced_coords
+
+   uc_reduced_occupationscoords
+
+   uc_sites
+
+   vis
+
+   wyckoff_sequence
+
+class class httk.atomistic.scalelessstructure.SlStructureCell(structure, cell)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(cell, structure=None)
+
+class class httk.atomistic.scalelessstructure.SlStructureRef(structure, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.scalelessstructure.SlStructureTag(structure, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+httk.atomistic.scalelessstructure.main()
+
+
+httk.atomistic.siteassignment module
+====================================
+
+class class httk.atomistic.siteassignment.SiteAssignment(assignments)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a possible vector of assignments
+
+   atomic_number
+
+   atomic_numbers
+
+   classmethod create(assignments=None)
+
+         Create a new assignment object,
+
+      assignments: a list-style object with one entry per 'atom type'.
+      Any sensible type accepted, most notably,
+         integers (for atom number)
+
+   get_extensions()
+
+   ratio
+
+   ratios
+
+   symbol
+
+   symbols
+
+   to_basis()
+
+   classmethod use(old)
+
+httk.atomistic.siteassignment.main()
+
+
+httk.atomistic.sites module
+===========================
+
+class class httk.atomistic.sites.Sites(reduced_coordgroups=None, reduced_coords=None, counts=None, hall_symbol=None, pbc=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents any collection of sites in a unitcell
+
+   anonymous_formula
+
+   clean()
+
+   coords_groupnumber
+
+   counts
+
+   classmethod create(sites=None, reduced_coordgroups=None, reduced_coords=None, counts=None, occupancies=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, periodicity=None)
+
+      Create a new sites object
+
+   get_cartesian_coordgroups(cell)
+
+   get_cartesian_coords(scale)
+
+   reduced_coordgroups
+
+   reduced_coords
+
+   classmethod use(old, cell=None, hall_symbol=None, periodicity=None)
+
+httk.atomistic.sites.main()
+
+
+httk.atomistic.sitesutils module
+================================
+
+httk.atomistic.sitesutils.abstract_symbol(count)
+
+httk.atomistic.sitesutils.anonymous_formula(filled_counts)
+
+httk.atomistic.sitesutils.clean_coordgroups_and_assignments(coordgroups, assignments)
+
+httk.atomistic.sitesutils.coordgroups_cartesian_to_reduced(coordgroups, basis)
+
+httk.atomistic.sitesutils.coordgroups_reduced_to_cartesian(cell, coordgroups)
+
+httk.atomistic.sitesutils.coordgroups_to_coords(coordgroups)
+
+httk.atomistic.sitesutils.coords_and_counts_to_coordgroups(coords, counts)
+
+httk.atomistic.sitesutils.coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies)
+
+httk.atomistic.sitesutils.coords_reduced_to_cartesian(cell, coords)
+
+httk.atomistic.sitesutils.coords_to_coordgroups(coords, counts)
+
+httk.atomistic.sitesutils.coordswap(fromidx, toidx, cell, coordgroups)
+
+httk.atomistic.sitesutils.main()
+
+httk.atomistic.sitesutils.normalized_formula_parts(assignments, ratios, counts)
+
+httk.atomistic.sitesutils.pbc_to_nonperiodic_vecs(pbc)
+
+httk.atomistic.sitesutils.periodicity_to_pbc(periodicity)
+
+httk.atomistic.sitesutils.sites_tidy(sites, backends=['platon'])
+
+httk.atomistic.sitesutils.sort_coordgroups(coordgroups, individual_data)
+
+httk.atomistic.sitesutils.structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegroup, backends=['isotropy'])
+
+
+httk.atomistic.spacegroup module
+================================
+
+class class httk.atomistic.spacegroup.Spacegroup(hall_symbol)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a spacegroup
+
+   classmethod create(spacegroup=None, hall_symbol=None, hm_symbol=None, spacegroupnumber=None, setting=None)
+
+      Create a new spacegroup object,
+
+      Give ONE OF hall_symbol or spacegroup.
+
+      hall_symbol = a string giving the hall symbol of the spacegroup
+
+      spacegroup = a spacegroup on any reasonable format that can be
+      parsed, e.g.,
+         an integer (spacegroup number)
+
+      setting = if only a spacegroup number is given, this allows also
+      specifying a setting.
+
+   spacegroup_number_and_setting
+
+httk.atomistic.spacegroup.main()
+
+
+httk.atomistic.spacegrouputils module
+=====================================
+
+httk.atomistic.spacegrouputils.any_to_hall_symbol(spacegroup, setting=1)
+
+httk.atomistic.spacegrouputils.find_index(parse)
+
+httk.atomistic.spacegrouputils.hall_rotation_term(code, prev_order, prev_axis_type, nbr_rotations, vector)
+
+httk.atomistic.spacegrouputils.main()
+
+httk.atomistic.spacegrouputils.parse_hall_symbol(hall_symbol)
+
+httk.atomistic.spacegrouputils.spacegroup_get_hall(parse)
+
+httk.atomistic.spacegrouputils.spacegroup_get_hm(parse)
+
+httk.atomistic.spacegrouputils.spacegroup_get_number(parse)
+
+httk.atomistic.spacegrouputils.spacegroup_get_number_and_setting(parse)
+
+httk.atomistic.spacegrouputils.spacegroup_get_schoenflies(parse)
+
+
+httk.atomistic.structure module
+===============================
+
+class class httk.atomistic.structure.Structure(assignments, rc_sites=None, uc_sites=None, rc_cell=None, uc_cell=None)
+
+   Bases: "httk.atomistic.scalelessstructure.ScalelessStructure"
+
+   A Structure represents N sites of, e.g., atoms or ions, in any
+   periodic or non-periodic arrangement.  The structure object is
+   meant to be immutable and assumes that no internal variables are
+   changed after its creation.  All methods that 'changes' the object
+   creates and returns a new, updated, structure object.
+
+   Naming conventions in this class (and elsewhere in httk.atomistic):
+
+   For cells:
+      cell = an abstract name for any reasonable representation of a
+      'cell' that defines
+         the basis vectors used for representing the structure. When a
+         'cell' is returned, it is an object of type Cell
+
+      basis = a 3x3 sequence-type with (in rows) the three basis
+      vectors (for a periodic system, defining the unit cell, and
+      defines the unit of repetition for the periodic dimensions)
+
+      lengths_and_angles = (a,b,c,alpha,beta,gamma): the basis vector
+      lengths and angles
+
+      niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3,
+      2*v2*v3)) where v1, v2, v3 are the vectors forming the basis
+
+      metric =
+      ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))
+
+   For sites:
+      These following prefixes are used to describe types of site
+      specifications:
+         representative cell/rc = only representative atoms are given,
+         which are then to be  repeated by structure symmetry group to
+         give all sites
+
+         unit cell/uc = all atoms in unitcell
+
+         reduced = coordinates given in cell vectors
+
+         cartesian = coordinates given as direct cartesian coordinates
+
+      sites = used as an abstract name for any sensible representation
+      of a list of coordinates and a cell,
+         when a 'sites' is returned, it is an object of type Sites
+
+      counts = number of atoms of each type (one per entry in
+      assignments)
+
+      coordgroups = coordinates represented as a 3-level-list of
+      coordinates, e.g.  [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]]
+      where level-1 list = groups: one group for each equivalent atom
+
+      counts and coords = one list with the number of atoms of each
+      type (one per entry in assignments) and a 2-level list of
+      coordinates.
+
+   For assignments of atoms, etc. to sites:
+      assignments = abstract name for any representation of assignment
+      of atoms. When returned, will be object of type Assignment.
+
+      atomic_numbers = a sequence of integers for the atomic number of
+      each species
+
+      occupations = a sequence where the assignments are *repeated*
+      for each coordinate as needed  (prefixed with uc or rc depending
+      on which coordinates)
+
+   For cell scaling:
+      scaling = abstract name for any representation of cell scaling
+
+      scale = multiply all basis vectors with this number
+
+      volume = rescaling the cell such that it takes this volume
+
+   For periodicity:
+      periodicity = abstract name of a representation of periodicity
+
+      pbc = 'periodic boundary conditions' = sequence of True and
+      False for which basis vectors are periodic / non-periodic
+
+      nonperiodic_vecs = integer, number of basis vectors, counted
+      from the first, which are non-periodic
+
+   For spacegroup:
+      spacegroup = abstract name for any spacegroup representation.
+      When returned, is of type Spacegroup.
+
+      hall_symbol = specifically the hall_symbol string representation
+      of the spacegroup
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   build_cubic_supercell(tolerance=None, max_search_cells=1000)
+
+   build_orthogonal_supercell(tolerance=None, max_search_cells=1000, ortho=[True, True, True])
+
+   build_supercell(transformation, max_search_cells=20, max_atoms=1000)
+
+   build_supercell_old(transformation, max_search_cells=1000)
+
+   clean()
+
+   classmethod create(structure=None, uc_cell=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None, uc_reduced_coords=None, uc_cartesian_coords=None, uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None, uc_occupancies=None, uc_counts=None, uc_scale=None, uc_scaling=None, uc_volume=None, rc_cell=None, rc_basis=None, rc_lengths=None, rc_angles=None, rc_niggli_matrix=None, rc_metric=None, rc_a=None, rc_b=None, rc_c=None, rc_alpha=None, rc_beta=None, rc_gamma=None, rc_sites=None, rc_reduced_coordgroups=None, rc_cartesian_coordgroups=None, rc_reduced_coords=None, rc_cartesian_coords=None, rc_reduced_occupationscoords=None, rc_cartesian_occupationscoords=None, rc_occupancies=None, rc_counts=None, wyckoff_symbols=None, multiplicities=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, rc_scale=None, rc_scaling=None, rc_volume=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A Structure represents N sites of, e.g., atoms or ions, in any
+      periodic or non-periodic arrangement.
+
+      This is a swiss-army-type constructor that allows a selection
+      between a large number of optional arguments.
+
+      To create a new structure, three primary components are:
+            * cell: defines the basis vectors in which reduced
+              coordinates are expressed, and the
+
+                 unit of repetition (*if* the structure has any
+                 periodicity - see the 'periodicity' parameter)
+
+            * assignments: a list of 'things' (atoms, ions, etc.)
+              that goes on the sites in the structure
+
+            * sites: a sensible representation of location /
+              coordinates of the sites.
+
+            However, two options exists for representing the sites;
+            either as only giving the representative sites, which when
+            the  symmetry operations of the spacegroup are applied
+            generates all sites, or, simply giving the primcell set of
+            sites. Since conversion between these are computationally
+            expensive and only strictly 'approximate'. Hence, sites is
+            divided accordingly into rc_sites and uc_sites keeping
+            track of the two representations.
+
+         Input:
+
+            * ONE OF: 'cell'; 'basis', 'length_and_angles';
+              'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+              gamma.  (cell requires a Cell object or a very specific
+              format, so unless you know what you are doing, use one
+              of the others.)
+
+            * ONE OF: 'assignments', 'atomic_numbers', 'occupancies'
+              (assignments requires an Assignments object or a
+              sequence.), occupations repeats similar site assignments
+              as needed
+
+            * ONE OF: 'rc_sites', 'uc_sites', 'rc_coords' (IF
+              rc_occupations OR rc_counts are also given), 'uc_coords'
+              (IF uc_occupations OR uc_counts are also given) 'A_B_C',
+              where A=representative or primcell, B=reduced or
+              cartesian, C=coordgroups, coords, or occupationscoords
+
+              Notes:
+
+                 * occupationscoords may differ to coords by
+                   *order*, since giving occupations as, e.g.,
+                   ['H','O','H'] requires a re-ordering of coordinates
+                   to the format of counts+coords as (2,1), ['H','O'].
+
+                 * rc_sites and uc_sites requires a Sites object or
+                   a very specific format, so unless you know what you
+                   are doing,  use one of the others.)
+
+            * ONE OF: 'spacegroup' or 'hall_symbol', or neither (in
+              which case spacegroup is regarded as unknown)
+
+            * ONE OF: scale or volume:  scale = multiply the basis
+              vectors with this scaling factor,  volume = rescale the
+              cell into this volume (overrides 'scale' if both are
+              given)
+
+            * ONE OF periodicity or nonperiodic_vecs
+
+      See help(Structure) for more information on the data format of
+      all these data representations.
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   io
+
+   orthogonal_supercell_transformation(tolerance=None, max_search_cells=1000, ortho=[True, True, True])
+
+   pbc
+
+   rc_a
+
+   rc_alpha
+
+   rc_b
+
+   rc_basis
+
+   rc_beta
+
+   rc_c
+
+   rc_cartesian_coordgroups
+
+   rc_cartesian_coords
+
+   rc_cell
+
+   rc_cell_orientation
+
+   rc_gamma
+
+   rc_lengths_and_angles
+
+   rc_sites
+
+   rc_volume
+
+   uc_a
+
+   uc_alpha
+
+   uc_b
+
+   uc_basis
+
+   uc_beta
+
+   uc_c
+
+   uc_cartesian_coordgroups
+
+   uc_cartesian_coords
+
+   uc_cartesian_occupationscoords
+
+   uc_cell
+
+   uc_cell_orientation
+
+   uc_gamma
+
+   uc_lengths_and_angles
+
+   uc_sites
+
+   uc_volume
+
+class class httk.atomistic.structure.StructureRef(structure, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.structure.StructureTag(structure, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+httk.atomistic.structure.main()
+
+
+httk.atomistic.structurephasediagram module
+===========================================
+
+class class httk.atomistic.structurephasediagram.StructurePhaseDiagram(structures, energies, hull_indices, competing_indices, hull_competing_indices, hull_distances, coord_system, phase_lines)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a phase diagram of structures
+
+   classmethod create(structures, energies)
+
+   get_phasediagram()
+
+class class httk.atomistic.structurephasediagram.StructurePhaseDiagramCompetingIndicies(indices)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(indices)
+
+httk.atomistic.structurephasediagram.main()
+
+httk.atomistic.structurephasediagram.setup_phasediagram(structures, energies)
+
+
+httk.atomistic.structureutils module
+====================================
+
+httk.atomistic.structureutils.abstract_formula(filled_counts)
+
+httk.atomistic.structureutils.abstract_symbol(count)
+
+httk.atomistic.structureutils.basis_determinant(basis)
+
+httk.atomistic.structureutils.basis_scale_to_vol(basis, scale)
+
+httk.atomistic.structureutils.basis_to_niggli(basis)
+
+httk.atomistic.structureutils.basis_vol_to_scale(basis, vol)
+
+httk.atomistic.structureutils.cartesian_to_reduced(cell, coordgroups)
+
+httk.atomistic.structureutils.clean_coordgroups_and_assignments(coordgroups, assignments)
+
+httk.atomistic.structureutils.coordgroups_and_assignments_to_coords_and_occupancies(coordgroups, assignments)
+
+httk.atomistic.structureutils.coordgroups_and_assignments_to_symbols(coordgroups, assignmentobj)
+
+   Return a list of atomic symbols, repeated as needed
+
+httk.atomistic.structureutils.coordgroups_cartesian_to_reduced(coordgroups, basis)
+
+httk.atomistic.structureutils.coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, backends=['cif2cell', 'ase'])
+
+httk.atomistic.structureutils.coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isotropy'])
+
+httk.atomistic.structureutils.coordgroups_to_coords(coordgroups)
+
+httk.atomistic.structureutils.coords_and_counts_to_coordgroups(coords, counts)
+
+httk.atomistic.structureutils.coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies)
+
+httk.atomistic.structureutils.coords_to_coordgroups(coords, counts)
+
+httk.atomistic.structureutils.coordswap(fromidx, toidx, cell, coordgroups)
+
+httk.atomistic.structureutils.lengths_angles_to_niggli(lengths, angles)
+
+httk.atomistic.structureutils.main()
+
+httk.atomistic.structureutils.metric_to_niggli(cell)
+
+httk.atomistic.structureutils.niggli_scale_to_vol(niggli_matrix, scale)
+
+httk.atomistic.structureutils.niggli_to_basis(niggli_matrix, orientation=1)
+
+httk.atomistic.structureutils.niggli_to_cell_old(niggli_matrix, orientation=1)
+
+httk.atomistic.structureutils.niggli_to_lengths_angles(niggli_matrix)
+
+httk.atomistic.structureutils.niggli_to_metric(niggli)
+
+httk.atomistic.structureutils.niggli_vol_to_scale(niggli_matrix, vol)
+
+httk.atomistic.structureutils.normalized_formula(assignments, ratios, counts)
+
+httk.atomistic.structureutils.normalized_formula_parts(assignments, ratios, counts)
+
+httk.atomistic.structureutils.occupations_and_coords_to_assignments_and_coordgroups(occupationscoords, occupations)
+
+httk.atomistic.structureutils.prototype_formula(proto)
+
+httk.atomistic.structureutils.reduced_to_cartesian(cell, coordgroups)
+
+httk.atomistic.structureutils.sort_coordgroups(coordgroups, individual_data)
+
+httk.atomistic.structureutils.structure_reduced_uc_to_representative(struct, backends=['isotropy', 'fake'])
+
+httk.atomistic.structureutils.structure_tidy(struct, backends=['platon'])
+
+httk.atomistic.structureutils.structure_to_p1structure(struct, backends=['ase'])
+
+httk.atomistic.structureutils.structure_to_sgstructure(struct, backends=['platon'])
+
+
+httk.atomistic.unitcellsites module
+===================================
+
+class class httk.atomistic.unitcellsites.UnitcellSites(reduced_coordgroups=None, reduced_coords=None, counts=None, hall_symbol='P 1', pbc=None)
+
+   Bases: "httk.atomistic.sites.Sites"
+
+   Represents any collection of sites in a unitcell
+
+httk.atomistic.unitcellsites.main()
+
+
+httk.atomistic.unitcellstructure module
+=======================================
+
+class class httk.atomistic.unitcellstructure.UCStructureRef(structure, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.unitcellstructure.UCStructureTag(structure, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.unitcellstructure.UnitcellStructure(cell=None, assignments=None, rc_sites=None, uc_sites=None, struct=None, uc_cell=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   FullSitesStructure essentially just wraps Structure, and provides a
+   strict subset of the functionality therein. This is needed,
+   because in interaction with, e.g., databases, we sometimes need to
+   restrict the available fields to those properties accessible via
+   this object.
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   classmethod create(structure=None, uc_cell=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None, uc_reduced_coords=None, uc_cartesian_coords=None, uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None, uc_occupancies=None, uc_counts=None, uc_scale=None, uc_scaling=None, uc_volume=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A FullStructure represents N sites of, e.g., atoms or ions, in
+      any periodic or non-periodic arrangement, where the positions of
+      all cites are given (as opposed to a set of unique sites +
+      symmetry operations).
+
+      This is a swiss-army-type constructor that allows several
+      different ways to create a FullStructure object.
+
+      To create a new structure, three primary components are:
+
+         * cell: defines the basis vectors in which reduced
+           coordinates are expressed, and the  unit of repetition
+           (*if* the structure has any periodicity - see the
+           'periodicity' parameter)
+
+         * assignments: a list of 'things' (atoms, ions, etc.) that
+           goes on the sites in the structure
+
+         * sites: a sensible representation of location /
+           coordinates of the sites.
+
+      Note: *uc_*-prefixes are consistently enforced for any quantity
+      that would be different in a UniqueSitesStructure. This is to
+      allow for painless change between the various structure-type
+      objects.
+
+      Note: see help(Structure) for parameter naming conventions,
+      i.e., what type of object is expected given a parameter name.
+
+      Input parameters:
+
+         * ONE OF: 'cell'; 'basis', 'length_and_angles';
+           'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+           gamma.  (cell requires a Cell object or a very specific
+           format, so unless you know what you are doing, use one of
+           the others.)
+
+         * ONE OF: 'assignments', 'atomic_numbers', 'occupations'
+           (assignments requires an Assignments object or a
+           sequence.), occupations repeats similar site assignments as
+           needed
+
+         * ONE OF: 'uc_sites', 'uc_coords' (IF uc_occupations OR
+           uc_counts are also given), or 'uc_B_C', where B=reduced or
+           cartesian, C=coordgroups, coords, or occupationscoords
+
+           Notes:
+
+              * occupationscoords may differ by coords by *order*,
+                since giving occupations as, e.g., ['H','O','H'] does
+                not necessarily have the same order of the coordinates
+                as the format of counts+coords as (2,1), ['H','O'],
+                and we cannot just re-order the coordinates at
+                creation time (since presevation of the order is
+                sometimes important.)
+
+              * uc_sites requires a Sites object or a python list on
+                a very specific format, (so unless you know what you
+                are doing,  use one of the others.)
+
+         * ONE OF: 'spacegroup' or 'hall_symbol', OR NEITHER (in
+           which case the spacegroup is regarded as unknown)
+
+         * ONE OF: scale or volume:
+
+              scale = multiply the basis vectors with this scaling
+              factor,  volume = rescale the cell into this volume
+              (overrides 'scale' if both are given)
+
+         * ONE OF periodicity or nonperiodic_vecs
+
+   extended
+
+   extensions
+
+   formula
+
+   formula_symbols
+
+   get_normalized()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   has_rc_repr
+
+      Returns True if the structure already contains the
+      representative coordinates + spacegroup, and thus can be queried
+      for this data without launching an expensive symmetry finder
+      operation.
+
+   has_uc_repr
+
+      Returns True if the structure contains the primcell coordinate
+      representation, and thus can be queried for this data without
+      launching a somewhat expensive cell filling operation.
+
+   uc_a
+
+   uc_alpha
+
+   uc_b
+
+   uc_basis
+
+   uc_beta
+
+   uc_c
+
+   uc_cartesian_coordgroups
+
+   uc_cartesian_coords
+
+   uc_cartesian_occupationscoords
+
+   uc_cell
+
+   uc_cell_orientation
+
+   uc_counts
+
+   uc_formula
+
+   uc_formula_counts
+
+   uc_formula_symbols
+
+   uc_gamma
+
+   uc_nbr_atoms
+
+   uc_occupancies
+
+   uc_reduced_coordgroups
+
+   uc_reduced_coords
+
+   uc_reduced_occupationscoords
+
+   uc_sites
+
+   uc_symbols
+
+   uc_volume
+
+
+Module contents
+===============
+
+The httk.atomistic package
+
+Classes and utilities for dealing with high-throughput calculations of
+atomistic systems.
+
+class class httk.atomistic.Structure(assignments, rc_sites=None, uc_sites=None, rc_cell=None, uc_cell=None)
+
+   Bases: "httk.atomistic.scalelessstructure.ScalelessStructure"
+
+   A Structure represents N sites of, e.g., atoms or ions, in any
+   periodic or non-periodic arrangement.  The structure object is
+   meant to be immutable and assumes that no internal variables are
+   changed after its creation.  All methods that 'changes' the object
+   creates and returns a new, updated, structure object.
+
+   Naming conventions in this class (and elsewhere in httk.atomistic):
+
+   For cells:
+      cell = an abstract name for any reasonable representation of a
+      'cell' that defines
+         the basis vectors used for representing the structure. When a
+         'cell' is returned, it is an object of type Cell
+
+      basis = a 3x3 sequence-type with (in rows) the three basis
+      vectors (for a periodic system, defining the unit cell, and
+      defines the unit of repetition for the periodic dimensions)
+
+      lengths_and_angles = (a,b,c,alpha,beta,gamma): the basis vector
+      lengths and angles
+
+      niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3,
+      2*v2*v3)) where v1, v2, v3 are the vectors forming the basis
+
+      metric =
+      ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))
+
+   For sites:
+      These following prefixes are used to describe types of site
+      specifications:
+         representative cell/rc = only representative atoms are given,
+         which are then to be  repeated by structure symmetry group to
+         give all sites
+
+         unit cell/uc = all atoms in unitcell
+
+         reduced = coordinates given in cell vectors
+
+         cartesian = coordinates given as direct cartesian coordinates
+
+      sites = used as an abstract name for any sensible representation
+      of a list of coordinates and a cell,
+         when a 'sites' is returned, it is an object of type Sites
+
+      counts = number of atoms of each type (one per entry in
+      assignments)
+
+      coordgroups = coordinates represented as a 3-level-list of
+      coordinates, e.g.  [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]]
+      where level-1 list = groups: one group for each equivalent atom
+
+      counts and coords = one list with the number of atoms of each
+      type (one per entry in assignments) and a 2-level list of
+      coordinates.
+
+   For assignments of atoms, etc. to sites:
+      assignments = abstract name for any representation of assignment
+      of atoms. When returned, will be object of type Assignment.
+
+      atomic_numbers = a sequence of integers for the atomic number of
+      each species
+
+      occupations = a sequence where the assignments are *repeated*
+      for each coordinate as needed  (prefixed with uc or rc depending
+      on which coordinates)
+
+   For cell scaling:
+      scaling = abstract name for any representation of cell scaling
+
+      scale = multiply all basis vectors with this number
+
+      volume = rescaling the cell such that it takes this volume
+
+   For periodicity:
+      periodicity = abstract name of a representation of periodicity
+
+      pbc = 'periodic boundary conditions' = sequence of True and
+      False for which basis vectors are periodic / non-periodic
+
+      nonperiodic_vecs = integer, number of basis vectors, counted
+      from the first, which are non-periodic
+
+   For spacegroup:
+      spacegroup = abstract name for any spacegroup representation.
+      When returned, is of type Spacegroup.
+
+      hall_symbol = specifically the hall_symbol string representation
+      of the spacegroup
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   build_cubic_supercell(tolerance=None, max_search_cells=1000)
+
+   build_orthogonal_supercell(tolerance=None, max_search_cells=1000, ortho=[True, True, True])
+
+   build_supercell(transformation, max_search_cells=20, max_atoms=1000)
+
+   build_supercell_old(transformation, max_search_cells=1000)
+
+   clean()
+
+   classmethod create(structure=None, uc_cell=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None, uc_reduced_coords=None, uc_cartesian_coords=None, uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None, uc_occupancies=None, uc_counts=None, uc_scale=None, uc_scaling=None, uc_volume=None, rc_cell=None, rc_basis=None, rc_lengths=None, rc_angles=None, rc_niggli_matrix=None, rc_metric=None, rc_a=None, rc_b=None, rc_c=None, rc_alpha=None, rc_beta=None, rc_gamma=None, rc_sites=None, rc_reduced_coordgroups=None, rc_cartesian_coordgroups=None, rc_reduced_coords=None, rc_cartesian_coords=None, rc_reduced_occupationscoords=None, rc_cartesian_occupationscoords=None, rc_occupancies=None, rc_counts=None, wyckoff_symbols=None, multiplicities=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, rc_scale=None, rc_scaling=None, rc_volume=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A Structure represents N sites of, e.g., atoms or ions, in any
+      periodic or non-periodic arrangement.
+
+      This is a swiss-army-type constructor that allows a selection
+      between a large number of optional arguments.
+
+      To create a new structure, three primary components are:
+            * cell: defines the basis vectors in which reduced
+              coordinates are expressed, and the
+
+                 unit of repetition (*if* the structure has any
+                 periodicity - see the 'periodicity' parameter)
+
+            * assignments: a list of 'things' (atoms, ions, etc.)
+              that goes on the sites in the structure
+
+            * sites: a sensible representation of location /
+              coordinates of the sites.
+
+            However, two options exists for representing the sites;
+            either as only giving the representative sites, which when
+            the  symmetry operations of the spacegroup are applied
+            generates all sites, or, simply giving the primcell set of
+            sites. Since conversion between these are computationally
+            expensive and only strictly 'approximate'. Hence, sites is
+            divided accordingly into rc_sites and uc_sites keeping
+            track of the two representations.
+
+         Input:
+
+            * ONE OF: 'cell'; 'basis', 'length_and_angles';
+              'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+              gamma.  (cell requires a Cell object or a very specific
+              format, so unless you know what you are doing, use one
+              of the others.)
+
+            * ONE OF: 'assignments', 'atomic_numbers', 'occupancies'
+              (assignments requires an Assignments object or a
+              sequence.), occupations repeats similar site assignments
+              as needed
+
+            * ONE OF: 'rc_sites', 'uc_sites', 'rc_coords' (IF
+              rc_occupations OR rc_counts are also given), 'uc_coords'
+              (IF uc_occupations OR uc_counts are also given) 'A_B_C',
+              where A=representative or primcell, B=reduced or
+              cartesian, C=coordgroups, coords, or occupationscoords
+
+              Notes:
+
+                 * occupationscoords may differ to coords by
+                   *order*, since giving occupations as, e.g.,
+                   ['H','O','H'] requires a re-ordering of coordinates
+                   to the format of counts+coords as (2,1), ['H','O'].
+
+                 * rc_sites and uc_sites requires a Sites object or
+                   a very specific format, so unless you know what you
+                   are doing,  use one of the others.)
+
+            * ONE OF: 'spacegroup' or 'hall_symbol', or neither (in
+              which case spacegroup is regarded as unknown)
+
+            * ONE OF: scale or volume:  scale = multiply the basis
+              vectors with this scaling factor,  volume = rescale the
+              cell into this volume (overrides 'scale' if both are
+              given)
+
+            * ONE OF periodicity or nonperiodic_vecs
+
+      See help(Structure) for more information on the data format of
+      all these data representations.
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   io
+
+   orthogonal_supercell_transformation(tolerance=None, max_search_cells=1000, ortho=[True, True, True])
+
+   pbc
+
+   rc_a
+
+   rc_alpha
+
+   rc_b
+
+   rc_basis
+
+   rc_beta
+
+   rc_c
+
+   rc_cartesian_coordgroups
+
+   rc_cartesian_coords
+
+   rc_cell
+
+   rc_cell_orientation
+
+   rc_gamma
+
+   rc_lengths_and_angles
+
+   rc_sites
+
+   rc_volume
+
+   uc_a
+
+   uc_alpha
+
+   uc_b
+
+   uc_basis
+
+   uc_beta
+
+   uc_c
+
+   uc_cartesian_coordgroups
+
+   uc_cartesian_coords
+
+   uc_cartesian_occupationscoords
+
+   uc_cell
+
+   uc_cell_orientation
+
+   uc_gamma
+
+   uc_lengths_and_angles
+
+   uc_sites
+
+   uc_volume
+
+class class httk.atomistic.ScalelessStructure(assignments, rc_sites=None, uc_sites=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   A ScalelessStructure is the same as a Structre object, only that it
+   does NOT carry information about the cell (no rc_cell or uc_cell).
+
+   add_rc_cell(cell)
+
+   add_rc_cells(cells)
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   anonymous_wyckoff_sequence
+
+   clean()
+
+   classmethod create(structure=None, uc_cellshape=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_reduced_coords=None, uc_reduced_occupationscoords=None, uc_occupancies=None, uc_counts=None, rc_cellshape=None, rc_basis=None, rc_lengths=None, rc_angles=None, rc_niggli_matrix=None, rc_metric=None, rc_a=None, rc_b=None, rc_c=None, rc_alpha=None, rc_beta=None, rc_gamma=None, rc_sites=None, rc_reduced_coordgroups=None, rc_reduced_coords=None, rc_reduced_occupationscoords=None, rc_occupancies=None, rc_counts=None, wyckoff_symbols=None, multiplicities=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A Structure represents N sites of, e.g., atoms or ions, in any
+      periodic or non-periodic arrangement.
+
+      This is a swiss-army-type constructor that allows a selection
+      between a large number of optional arguments.
+
+      To create a new structure, three primary components are:
+            * cell: defines the basis vectors in which reduced
+              coordinates are expressed, and the
+
+                 unit of repetition (*if* the structure has any
+                 periodicity - see the 'periodicity' parameter)
+
+            * assignments: a list of 'things' (atoms, ions, etc.)
+              that goes on the sites in the structure
+
+            * sites: a sensible representation of location /
+              coordinates of the sites.
+
+            However, two options exists for representing the sites;
+            either as only giving the representative sites, which when
+            the  symmetry operations of the spacegroup are applied
+            generates all sites, or, simply giving the primcell set of
+            sites. Since conversion between these are computationally
+            expensive and only strictly 'approximate'. Hence, sites is
+            divided accordingly into rc_sites and uc_sites keeping
+            track of the two representations.
+
+         Input:
+
+            * ONE OF: 'cell'; 'basis', 'length_and_angles';
+              'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+              gamma.  (cell requires a Cell object or a very specific
+              format, so unless you know what you are doing, use one
+              of the others.)
+
+            * ONE OF: 'assignments', 'atomic_numbers', 'occupancies'
+              (assignments requires an Assignments object or a
+              sequence.), occupations repeats similar site assignments
+              as needed
+
+            * ONE OF: 'rc_sites', 'uc_sites', 'rc_coords' (IF
+              rc_occupations OR rc_counts are also given), 'uc_coords'
+              (IF uc_occupations OR uc_counts are also given) 'A_B_C',
+              where A=representative or primcell, B=reduced or
+              cartesian, C=coordgroups, coords, or occupationscoords
+
+              Notes:
+
+                 * occupationscoords may differ to coords by
+                   *order*, since giving occupations as, e.g.,
+                   ['H','O','H'] requires a re-ordering of coordinates
+                   to the format of counts+coords as (2,1), ['H','O'].
+
+                 * rc_sites and uc_sites requires a Sites object or
+                   a very specific format, so unless you know what you
+                   are doing,  use one of the others.)
+
+            * ONE OF: 'spacegroup' or 'hall_symbol', or neither (in
+              which case spacegroup is regarded as unknown)
+
+            * ONE OF: scale or volume:  scale = multiply the basis
+              vectors with this scaling factor,  volume = rescale the
+              cell into this volume (overrides 'scale' if both are
+              given)
+
+            * ONE OF periodicity or nonperiodic_vecs
+
+      See help(Structure) for more information on the data format of
+      all these data representations.
+
+   element_wyckoff_sequence
+
+   extended
+
+   extensions
+
+   fill_cell()
+
+      Make sure this structure has a unitcell representation. I.e.,
+      run an algorithm to copy the representative atoms throughout the
+      unitcell.
+
+      (This method exists as a user friendly name for simply asking
+      for the property self.uc_sites, which does the same; i.e. fills
+      the cell if this representation is not yet known.)
+
+   find_symetry()
+
+      Make sure this structure has a representative cell
+      representation. I.e., run an algorithm to find symmetries.
+
+      (This method exists as a user friendly name for simply asking
+      for the property self.rc_sites, which does the same. i.e. finds
+      the crystal symmetries if this representation is not yet known.)
+
+   formula
+
+   formula_counts
+
+   formula_symbols
+
+   get_rc_cells()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   hall_symbol
+
+   has_rc_repr
+
+      Returns True if the structure already contains the
+      representative coordinates + spacegroup, and thus can be queried
+      for this data without launching an expensive symmetry finder
+      operation.
+
+   has_uc_repr
+
+      Returns True if the structure contains the primcell coordinate
+      representation, and thus can be queried for this data without
+      launching a somewhat expensive cell filling operation.
+
+   io
+
+   number_of_elements
+
+   rc_counts
+
+   rc_formula
+
+   rc_nbr_atoms
+
+   rc_occupancies
+
+   rc_occupationssymbols
+
+   rc_reduced_coordgroups
+
+   rc_reduced_coords
+
+   rc_sites
+
+   spacegroup_number
+
+   spacegroup_number_and_setting
+
+   spacegroupobj
+
+   symbols
+
+   tidy()
+
+   uc_counts
+
+   uc_formula
+
+   uc_formula_counts
+
+   uc_formula_parts
+
+   uc_formula_spaceseparated
+
+   uc_formula_symbols
+
+   uc_nbr_atoms
+
+   uc_occupancies
+
+   uc_occupationssymbols
+
+   uc_reduced_coordgroups
+
+   uc_reduced_coords
+
+   uc_reduced_occupationscoords
+
+   uc_sites
+
+   vis
+
+   wyckoff_sequence
+
+class class httk.atomistic.Cell(niggli_matrix, orientation=1, basis=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a cell (e.g., a unitcell, but also possibly just the
+   basis vectors of a non-periodic system)
+
+   basis
+
+   clean()
+
+   coordgroups_cartesian_to_reduced(coordgroups)
+
+   coordgroups_reduced_to_cartesian(coordgroups)
+
+   coords_cartesian_to_reduced(coords)
+
+   coords_reduced_to_cartesian(coords)
+
+   classmethod create(cell=None, basis=None, metric=None, niggli_matrix=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, lengths=None, angles=None, scale=None, scaling=None, volume=None, periodicity=None, nonperiodic_vecs=None, orientation=1, lattice_system=None)
+
+      Create a new cell object,
+
+      cell: any one of the following:
+
+         * a 3x3 array with (in rows) the three basis vectors of the
+           cell (a non-periodic system should conventionally use an
+           identity matrix)
+
+         * a dict with a single key 'niggli_matrix' with a 3x2 array
+           with the Niggli Matrix representation of the cell
+
+         * a dict with 6 keys, 'a', 'b', 'c', 'alpha', 'beta',
+           'gamma' giving the cell parameters as floats
+
+      scaling: free form input parsed for a scale.
+         positive value = multiply basis vectors by this value
+         negative value = rescale basis vectors so that cell volume
+         becomes abs(value).
+
+      scale: set to non-None to multiply all cell vectors with this
+      factor
+
+      volume: set to non-None if the basis vectors only give
+      directions, and the volume of the cell should be this value
+      (overrides scale)
+
+      periodicity: free form input parsed for periodicity
+         sequence: True/False for each basis vector being periodic
+         integer: number of non-periodic basis vectors
+
+   get_normalized()
+
+   is_point_inside(cartesian_coord)
+
+   normalization_scale
+
+      Get the factor with which a normalized version of this cell
+      needs to be multiplied to reproduce this cell.
+
+      I.e. self = (normalization_scale)*self.get_normalized()
+
+   scaling()
+
+   volume
+
+class class httk.atomistic.UnitcellStructure(cell=None, assignments=None, rc_sites=None, uc_sites=None, struct=None, uc_cell=None)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   FullSitesStructure essentially just wraps Structure, and provides a
+   strict subset of the functionality therein. This is needed,
+   because in interaction with, e.g., databases, we sometimes need to
+   restrict the available fields to those properties accessible via
+   this object.
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   classmethod create(structure=None, uc_cell=None, uc_basis=None, uc_lengths=None, uc_angles=None, uc_niggli_matrix=None, uc_metric=None, uc_a=None, uc_b=None, uc_c=None, uc_alpha=None, uc_beta=None, uc_gamma=None, uc_sites=None, uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None, uc_reduced_coords=None, uc_cartesian_coords=None, uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None, uc_occupancies=None, uc_counts=None, uc_scale=None, uc_scaling=None, uc_volume=None, assignments=None, periodicity=None, nonperiodic_vecs=None, refs=None, tags=None)
+
+      A FullStructure represents N sites of, e.g., atoms or ions, in
+      any periodic or non-periodic arrangement, where the positions of
+      all cites are given (as opposed to a set of unique sites +
+      symmetry operations).
+
+      This is a swiss-army-type constructor that allows several
+      different ways to create a FullStructure object.
+
+      To create a new structure, three primary components are:
+
+         * cell: defines the basis vectors in which reduced
+           coordinates are expressed, and the  unit of repetition
+           (*if* the structure has any periodicity - see the
+           'periodicity' parameter)
+
+         * assignments: a list of 'things' (atoms, ions, etc.) that
+           goes on the sites in the structure
+
+         * sites: a sensible representation of location /
+           coordinates of the sites.
+
+      Note: *uc_*-prefixes are consistently enforced for any quantity
+      that would be different in a UniqueSitesStructure. This is to
+      allow for painless change between the various structure-type
+      objects.
+
+      Note: see help(Structure) for parameter naming conventions,
+      i.e., what type of object is expected given a parameter name.
+
+      Input parameters:
+
+         * ONE OF: 'cell'; 'basis', 'length_and_angles';
+           'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta,
+           gamma.  (cell requires a Cell object or a very specific
+           format, so unless you know what you are doing, use one of
+           the others.)
+
+         * ONE OF: 'assignments', 'atomic_numbers', 'occupations'
+           (assignments requires an Assignments object or a
+           sequence.), occupations repeats similar site assignments as
+           needed
+
+         * ONE OF: 'uc_sites', 'uc_coords' (IF uc_occupations OR
+           uc_counts are also given), or 'uc_B_C', where B=reduced or
+           cartesian, C=coordgroups, coords, or occupationscoords
+
+           Notes:
+
+              * occupationscoords may differ by coords by *order*,
+                since giving occupations as, e.g., ['H','O','H'] does
+                not necessarily have the same order of the coordinates
+                as the format of counts+coords as (2,1), ['H','O'],
+                and we cannot just re-order the coordinates at
+                creation time (since presevation of the order is
+                sometimes important.)
+
+              * uc_sites requires a Sites object or a python list on
+                a very specific format, (so unless you know what you
+                are doing,  use one of the others.)
+
+         * ONE OF: 'spacegroup' or 'hall_symbol', OR NEITHER (in
+           which case the spacegroup is regarded as unknown)
+
+         * ONE OF: scale or volume:
+
+              scale = multiply the basis vectors with this scaling
+              factor,  volume = rescale the cell into this volume
+              (overrides 'scale' if both are given)
+
+         * ONE OF periodicity or nonperiodic_vecs
+
+   extended
+
+   extensions
+
+   formula
+
+   formula_symbols
+
+   get_normalized()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   has_rc_repr
+
+      Returns True if the structure already contains the
+      representative coordinates + spacegroup, and thus can be queried
+      for this data without launching an expensive symmetry finder
+      operation.
+
+   has_uc_repr
+
+      Returns True if the structure contains the primcell coordinate
+      representation, and thus can be queried for this data without
+      launching a somewhat expensive cell filling operation.
+
+   uc_a
+
+   uc_alpha
+
+   uc_b
+
+   uc_basis
+
+   uc_beta
+
+   uc_c
+
+   uc_cartesian_coordgroups
+
+   uc_cartesian_coords
+
+   uc_cartesian_occupationscoords
+
+   uc_cell
+
+   uc_cell_orientation
+
+   uc_counts
+
+   uc_formula
+
+   uc_formula_counts
+
+   uc_formula_symbols
+
+   uc_gamma
+
+   uc_nbr_atoms
+
+   uc_occupancies
+
+   uc_reduced_coordgroups
+
+   uc_reduced_coords
+
+   uc_reduced_occupationscoords
+
+   uc_sites
+
+   uc_symbols
+
+   uc_volume
+
+class class httk.atomistic.RepresentativeSites(reduced_coordgroups=None, cartesian_coordgroups=None, reduced_coords=None, cartesian_coords=None, counts=None, hall_symbol=None, pbc=None, wyckoff_symbols=None, multiplicities=None)
+
+   Bases: "httk.atomistic.sites.Sites"
+
+   Represents any collection of sites in a unitcell
+
+   anonymous_wyckoff_sequence
+
+   clean()
+
+   classmethod create(sites=None, reduced_coordgroups=None, reduced_coords=None, counts=None, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None, periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None)
+
+   multiplicities
+
+   tidy()
+
+   wyckoff_sequence
+
+class class httk.atomistic.UnitcellSites(reduced_coordgroups=None, reduced_coords=None, counts=None, hall_symbol='P 1', pbc=None)
+
+   Bases: "httk.atomistic.sites.Sites"
+
+   Represents any collection of sites in a unitcell
+
+class class httk.atomistic.Assignments(siteassignments, extensions=[])
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a possible vector of assignments
+
+   atomic_numbers
+
+   classmethod create(assignments=None)
+
+         Create a new assignment object,
+
+      assignments: a list-style object with one entry per 'atom type'.
+      Any sensible type accepted, most notably,
+         integers (for atom number)
+
+   extended
+
+   ratios
+
+   ratioslist
+
+   symbollists
+
+   symbols
+
+   to_basis()
+
+   classmethod use(old)
+
+class class httk.atomistic.Compound(element_wyckoff_sequence, formula, spacegroup_number, extended, extensions, wyckoff_sequence, anonymous_wyckoff_sequence, anonymous_formula, formula_symbols, formula_counts, pbc)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   add_name(name)
+
+   add_names(names)
+
+   add_ref(ref)
+
+   add_refs(refs)
+
+   add_tag(tag, val)
+
+   add_tags(tags)
+
+   anonymous_formula
+
+   anonymous_wyckoff_sequence
+
+   classmethod create(base_on_structure=None, lift_tags=True, lift_refs=True)
+
+      struct: Structure object which forms the basis of this object
+
+   formula_counts
+
+   formula_symbols
+
+   get_names()
+
+   get_refs()
+
+   get_tag(tag)
+
+   get_tags()
+
+   number_of_elements
+
+   wyckoff_sequence
+
+class class httk.atomistic.CompoundStructure(compound, structure)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   classmethod create(compound, structure)
+
+class class httk.atomistic.StructurePhaseDiagram(structures, energies, hull_indices, competing_indices, hull_competing_indices, hull_distances, coord_system, phase_lines)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+   Represents a phase diagram of structures
+
+   classmethod create(structures, energies)
+
+   get_phasediagram()
+
+class class httk.atomistic.StructureRef(structure, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.StructureTag(structure, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.CompoundTag(compound, tag, value)
+
+   Bases: "httk.core.httkobject.HttkObject"
+
+class class httk.atomistic.CompoundRef(compound, reference)
+
+   Bases: "httk.core.httkobject.HttkObject"

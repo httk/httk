@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -24,4 +24,6 @@ httk Io module
 from httk.core import citation
 citation.add_src_citation("httk","Rickard Armiento")
 
-from structure import cif_to_struct
+from load import load
+from save import save
+from cif import read_cif, write_cif

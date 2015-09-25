@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>httk.iface.vasp_if &mdash; httk 1.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="httk 1.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="httk" href="../../httk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" accesskey="U">httk</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for httk.iface.vasp_if</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#    The high-throughput toolkit (httk)</span>
+<span class="c">#    Copyright (C) 2012-2015 Rickard Armiento</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU Affero General Public License as</span>
+<span class="c">#    published by the Free Software Foundation, either version 3 of the</span>
+<span class="c">#    License, or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU Affero General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU Affero General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">httk</span>
+<span class="kn">from</span> <span class="nn">httk</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">httk.core.template</span> <span class="kn">import</span> <span class="n">apply_templates</span> 
+<span class="kn">from</span> <span class="nn">httk.atomistic.data</span> <span class="kn">import</span> <span class="n">periodictable</span>
+<span class="kn">from</span> <span class="nn">httk.core.ioadapters</span> <span class="kn">import</span> <span class="n">cleveropen</span> 
+<span class="kn">from</span> <span class="nn">httk.core</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">httk.core.basic</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">micro_pyawk</span>
+<span class="kn">from</span> <span class="nn">httk.atomistic</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">httk.atomistic.structureutils</span> <span class="kn">import</span> <span class="n">cartesian_to_reduced</span>
+
+<div class="viewcode-block" id="get_pseudopotential"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.get_pseudopotential">[docs]</a><span class="k">def</span> <span class="nf">get_pseudopotential</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">poscarspath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">poscarspath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>   
+            <span class="n">poscarspath</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;paths&#39;</span><span class="p">,</span> <span class="s">&#39;vasp_pseudolib&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c">#return [name for name in os.listdir(a_dir)</span>
+            <span class="c">#        if os.path.isdir(os.path.join(a_dir, name))]    </span>
+            <span class="n">poscarspath</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">poscarspath</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="s">&quot;VASP_PSEUDOLIB&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">poscarspath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;VASP_PSEUDOLIB&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">poscarspath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;httk.iface.vasp_if.get_pseudopotentials: No path given for where to find VASP pseudopotentials. </span><span class="se">\</span>
+<span class="s">                         Please either set vasp_pseudolib in httk.cfg, or define the VASP_PSEUDOLIB variable, or </span><span class="se">\</span>
+<span class="s">                         pass along a string in your code for the parameter &#39;poscarspath&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">poscarspath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">poscarspath</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">priority</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;_3&quot;</span><span class="p">,</span><span class="s">&quot;_2&quot;</span><span class="p">,</span><span class="s">&quot;_d&quot;</span><span class="p">,</span><span class="s">&quot;_pv&quot;</span><span class="p">,</span><span class="s">&quot;_sv&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="s">&quot;_h&quot;</span><span class="p">,</span><span class="s">&quot;_s&quot;</span><span class="p">]:</span>
+        <span class="n">basepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">poscarspath</span><span class="p">,</span><span class="n">species</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">basepath</span><span class="o">+</span><span class="n">priority</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">cleveropen</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basepath</span><span class="o">+</span><span class="n">priority</span><span class="p">,</span><span class="s">&#39;POTCAR&#39;</span><span class="p">),</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">data</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="k">pass</span>
+
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;httk.iface.vasp_if.get_pseudopotentials: could not find a suitable pseudopotential for &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>            
+
+</div>
+<div class="viewcode-block" id="write_kpoints_file"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.write_kpoints_file">[docs]</a><span class="k">def</span> <span class="nf">write_kpoints_file</span><span class="p">(</span><span class="n">fio</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">mp</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gamma_centered</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>            
+    <span class="n">fio</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">fio</span><span class="p">)</span>    
+    <span class="n">f</span> <span class="o">=</span> <span class="n">fio</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;0</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="c">#if mp:</span>
+    <span class="c">#    f.write(&quot;Monkhorst-Pack\n&quot;)</span>
+    <span class="c">#else:</span>
+    <span class="c">#    f.write(&quot;Gamma\n&quot;)</span>
+    <span class="k">if</span> <span class="n">gamma_centered</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Gamma</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Monkhorst-Pack</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">kpoints</span><span class="p">])</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fio</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="write_generic_kpoints_file"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.write_generic_kpoints_file">[docs]</a><span class="k">def</span> <span class="nf">write_generic_kpoints_file</span><span class="p">(</span><span class="n">fio</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">mp</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>            
+    <span class="n">fio</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">fio</span><span class="p">)</span>    
+    <span class="n">f</span> <span class="o">=</span> <span class="n">fio</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;0</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="c">#if mp:</span>
+    <span class="c">#    f.write(&quot;Monkhorst-Pack\n&quot;)</span>
+    <span class="c">#else:</span>
+    <span class="c">#    f.write(&quot;Gamma\n&quot;)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Auto</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;20</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">fio</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="get_magmom"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.get_magmom">[docs]</a><span class="k">def</span> <span class="nf">get_magmom</span><span class="p">(</span><span class="n">symbol</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">8</span>
+
+<span class="c">#magions = [&#39;Sc&#39;,&#39;Ti&#39;,&#39;V&#39;,&#39;Cr&#39;,&#39;Mn&#39;,&#39;Fe&#39;,&#39;Co&#39;,&#39;Ni&#39;,&#39;Cu&#39;,&#39;Zn&#39;,&#39;Y&#39;,&#39;Zr&#39;,&#39;Nb&#39;,&#39;Mo&#39;,&#39;Tc&#39;,&#39;Ru&#39;,&#39;Rh&#39;,&#39;Pd&#39;,&#39;Ag&#39;,&#39;Cd&#39;,&#39;La&#39;,&#39;Hf&#39;,&#39;Ta&#39;,&#39;W&#39;,&#39;Re&#39;,&#39;Os&#39;,&#39;Ir&#39;,&#39;Pt&#39;,&#39;Au&#39;,&#39;Hg&#39;,&#39;Ce&#39;,&#39;Pr&#39;,&#39;Nd&#39;,&#39;Pm&#39;,&#39;Sm&#39;,&#39;Eu&#39;,&#39;Gd&#39;,&#39;Tb&#39;,&#39;Dy&#39;,&#39;Ho&#39;,&#39;Er&#39;,&#39;Tm&#39;,&#39;Yb&#39;,&#39;Lu&#39;,&#39;Th&#39;,&#39;Pa&#39;,&#39;U&#39;]</span>
+<span class="c"># From: A. Jain et al. / Computational Materials Science 50 (2011) 2295-2310</span></div>
+<span class="n">magions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Ag&#39;</span><span class="p">,</span><span class="s">&#39;Au&#39;</span><span class="p">,</span><span class="s">&#39;Cd&#39;</span><span class="p">,</span><span class="s">&#39;Ce&#39;</span><span class="p">,</span><span class="s">&#39;Co&#39;</span><span class="p">,</span><span class="s">&#39;Cr&#39;</span><span class="p">,</span><span class="s">&#39;Cu&#39;</span><span class="p">,</span><span class="s">&#39;Dy&#39;</span><span class="p">,</span><span class="s">&#39;Er&#39;</span><span class="p">,</span><span class="s">&#39;Eu&#39;</span><span class="p">,</span><span class="s">&#39;Fe&#39;</span><span class="p">,</span><span class="s">&#39;Gd&#39;</span><span class="p">,</span><span class="s">&#39;Hf&#39;</span><span class="p">,</span><span class="s">&#39;Hg&#39;</span><span class="p">,</span><span class="s">&#39;Ho&#39;</span><span class="p">,</span><span class="s">&#39;Ir&#39;</span><span class="p">,</span><span class="s">&#39;La&#39;</span><span class="p">,</span><span class="s">&#39;Lu&#39;</span><span class="p">,</span><span class="s">&#39;Mn&#39;</span><span class="p">,</span><span class="s">&#39;Mo&#39;</span><span class="p">,</span><span class="s">&#39;Nb&#39;</span><span class="p">,</span><span class="s">&#39;Nd&#39;</span><span class="p">,</span><span class="s">&#39;Ni&#39;</span><span class="p">,</span><span class="s">&#39;Os&#39;</span><span class="p">,</span><span class="s">&#39;Pa&#39;</span><span class="p">,</span><span class="s">&#39;Pd&#39;</span><span class="p">,</span><span class="s">&#39;Pm&#39;</span><span class="p">,</span><span class="s">&#39;Pr&#39;</span><span class="p">,</span><span class="s">&#39;Pt&#39;</span><span class="p">,</span><span class="s">&#39;Re&#39;</span><span class="p">,</span><span class="s">&#39;Rh&#39;</span><span class="p">,</span><span class="s">&#39;Ru&#39;</span><span class="p">,</span><span class="s">&#39;Sc&#39;</span><span class="p">,</span><span class="s">&#39;Sm&#39;</span><span class="p">,</span><span class="s">&#39;Ta&#39;</span><span class="p">,</span><span class="s">&#39;Tb&#39;</span><span class="p">,</span><span class="s">&#39;Tc&#39;</span><span class="p">,</span><span class="s">&#39;Th&#39;</span><span class="p">,</span><span class="s">&#39;Ti&#39;</span><span class="p">,</span><span class="s">&#39;Tm&#39;</span><span class="p">,</span><span class="s">&#39;U&#39;</span><span class="p">,</span><span class="s">&#39;V&#39;</span><span class="p">,</span><span class="s">&#39;W&#39;</span><span class="p">,</span><span class="s">&#39;Y&#39;</span><span class="p">,</span><span class="s">&#39;Yb&#39;</span><span class="p">,</span><span class="s">&#39;Zn&#39;</span><span class="p">,</span><span class="s">&#39;Zr&#39;</span><span class="p">]</span>
+<span class="n">dualmag</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;O&#39;</span><span class="p">:[</span><span class="s">&#39;Co&#39;</span><span class="p">],</span> <span class="s">&#39;S&#39;</span><span class="p">:[</span><span class="s">&#39;Mn&#39;</span><span class="p">,</span><span class="s">&#39;Fe&#39;</span><span class="p">,</span><span class="s">&#39;Cr&#39;</span><span class="p">,</span><span class="s">&#39;Co&#39;</span><span class="p">]}</span>
+
+<div class="viewcode-block" id="is_dualmagnetic"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.is_dualmagnetic">[docs]</a><span class="k">def</span> <span class="nf">is_dualmagnetic</span><span class="p">(</span><span class="n">ion</span><span class="p">,</span><span class="n">ionlist</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ionlist</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">dualmag</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">ionlist</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">dualmag</span><span class="p">[</span><span class="n">ionlist</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="magnetization_recurse"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.magnetization_recurse">[docs]</a><span class="k">def</span> <span class="nf">magnetization_recurse</span><span class="p">(</span><span class="n">basemags</span><span class="p">,</span><span class="n">dualmags</span><span class="p">,</span><span class="n">high</span><span class="p">,</span><span class="n">low</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dualmags</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">basemags</span><span class="p">]</span>
+    
+    <span class="n">index</span> <span class="o">=</span> <span class="n">dualmags</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">basemags</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">high</span>
+    <span class="n">hi_list</span> <span class="o">=</span> <span class="n">magnetization_recurse</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">basemags</span><span class="p">),</span><span class="nb">list</span><span class="p">(</span><span class="n">dualmags</span><span class="p">),</span><span class="n">high</span><span class="p">,</span><span class="n">low</span><span class="p">)</span>
+    <span class="n">basemags</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">low</span>
+    <span class="n">low_list</span> <span class="o">=</span> <span class="n">magnetization_recurse</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">basemags</span><span class="p">),</span><span class="nb">list</span><span class="p">(</span><span class="n">dualmags</span><span class="p">),</span><span class="n">high</span><span class="p">,</span><span class="n">low</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">hi_list</span> <span class="o">+</span> <span class="n">low_list</span>
+    
+</div>
+<div class="viewcode-block" id="get_magnetizations"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.get_magnetizations">[docs]</a><span class="k">def</span> <span class="nf">get_magnetizations</span><span class="p">(</span><span class="n">ionlist</span><span class="p">,</span><span class="n">high</span><span class="p">,</span><span class="n">low</span><span class="p">):</span>
+    <span class="n">basemags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dualmags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ionlist</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">is_dualmagnetic</span><span class="p">(</span><span class="n">ionlist</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">ionlist</span><span class="p">):</span>
+            <span class="n">basemags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="n">dualmags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ionlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">magions</span><span class="p">:</span>
+                <span class="n">basemags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">basemags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
+                
+    <span class="k">return</span> <span class="n">magnetization_recurse</span><span class="p">(</span><span class="n">basemags</span><span class="p">,</span><span class="n">dualmags</span><span class="p">,</span><span class="n">high</span><span class="p">,</span><span class="n">low</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="copy_template"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.copy_template">[docs]</a><span class="k">def</span> <span class="nf">copy_template</span><span class="p">(</span><span class="n">dirtemplate</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">templatename</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span><span class="s">&quot;ht.template.&quot;</span><span class="o">+</span><span class="n">templatename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Template dir already exists.&quot;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">dirtemplate</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="poscar_to_strs"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.poscar_to_strs">[docs]</a><span class="k">def</span> <span class="nf">poscar_to_strs</span><span class="p">(</span><span class="n">fio</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses a file on VASPs POSCAR format. Returns </span>
+<span class="sd">      (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)</span>
+<span class="sd">    where</span>
+<span class="sd">      cell: 3x3 nested list of *strings* designating the cell</span>
+<span class="sd">      scale: *string* representing the overall scale of the cell</span>
+<span class="sd">      vol: *string* representing the volume of the cell (only one of scale and vol will be set, the other one = None)</span>
+<span class="sd">      coords: Nx3 nested list of *strings* designating the coordinates</span>
+<span class="sd">      coords_reduced: bool, true = coords are given in reduced coordinate (in vasp D or Direct), false = coords are given in cartesian coordinates</span>
+<span class="sd">      counts: how many atoms of each type</span>
+<span class="sd">      occupations: which species of each atom type (integers), or -1, ... -N if no species are given.</span>
+<span class="sd">      comment: the comment string given at the top of the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fio</span> <span class="o">=</span> <span class="n">IoAdapterFileReader</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">fio</span><span class="p">)</span>    
+    <span class="n">f</span> <span class="o">=</span> <span class="n">fio</span><span class="o">.</span><span class="n">file</span>
+    
+    <span class="n">fi</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">comment</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">vol_or_scale</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">vol_or_scale_nbr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vol_or_scale</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vol_or_scale_nbr</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">vol</span> <span class="o">=</span> <span class="n">vol_or_scale</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">vol_or_scale</span>
+        <span class="n">vol</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">cell</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">]]</span>        
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]:</span>
+        <span class="n">cellline</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cellline</span><span class="p">):</span>
+            <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+   
+    <span class="n">symbols_or_count</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="n">symbols_or_count</span><span class="p">)</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">occupations</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols_or_count</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+        <span class="n">occupations</span> <span class="o">=</span> <span class="p">[</span><span class="n">periodictable</span><span class="o">.</span><span class="n">numbers</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">]</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+
+    <span class="n">coordtype_or_selectivedynamics</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">coordtype_or_selectivedynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s">&#39;Ss&#39;</span><span class="p">:</span>       
+        <span class="c"># Skip row if selective dynamics specifier</span>
+        <span class="n">coordtype</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coordtype</span> <span class="o">=</span> <span class="n">coordtype_or_selectivedynamics</span>
+
+    <span class="k">if</span> <span class="n">coordtype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s">&#39;CcKk&#39;</span><span class="p">:</span>
+        <span class="n">coords_reduced</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords_reduced</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">strcoord</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span><span class="n">strcoord</span><span class="p">)</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_reduced</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">occupations</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="poscar_to_structure"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.poscar_to_structure">[docs]</a><span class="k">def</span> <span class="nf">poscar_to_structure</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="n">cell</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_reduced</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">occupations</span><span class="p">,</span> <span class="n">comment</span> <span class="o">=</span> <span class="n">poscar_to_strs</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">frac_cell</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="n">simplify</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+        
+    <span class="k">if</span> <span class="n">coords_reduced</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">frac_coords</span> <span class="o">=</span> <span class="n">cartesian_to_reduced</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frac_coords</span> <span class="o">=</span> <span class="n">FracVector</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">simplify</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>   
+
+    <span class="k">if</span> <span class="n">volume</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">FracScalar</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">FracScalar</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+
+    <span class="n">newoccupations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">occupation</span> <span class="ow">in</span> <span class="n">occupations</span><span class="p">:</span>
+        <span class="n">newoccupations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">(</span><span class="n">occupation</span><span class="p">))</span>
+
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">uc_cell</span><span class="o">=</span><span class="n">frac_cell</span><span class="p">,</span> <span class="n">uc_volume</span><span class="o">=</span><span class="n">volume</span><span class="p">,</span> <span class="n">uc_scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">uc_reduced_coords</span><span class="o">=</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">uc_counts</span><span class="o">=</span><span class="n">counts</span><span class="p">,</span> <span class="n">assignments</span><span class="o">=</span><span class="n">newoccupations</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;comment&#39;</span><span class="p">:</span><span class="n">comment</span><span class="p">},</span> <span class="n">periodicity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">struct</span>
+</div>
+<div class="viewcode-block" id="write_poscar"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.write_poscar">[docs]</a><span class="k">def</span> <span class="nf">write_poscar</span><span class="p">(</span><span class="n">fio</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_reduced</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">occupations</span><span class="p">,</span><span class="n">comment</span><span class="o">=</span><span class="s">&quot;Comment&quot;</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="s">&quot;1&quot;</span><span class="p">,</span><span class="n">vol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a file on VASPs POSCAR format. Where it says *string* below, any type that works with str(x) is also ok.</span>
+
+<span class="sd">    Input arguments  </span>
+<span class="sd">      f: file stream to put output on  </span>
+<span class="sd">      cell: 3x3 nested list of *strings* designating the cell</span>
+<span class="sd">      coords: Nx3 nested list of *strings* designating the coordinates</span>
+<span class="sd">      coords_reduced: bool, true = coords are given in reduced coordinate (in vasp D or Direct), false = coords are given in cartesian coordinates</span>
+<span class="sd">      counts: how many atoms of each type</span>
+<span class="sd">      occupations: which species of each atom type</span>
+<span class="sd">      comment: (optional) the comment string given at the top of the file</span>
+<span class="sd">      scale: (optional) *string* representing the overall scale of the cell</span>
+<span class="sd">      vol: *string* representing the volume of the cell (only one of scale and vol can be set)</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="n">fio</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">fio</span><span class="p">)</span>    
+    <span class="n">f</span> <span class="o">=</span> <span class="n">fio</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vol</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">:</span>  
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">c3</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">occupations</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">periodictable</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">occupations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+ 
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">coords_reduced</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;D</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;K</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">c3</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="structure_to_comment"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.structure_to_comment">[docs]</a><span class="k">def</span> <span class="nf">structure_to_comment</span><span class="p">(</span><span class="n">struct</span><span class="p">):</span>
+    <span class="n">tags</span> <span class="o">=</span>  <span class="n">struct</span><span class="o">.</span><span class="n">get_tags</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tagstr</span> <span class="o">=</span> <span class="s">&quot; tags: &quot;</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">tag</span><span class="o">.</span><span class="n">tag</span><span class="o">+</span><span class="s">&quot;:&quot;</span><span class="o">+</span><span class="n">tag</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">])</span>        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tagstr</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_rc_repr</span> <span class="ow">and</span> <span class="n">struct</span><span class="o">.</span><span class="n">has_uc_repr</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">formula</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">hexhash</span> <span class="o">+</span> <span class="n">tagstr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">formula</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">tagstr</span>
+</div>
+<div class="viewcode-block" id="structure_to_poscar"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.structure_to_poscar">[docs]</a><span class="k">def</span> <span class="nf">structure_to_poscar</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">fix_negative_determinant</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>    
+    <span class="k">if</span> <span class="n">comment</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">structure_to_comment</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_basis</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_reduced_coords</span>
+    <span class="k">if</span> <span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fix_negative_determinant</span><span class="p">:</span>
+            <span class="n">basis</span> <span class="o">=</span> <span class="o">-</span><span class="n">basis</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="o">-</span><span class="n">coords</span>
+    
+    <span class="n">write_poscar</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">basis</span><span class="o">.</span><span class="n">to_floats</span><span class="p">(),</span> <span class="n">coords</span><span class="o">.</span><span class="n">to_floats</span><span class="p">(),</span> <span class="bp">True</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">symbols</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span><span class="n">vol</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">uc_volume</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="calculate_kpoints"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.calculate_kpoints">[docs]</a><span class="k">def</span> <span class="nf">calculate_kpoints</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span><span class="n">dens</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="c">#local KPTSLINE=$(awk -v &quot;LVAL=$LVAL&quot; -v&quot;equalkpts=$EQUAL_KPTS&quot; -v&quot;bumpkpts=$BUMP_KPTS&quot; &#39;</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_basis</span>
+    
+    <span class="n">celldet</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+    <span class="n">cellvol</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">celldet</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cellvol</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;vasp_if.calculate_kpoints: Error in VASP_KPOINTSLINE: singular cell vectors. POSCAR is broken.&quot;</span><span class="p">)</span>
+
+    <span class="n">recip</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="n">half</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">N1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">recip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lengthsqr</span><span class="p">())</span><span class="o">*</span><span class="n">dens</span><span class="o">+</span><span class="n">half</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">N2</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">recip</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lengthsqr</span><span class="p">())</span><span class="o">*</span><span class="n">dens</span><span class="o">+</span><span class="n">half</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">N3</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">recip</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lengthsqr</span><span class="p">())</span><span class="o">*</span><span class="n">dens</span><span class="o">+</span><span class="n">half</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N1</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N2</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N3</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="prepare_single_run"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.prepare_single_run">[docs]</a><span class="k">def</span> <span class="nf">prepare_single_run</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">poscarspath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s">&#39;t:/vasp/single/static&#39;</span><span class="p">,</span><span class="n">overwrite</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+    <span class="n">structure_to_poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span><span class="s">&quot;POSCAR&quot;</span><span class="p">),</span><span class="n">struct</span><span class="p">,</span><span class="n">fix_negative_determinant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>         
+    <span class="c">#write_generic_kpoints_file(os.path.join(dirpath,&quot;KPOINTS&quot;),comment=structure_to_comment(struct))</span>
+    <span class="n">kpoints</span> <span class="o">=</span> <span class="n">calculate_kpoints</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+    <span class="n">write_kpoints_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span><span class="s">&quot;KPOINTS&quot;</span><span class="p">),</span><span class="n">kpoints</span><span class="p">,</span><span class="n">comment</span><span class="o">=</span><span class="n">structure_to_comment</span><span class="p">(</span><span class="n">struct</span><span class="p">))</span>
+    <span class="n">ioa</span> <span class="o">=</span> <span class="n">IoAdapterFileWriter</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span><span class="s">&quot;POTCAR&quot;</span><span class="p">))</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">ioa</span><span class="o">.</span><span class="n">file</span>			
+    <span class="n">spieces_counts</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">magmomlist</span> <span class="o">=</span> <span class="n">get_magnetizations</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">symbols</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">magmom_per_ion</span><span class="o">=</span><span class="n">magmomlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">magmoms</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">nelect</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">natoms</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">nmag</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="p">)):</span>
+        <span class="n">assignment</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">uc_counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">symbol</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">atomic_symbol</span><span class="p">(</span><span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="n">get_pseudopotential</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span><span class="n">poscarspath</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+        <span class="n">spieces_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+        <span class="c">#magmoms.append(str(count)+&quot;*&quot;+str(get_magmom(symbol)))    </span>
+        <span class="n">magmom</span> <span class="o">=</span> <span class="n">magmom_per_ion</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">magmoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;*&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">magmom</span><span class="p">))</span>    
+        
+        <span class="k">def</span> <span class="nf">zval</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;zval&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">micro_pyawk</span><span class="p">(</span><span class="n">IoAdapterString</span><span class="p">(</span><span class="n">pp</span><span class="p">),[[</span><span class="s">&quot;^ *POMASS.*; *ZVAL *= *([^ ]+)&quot;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">zval</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;zval&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;vasp_if.prepare_simple_static_run: Could not read ZVAL from potcar file&quot;</span><span class="p">)</span>
+        <span class="n">nelect</span> <span class="o">+=</span> <span class="n">results</span><span class="p">[</span><span class="s">&#39;zval&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">count</span>
+        <span class="n">natoms</span> <span class="o">+=</span> <span class="n">count</span>
+        <span class="n">nmag</span> <span class="o">+=</span> <span class="n">count</span><span class="o">*</span><span class="n">magmom</span>
+
+    <span class="n">ioa</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">nbands1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.6</span><span class="o">*</span><span class="n">nelect</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">natoms</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">nbands2</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.6</span><span class="o">*</span><span class="n">nelect</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nmag</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">nbands3</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.6</span><span class="o">*</span><span class="n">nelect</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">+</span><span class="mi">20</span>
+    <span class="n">nbands_spin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">nbands1</span><span class="p">,</span><span class="n">nbands2</span><span class="p">,</span><span class="n">nbands3</span><span class="p">)</span>
+    <span class="n">nbands_spin</span> <span class="o">+=</span> <span class="n">nbands_spin</span> <span class="o">%</span> <span class="mi">2</span>
+    <span class="n">nbands1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nelect</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">natoms</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">nbands2</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nelect</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span><span class="o">+</span><span class="mi">20</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">nbands_nospin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">nbands1</span><span class="p">,</span><span class="n">nbands2</span><span class="p">)</span>
+    <span class="n">nbands_nospin</span> <span class="o">+=</span> <span class="n">nbands_spin</span> <span class="o">%</span> <span class="mi">2</span>
+    
+    <span class="n">data</span><span class="o">=</span><span class="p">{}</span>	
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;VASP_SPIECES_COUNTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">spieces_counts</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;VASP_MAGMOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">magmoms</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;VASP_NBANDS_SPIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nbands_spin</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;VASP_NBANDS_NOSPIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nbands_nospin</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;t:&#39;</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">httk</span><span class="o">.</span><span class="n">httk_dir</span><span class="p">,</span><span class="s">&#39;Execution&#39;</span><span class="p">,</span><span class="s">&#39;tasks-templates&#39;</span><span class="p">,</span><span class="n">template</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+    
+    <span class="n">apply_templates</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">envglobals</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">mkdir</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OutcarReader"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.OutcarReader">[docs]</a><span class="k">class</span> <span class="nc">OutcarReader</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioa</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ioa</span> <span class="o">=</span> <span class="n">ioa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="OutcarReader.parse"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.OutcarReader.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;final&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="k">def</span> <span class="nf">set_final</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s">&#39;final&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">def</span> <span class="nf">read_energy</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">match</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">final_energy_with_entropy</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">final_energy</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">micro_pyawk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ioa</span><span class="p">,[</span>
+             <span class="p">[</span><span class="s">&quot;^ *energy *without *entropy= *([^ ]+) *energy\(sigma-&gt;0\) *= *([^ ]+) *$&quot;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">read_energy</span><span class="p">],</span>
+             <span class="p">[</span><span class="s">&quot;FREE ENERGIE&quot;</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="n">set_final</span><span class="p">],</span>
+             <span class="p">],</span><span class="n">results</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parsed</span> <span class="o">=</span> <span class="bp">True</span>
+ </div></div>
+<div class="viewcode-block" id="read_outcar"><a class="viewcode-back" href="../../../httk.iface.html#httk.iface.vasp_if.read_outcar">[docs]</a><span class="k">def</span> <span class="nf">read_outcar</span><span class="p">(</span><span class="n">ioa</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">OutcarReader</span><span class="p">(</span><span class="n">ioa</span><span class="p">)</span>
+    
+
+    
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3><a href="#">Navigation</a></h3>
+  <ul>
+<li><a class="reference internal" href="/index.html">The High-Throughput Toolkit (httk)</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/downloads.html">Downloads</a>
+<li><a class="reference internal" href="/install.html">Installation</a>
+<li><a class="reference internal" href="/users_guide.html">Users' Guide</a>
+<li><a class="reference internal" href="/runmanager_details.html">Runmanager Details</a>
+<li><a class="reference internal" href="/developers_guide.html">Developers' Guide</a>
+<li><a class="reference internal" href="/contributors.html">Contributors</a>
+<li><a class="reference internal" href="/erratum.html">Erratum</a>
+</ul>
+<h3><a href="#">Python API</a></h3>
+<ul>
+<li><a class="reference internal" href="/mod_httk.html">httk</a>
+<li><a class="reference internal" href="/mod_httk_atomistic.html">httk.atomistic</a>
+</ul>
+<ul>
+<li><a class="reference internal" href="/httk_base.html">Full API tree</a>
+<li><a class="reference internal" href="/genindex.html">Index</a>
+<li><a class="reference internal" href="/py-modindex.html">Module Index</a>
+<li><a class="reference internal" href="/search.html">Search Page</a>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">httk 1.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../httk.html" >httk</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2015, Rickard Armiento et al..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6663881-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

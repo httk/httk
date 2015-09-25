@@ -1,0 +1,90 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 909a6e59b3a0aacf10d00837a9670b11
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 16:04:56 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120072 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/00/22/2002233.cif $
+#------------------------------------------------------------------------------
+data_2002233
+_chemical_name_systematic          'Copper tetraoxodibismuthate(III)'
+_publ_section_title
+;
+Isolierte quadratisch planare (Cu O4)6- -Polyeder in Cu Bi2 O4, ein
+neuer Bautyp zur Formel (Me3+)2 M2+ O4
+;
+loop_
+_publ_author_name
+  'Arpe, R'
+  'Mueller-Buschbaum, Hk'
+_journal_name_full
+;
+Zeitschrift fuer Anorganische und Allgemeine Chemie
+;
+_journal_volume                    426
+_journal_year                      1976
+_journal_page_first                1
+_journal_page_last                 6
+_refine_ls_R_factor_all            0.094
+_cod_database_code 2002233
+_journal_paper_doi 10.1002/zaac.19764260102
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 4"
+_symmetry_space_group_name_Hall 'I 4'
+_[local]_omdb_cod_original_Hall 'I 4'
+_symmetry_Int_Tables_number 79
+ 
+_cell_length_a    8.48400
+_cell_length_b    8.48400
+_cell_length_c    5.81300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+5 x+1/2,y+1/2,z+1/2
+6 -x+1/2,-y+1/2,z+1/2
+7 -y+1/2,x+1/2,z+1/2
+8 y+1/2,-x+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cu1 Cu 2 a 0.00000 0.00000 0.32900 1.0
+Cu2 Cu 2 a 0.00000 0.00000 0.82370 1.0
+Bi1 Bi 8 c 0.16830 0.66840 0.00000 1.0
+O1 O 8 c 0.09800 0.79700 0.34600 1.0
+O2 O 8 c 0.70200 0.39900 0.33900 1.0
+ 
+

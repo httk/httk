@@ -1,0 +1,25 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+QUEUE="$1"
+shift 1
+. "$SCRIPT_PATH/config"
+if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
+    . "$SCRIPT_PATH/config.$QUEUE"
+fi
+
+mkdir -p "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/default"
+
+# Saftey check
+echo "$HTTK_DIR" "$LOCAL_HTTK_DIR"
+if [ -n "$HTTK_DIR" -a -e "$HTTK_DIR" -a -n "${LOCAL_HTTK_DIR/#\~/$HOME}" -a -e "${LOCAL_HTTK_DIR/#\~/$HOME}" ]; then
+    echo "Please wait while copying files."
+    rsync --delete -az -r --files-from="$HTTK_DIR/httk.minimal.files" "$HTTK_DIR" "${LOCAL_HTTK_DIR/#\~/$HOME}/httk/"
+    echo "Installation complete."
+    echo ""
+else
+    echo "Failure to install code due to configuration error ($HTTK_DIR/httk or ${LOCAL_HTTK_DIR} does not exist.)." >&2
+fi

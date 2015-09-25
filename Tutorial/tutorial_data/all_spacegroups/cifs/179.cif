@@ -1,0 +1,184 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: ebf818d1e5028f89463b885ef6caec99
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-29 11:49:26 +0000 (Sun, 29 Dec 2013) $
+#$Revision: 91935 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/67/4316707.cif $
+#------------------------------------------------------------------------------
+data_4316707
+loop_
+_publ_author_name
+'Gang Wei'
+'Yu-Feng Shen'
+'Yong-Ru Li'
+'Xiao-Chun Huang'
+_publ_contact_author_email       xchuang@stu.edu.cn
+_publ_contact_author_fax         '86 754 2902589'
+_publ_contact_author_phone       '86 754 2902917'
+_publ_section_title
+;
+ Synthesis, Crystal Structure, and Photoluminescent Properties of Ternary
+ Cd(II)/Triazolate/Chloride System
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              9191
+_journal_page_last               9199
+_journal_volume                  49
+_journal_year                    2010
+_computing_cell_refinement       'Bruker SMART'
+_computing_data_collection       'Bruker SMART'
+_computing_data_reduction        'Bruker SAINT'
+_computing_molecular_graphics    'Bruker SHELXTL'
+_computing_publication_material  'Bruker SHELXTL'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      294(2)
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'Bruker Smart Apex CCD area detector'
+_diffrn_measurement_method       'phi and omega scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0319
+_diffrn_reflns_av_sigmaI/netI    0.0119
+_diffrn_reflns_limit_h_max       14
+_diffrn_reflns_limit_h_min       -14
+_diffrn_reflns_limit_k_max       13
+_diffrn_reflns_limit_k_min       -14
+_diffrn_reflns_limit_l_max       13
+_diffrn_reflns_limit_l_min       -13
+_diffrn_reflns_number            8036
+_diffrn_reflns_theta_full        26.00
+_diffrn_reflns_theta_max         26.00
+_diffrn_reflns_theta_min         2.05
+_exptl_absorpt_coefficient_mu    2.813
+_exptl_absorpt_correction_T_max  0.509
+_exptl_absorpt_correction_T_min  0.434
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'SADABS (Sheldrick, 1996)'
+_exptl_crystal_colour            colorless
+_exptl_crystal_density_diffrn    1.698
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             600
+_exptl_crystal_size_max          0.30
+_exptl_crystal_size_mid          0.26
+_exptl_crystal_size_min          0.24
+_refine_diff_density_max         0.203
+_refine_diff_density_min         -0.223
+_refine_diff_density_rms         0.060
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   -0.03(5)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.116
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     34
+_refine_ls_number_reflns         837
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.116
+_refine_ls_R_factor_all          0.0128
+_refine_ls_R_factor_gt           0.0126
+_refine_ls_shift/su_max          0.001
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0185P)^2^+0.1950P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0325
+_refine_ls_wR_factor_ref         0.0327
+_reflns_number_gt                826
+_reflns_number_total             837
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ic100610t_si_001_2.cif
+_[local]_cod_data_source_block   1
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Hexagonal' changed to 'hexagonal'
+according to the built-in table from CIF Core dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1646 2011-03-28 12:23:43Z adriana 
+;
+_cod_database_code               4316707
+loop_
+_publ_contact_author
+;
+      Huang, Xiao-Chun
+      Department of Chemistry
+      Shantou University
+      Guangdong 515063
+      P. R. China
+;
+_journal_paper_doi 10.1021/ic100610t
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 65 2 2"
+_symmetry_space_group_name_Hall 'P 65 2 (0 0 1)'
+_[local]_omdb_cod_original_Hall 'P 65 2 (0 0 1)'
+_symmetry_Int_Tables_number 179
+ 
+_cell_length_a    11.45440
+_cell_length_b    11.45440
+_cell_length_c    11.15300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+5/6
+3 -y,x-y,z+2/3
+4 -x,-y,z+1/2
+5 -x+y,-x,z+1/3
+6 y,-x+y,z+1/6
+7 x-y,-y,-z
+8 x,x-y,-z+5/6
+9 y,x,-z+2/3
+10 -x+y,y,-z+1/2
+11 -x,-x+y,-z+1/3
+12 -y,-x,-z+1/6
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cd1 Cd 6 b 0.61428 0.22856 0.75000 1.0
+Cl1 Cl 6 b 0.22480 0.44961 0.75000 1.0
+N1 N 6 b 0.50235 0.00470 0.75000 1.0
+N2 N 12 c 0.79253 0.36190 0.86663 1.0
+C1 C 12 c -0.07970 0.40700 0.84030 1.0
+H1 H 12 c -0.05130 0.37610 0.77570 1.0
+ 
+

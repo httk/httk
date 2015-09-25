@@ -1,0 +1,185 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: c4e60847b54cd7d3bc1d54310a1743f5
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-29 11:49:26 +0000 (Sun, 29 Dec 2013) $
+#$Revision: 91935 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/71/4317108.cif $
+#------------------------------------------------------------------------------
+data_4317108
+loop_
+_publ_author_name
+'Catherine M. Mauck'
+'Titus W. P. van den Heuvel'
+'Michaela M. Hull'
+'Matthias Zeller'
+'Catherine M. Oertel'
+_publ_contact_author
+; Dr Catherine M. Oertel
+Department of Chemistry and Biochemistry
+Oberlin College 
+Oberlin, OH  44074, USA 
+;
+_publ_contact_author_email       catherine.oertel@oberlin.edu
+_publ_contact_author_fax         '440 775 6682'
+_publ_contact_author_phone       '440 775 8989'
+_publ_section_title
+;
+ Synthesis and Structures of Pb3O2(CH3COO)2.0.5H2O and Pb2O(HCOO)2: Two
+ Corrosion Products Revisited
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              10736
+_journal_page_last               10743
+_journal_volume                  49
+_journal_year                    2010
+_computing_cell_refinement       'SAINT+ 6.45 (Bruker, 2003)'
+_computing_data_collection       'SMART 5.630 (Bruker, 1997-2002)'
+_computing_data_reduction        'SAINT+ 6.45'
+_computing_molecular_graphics    'SHELXTL 6.14'
+_computing_publication_material  'SHELXTL 6.14'
+_computing_structure_refinement  'SHELXTL 6.14'
+_computing_structure_solution    'SHELXTL 6.14 (Bruker, 2000-2003)'
+_diffrn_ambient_temperature      100(2)
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'Bruker AXS SMART APEX CCD diffractometer'
+_diffrn_measurement_method       '\w scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0334
+_diffrn_reflns_av_sigmaI/netI    0.0182
+_diffrn_reflns_limit_h_max       12
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       14
+_diffrn_reflns_limit_k_min       0
+_diffrn_reflns_limit_l_max       7
+_diffrn_reflns_limit_l_min       0
+_diffrn_reflns_number            2265
+_diffrn_reflns_theta_full        28.25
+_diffrn_reflns_theta_max         28.25
+_diffrn_reflns_theta_min         2.87
+_diffrn_standards_number         0
+_exptl_absorpt_coefficient_mu    56.806
+_exptl_absorpt_correction_T_max  0.321
+_exptl_absorpt_correction_T_min  0.056
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'TWINABS in SAINT+ (Bruker, 2007)'
+_exptl_crystal_colour            colourless
+_exptl_crystal_density_diffrn    5.845
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             872
+_exptl_crystal_size_max          0.05
+_exptl_crystal_size_mid          0.04
+_exptl_crystal_size_min          0.02
+_refine_diff_density_max         4.910
+_refine_diff_density_min         -4.119
+_refine_diff_density_rms         0.717
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.289
+_refine_ls_hydrogen_treatment    constr
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     37
+_refine_ls_number_reflns         409
+_refine_ls_number_restraints     15
+_refine_ls_restrained_S_all      1.265
+_refine_ls_R_factor_all          0.0341
+_refine_ls_R_factor_gt           0.0340
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0558P)^2^+50.7940P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1029
+_refine_ls_wR_factor_ref         0.1030
+_reflns_number_gt                407
+_reflns_number_total             409
+_reflns_threshold_expression     I>2\s(I)
+_[local]_cod_data_source_file    ic101904j_si_001_3.cif
+_[local]_cod_data_source_block   basic_lead_formate_(2)
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Orthorhombic' changed to
+'orthorhombic' according to the built-in table from CIF Core
+dictionary named 'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1646 2011-03-28 12:23:43Z adriana 
+;
+_cod_database_code               4317108
+_journal_paper_doi 10.1021/ic101904j
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 2/c 2/c 2/m"
+_symmetry_space_group_name_Hall '-C 2 2c'
+_[local]_omdb_cod_original_Hall '-C 2 2c'
+_symmetry_Int_Tables_number 66
+ 
+_cell_length_a    9.39550
+_cell_length_b    10.82760
+_cell_length_c    5.81330
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y,z
+5 -x,-y,-z
+6 -x,y,z+1/2
+7 x,-y,z+1/2
+8 x,y,-z
+9 x+1/2,y+1/2,z
+10 x+1/2,-y+1/2,-z+1/2
+11 -x+1/2,y+1/2,-z+1/2
+12 -x+1/2,-y+1/2,z
+13 -x+1/2,-y+1/2,-z
+14 -x+1/2,y+1/2,z+1/2
+15 x+1/2,-y+1/2,z+1/2
+16 x+1/2,y+1/2,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pb1 Pb 8 l 0.13583 0.38183 0.00000 1.0
+O1 O 4 b 0.00000 0.50000 0.25000 1.0
+C1 C 16 m 0.87600 0.13400 0.04700 0.5
+H1 H 16 m -0.09310 0.11180 0.89750 0.5
+O2 O 16 m -0.07960 0.23650 0.12500 0.5
+O3 O 16 m 0.79730 0.06080 0.14600 0.5
+ 
+

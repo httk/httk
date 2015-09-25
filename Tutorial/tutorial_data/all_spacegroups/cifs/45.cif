@@ -1,0 +1,99 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 73cb18e8750a6377ed422dba76a2623d
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-02 20:59:18 +0000 (Thu, 02 May 2013) $
+#$Revision: 84994 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/20/94/7209484.cif $
+#------------------------------------------------------------------------------
+data_7209484
+loop_
+_publ_author_name
+'Schaefer, J.'
+'Bluhm, K.'
+_publ_section_title
+;
+ Synthese und Kristallstruktur von Verbindungen des Typs Cu M (B5 O10) (M=
+ Tm3+, Lu3+)
+;
+_journal_name_full
+;
+Zeitschrift fuer Naturforschung, Teil B. Anorganische Chemie, Organische
+ Chemie (42,1987-)
+;
+_journal_page_first              762
+_journal_page_last               766
+_journal_volume                  50
+_journal_year                    1995
+_chemical_name_systematic        'Cu Tm (B5 O10)'
+_citation_journal_id_ASTM        ZNBSEN
+_[local]_cod_data_source_file    boron4-x_178.cif
+_[local]_cod_data_source_block   B5Cu1O10Tm1
+_[local]_cod_chemical_formula_sum_orig 'B5 Cu1 O10 Tm1'
+_cod_original_cell_volume        665.1606
+_cod_database_code               7209484
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I b a 2"
+_symmetry_space_group_name_Hall 'I 2 -2c'
+_[local]_omdb_cod_original_Hall 'I 2 -2c'
+_symmetry_Int_Tables_number 45
+ 
+_cell_length_a    6.22000
+_cell_length_b    8.44700
+_cell_length_c    12.66000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x,y,z+1/2
+4 x,-y,z+1/2
+5 x+1/2,y+1/2,z+1/2
+6 -x+1/2,-y+1/2,z+1/2
+7 -x+1/2,y+1/2,z
+8 x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Tm1 Tm 4 a 0.00000 0.00000 0.81203 1.0
+O1 O 8 c 0.15100 0.37620 0.05920 1.0
+O2 O 8 c 0.55330 0.34180 0.16860 1.0
+O3 O 8 c 0.56890 0.65480 0.44750 1.0
+O4 O 8 c 0.64590 -0.10000 0.37190 1.0
+O5 O 8 c 0.65300 0.08970 0.24430 1.0
+Cu1 Cu 4 a 0.00000 0.00000 0.06010 1.0
+B1 B 4 b 0.00000 0.50000 0.80690 1.0
+B2 B 8 c 0.61590 0.81010 0.46030 1.0
+B3 B 8 c 0.61770 0.19310 0.15810 1.0
+ 
+

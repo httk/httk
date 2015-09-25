@@ -1,0 +1,80 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 290abcd1c1d246edd6d92d53cf1c9770
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-09 13:53:25 +0000 (Thu, 09 May 2013) $
+#$Revision: 86000 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/56/9015630.cif $
+#------------------------------------------------------------------------------
+data_9015630
+loop_
+_publ_author_name
+'Beintema, J.'
+_publ_section_title
+;
+ On the crystal structure of barium antimonate.
+ _cod_database_code 1010070
+;
+_journal_name_full
+'Proceedings of the Koninklijke Nederlandse Academie van Wetenschappen'
+_journal_page_first              652
+_journal_page_last               661
+_journal_volume                  39
+_journal_year                    1936
+_database_code_amcsd             0017005
+_exptl_crystal_density_diffrn    2.731
+_cod_database_code               9015630
+_amcsd_formula_title             'Ba H16 O14 Sb2'
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1 2/m 1"
+_symmetry_space_group_name_Hall '-P 2y'
+_[local]_omdb_cod_original_Hall '-I 2ya'
+_symmetry_Int_Tables_number 10
+ 
+_cell_length_a    4.98050
+_cell_length_b    6.25300
+_cell_length_c    5.06450
+_cell_angle_alpha 90.00000
+_cell_angle_beta  92.70000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y,-z
+3 -x,-y,-z
+4 x,-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ba1 Ba 1 b 0.00000 0.50000 0.00000 1.0
+Sb1 Sb 1 c 0.00000 0.00000 0.50000 1.0
+ 
+
