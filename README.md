@@ -1,14 +1,10 @@
-=====================================================================
 httk git repository README file
 =====================================================================
 
 The High-Throughput Toolkit (httk)
 Copyright (c) 2012-2015, Rickard Armiento
-
 For License information see the file COPYING.
-
 Contact: httk [at] openmaterialsdb.se
-=====================================================================
 
 Important temporary notes
 -------------------------
