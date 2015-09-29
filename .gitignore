@@ -1,0 +1,6 @@
+# General ignores
+.DS_Store
+*.pyc
+# Httk specific ignores
+httk.cfg
+External
