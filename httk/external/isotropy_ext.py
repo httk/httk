@@ -37,7 +37,7 @@ try:
         raise Exception
 except Exception:
     isotropy_path = None
-    raise Exception("httk.external.isotropy_ext imported with no isotropy path set in httk.cfg")
+    raise ImportError, "httk.external.isotropy_ext imported with no isotropy path set in httk.cfg"
 
 def isotropy(cwd,args,inputstr,timeout=30):
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE, 

@@ -503,7 +503,7 @@ def structure_reduced_uc_to_representative(struct, backends=['isotropy','fake'])
                 sys.stderr.write("Warning: need to run symmetry finder. This may take a while.\n")
                 struct = isotropy_ext.struct_process_with_isotropy(struct)
                 return struct
-            except Exception:
+            except ImportError:
                 pass
         if backend ==  'fake':
             try:
