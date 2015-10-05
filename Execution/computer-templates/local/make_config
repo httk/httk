@@ -40,7 +40,7 @@ else
     VASP_PSEUDO_PATH="~/$VASP_PSEUDO_PATH"
 fi
 
-echo "Taksmanager job timeout in seconds: [$TASKMGR_JOB_TIMEOUT]"
+echo "Taskmanager job timeout in seconds: [$TASKMGR_JOB_TIMEOUT]"
 TASKMGR_JOB_TIMEOUT=$(readdata "$TASKMGR_JOB_TIMEOUT")
 echo
 
