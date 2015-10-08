@@ -31,17 +31,11 @@ struct1 = Structure.create(uc_cell=cell,uc_reduced_coordgroups=coordgroups,assig
 
 print "Formula:",struct1.formula
 print "Volume",float(struct1.uc_volume)
-print "Assignments",struct1.uc_formula_symbols
+print "Assignments",struct1.assignments.symbols
 print "Counts:",struct1.uc_counts
 print "Coords",struct1.uc_reduced_coords
 hall_symbol = struct1.hall_symbol
 print "Spacegroup info:",hall_symbol, "(#"+str(struct1.spacegroup_number)+")"
-
-#struct1.vis.show()
-#struct1.vis.wait()
-
-#ase_atoms = ase.lattice.bulk('Cu', 'fcc', a=3.6)
-#struct2 = Structure.ase.from_Atoms(ase_atoms)
 
 slab = ase.lattice.surface.fcc111('Al', size=(2,2,10), vacuum=10.0)
 struct2 = Structure.ase.from_Atoms(slab)
