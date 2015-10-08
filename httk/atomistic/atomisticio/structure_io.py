@@ -32,7 +32,7 @@ def load_struct(ioa, ext=None, filename=None):
             raise Exception("httk.io.load: original filename not known. Cannot open a generic file.")
 
         splitfilename = os.path.splitext(os.path.basename(filename))
-        ext = splitfilename[1]
+        ext = splitfilename[1].lower()
 
         if (ext == '.bz2' or ext == '.gz'):
             splitfilename = os.path.splitext(splitfilename[0])
@@ -41,9 +41,9 @@ def load_struct(ioa, ext=None, filename=None):
         if ext == '':
             ext = splitfilename[0]
 
-        if ext.startswith("POSCAR"):
+        if ext.startswith(".poscar") or splitfilename[0] == "POSCAR":
             ext = '.vasp'
-        if ext.startswith("CONTCAR"):
+        if ext.startswith(".contcar" or splitfilename[0] == "CONTCAR"):
             ext = '.vasp'
 
     if ext == '.vasp':
