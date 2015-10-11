@@ -19,7 +19,7 @@ About the High-Throughput Toolkit
 The High-Throughput Toolkit (*httk*) is a toolkit for preparing and running calculations, analyzing the results, and store them in a global and/or in a personalized database. *httk* is an independent implementation of the database-centric high-throughput methodology pioneered by Ceder et al., and others. [see, e.g., Comp. Mat. Sci. 50, 2295 (2011)]. *httk* is presently targeted at atomistic calculations in materials science and electronic structure, but aims to be extended into a library useful also outside those areas. 
 
 .. raw:: html
-   :file: httk_overview.html
+   :file: generated/httk_overview.html
 
 .. include:: readme.rst
 

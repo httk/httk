@@ -2,10 +2,12 @@
 *httk* Contributors
 =====================================================================
 .. raw:: text
-   :file: header.txt
+   :file: generated/header.txt
 
 Programming:
   - Rickard Armiento, Linköping University, Sweden (ricard [at] ifm.liu.se)
+
+  - Christopher Tholander, Linköping University, Sweden.
 
 *httk* presently relies on the external program cif2cell by Torbjörn Björkman (Aalto University, Finland) for reading and turning cif files into structures.
 

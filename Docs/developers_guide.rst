@@ -2,7 +2,7 @@
 *httk* Developers' Guide
 ================================================================================
 .. raw:: text
-   :file: header.txt
+   :file: generated/header.txt
 
 Introduction
 -------------

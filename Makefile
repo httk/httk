@@ -1,10 +1,10 @@
-all:	docs dist
+all:	VERSION presentation docs httk.cfg
 
-presentation:
-	( cd Presentation; \
-	   make; \
-	)
-	cp Presentation/presentation.pdf httk_overview.pdf
+VERSION:
+	echo '$$HTTKVERSION' | Docs/subsvars.sh > VERSION
+
+httk.cfg:
+	if [ ! -e httk.cfg ]; then cp httk.cfg.default httk.cfg; fi
 
 clean: preclean
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
@@ -28,15 +28,21 @@ dist: presentation preclean
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
 
-docs: presentation
-	echo '$$HTTKVERSION' | Docs/subsvars.sh > VERSION
-	Docs/subsvars.sh < Docs/header.tpl > Docs/header.txt
+presentation: 
+	( cd Presentation; \
+	   make; \
+	)
+	cp Presentation/presentation.pdf httk_overview.pdf
+
+docs: VERSION presentation
+	mkdir -p Docs/generated/
+	Docs/subsvars.sh < Docs/header.tpl > Docs/generated/header.txt
 	rm -f Docs/httk.*
 	sphinx-apidoc -F -o Docs httk
-	mkdir -p Docs/_static/httk_overview/	
-	cp Presentation/images/*.png Docs/_static/httk_overview/.
-	cp Presentation/httk_overview.html Docs/.
-	cp Presentation/presentation.pdf Docs/_static/httk_overview.pdf
+	mkdir -p Docs/_static/generated/httk_overview/	
+	cp Presentation/generated/*.png Docs/_static/generated/httk_overview/.
+	cp Presentation/generated/httk_overview.html Docs/generated/.
+	cp Presentation/presentation.pdf Docs/_static/generated/httk_overview.pdf
 	(cd Docs; make html; make text)
 	cp Docs/_build/text/developers_guide.txt DEVELOPERS_GUIDE.txt
 	cp Docs/_build/text/readme.txt README.txt

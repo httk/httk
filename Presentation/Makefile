@@ -1,5 +1,5 @@
 # Make sure it always gets remaked, because latexmk takes care of everything.
-all: latex httk_overview.html
+all: latex generated/httk_overview.html
 
 latex: 
 	latexmk -pdf 
@@ -7,7 +7,7 @@ latex:
 clean:
 	rm -f *~
 	latexmk -C
-	rm httk_overview.html
+	rm -r generated
 
-httk_overview.html: pdf_to_html.sh presentation.pdf
+generated/httk_overview.html: pdf_to_html.sh latex
 	./pdf_to_html.sh 
