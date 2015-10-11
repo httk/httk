@@ -1,4 +1,4 @@
-all:	VERSION presentation docs httk.cfg
+all:	httk.cfg VERSION presentation docs
 
 VERSION:
 	echo '$$HTTKVERSION' | Docs/subsvars.sh > VERSION
