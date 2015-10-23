@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -23,7 +23,7 @@ def load_struct(ioa, ext=None, filename=None):
     """
     Load structure data from a file into a Structure
     """
-    ioa = IoAdapterFilename.use(ioa)   
+    ioa = IoAdapterFilename.use(ioa)
     if ext == None:
         try:
             if filename == None:
@@ -43,7 +43,7 @@ def load_struct(ioa, ext=None, filename=None):
 
         if ext.startswith(".poscar") or splitfilename[0] == "POSCAR":
             ext = '.vasp'
-        if ext.startswith(".contcar" or splitfilename[0] == "CONTCAR"):
+        if ext.startswith(".contcar") or splitfilename[0] == "CONTCAR":
             ext = '.vasp'
 
     if ext == '.vasp':
@@ -67,7 +67,7 @@ def save_struct(struct, ioa, ext=None):
     """
     Save structure data from a file into a Structure
     """
-    ioa = IoAdapterFilename.use(ioa)   
+    ioa = IoAdapterFilename.use(ioa)
     if ext == None:
         try:
             filename = ioa.filename
@@ -97,6 +97,3 @@ def save_struct(struct, ioa, ext=None):
         return struct_to_cif(struct, ioa)
     else:
         raise Exception("httk.io.save: I do not know what to do with the file:"+filename)
-    
-
-
