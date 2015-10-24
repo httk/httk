@@ -1,6 +1,9 @@
 # General ignores
-.DS_Store
 *.pyc
+.DS_Store
+.project
+.pydevproject
+**/*~
 # Httk specific ignores
 httk.cfg
 External
@@ -19,8 +22,6 @@ Presentation/presentation.out
 Presentation/presentation.snm
 Presentation/presentation.toc
 Presentation/presentation.vrb
-.project
-.pydevproject
 DEVELOPERS_GUIDE.txt
 INSTALL.txt
 README.txt
