@@ -38,7 +38,7 @@ rm -f httk_overview_img_*.png
 convert -density 135 ../presentation.pdf httk_overview_img_%02d.png
 ls *.png | sort -n | (
     while read LINE; do
-        echo "<li><img src=\"_static/generated/httk_overview/$LINE\" /></li>" >> ../httk_overview.html
+        echo "<li><img src=\"_static/generated/httk_overview/$LINE\" /></li>" >> httk_overview.html
     done
 )
 
