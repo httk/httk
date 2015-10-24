@@ -23,6 +23,21 @@ Introduction
 
 You likely want to have read the users' guide before reading this.
 
+Short points for experienced developers
+---------------------------------------
+* Follow PEP8, except --ignore=E226,E265,E266,E401,E402,E501,W291,W293,W391
+
+* Favor unmutable classes over mutable ones
+
+* For arrays of numbers, use core/FracVector unless you have a reason
+
+* Constructors are generally considered private, use a create(...) static method instead. 
+
+* Type conversion should be handled with use(other) methods
+
+* File I/O should be done with the core/ioadapters classes
+
+* Note the plugin system that comes via inheritance from HttkObject
   
 Overview of the python library
 ------------------------------
@@ -213,9 +228,9 @@ To avoid dependences on libraries that you may not have installed,
 httk implements somewhat unusual 'plugin'-type extensions to any class
 that inherits from HttkObject.
 
-The practical outcome is that loading a module, e.g., the atmoistic
+The practical outcome is that loading a module, e.g., the atomistic
 visualization module, adds functionality to some objects inside
-htt.atmoistic. E.g., ::
+htt.atomistic. E.g., ::
 
   from httk import *
   from httk.atomistic import *
@@ -255,7 +270,10 @@ httk.atomistic.vis.
 General recommendations for contributed code
 --------------------------------------------
 
-Rule #1: Read and follow: http://www.python.org/dev/peps/pep-0008/
+Rule #1: Generally read and follow: http://www.python.org/dev/peps/pep-0008/
+   You are encouraged to use the pep8 tool (either directly or via your code 
+   development platform, but, use: --ignore=E401,E402,E501,W291,W293,W391,E265,E266,E226
+   (See below for motivations.)
 
 Rule #2: Always organize your code in private sections and a public
    API. Never write code that depends on private sections outside the
@@ -293,6 +311,49 @@ Rule #3: Always make your classes be *immutable* unless you know why
     of the final program execution time, but people will care if your
     program has bugs. Only optimize code where speed *matters*. See
     longer rant in section below.
+
+Motivations for/discussions about our digressions from pep8
+-----------------------------------------------------------
+
+* E226: missing whitespace around arithmetic operator: This rule as
+  implemented in the pep8 tool is not consistent with the pep0008
+  standard. Use spaces around arithmetic operators when it adds to
+  readability.
+
+* E265: block comment should start with '# ': We do not want to
+  enforce what can go inside comment sections as they are used rather
+  freely throughout the code right now. This may change in the future.
+
+* E266: too many leading '#' for block comment: see E265
+
+* E401: multiple imports on one line: In this code we put standard
+  system libraries as a single import line to avoid the file preambles
+  to become overly long. All other imports should be each on one line.
+
+* E402: module level import not at top of file: We should generally
+  strive to put all module imports at the top of the file. However, we
+  need to depart from this for conditional imports, especially for our
+  handling of external libraries, and, sometimes for speed
+  optimization (only do slow import X if a function is run that
+  absolutely needs it.)
+
+* E501: line too long: Modern editors allow editing wide source with
+  ease. *Try* to keep lines down under 100 characters, but this rule
+  should be violated if significantly increased readability is
+  obtained by a few even longer lines.
+
+* W291: trailing whitespace: Between all different editors used, this
+  simply generates too many warnings that makes more important pep8
+  violations more difficult to see.  Once in a while we should simply
+  run the files through a tool that removes trailing whitespace.
+
+* W293: blank line contains whitespace: I genuinely disagree with this
+  rule. It is not motivated by the pep0008 standard, but something
+  unmotivated put in by developers of the pep8 tool.  Blank lines
+  should be indented to the indentation level of the block that they
+  appear in.
+
+* W391: blank line at end of file: see W291.
 
 
 A rant about mutable vs. non-mutable classes
@@ -337,7 +398,7 @@ documentation!::
 
     B = A.reshape(8)[0] 
     # Yes. Despite that this seem to be equivalent to flatten(), 
-    # B beomces a reference into A instead of a copy! Hence, if someone were 
+    # B becomes a reference into A instead of a copy! Hence, if someone were 
     # to "clean up the code" by thinking 'flatten is much easier to read' 
     # and replacing it, they will unintentionally change the behavior of the code!
 

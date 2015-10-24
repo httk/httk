@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,6 +19,7 @@ import fractions, random, operator, itertools
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
+
 def nested_map_tuple(op, *ls):
     """
     Map an operator over a nested tuple. (i.e., the same as the built-in map(), but works recursively on a nested tuple)
@@ -29,6 +30,7 @@ def nested_map_tuple(op, *ls):
         return tuple(map(lambda *items: nested_map_tuple(op, *items), *ls))
     return op(*ls)
 
+
 def nested_map_fractions_tuple(op, *ls):
     """
     Map an operator over a nested tuple, but checks every element for a method to_fractions() 
@@ -37,7 +39,7 @@ def nested_map_fractions_tuple(op, *ls):
     if hasattr(ls[0], 'to_fractions'):
         ls = list(ls)
         ls[0] = ls[0].to_fractions()
-    if not isinstance(ls[0],basestring):
+    if not isinstance(ls[0], basestring):
         try:
             dummy = iter(ls[0])
             return tuple(map(lambda *items: nested_map_fractions_tuple(op, *items), *ls))
@@ -46,6 +48,7 @@ def nested_map_fractions_tuple(op, *ls):
     return op(*ls)
 
 # Class definition
+
 
 class FracVector(object):
     """
@@ -73,7 +76,7 @@ class FracVector(object):
     #### Creation
 
     def __init__(self, noms, denom=1):
-        """ 
+        """
         Low overhead constructor.
         
         noms: nested *tuples* (may not be lists!) of nominator integers
@@ -88,16 +91,16 @@ class FracVector(object):
         self._dim = None
 
     @classmethod
-    def use(cls,old):
+    def use(cls, old):
         """
         Make sure variable is a FracVector, and if not, convert it.
         """
-        if isinstance(old,FracVector):
+        if isinstance(old, FracVector):
             return old
         else:
             try:
                 fracvec = old.to_FracVector()
-                return cls.__init__(fracvec.noms,fracvec.denom)        
+                return cls.__init__(fracvec.noms, fracvec.denom)        
             except Exception:
                 pass
             
@@ -139,6 +142,7 @@ class FracVector(object):
             except TypeError:
                 b = abs(fractions.Fraction(str(y))).denominator                
             return a * b // fractions.gcd(a, b)
+        
         def frac(x):
             return (fractions.Fraction(x) * lcd).numerator
 
@@ -148,10 +152,10 @@ class FracVector(object):
         if chain:
             v_noms = cls._dup_noms(itertools.chain(*v_noms))
 
-        if denom == None:                          
-            v = cls(v_noms, lcd)                       
+        if denom is None:
+            v = cls(v_noms, lcd)
         else:
-            v = cls(v_noms, lcd * denom)                       
+            v = cls(v_noms, lcd * denom)
 
         if simplify and v.denom != 1:
             v = v.simplify()
@@ -162,28 +166,28 @@ class FracVector(object):
     # they do not modify the vector itself. 
 
     def get_append(self, other):
-        return self.__class__.create([self,[other]],chain=True)
+        return self.__class__.create([self, [other]], chain=True)
 
     def get_extend(self, other):
-        return self.__class__.create([self,other],chain=True)
+        return self.__class__.create([self, other], chain=True)
 
     def get_insert(self, pos, other):
-        return self.__class__.create([self[:pos],[other],self[pos:]],chain=True)
+        return self.__class__.create([self[:pos], [other], self[pos:]], chain=True)
 
     def get_prepend(self, other):
-        return self.__class__.create([[other],self],chain=True)
+        return self.__class__.create([[other], self], chain=True)
 
     def get_prextend(self, other):
-        return self.__class__.create([other,self],chain=True)
+        return self.__class__.create([other, self], chain=True)
 
     def get_stacked(self, other):
-        return self.__class__.create([self,[other]])
+        return self.__class__.create([self, [other]])
 
     def ged_prestacked(self, other):
-        return self.__class__.create([[other],self])
+        return self.__class__.create([[other], self])
 
     def ged_stackedinsert(self, pos, other):
-        return self.__class__.create([self[:pos],[other],self[pos:]],chain=True)
+        return self.__class__.create([self[:pos], [other], self[pos:]], chain=True)
 
     @classmethod
     def chain_vecs(cls, vecs):
@@ -195,10 +199,10 @@ class FracVector(object):
         Returns the same thing as
            FracVector.create(vecs,chain=True)
         i.e., removes outermost dimension and chain the sub-sequences. If input=[[1 2 3],[4,5,6]], then
-          FracVector.chain(input) -> [1,2,3,4,5,6]          
+          FracVector.chain(input) -> [1,2,3,4,5,6]
         
         but this method assumes all vectors share the same denominator (it raises an exception if this is not true)
-        """   
+        """
         noms = []
         denom = vecs[0].denom
         for vec in vecs:
@@ -231,25 +235,25 @@ class FracVector(object):
         return cls(noms, denom)
     
     @classmethod
-    def eye(cls,dims):
+    def eye(cls, dims):
         """
         Create a diagonal one-matrix with the given dimensions
         """
-        return cls.create(tuple_eye(dims))     
+        return cls.create(tuple_eye(dims))
 
     @classmethod
-    def zeros(cls,dims):
+    def zeros(cls, dims):
         """
         Create a zero matrix with the given dimensions
         """
-        return cls.create(tuple_zeros(dims))     
+        return cls.create(tuple_zeros(dims))
 
     @classmethod
-    def random(cls,dims,minnom=-100,maxnom=100,denom=100):
+    def random(cls, dims, minnom=-100, maxnom=100, denom=100):
         """
         Create a zero matrix with the given dimensions
         """
-        return cls.create(tuple_random(dims,minval=minnom,maxval=maxnom),denom)     
+        return cls.create(tuple_random(dims, minval=minnom, maxval=maxnom), denom)
     
     @classmethod
     def from_tuple(cls, t):
@@ -283,7 +287,7 @@ class FracVector(object):
         This property returns a tuple with the dimensionality of each dimension of the FracVector 
         (the noms are assumed to be a nested list of rectangular shape).
         """
-        if self._dim == None:   
+        if self._dim is None:
             dimchk = self.noms
             self._dim = ()
             while True:
@@ -333,7 +337,7 @@ class FracVector(object):
         try:
             return float(self.nom) / float(self.denom)
         except OverflowError:
-            return float(fractions.Fraction(self.nom/self.denom))            
+            return float(fractions.Fraction(self.nom/self.denom))
 
     def to_fractions(self):
         """
@@ -364,7 +368,7 @@ class FracVector(object):
         """
         Returns a FracVector that has been flattened out to a single rowvector
         """
-        noms = nested_reduce(lambda x,y: x + [y],self.noms, initializer=[])        
+        noms = nested_reduce(lambda x, y: x + [y], self.noms, initializer=[])        
         return self.__class__(self._dup_noms(noms), self.denom)
 
     @classmethod
@@ -431,14 +435,14 @@ class FracVector(object):
         elif dim == (4, 4):
             A = self.noms
             noms = \
-              A[0][0] * A[1][1] * A[2][2] * A[3][3] + A[0][0] * A[2][1] * A[3][2] * A[1][3] + A[0][0] * A[3][1] * A[1][2] * A[2][3] \
-            + A[1][0] * A[0][1] * A[3][2] * A[2][3] + A[1][0] * A[2][1] * A[0][2] * A[3][3] + A[1][0] * A[3][1] * A[2][2] * A[0][3] \
-            + A[2][0] * A[0][1] * A[1][2] * A[3][3] + A[2][0] * A[1][1] * A[3][2] * A[0][3] + A[2][0] * A[3][1] * A[0][2] * A[1][3] \
-            + A[3][0] * A[0][1] * A[2][2] * A[1][3] + A[3][0] * A[1][1] * A[0][2] * A[2][3] + A[3][0] * A[2][1] * A[1][2] * A[0][3] \
-            - A[0][0] * A[1][1] * A[3][2] * A[2][3] - A[0][0] * A[2][1] * A[1][2] * A[3][3] - A[0][0] * A[3][1] * A[2][2] * A[1][3] \
-            - A[1][0] * A[0][1] * A[2][2] * A[3][3] - A[1][0] * A[2][1] * A[3][2] * A[0][3] - A[1][0] * A[3][1] * A[0][2] * A[2][3] \
-            - A[2][0] * A[0][1] * A[3][2] * A[1][3] - A[2][0] * A[1][1] * A[0][2] * A[3][3] - A[2][0] * A[3][1] * A[1][2] * A[0][3] \
-            - A[3][0] * A[0][1] * A[1][2] * A[2][3] - A[3][0] * A[1][1] * A[2][2] * A[0][3] - A[3][0] * A[2][1] * A[0][2] * A[1][3] 
+                A[0][0] * A[1][1] * A[2][2] * A[3][3] + A[0][0] * A[2][1] * A[3][2] * A[1][3] + A[0][0] * A[3][1] * A[1][2] * A[2][3] \
+                + A[1][0] * A[0][1] * A[3][2] * A[2][3] + A[1][0] * A[2][1] * A[0][2] * A[3][3] + A[1][0] * A[3][1] * A[2][2] * A[0][3] \
+                + A[2][0] * A[0][1] * A[1][2] * A[3][3] + A[2][0] * A[1][1] * A[3][2] * A[0][3] + A[2][0] * A[3][1] * A[0][2] * A[1][3] \
+                + A[3][0] * A[0][1] * A[2][2] * A[1][3] + A[3][0] * A[1][1] * A[0][2] * A[2][3] + A[3][0] * A[2][1] * A[1][2] * A[0][3] \
+                - A[0][0] * A[1][1] * A[3][2] * A[2][3] - A[0][0] * A[2][1] * A[1][2] * A[3][3] - A[0][0] * A[3][1] * A[2][2] * A[1][3] \
+                - A[1][0] * A[0][1] * A[2][2] * A[3][3] - A[1][0] * A[2][1] * A[3][2] * A[0][3] - A[1][0] * A[3][1] * A[0][2] * A[2][3] \
+                - A[2][0] * A[0][1] * A[3][2] * A[1][3] - A[2][0] * A[1][1] * A[0][2] * A[3][3] - A[2][0] * A[3][1] * A[1][2] * A[0][3] \
+                - A[3][0] * A[0][1] * A[1][2] * A[2][3] - A[3][0] * A[1][1] * A[2][2] * A[0][3] - A[3][0] * A[2][1] * A[0][2] * A[1][3] 
             return self.__class__(noms, self.denom ** 4)
 
         raise Exception("FracVector.det: on non 3x3 or 4x4 matrix not implemented. Matrix was:"+str(dim))
@@ -447,7 +451,7 @@ class FracVector(object):
         """
         Returns the matrix inverse, A^-1
         """
-        dim = self.dim        
+        dim = self.dim
         if dim == ():
             # For a FracScalar, just swap denominator and nominator
             return self.__class__(self.denom, self.nom)
@@ -470,13 +474,13 @@ class FracVector(object):
         else:
             denom = det_nom
             m = self.denom
-            
+        
         A = self.noms
         noms = self._dup_noms((
-                 self._dup_noms((m * (A[1][1] * A[2][2] - A[1][2] * A[2][1]), m * (A[0][2] * A[2][1] - A[0][1] * A[2][2]), m * (A[0][1] * A[1][2] - A[0][2] * A[1][1])),),
-                 self._dup_noms((m * (A[1][2] * A[2][0] - A[1][0] * A[2][2]), m * (A[0][0] * A[2][2] - A[0][2] * A[2][0]), m * (A[0][2] * A[1][0] - A[0][0] * A[1][2])),),
-                 self._dup_noms((m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])),)
-            ))                    
+            self._dup_noms((m * (A[1][1] * A[2][2] - A[1][2] * A[2][1]), m * (A[0][2] * A[2][1] - A[0][1] * A[2][2]), m * (A[0][1] * A[1][2] - A[0][2] * A[1][1])),),
+            self._dup_noms((m * (A[1][2] * A[2][0] - A[1][0] * A[2][2]), m * (A[0][0] * A[2][2] - A[0][2] * A[2][0]), m * (A[0][2] * A[1][0] - A[0][0] * A[1][2])),),
+            self._dup_noms((m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])),)
+        ))
             
         return self.__class__(noms, denom)
 
@@ -492,7 +496,7 @@ class FracVector(object):
             gcd = self._reduce_over_noms(lambda x, y: fractions.gcd(x, abs(y)), initializer=self.denom)
             if gcd != 1:
                 denom = denom / gcd
-                noms = self._map_over_noms(lambda x:int(x / gcd))
+                noms = self._map_over_noms(lambda x: int(x / gcd))
             
         return self.__class__(noms, denom)
 
@@ -501,6 +505,7 @@ class FracVector(object):
         Returns a FracVector of reduced resolution where every element is the closest numerical approximation using this denominator.
         """
         denom = self.denom
+        
         def limit_resolution_one(x):
             low = (x * set_denom) // denom
             if x * set_denom * 2 > (low * 2 + 1) * denom:
@@ -508,8 +513,8 @@ class FracVector(object):
             else:
                 return low
         
-        noms = self._map_over_noms(limit_resolution_one)        
-        return self.__class__(noms, set_denom)  
+        noms = self._map_over_noms(limit_resolution_one)
+        return self.__class__(noms, set_denom)
 
     def limit_denominator(self, max_denom=1000000000):
         """
@@ -519,10 +524,9 @@ class FracVector(object):
         a fraction with maximally this denominator. Note: since all elements must be put on a common denominator, the result
         may have a larger denominator than max_denom
         """
-        denom = self.denom        
-        newvalues = self._map_over_noms(lambda x: fractions.Fraction(x,denom).limit_denominator(max_denom))        
-        return self.__class__.create(newvalues)  
-
+        denom = self.denom
+        newvalues = self._map_over_noms(lambda x: fractions.Fraction(x, denom).limit_denominator(max_denom))
+        return self.__class__.create(newvalues)
 
     def floor(self):
         """
@@ -539,7 +543,7 @@ class FracVector(object):
         """
         if self.dim != ():
             raise Exception("FracVector.ceil: Needs scalar FracVector")
-        if self.nom % self.denom == 0:            
+        if self.nom % self.denom == 0:
             return self.nom // self.denom
         else:
             return self.nom // self.denom + 1
@@ -548,8 +552,8 @@ class FracVector(object):
         """
         Add/remove an integer +/-N to each element to place it in the range [0,1)
         """
-        noms = self._map_over_noms(lambda x:x - self.denom * (x // self.denom))
-        return self.__class__(noms, self.denom)        
+        noms = self._map_over_noms(lambda x: x - self.denom * (x // self.denom))
+        return self.__class__(noms, self.denom)
 
     def normalize_half(self):
         """
@@ -558,7 +562,7 @@ class FracVector(object):
         This is useful to find the shortest vector C between two points A, B in a space with periodic boundary conditions [0,1):
            C = (A-B).normalize_half()
         """
-        noms = self._map_over_noms(lambda x:2 * x - (2 * self.denom) * ((((2 * x) // self.denom) + 1) // 2))
+        noms = self._map_over_noms(lambda x: 2 * x - (2 * self.denom) * ((((2 * x) // self.denom) + 1) // 2))
         return self.__class__(noms, 2 * self.denom)
 
     def mul(self, other):
@@ -567,14 +571,14 @@ class FracVector(object):
         
         Note that for two 1D FracVectors, A.dot(B) is *not* the same as A.mul(B), but rather: A.mul(B.T()). 
         """
-        # Handle other being another object  
+        # Handle other being another object
         if not isinstance(other, FracVector):
             other = self.__class__.create(other)
-               
+        
         Adim = self.dim
         Bdim = other.dim
         A = self.noms
-        B = other.noms    
+        B = other.noms
         denom = self.denom * other.denom
 
         # Other is scalar
@@ -591,26 +595,26 @@ class FracVector(object):
         elif len(Adim) == 1 and len(Bdim) == 1:
             if Adim[0] != Bdim[0]:
                 raise Exception("ExactVector.dot: vector multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))
-            noms = self._dup_noms(A[i] * B[i] for i in range(Adim[0]))            
+            noms = self._dup_noms(A[i] * B[i] for i in range(Adim[0]))
 
         # Matrix * vector 
         elif len(Adim) == 2 and len(Bdim) == 1:
             if Adim[1] != Bdim[0]:
-                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))                
+                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))
             noms = self._dup_noms(sum([A[row][i] * B[i] for i in range(Adim[1])]) for row in range(Adim[0]))
 
-        # vector * Matrix    
+        # vector * Matrix
         elif len(Adim) == 1 and len(Bdim) == 2:
             if Adim[0] != Bdim[0]:
-                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))                
+                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))
             noms = self._dup_noms(sum([A[i] * B[i][col] for i in range(Adim[0])]) for col in range(Bdim[1]))
 
         # Matrix * Matrix
         elif len(Adim) == 2 and len(Bdim) == 2:
             if Adim[1] != Bdim[0]:
-                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))                
+                raise Exception("ExactVector.dot: matrix multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))
             noms = self._dup_noms(self._dup_noms(sum([A[row][i] * B[i][col] for i in range(Adim[1])]) for col in range(Bdim[1]))
-                      for row in range(Adim[0]))
+                                  for row in range(Adim[0]))
 
         else:
             raise Exception("ExactVector.dot: cannot handle tensors of order > 2, dimensions:" + str(Adim) + " and " + str(Bdim))
@@ -624,13 +628,13 @@ class FracVector(object):
         Adim = self.dim
         Bdim = other.dim
         A = self.noms
-        B = other.noms    
+        B = other.noms
         denom = self.denom * other.denom
 
         if len(Adim) == 1 and len(Bdim) == 1:
             if Adim[0] != Bdim[0]:
                 raise Exception("ExactVector.dot: vector multiplication dimension mismatch," + str(Adim) + " and " + str(Bdim))
-            noms = sum(A[i] * B[i] for i in range(Adim[0]))       
+            noms = sum(A[i] * B[i] for i in range(Adim[0]))
         else:
             raise Exception("ExactVector.dot: dot multiplication dimensions not = 1," + str(Adim) + " and " + str(Bdim))
         return self.__class__(noms, denom)
@@ -655,11 +659,11 @@ class FracVector(object):
         Returns the vector cross product of the 3-element 1D vector with the 3-element 1D vector 'other', i.e., A x B.
         """
         # Note: multiplication is an especially simple case, there is no need to bring the two vectors into a
-        # common denom with common_denom, since a/b * c/d = a*c/(b*d)        
+        # common denom with common_denom, since a/b * c/d = a*c/(b*d)
         Adim = self.dim
         A = self.noms
         Bdim = other.dim
-        B = other.noms    
+        B = other.noms
         denom = self.denom * other.denom
         if Adim != (3,) or Bdim != (3,):
             raise Exception("FracVector.cross: can only do cross products of 3-element 1D vectors. The dimensions are:" + str(Adim) + " and " + str(Bdim))
@@ -670,23 +674,23 @@ class FracVector(object):
 
     def reciprocal(self):
         dim = self.dim
-        if dim != (3,3):
+        if dim != (3, 3):
             raise Exception("FracVector.reciprocal: can only calculate reciprocal matrix for a 3,3 matrix. The dimension are:" + str(dim))
         noms = self.noms
 
         def det_noms(A):
             return A[0][0] * A[1][1] * A[2][2] + A[0][1] * A[1][2] * A[2][0] + A[0][2] * A[1][0] * A[2][1] - A[0][2] * A[1][1] * A[2][0] - A[0][1] * A[1][0] * A[2][2] - A[0][0] * A[1][2] * A[2][1]
         
-        def cross_noms(A,B):
+        def cross_noms(A, B):
             return ((A[1] * B[2] - A[2] * B[1]), (A[2] * B[0] - A[0] * B[2]), (A[0] * B[1] - A[1] * B[0]))
 
         detnom = det_noms(noms)
         denom = self.denom
         
-        v1,v2,v3 = noms[0],noms[1],noms[2]
-        noms = (cross_noms(v2,v3), cross_noms(v1,v3), cross_noms(v1,v2))
+        v1, v2, v3 = noms[0], noms[1], noms[2]
+        noms = (cross_noms(v2, v3), cross_noms(v1, v3), cross_noms(v1, v2))
         noms = self.nested_map(lambda x: x*denom, noms)
-        return self.__class__(noms,detnom)
+        return self.__class__(noms, detnom)
 
     def metric_product(self, vecA, vecB):
         """
@@ -708,14 +712,14 @@ class FracVector(object):
 
         if dimA != dimB or dimM != (l, l) or ((len(dimA) != 1 or len(dimB) != 1) and (dimA[1] != l or dimB[1] != l)):
             raise Exception("ExactVector.metric_product: vectors not in right dimensions.")
-                
+        
         if len(dimA) == 1: 
             noms = sum([A[row] * M[row][col] * B[col] for row in range(l) for col in range(l)])
         else:
             # Matrix * Matrix
             noms = [sum([A[i][row] * M[row][col] * B[i][col] for row in range(l) for col in range(l)]) for i in range(dimA[0])]
 
-        return self.__class__(noms, denom)   
+        return self.__class__(noms, denom)
 
     #### Python special overloading
 
@@ -755,20 +759,20 @@ class FracVector(object):
             if exp == 0:
                 return self.__class__(1) 
             if exp > 0:
-                return self.__class__(self.nom**exp,self.denom**exp) 
+                return self.__class__(self.nom**exp, self.denom**exp)
             if exp < 0:
-                return self.__class__(self.denom**(-exp),self.nom**(-exp))                 
-        if isinstance(exp,(int,long)):
+                return self.__class__(self.denom**(-exp), self.nom**(-exp))
+        if isinstance(exp, (int, long)):
             if exp == 0:
                 return self.eye(self.dim)
             if exp > 0:
                 a = self
-                for i in range(exp-1):
+                for _ in range(exp-1):
                     a = a.mul(self)
                 return a
             if exp < 0:
                 a = self.inv()
-                for i in range(-exp-1):
+                for _ in range(-exp-1):
                     a = a.mul(self)
                 return a
         else:
@@ -777,13 +781,13 @@ class FracVector(object):
     def __div__(self, other):
         if not isinstance(other, FracVector):
             other = self.__class__.create(other)
-        frac = self.__class__(other.denom,other.nom)
+        frac = self.__class__(other.denom, other.nom)
         return self.mul(frac)
 
     def __truediv__(self, other):
         if not isinstance(other, FracVector):
             other = self.__class__.create(other)
-        frac = self.__class__(other.denom,other.nom)
+        frac = self.__class__(other.denom, other.nom)
         return self.mul(frac)
     
     def __add__(self, other):
@@ -828,10 +832,10 @@ class FracVector(object):
             if self.denom == other.denom:
                 return (self.noms == other.noms)
             else:
-                (A,B,denom) = self.set_common_denom(self,other)
+                (A, B, _) = self.set_common_denom(self, other)
                 return (A.noms == B.noms)
-        except AttributeError:                
-            if other == None:
+        except AttributeError:
+            if other is None:
                 return False
 
             if not isinstance(other, FracVector):
@@ -843,10 +847,9 @@ class FracVector(object):
         if self.denom == other.denom:
             return (self.noms == other.noms)
         else:
-            (A,B,denom) = self.set_common_denom(self,other)
+            (A, B, _) = self.set_common_denom(self, other)
             return (A.noms == B.noms)
-        
-
+    
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -862,22 +865,22 @@ class FracVector(object):
         except AttributeError:
             return self.nom > other * self.denom
         
-    def __le__(self, other):           
+    def __le__(self, other):
         return not self.__gt__(other)
-        
+    
     def __ge__(self, other):
         return not self.__lt__(other)
 
     def __float__(self):
         # This way of converting avoids many possible overflow errors
-        return float(fractions.Fraction(self.nom,self.denom))
+        return float(fractions.Fraction(self.nom, self.denom))
 
     def __int__(self):
         #return self.nom // self.denom
-        return int(fractions.Fraction(self.nom,self.denom))
+        return int(fractions.Fraction(self.nom, self.denom))
 
     def __long__(self):
-        return long(fractions.Fraction(self.nom,self.denom))
+        return long(fractions.Fraction(self.nom, self.denom))
         #return self.nom // self.denom
 
     def __index__(self):
@@ -904,7 +907,7 @@ class FracVector(object):
         
         idt = tuple_index(self.dim)
         maxval = self.max()
-        indices = nested_reduce_levels(lambda x,y: x+[y] if self[y]==maxval else x,idt,len(self.dim),[])
+        indices = nested_reduce_levels(lambda x, y: x+[y] if self[y] == maxval else x, idt, len(self.dim), [])
         return indices
 
     def argmax(self):
@@ -912,8 +915,8 @@ class FracVector(object):
         Return the index of the maximum element across all dimensions in the FracVector.
         """
         idt = tuple_index(self.dim)
-        flat_idt = nested_reduce_levels(lambda x,y: x + [y],idt, len(self.dim),initializer=[])        
-        return max(flat_idt,key=lambda i:self[i])
+        flat_idt = nested_reduce_levels(lambda x, y: x + [y], idt, len(self.dim), initializer=[])        
+        return max(flat_idt, key=lambda i: self[i])
 
     def min(self):
         """
@@ -930,7 +933,7 @@ class FracVector(object):
         """
         idt = tuple_index(self.dim)
         minval = self.min()
-        indices = nested_reduce_levels(lambda x,y: x+[y] if self[y]==minval else x,idt,len(self.dim),[])
+        indices = nested_reduce_levels(lambda x, y: x+[y] if self[y] == minval else x, idt, len(self.dim), [])
         return indices
     
     def argmin(self):
@@ -938,8 +941,8 @@ class FracVector(object):
         Return the index of the minimum element across all dimensions in the FracVector.
         """
         idt = tuple_index(self.dim)
-        flat_idt = nested_reduce_levels(lambda x,y: x + [y],idt, len(self.dim),initializer=[])        
-        return min(flat_idt,key=lambda i:self[i])
+        flat_idt = nested_reduce_levels(lambda x, y: x + [y], idt, len(self.dim), initializer=[])        
+        return min(flat_idt, key=lambda i: self[i])
                 
     #### Private methods
 
@@ -948,7 +951,7 @@ class FracVector(object):
         Map an operation over all nominators
         """
         othernoms = [x.noms for x in others]
-        if isinstance(self.noms, (tuple,list)):
+        if isinstance(self.noms, (tuple, list)):
             return self.nested_map(op, self.noms, *othernoms)
         else:
             return op(self.noms, *othernoms)
@@ -971,22 +974,22 @@ class FracVector(object):
                 result = op(A.nom, B.nom)
             else:
                 # scalar [op] (Matrix or Vector)
-                result = B._map_over_noms(lambda x:op(A.nom, x))            
+                result = B._map_over_noms(lambda x: op(A.nom, x))
         elif len(Bdim) == 0:
             # [Matrix or Vector] op scalar
-            result = A._map_over_noms(lambda x:op(B.nom, x))
+            result = A._map_over_noms(lambda x: op(B.nom, x))
         else:
             # Matrix op Matrix
             result = A._map_over_noms(lambda x, y: op(x, y), B)
 
-        return (result, denom)        
-
+        return (result, denom)
 
     def _reduce_over_noms(self, op, initializer=None):
         """
         Run a nested reduce operation over all nominators
         """
         return nested_reduce(op, self.noms, initializer=initializer)
+    
     
 class FracScalar(FracVector):
     """
@@ -1020,18 +1023,19 @@ class FracScalar(FracVector):
             try:
                 b = abs(fractions.Fraction(y)).denominator
             except TypeError:
-                b = abs(fractions.Fraction(str(y))).denominator                
+                b = abs(fractions.Fraction(str(y))).denominator
             return a * b // fractions.gcd(a, b)
+        
         def frac(x):
             return (fractions.Fraction(x) * lcd).numerator
 
         lcd = nested_reduce_fractions(lambda x, y: lcd(x, y), nom, initializer=1)
         v_noms = cls.nested_map_fractions(lambda x: frac(x), nom)
 
-        if denom == None:                          
-            v = cls(v_noms, lcd)                       
+        if denom is None:
+            v = cls(v_noms, lcd)
         else:
-            v = cls(v_noms, lcd * denom)                       
+            v = cls(v_noms, lcd * denom)
 
         if simplify and v.denom != 1:
             v = v.simplify()
@@ -1039,6 +1043,7 @@ class FracScalar(FracVector):
         return v
 
 # Utility functions
+
 
 def nested_map_list(op, *ls):
     """
@@ -1050,6 +1055,7 @@ def nested_map_list(op, *ls):
         return list(map(lambda *items: nested_map_list(op, *items), *ls))
     return op(*ls)
 
+
 def nested_map_fractions_list(op, *ls):
     """
     Map an operator over a nested list, but checks every element for a method to_fractions() 
@@ -1058,13 +1064,14 @@ def nested_map_fractions_list(op, *ls):
     if hasattr(ls[0], 'to_fractions'):
         ls = list(ls)
         ls[0] = ls[0].to_fractions()
-    if not isinstance(ls[0],basestring):
+    if not isinstance(ls[0], basestring):
         try:
             dummy = iter(ls[0])
             return list(map(lambda *items: nested_map_fractions_list(op, *items), *ls))
         except TypeError:
             pass
     return op(*ls)
+
 
 def nested_reduce(op, l, initializer=None):
     """
@@ -1074,6 +1081,7 @@ def nested_reduce(op, l, initializer=None):
         return reduce(lambda x, y: nested_reduce(op, y, initializer=x), l, initializer)
     else:
         return op(initializer, l)
+
 
 def nested_reduce_levels(op, l, level=1, initializer=None):
     """
@@ -1094,7 +1102,7 @@ def nested_reduce_fractions(op, l, initializer=None):
     """
     if hasattr(l, 'to_fractions'):
         l = l.to_fractions()
-    if not isinstance(l,basestring):
+    if not isinstance(l, basestring):
         try:
             dummy = iter(l)
             return reduce(lambda x, y: nested_reduce_fractions(op, y, initializer=x), l, initializer)
@@ -1102,7 +1110,8 @@ def nested_reduce_fractions(op, l, initializer=None):
             pass
     return op(initializer, l)
 
-def tuple_slice(l, key):    
+
+def tuple_slice(l, key):
     """
     Given a python slice (i.e., what you get to __getitem__ when you write A[3:2]), cut out the relevant
     nested tuple.
@@ -1110,7 +1119,7 @@ def tuple_slice(l, key):
     if isinstance(key[0], (int, long, slice)):
         slicedlist = l[key[0]]
     else: 
-        slicedlist = tuple([ l[i] for i in key[0]])
+        slicedlist = tuple([l[i] for i in key[0]])
     cdr = key[1:]
     if len(cdr) > 0:
         if isinstance(key[0], slice):
@@ -1119,118 +1128,122 @@ def tuple_slice(l, key):
             return tuple_slice(slicedlist, cdr)
     return slicedlist
 
-def tuple_index(dims,uppidx=()):
+
+def tuple_index(dims, uppidx=()):
         """
         Create a nested tuple where every element is a tuple indicating the position of that tuple
         """
-        if dims==():
+        if dims == ():
             if len(uppidx) == 1:
                 return uppidx[0]
             else:
                 return uppidx
         else:
-            neweye=[]
+            neweye = []
             lastdim = dims[0]
             lowerdims = dims[1:]
             for i in range(lastdim):
-                neweye+=[tuple_index(lowerdims,uppidx + (i,))]
+                neweye += [tuple_index(lowerdims, uppidx + (i,))]
         return neweye
+
 
 def tuple_zeros(dims):
         """
         Create a netsted tuple with the given dimensions filled with zeroes
         """
-        if dims==():
+        if dims == ():
             return 0
         else:
-            neweye=[]
+            neweye = []
             lastdim = dims[0]
             lowerdims = dims[1:]
-            for i in range(lastdim):
-                neweye+=[tuple_zeros(lowerdims)]
+            for _ in range(lastdim):
+                neweye += [tuple_zeros(lowerdims)]
         return neweye
 
-def tuple_random(dims,minval,maxval):
+
+def tuple_random(dims, minval, maxval):
         """
         Create a nested tuple with the given dimensions filled with random numbers between minval and maxval
         """
-        if dims==():
+        if dims == ():
             return random.randint(minval, maxval)
         else:
-            neweye=[]
+            neweye = []
             lastdim = dims[0]
             lowerdims = dims[1:]
-            for i in range(lastdim):
-                neweye+=[tuple_random(lowerdims,minval,maxval)]
+            for _ in range(lastdim):
+                neweye += [tuple_random(lowerdims, minval, maxval)]
         return neweye
 
 
-def tuple_eye(dims,onepos=0):
+def tuple_eye(dims, onepos=0):
         """
         Create a matrix with the given dimensions and 1 on the diagonal
         """
-        if dims==():
+        if dims == ():
             return 1
 
-        if len(dims)==1:
+        if len(dims) == 1:
             neweye = [0]*dims[0]
-            neweye[onepos]=1
+            neweye[onepos] = 1
         
         else:
-            neweye=[]
+            neweye = []
             lastdim = dims[-1]
             nextdim = dims[-2]
             lowerdims = dims[:-1]
             for i in range(lastdim):
-                neweye+=[tuple_eye(lowerdims,onepos=(i*nextdim//lastdim))]
+                neweye += [tuple_eye(lowerdims, onepos=(i*nextdim//lastdim))]
         return neweye
 
 # Tests
 
+
 def main():
     
     print "==== Simple things:"
-    a = FracVector.create([[2,7,5],[3,5,4],[4,6,7]])
+    a = FracVector.create([[2, 7, 5], [3, 5, 4], [4, 6, 7]])
     print a
-    print "Max value,",a.max(),"at position:",a.argmax(),"all pos:",a.nargmax()
-    print "Min value,",a.min(),"at position:",a.argmin(),"all pos:",a.nargmin()
+    print "Max value,", a.max(), "at position:", a.argmax(), "all pos:", a.nargmax()
+    print "Min value,", a.min(), "at position:", a.argmin(), "all pos:", a.nargmin()
     print
-    b = FracVector([1,2,3,4])
+    b = FracVector([1, 2, 3, 4])
     # NOTE: cannot do b + [5] to append, because that is interpreted as vector addition
     print b.get_append(5)
     print b.argmax()
     print tuple_index((5,))
     exit(0)
-    print(a)    
-    print(a.T())    
-    print(a.inv())  
+    print(a)
+    print(a.T())
+    print(a.inv())
     print a.to_floats()
-    print a.zeros((5,7))
-    print a.eye((5,5))
-    print a.eye((5,7))
+    print a.zeros((5, 7))
+    print a.eye((5, 5))
+    print a.eye((5, 7))
     # TODO: Is this right? Need to think about identity tensors of order > 2
-    print a.eye((3,3,3))
+    print a.eye((3, 3, 3))
     print
     print "==== Numpy conversion:"
     try:
         import numpy
-        x = numpy.array([[2.3,3.5,5.3],[3.7,5.4,4.2],[4.6,6.7,7.4]])
+        x = numpy.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
         a = FracVector.create(x)
-        print "Original numpy array:",x
-        print "FracVector:",a
-        print "FracVector as floats:",a.to_floats()
+        print "Original numpy array:", x
+        print "FracVector:", a
+        print "FracVector as floats:", a.to_floats()
     except ImportError:
         print "(Could not import numpy, numpy tests skipped)"
 
     print
     print "==== Exact cell transformation example:"
-    prim_cell = FracVector.create([[2,3,5],[3,5,4],[4,6,7]],10)
-    print "Primitive cell:",prim_cell
-        
+    prim_cell = FracVector.create([[2, 3, 5], [3, 5, 4], [4, 6, 7]], 10)
+    print "Primitive cell:", prim_cell
+    
     inv = prim_cell.inv().simplify()
     transformation = (inv*inv.denom).simplify()
 
-    print "Integer-only transformation matrix that diagonalize the primitive cell:",transformation
+    print "Integer-only transformation matrix that diagonalize the primitive cell:", transformation
 
     print "How does this transformation matrix act on the original basis vectors?:"
     result = transformation*prim_cell
@@ -1240,14 +1253,14 @@ def main():
 
     print
     print "==== Approximate cell transformation example:"
-    prim_cell = FracVector.create([[23243253,32352322,52343423],[32433242,52324332,42343242],[42342342,62433453,72432343]],100000000)
-    print "Primitive cell:",prim_cell
-    print "Primitive cell in float representation:",prim_cell.to_floats()
-        
+    prim_cell = FracVector.create([[23243253, 32352322, 52343423], [32433242, 52324332, 42343242], [42342342, 62433453, 72432343]], 100000000)
+    print "Primitive cell:", prim_cell
+    print "Primitive cell in float representation:", prim_cell.to_floats()
+    
     inv = prim_cell.inv().simplify()
     transformation = (inv*inv.denom).simplify()
 
-    print "Integer-only transformation matrix that diagonalize the primitive cell:",transformation
+    print "Integer-only transformation matrix that diagonalize the primitive cell:", transformation
 
     print "How does this transformation matrix act on the original basis vectors?:"
     result = transformation*prim_cell
@@ -1257,7 +1270,7 @@ def main():
     
     approxinv = prim_cell.inv().set_denominator(10).simplify()
     transformation = (approxinv*approxinv.denom).simplify()
-    print "Integer-only transformation matrix that approximately diagonalize the primitive cell:",transformation
+    print "Integer-only transformation matrix that approximately diagonalize the primitive cell:", transformation
 
     print "How does this transformation matrix act on the original basis vectors?:"
     result = transformation*prim_cell
@@ -1267,4 +1280,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+
