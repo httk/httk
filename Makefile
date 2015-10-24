@@ -1,3 +1,5 @@
+minimal: httk.cfg VERSION
+
 all:	httk.cfg VERSION presentation docs
 
 VERSION:
