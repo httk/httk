@@ -65,11 +65,14 @@ intricate run-scripts using *httk*.
 Reporting bugs
 **************
 
-Please report any bugs your find to our email (httk [at]
-openmaterialsdb.se (where [at] is replaced by @)
+We track our bugs using the issue tracker at github. 
+If you find a bug, please search to see if someone else
+has reported it here:
 
-Presently known bugs will be listed in the *httk* erratum at
-http://httk.openmaterialsdb.se/erratum.html
+  https://github.com/rartino/httk/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen
+
+If you cannot find it already reported, please click the 'new issue' 
+button and report the bug.
 
 
 Developing / contributing to *httk*

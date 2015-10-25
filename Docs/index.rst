@@ -37,7 +37,6 @@ Full API reference
    copying
    developers_guide
    downloads
-   erratum
    httk_base
    install
    mod_httk
