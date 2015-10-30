@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,15 +21,15 @@ import httk
 from httk.core.basic import mkdir_p
 from httk.core.template import apply_templates
 
-def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',instantiate_name='ht.instantiate.py',overwrite=False, overwrite_head_dir=True, remove_instantiate=True,name=None):
+def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',instantiate_name='ht_instantiate.py',overwrite=False, overwrite_head_dir=True, remove_instantiate=True,name=None):
     global instantiate_args, instantiate_to_path
 
     if args==None:
         args={}
-    
+
     if template.startswith('t:'):
         template = os.path.join(httk.httk_dir,'Execution','tasks-templates',template[2:])
-    
+
     instantiate_args = args
     instantiate_to_path = template
 
@@ -48,24 +48,24 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     tmpstr = basename[7:]
     apply_templates(template, taskpath, envglobals=args, mkdir=False)
 
-    old_path = os.getcwd()  
+    old_path = os.getcwd()
     old_sys_argv = sys.argv
 
     # Saftey check
     if instantiate_name == None or instantiate_name == '' or not isinstance(instantiate_name,str) or not instantiate_name:
         raise Exception("taskmgr.create_batch_task: empty or weird instantiate_name:"+str(instantiate_name))
-    
-    try:        
+
+    try:
         os.chdir(taskpath)
-        #try:            
+        #try:
         execfile(instantiate_name,args,{})
         #except:
         #    with open(instantiate_name) as f:
         #        code = compile(f.read(), instantiate_name, 'exec')
         #        exec(code,args,{})
         os.unlink(instantiate_name)
-        
-    #mkdir_p(os.path.join(dirpath,"ht.tmp.waiting",project))    
+
+    #mkdir_p(os.path.join(dirpath,"ht.tmp.waiting",project))
     finally:
         os.chdir(old_path)
         sys.argv = old_sys_argv
@@ -86,6 +86,5 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     finalpath = os.path.join(taskspath,full_finalname)
 
     os.rename(taskpath, finalpath)
-                                
+
     return finalpath
-    
