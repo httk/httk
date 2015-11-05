@@ -664,11 +664,12 @@ function VASP_OSZICAR_CHECKER {
        energy=$5
        # print "NSTEP:",nstep, nelm
        # print "NSW:",istep, nsw
-       if(energy > 0) {print "POSITIVE ENERGY (E0>0)" >> msgfile; quit=1}
+       if(energy > 0) {lastep=1}
        if(lastrmsc >= 0.7) {print "BADCONV ELEC (RMSC>=0.7)" >> msgfile; lastebad=1}
        if(nstep >= nelm) {print "BADCONV ELEC (N>=NELM)" >> msgfile; lastebad=1}
        if(nsw>1 && istep >= nsw) {print "BADCONV ION (ISTEP>=NSW)" >> msgfile; lastibad=1}
 
+       if(energy < 0) {lastep=0}
        if(lastebad && lastrmsc < 0.7 && nstep < nelm) {print "RECOVERED CONV ELEC" >> msgfile; lastebad=0;}
        if(lastibad && nsw>1 && istep < nsw) {print "RECOVERED CONV ION" >> msgfile; lastibad=0;}
 
@@ -679,6 +680,7 @@ function VASP_OSZICAR_CHECKER {
     END {
        if(lastebad) {print "LAST BADCONV ELEC" >> msgfile;}
        if(lastibad) {print "LAST BADCONV ION" >> msgfile;}
+       if(lastep) {print "LAST ENERGY IS POSITIVE (E>0)" >> msgfile; exit 2;}
     }
     '
     RETURNCODE="$?"
