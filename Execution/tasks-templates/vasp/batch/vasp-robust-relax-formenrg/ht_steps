@@ -1,13 +1,12 @@
 #!/bin/bash
-# httk-vasp-relaxformenrg (relax until converged)
-# 1.2
-# Carefully relax a structure into its ground state.
+# vasp-robust-relax-formenrg (relax until converged)
+# 1.0
+# Robust relaxation of a structure into its ground state.
+# This template works for starting structures further from
+# their equilibrium. 
 #
 # Version history:
-#    1.0: Initial version
-#    1.1: Fixed bug if structure started with atoms too close (infinite loop)
-#         Also added task freeze capability
-#    1.2: Better handling of bad convergence during relax2
+#    1.0: Initial version by Christopher Tholander
 #
 #
 
