@@ -21,14 +21,16 @@ import httk
 from httk.core.basic import mkdir_p
 from httk.core.template import apply_templates
 
-def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',instantiate_name='ht_instantiate.py',overwrite=False, overwrite_head_dir=True, remove_instantiate=True,name=None):
+
+def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',
+                      instantiate_name='ht_instantiate.py', overwrite=False, overwrite_head_dir=True, remove_instantiate=True, name=None, priority=3):
     global instantiate_args, instantiate_to_path
 
-    if args==None:
-        args={}
+    if args is None:
+        args = {}
 
     if template.startswith('t:'):
-        template = os.path.join(httk.httk_dir,'Execution','tasks-templates',template[2:])
+        template = os.path.join(httk.httk_dir, 'Execution', 'tasks-templates', template[2:])
 
     instantiate_args = args
     instantiate_to_path = template
@@ -39,8 +41,8 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
         os.mkdir(dirpath)
 
     taskspath = dirpath
-    #taskspath = os.path.join(dirpath,project)
-    #taskspath = os.path.join(dirpath,'ht.waiting',project)
+    # taskspath = os.path.join(dirpath,project)
+    # taskspath = os.path.join(dirpath,'ht.waiting',project)
     mkdir_p(taskspath)
 
     taskpath = tempfile.mkdtemp(prefix='ht.tmp.', dir=taskspath)
@@ -52,38 +54,38 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     old_sys_argv = sys.argv
 
     # Saftey check
-    if instantiate_name == None or instantiate_name == '' or not isinstance(instantiate_name,str) or not instantiate_name:
-        raise Exception("taskmgr.create_batch_task: empty or weird instantiate_name:"+str(instantiate_name))
+    if instantiate_name is None or instantiate_name == '' or not isinstance(instantiate_name, str) or not instantiate_name:
+        raise Exception("taskmgr.create_batch_task: empty or weird instantiate_name:" + str(instantiate_name))
 
     try:
         os.chdir(taskpath)
-        #try:
-        execfile(instantiate_name,args,{})
-        #except:
+        # try:
+        execfile(instantiate_name, args, {})
+        # except:
         #    with open(instantiate_name) as f:
         #        code = compile(f.read(), instantiate_name, 'exec')
         #        exec(code,args,{})
         os.unlink(instantiate_name)
 
-    #mkdir_p(os.path.join(dirpath,"ht.tmp.waiting",project))
+    # mkdir_p(os.path.join(dirpath,"ht.tmp.waiting",project))
     finally:
         os.chdir(old_path)
         sys.argv = old_sys_argv
 
-    if name == None:
-        if not 'finalname' in args:
+    if name is None:
+        if 'finalname' not in args:
             name = tmpstr
         else:
             name = args['finalname']
 
     if not overwrite:
-        check = glob.glob(os.path.join(taskspath,'ht.task.*.'+name+'.*'))
+        check = glob.glob(os.path.join(taskspath, 'ht.task.*.' + name + '.*'))
         if len(check) > 0:
-            shutil.rmtree(os.path.join(taskspath,'ht.tmp.'+tmpstr))
-            raise Exception("task.taskmgr.create_batch_task: Task already exists:"+str(name))
+            shutil.rmtree(os.path.join(taskspath, 'ht.tmp.' + tmpstr))
+            raise Exception("task.taskmgr.create_batch_task: Task already exists:" + str(name))
 
-    full_finalname = "ht.task."+assignment+"."+name+".start.0.unclaimed.3.waitstart"
-    finalpath = os.path.join(taskspath,full_finalname)
+    full_finalname = "ht.task." + assignment + "." + name + ".start.0.unclaimed." + str(priority) + ".waitstart"
+    finalpath = os.path.join(taskspath, full_finalname)
 
     os.rename(taskpath, finalpath)
 
