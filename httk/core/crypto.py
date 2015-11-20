@@ -18,7 +18,10 @@
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
 import hashlib, os.path, base64, re
-import bz2
+try:
+	import bz2
+except Exception:
+	pass
 import ConfigParser
 from ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
