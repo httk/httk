@@ -43,6 +43,7 @@
 #   Trigonal                    code  =  <cell choice>
 #        Cell choices                   h (hex)   r (rhomb)
 # 
+import re
 
 from httk.core import FracVector, MutableFracVector
 
@@ -1542,10 +1543,72 @@ def preprocess():
 
 preprocess()
 
+
+def symopsmatrix(symop):   
+    transl = [0, 0, 0]
+    transf = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    row = symop.split(",")
+
+    for i in range(len(row)):
+        
+        parts = [x for x in re.split("([xyz+-])", row[i]) if x != '']
+        if parts[0] not in ['+', '-']:
+            parts.insert(0, '+')
+
+        if parts.pop(0) == '-':
+            sign = "-"
+        else:
+            sign = ""
+        val = None
+        var = None
+        while len(parts) > 0:
+            data = parts.pop(0)
+            if data in ('+', '-'):
+                if var is not None:
+                    if val is None:
+                        val = '1'
+                    transf[i][var] = sign + val
+                else:
+                    if val is None:
+                        val = '0'
+                    transl[i] = val
+                val = None
+                var = None
+                sign = None                    
+            if data == '+':
+                sign = ""
+            elif data == '-':
+                sign = "-"
+            elif data == 'x':
+                var = 0
+            elif data == 'y':
+                var = 1
+            elif data == 'z':
+                var = 2
+            else:
+                val = data
+        if var is not None:
+            if val is None:
+                val = '1'
+            transf[i][var] = sign + val
+        else:
+            if val is None:
+                val = '0'
+            transl[i] = val
+
+    return FracVector.create(transf), FracVector.create(transl)
+
 def get_hall(hall):
     if hall in spacegroupdata:
         return hall
     return None
+
+def get_symops(hall):
+    if hall in spacegroupdata:
+        print [symmetryops[x] for x in spacegroupdata[hall][5]]
+        return [symopsmatrix(symmetryops[x]) for x in spacegroupdata[hall][5]]
+    return None
+
 
 def get_nonstandard_hall(nonstd_hall):
     if nonstd_hall in spacegroupdata:

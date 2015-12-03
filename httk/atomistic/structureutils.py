@@ -19,6 +19,9 @@ import sys
 from httk.core.basic import is_sequence
 from httk.core.fracvector import FracVector, FracScalar
 from httk.core.mutablefracvector import MutableFracVector
+from cell import Cell
+from unitcellsites import UnitcellSites
+import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
 from data import periodictable
 
@@ -525,6 +528,7 @@ def structure_reduced_uc_to_representative(struct, backends=['isotropy','fake'])
                 pass
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
+
 def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isotropy']):
     sys.stderr.write("WARNING: coordgroups_reduced_uc_to_representative: running untested code...\n")
     for backend in backends:
@@ -545,15 +549,36 @@ def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isot
         #        pass
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
-def coordgroups_reduced_rc_to_unitcellsites(coordgroups,basis,hall_symbol, backends=['cif2cell','ase']):
+
+def internal_coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, eps=0.001):
+    symops = spacegrouputils.get_symops(hall_symbol)
+    newcoordgroups = []
+    for coordgroup in coordgroups:
+        newcoordgroup = []
+        for symop in symops:
+            rotcoords = coordgroup*(symop[0].T())
+            for coord in rotcoords:
+                finalcoord = (coord+symop[1]).normalize()
+                if finalcoord not in newcoordgroup:
+                    for checkcoord in newcoordgroup:
+                        if (checkcoord-finalcoord).normalize_half().lengthsqr() < eps:
+                            break
+                    else:
+                        newcoordgroup += [finalcoord]
+        newcoordgroup = sorted(newcoordgroup, key=lambda x: (x[0], x[1], x[2]))
+        newcoordgroups += [newcoordgroup]
+    return newcoordgroups, basis
+
+
+def coordgroups_reduced_rc_to_unitcellsites(coordgroups,basis,hall_symbol, backends=['cif2cell','internal','ase']):
     # TODO: Make own, or use cif2cell to generate reduced unitcell
     if hall_symbol == 'P 1':
-        return coordgroups,FracScalar(1)
+        return UnitcellSites.create(reduced_coordgroups=coordgroups),Cell.create(basis)
 
     for backend in backends:
         if backend ==  'internal':
-            print "HALL SYMBOL",hall_symbol
-            raise Exception("Debug: not yet implemented")
+            newcoordgroups, newcell = internal_coordgroups_reduced_rc_to_unitcellsites(coordgroups,basis,hall_symbol)
+            return UnitcellSites.create(reduced_coordgroups=newcoordgroups), Cell.create(basis)
                 
         if backend ==  'cif2cell':
             try:
