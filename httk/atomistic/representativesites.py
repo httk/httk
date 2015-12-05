@@ -22,6 +22,7 @@ from spacegroup import Spacegroup
 from sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from sites import Sites
+from unitcellsites import UnitcellSites
 
 class RepresentativeSites(Sites):
     """
@@ -144,7 +145,13 @@ class RepresentativeSites(Sites):
         #exit(0)
         return out
 
+    @property
+    def total_number_of_atoms(self):
+        return sum(self._multiplicities)
 
+    def get_uc_sites(self):
+        filled_reduced_coordgroups = coordgroups_reduced_to_unitcell(self.reduced_coordgroups, self.hall_symbol)
+        return UnitcellSites.create(reduced_coordgroups=filled_reduced_coordgroups, pbc=self.pbc)
 
     def clean(self):
         c = super(RepresentativeSites,self).clean()

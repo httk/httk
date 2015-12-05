@@ -41,9 +41,9 @@ def load_struct(ioa, ext=None, filename=None):
         if ext == '':
             ext = splitfilename[0]
 
-        if ext.startswith(".poscar") or splitfilename[0] == "POSCAR":
+        if ext.startswith(".poscar") or splitfilename[0].startswith("POSCAR"):
             ext = '.vasp'
-        if ext.startswith(".contcar") or splitfilename[0] == "CONTCAR":
+        if ext.startswith(".contcar") or splitfilename[0].startswith("CONTCAR"):
             ext = '.vasp'
 
     if ext == '.vasp':

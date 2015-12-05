@@ -57,7 +57,7 @@ class Sites(HttkObject):
                 reduced_coords=None, 
                 counts=None, occupancies=None,
                 spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-                periodicity=None):
+                pbc=None, periodicity=None):
         """
         Create a new sites object
         """        
@@ -79,16 +79,26 @@ class Sites(HttkObject):
         else:
             hall_symbol = None
         
-        if reduced_coordgroups != None:
+        if reduced_coordgroups is not None:
             reduced_coordgroups = FracVector.use(reduced_coordgroups)
         
-        if reduced_coords != None:
+        if reduced_coords is not None:
             reduced_coords = FracVector.use(reduced_coords)
 
-        if periodicity != None:
-            pbc = periodicity_to_pbc(periodicity)
-        else:
-            pbc = (True, True, True)
+        if reduced_coords is None and reduced_coordgroups is not None:
+            reduced_coords = FracVector.chain_vecs(reduced_coordgroups)
+
+        if pbc is None:
+            if periodicity is not None:
+                pbc = periodicity_to_pbc(periodicity)
+            else:
+                pbc = (True, True, True)
+
+        if counts is None and reduced_coordgroups is not None:
+            counts = [len(x) for x in reduced_coordgroups]
+
+        if counts is None or reduced_coords is None:
+            raise Exception("Sites.create: not enough information to create sites object.")
 
         sites = cls(reduced_coordgroups=reduced_coordgroups, 
                 reduced_coords=reduced_coords, 
@@ -163,6 +173,11 @@ class Sites(HttkObject):
                 reduced_coords=reduced_coords, 
                 counts=self.counts,  
                 hall_symbol=self.hall_symbol, pbc=self.pbc)
+
+    @property
+    def total_number_of_atoms(self):
+        raise Exception("Sites: attempt to call total_number_of_atoms on generic site, needs unitcellsites or representativesites")
+
         
     #def tidy(self):
     #    return Sites(self._unique_coordgroups, self._uc_coordgroups, self.cell, self.hall_symbol, self.periodicity, self.refs, self.tags)

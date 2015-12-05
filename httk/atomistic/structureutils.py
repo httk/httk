@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 # 
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
@@ -16,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 
-from httk.core.basic import is_sequence
+from httk.core import is_sequence, breath_first_idxs
 from httk.core.fracvector import FracVector, FracScalar
 from httk.core.mutablefracvector import MutableFracVector
 from cell import Cell
@@ -24,6 +25,8 @@ from unitcellsites import UnitcellSites
 import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
 from data import periodictable
+from fractions import Fraction
+from httk.atomistic.spacegrouputils import crystal_system, Hex2RhombHall, Rhomb2HexHall
 
 def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]
@@ -677,6 +680,138 @@ def structure_tidy(struct,backends=['platon']):
                 raise
                 pass
     raise Exception("structure_tidy: None of the available backends available.")
+
+# Taken from cif2cell by Torbjörn Björkman, uctools.py
+def get_primitive_basis_transform(basis, hall_symbol, eps=0.001):
+    basis = FracVector.use(basis)
+    niggli, orientation = basis_to_niggli(basis)
+    length, angles = niggli_to_lengths_angles(niggli)
+    a, b, c = length
+    alpha, beta, gamma = angles
+    
+    zero = Fraction(0)
+    half = Fraction(1, 2)
+    one = Fraction(1)
+    third = Fraction(1, 3)
+    spacegroupsetting = hall_symbol.lstrip("-")[0][0]
+    system = crystal_system(hall_symbol)
+    
+    if spacegroupsetting == 'I':
+        # Body centered
+        transvecs = [FracVector.create([zero, zero, zero]),
+                          FracVector.create([half, half, half])]
+        if system == 'cubic':
+            lattrans = FracVector.create([[-half, half, half],
+                                           [half, -half, half],
+                                           [half, half, -half]])
+        else:
+            lattrans = FracVector.create([[one, zero, zero],
+                                           [zero, one, zero],
+                                           [half, half, half]])
+    elif spacegroupsetting == 'F':
+        # face centered
+        transvecs = [FracVector.create([zero, zero, zero]),
+                     FracVector.create([half, half, zero]),
+                     FracVector.create([half, zero, half]),
+                     FracVector.create([zero, half, half])]
+        lattrans = FracVector.create([[half, half, zero],
+                                      [half, zero, half],
+                                      [zero, half, half]])
+    elif spacegroupsetting == 'A':
+        # A-centered
+        transvecs = [FracVector.create([zero, zero, zero]),
+                     FracVector.create([zero, half, half])]
+        lattrans = FracVector.create([[one, zero, zero],
+                                      [zero, half, -half],
+                                      [zero, half, half]])
+    elif spacegroupsetting == 'B':
+        # B-centered
+        transvecs = [FracVector.create([zero, zero, zero]),
+                     FracVector.create([half, zero, half])]
+        lattrans = FracVector.create([[half, zero, -half],
+                                      [zero, one, zero],
+                                      [half, zero, half]])
+    elif spacegroupsetting == 'C':
+        # C-centered
+        transvecs = [FracVector.create([zero, zero, zero]),
+                     FracVector.create([half, half, zero])]
+        lattrans = FracVector.create([[half, -half, zero],
+                                      [half, half, zero],
+                                      [zero, zero, one]])
+    elif hall_symbol in Hex2RhombHall or hall_symbol in Rhomb2HexHall:
+        if abs(gamma - 120) < eps:
+            # rhombohedral from hexagonal setting
+            rhombohedral = True
+            transvecs = [FracVector.create([zero, zero, zero]),
+                         FracVector.create([third, 2*third, 2*third]),
+                         FracVector.create([2*third, third, third])]
+            lattrans = FracVector.create([[2*third, third, third],
+                                          [-third, third, third],
+                                          [-third, -2*third, third]])
+        else:
+            transvecs = [FracVector.create([zero, zero, zero])]
+            lattrans = FracVector.create([[1, 0, 0],
+                                          [0, 1, 0],
+                                          [0, 0, 1]])
+    else:
+        transvecs = [FracVector.create([zero, zero, zero])]
+        lattrans = FracVector.create([[1, 0, 0],
+                                      [0, 1, 0],
+                                      [0, 0, 1]])
+    # Transform to primitive cell
+    tmp = []
+    return lattrans
+
+def transform(structure,transformation,max_search_cells=20, max_atoms=1000):
+
+    transformation=FracVector.use(transformation).simplify()
+    #if transformation.denom != 1:
+    #    raise Exception("Structure.transform requires integer transformation matrix")
+    
+    old_cell = structure.uc_cell
+    new_cell = Cell.create(basis=transformation*old_cell.basis)
+    conversion_matrix = (old_cell.basis*new_cell.inv).simplify()
+
+    volume_ratio = abs((new_cell.basis.det()/abs(old_cell.basis.det()))).simplify()
+    seek_counts = [int((volume_ratio*x).simplify()) for x in structure.uc_counts]
+    total_seek_counts = sum(seek_counts)
+    if total_seek_counts > max_atoms:
+        raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
+
+    #if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
+    #    raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
+         
+    ### Collect coordinate list of all sites inside the new cell
+    coordgroups = structure.uc_reduced_coordgroups
+    extendedcoordgroups = [[] for x in range(len(coordgroups))]
+
+    if max_search_cells != None:
+        max_search = [max_search_cells,max_search_cells,max_search_cells]
+    else:
+        max_search = None
+
+    for offset in breath_first_idxs(dim=3, end=max_search, negative=True):
+        #print "X",offset, seek_counts
+        for idx in range(len(coordgroups)):
+            coordgroup = coordgroups[idx]
+            newcoordgroup = coordgroup+FracVector([offset]*len(coordgroup))
+            new_reduced = newcoordgroup*conversion_matrix
+            #print "NEW:",FracVector.use(new_reduced).to_floats(),
+            new_reduced = [x for x in new_reduced if x[0]>=0 and x[1]>=0 and x[2]>=0 and x[0]<1 and x[1]<1 and x[2]<1]
+            extendedcoordgroups[idx] += new_reduced
+            c = len(new_reduced)
+            seek_counts[idx] -= c
+            total_seek_counts-= c
+            #print "ADD",str(c)
+            if seek_counts[idx] < 0:
+                #print "X",offset, seek_counts
+                raise Exception("Structure.transform safety check error, internal error: too many atoms in supercell.")
+        if total_seek_counts == 0:
+            break
+    else:
+        raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
+
+    return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 
 
 def main():

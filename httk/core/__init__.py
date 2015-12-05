@@ -39,7 +39,8 @@ except Exception:
 import citation
 citation.add_src_citation("httk", "Rickard Armiento")
 
-import basic
+from basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
+from basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
 from code import Code
 from computation import Computation, Result, ComputationRelated, ComputationProject
 from reference import Author, Reference

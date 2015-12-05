@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from httk.atomistic import Structure, ScalelessStructure, StructureTag, StructureRef
+from httk.atomistic import Structure, StructureTag, StructureRef
 from httk.core.reference import Reference
 from httk.core.computation import Computation
 from httk.core import FracScalar

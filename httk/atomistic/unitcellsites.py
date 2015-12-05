@@ -45,9 +45,15 @@ class UnitcellSites(Sites):
                 reduced_coords=reduced_coords, 
                 counts=counts, 
                 hall_symbol='P 1',pbc=pbc)
+
+    @property
+    def total_number_of_atoms(self):
+        return sum(self._counts)
+
                                         
 def main():
     pass
+
 
 if __name__ == "__main__":
     main()

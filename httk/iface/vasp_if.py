@@ -291,17 +291,24 @@ def structure_to_comment(struct):
     else:
         return struct.formula + " " + tagstr
 
-def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None):    
+def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None, primitive_cell=True):    
     if comment == None:
         comment = structure_to_comment(struct)
-    basis = struct.uc_basis
-    coords = struct.uc_reduced_coords
+    if primitive_cell:
+        basis = struct.pc_basis
+        coords = struct.pc_reduced_coords
+        vol = float(struct.pc_volume)
+    else:
+        basis = struct.cc_basis
+        coords = struct.cc_reduced_coords
+        vol = float(struct.cc_volume)
+        
     if basis.det() < 0:
         if fix_negative_determinant:
             basis = -basis
-            coords = -coords
+            coords = (-coords).normalize()
     
-    write_poscar(f, basis.to_floats(), coords.to_floats(), True, struct.uc_counts, struct.symbols, comment,vol=float(struct.uc_volume))
+    write_poscar(f, basis.to_floats(), coords.to_floats(), True, struct.uc_counts, struct.symbols, comment,vol=vol)
 
 def calculate_kpoints(struct,dens=20):
     #local KPTSLINE=$(awk -v "LVAL=$LVAL" -v"equalkpts=$EQUAL_KPTS" -v"bumpkpts=$BUMP_KPTS" '

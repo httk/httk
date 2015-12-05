@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 # 
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
@@ -19,6 +20,8 @@ from httk.core.httkobject import HttkObject
 from httk.core.fracvector import FracVector
 from math import sqrt, acos, cos, sin, pi
 from httk.core.basic import *
+from fractions import Fraction
+from spacegrouputils import Hex2RhombHall, Rhomb2HexHall, crystal_system
 
 def niggli_to_basis(niggli_matrix,orientation=1):
     #cell = FracVector.use(niggli_matrix)
@@ -194,6 +197,7 @@ def scaling_to_volume(basis,scaling):
         volume = scale_to_vol(basis, scale)    
 
     return volume
+
 
 def main():
     pass
