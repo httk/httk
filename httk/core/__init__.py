@@ -36,23 +36,23 @@ try:
 except Exception:
     raise Exception("Python version too old. Httk appear to be running on a version older than python 2.0!")
 
-import citation
+from . import citation
 citation.add_src_citation("httk", "Rickard Armiento")
 
-from basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
-from basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
-from code import Code
-from computation import Computation, Result, ComputationRelated, ComputationProject
-from reference import Author, Reference
-from project import Project, ProjectRef, ProjectTag
-import crypto
-from fracvector import FracVector, FracScalar
-from mutablefracvector import MutableFracVector
-from signature import Signature, SignatureKey
+from .basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
+from .basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
+from .code import Code
+from .computation import Computation, Result, ComputationRelated, ComputationProject
+from .reference import Author, Reference
+from .project import Project, ProjectRef, ProjectTag
+from . import crypto
+from .fracvector import FracVector, FracScalar
+from .mutablefracvector import MutableFracVector
+from .signature import Signature, SignatureKey
 
-from ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAppender, IoAdapterString, IoAdapterStringList, IoAdapterFilename
-from httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
-from httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
+from .ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAppender, IoAdapterString, IoAdapterStringList, IoAdapterFilename
+from .httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
+from .httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
 
 
 

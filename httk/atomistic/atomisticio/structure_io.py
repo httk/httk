@@ -29,7 +29,7 @@ def load_struct(ioa, ext=None, filename=None):
             if filename is None:
                 filename = ioa.filename
         except Exception:
-            raise Exception("httk.io.load: original filename not known. Cannot open a generic file.")
+            raise Exception("httk.httkio.load: original filename not known. Cannot open a generic file.")
 
         splitfilename = os.path.splitext(os.path.basename(filename))
         ext = splitfilename[1].lower()
@@ -53,7 +53,7 @@ def load_struct(ioa, ext=None, filename=None):
         from structure_cif_io import cif_to_struct
         return cif_to_struct(ioa)
     else:
-        raise Exception("httk.io.load: I do not know what to do with the file:" + filename)
+        raise Exception("httk.httkio.load: I do not know what to do with the file:" + filename)
 
 
 def save_struct(struct, ioa, ext=None):
@@ -65,7 +65,7 @@ def save_struct(struct, ioa, ext=None):
         try:
             filename = ioa.filename
         except Exception:
-            raise Exception("httk.io.load: original filename not known. Cannot open a generic file.")
+            raise Exception("httk.httkio.load: original filename not known. Cannot open a generic file.")
 
         splitfilename = os.path.splitext(os.path.basename(filename))
         ext = splitfilename[1]
@@ -89,4 +89,4 @@ def save_struct(struct, ioa, ext=None):
         from structure_cif_io import struct_to_cif
         return struct_to_cif(struct, ioa)
     else:
-        raise Exception("httk.io.save: I do not know what to do with the file:" + filename)
+        raise Exception("httk.httkio.save: I do not know what to do with the file:" + filename)

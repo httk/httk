@@ -24,27 +24,29 @@ from sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init
 from sites import Sites
 
+
 class UnitcellSites(Sites):
+
     """
     Represents any collection of sites in a unitcell
     """
     
-    @httk_typed_init({'reduced_coords':(FracVector,0,3), 'counts':[int], 
-                'pbc':(bool,1,3)},index=['counts','pbc'])
+    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int], 
+                      'pbc': (bool, 1, 3)}, index=['counts', 'pbc'])
     def __init__(self, reduced_coordgroups=None, 
-                reduced_coords=None, 
-                counts=None, 
-                hall_symbol='P 1',pbc=None):
+                 reduced_coords=None, 
+                 counts=None, 
+                 hall_symbol='P 1', pbc=None):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
         """        
-        if hall_symbol!='P 1' and hall_symbol != None:
+        if hall_symbol != 'P 1' and hall_symbol is not None:
             raise Exception("Attempt to create FullSites object with other hall symbol than P 1, hall_symbol was:"+str(hall_symbol))
         
-        super(UnitcellSites,self).__init__(reduced_coordgroups=reduced_coordgroups, 
-                reduced_coords=reduced_coords, 
-                counts=counts, 
-                hall_symbol='P 1',pbc=pbc)
+        super(UnitcellSites, self).__init__(reduced_coordgroups=reduced_coordgroups, 
+                                            reduced_coords=reduced_coords, 
+                                            counts=counts, 
+                                            hall_symbol='P 1', pbc=pbc)
 
     @property
     def total_number_of_atoms(self):

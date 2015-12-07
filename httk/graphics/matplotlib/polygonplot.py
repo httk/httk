@@ -19,11 +19,12 @@
 
 from pylab import *
 
+
 class PolygonPlot(object):
     
-    def __init__(self, start_angle=90, rotate_labels=False, labels=('one','two','three'),sides=3, 
-                 label_offset=0.10,edge_args={'color':'black','linewidth':2},fig_args = {'figsize':(8,8),'facecolor':'white','edgecolor':'white'},
-                 text_args = {'fontsize':24,'color':'black'}):
+    def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three'), sides=3, 
+                 label_offset=0.10, edge_args={'color': 'black', 'linewidth': 2}, fig_args = {'figsize': (8, 8), 'facecolor': 'white', 'edgecolor': 'white'},
+                 text_args = {'fontsize': 24, 'color': 'black'}):
         """
         start_angle (90): Direction of first vertex.
         rotate_labels (False): Orient labels perpendicular to vertices.
@@ -36,39 +37,38 @@ class PolygonPlot(object):
 
         """
         self.basis = array(
-                        [
-                            [
-                                cos(2*_*pi/sides + start_angle*pi/180),
-                                sin(2*_*pi/sides + start_angle*pi/180)
-                            ] 
-                            for _ in range(sides)
-                        ]
-                    )
+            [
+                [
+                    cos(2*_*pi/sides + start_angle*pi/180),
+                    sin(2*_*pi/sides + start_angle*pi/180)
+                ] 
+                for _ in range(sides)
+            ]
+        )
 
-        
         fig = figure(**fig_args)
         ax = fig.add_subplot(111)
     
-        for i,l in enumerate(labels):
+        for i, l in enumerate(labels):
             if i >= sides:
                 break
-            x = self.basis[i,0]
-            y = self.basis[i,1]
+            x = self.basis[i, 0]
+            y = self.basis[i, 1]
             if rotate_labels:
                 angle = 180*arctan(y/x)/pi + 90
                 if angle > 90 and angle <= 270:
-                    angle = mod(angle + 180,360)
+                    angle = mod(angle + 180, 360)
             else:
                 angle = 0
             ax.text(
-                    x*(1 + label_offset),
-                    y*(1 + label_offset),
-                    l,
-                    horizontalalignment='center',
-                    verticalalignment='center',
-                    rotation=angle,
-                    **text_args
-                )
+                x*(1 + label_offset),
+                y*(1 + label_offset),
+                l,
+                horizontalalignment='center',
+                verticalalignment='center',
+                rotation=angle,
+                **text_args
+            )
     
         # Clear normal matplotlib axes graphics.
         ax.set_xticks(())
@@ -77,15 +77,14 @@ class PolygonPlot(object):
     
         # Plot border
         ax.plot(
-            [self.basis[_,0] for _ in range(sides) + [0,]],
-            [self.basis[_,1] for _ in range(sides) + [0,]],
+            [self.basis[_, 0] for _ in range(sides) + [0, ]],
+            [self.basis[_, 1] for _ in range(sides) + [0, ]],
             **edge_args
         )
         self.ax = ax
         
-
-    def translate_coords(self,data,scaling=True):
-        if len(data)==0:
+    def translate_coords(self, data, scaling=True):
+        if len(data) == 0:
             return data
         
         data = array(data)        
@@ -93,34 +92,34 @@ class PolygonPlot(object):
         # If data is Nxsides, newdata is Nx2.
         if scaling:
             # Scales data for you.
-            newdata = dot((data.T / data.sum(-1)).T,self.basis)
+            newdata = dot((data.T / data.sum(-1)).T, self.basis)
         else:
             # Assumes data already sums to 1.
-            newdata = dot(data,self.basis)
+            newdata = dot(data, self.basis)
         return newdata
 
-__all__= ['PolygonPlot']
+__all__ = ['PolygonPlot']
 
 if __name__ == '__main__':
     k = 0.5
     s = 1000
 
     data = vstack((
-        array([k,0,0]) + rand(s,3), 
-        array([0,k,0]) + rand(s,3), 
-        array([0,0,k]) + rand(s,3)
+        array([k, 0, 0]) + rand(s, 3), 
+        array([0, k, 0]) + rand(s, 3), 
+        array([0, 0, k]) + rand(s, 3)
     ))
-    color = array([[1,0,0]]*s + [[0,1,0]]*s + [[0,0,1]]*s)
+    color = array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s)
 
     pp = PolygonPlot()
 
     newdata = pp.translate_coords(data)
 
     pp.ax.scatter(
-        newdata[:,0],
-        newdata[:,1],
+        newdata[:, 0],
+        newdata[:, 1],
         s=2,
         alpha=0.5,
         color=color
-        )
+    )
     show()

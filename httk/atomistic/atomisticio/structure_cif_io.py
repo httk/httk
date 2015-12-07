@@ -17,18 +17,20 @@
 
 import os, hashlib, random, string
 from collections import OrderedDict 
-import httk, httk.io
+import httk
+import httk.httkio
 
 from httk.atomistic.data import periodictable, spacegroups
 from httk.core import *
 from httk.atomistic import Structure, Spacegroup
 
-def cif_to_struct(ioa,backends=['internal','cif2cell','ase','platon']):
+
+def cif_to_struct(ioa, backends=['internal', 'cif2cell', 'ase', 'platon']):
     for backend in backends:
         #print "CIF TO STRUCT BACKEND",backend
         if backend == 'internal':
             try:
-                cifdata, cifheader = httk.io.read_cif(ioa)
+                cifdata, cifheader = httk.httkio.read_cif(ioa)
                 return cifdata_to_struct(cifdata)
             except ImportError:
                 pass
@@ -80,7 +82,7 @@ def cif_to_struct(ioa,backends=['internal','cif2cell','ase','platon']):
 def struct_to_cif(struct, ioa, backends=['httk']):
     for backend in backends:
         if backend == 'httk':
-            return struct_to_cif_httk(struct,ioa)
+            return struct_to_cif_httk(struct, ioa)
         if backend == 'ase':
             try:
                 from httk.external import ase_glue
@@ -113,14 +115,14 @@ def struct_to_cif_httk(struct, ioa, header=None):
         sgnumber = 1
         hmsymbol = 'P 1'
 
-    if header != None:
+    if header is not None:
         f.write(header)
         f.write("\n")
     
     f.write("data_image0\n")
     f.write("\n")
     try:
-        if struct.get_tag('name') != None:
+        if struct.get_tag('name') is not None:
             f.write("_chemical_name_systematic '"+struct.get_tag('name').value+"'\n")   
     except Exception:
         pass
@@ -135,14 +137,14 @@ def struct_to_cif_httk(struct, ioa, header=None):
     f.write("_cell_angle_gamma    "+str(float(la[5]))+"\n")
     f.write("\n")
     f.write("_symmetry_space_group_name_Hall      '"+str(hall)+"'\n")
-    if hmsymbol != None:
+    if hmsymbol is not None:
         f.write("_symmetry_space_group_name_H-M      '"+str(hmsymbol)+"'\n")
     f.write("_symmetry_Int_Tables_number          "+str(sgnumber)+"\n")
     f.write("\n")
     f.write("loop_\n")
     f.write("_atom_site_label\n")
     f.write("_atom_site_type_symbol\n")
-    if wyckoffsymbols != None:
+    if wyckoffsymbols is not None:
         f.write("_atom_site_symmetry_multiplicity\n")
         f.write("_atom_site_Wyckoff_symbol\n")
     f.write("_atom_site_fract_x\n")
@@ -151,7 +153,7 @@ def struct_to_cif_httk(struct, ioa, header=None):
     f.write("_atom_site_occupancy\n")
     seen = {}
     
-    for i,cg in enumerate(coordgroups):
+    for i, cg in enumerate(coordgroups):
         for coord in cg:
             x = coord[0]
             y = coord[1]
@@ -162,13 +164,13 @@ def struct_to_cif_httk(struct, ioa, header=None):
                 symbol = symbols[occ]
                 ratio = ratios[occ]
                 if symbol in seen:
-                    seen[symbol]+=1
+                    seen[symbol] += 1
                     idx = seen[symbol]
                 else:
-                    seen[symbol]=1
+                    seen[symbol] = 1
                     idx = 1
                 label = symbol+str(idx)
-                if wyckoffsymbols != None:
+                if wyckoffsymbols is not None:
                     multiplicity = multiplicities[i]
                     wyckoffsymbol = wyckoffsymbols[i]
                     f.write("%s   %s  %d %s %.14f %.14f %.14f %.14f\n" % (label, symbol, multiplicity, wyckoffsymbol, float(x), float(y), float(z), float(ratio)))
@@ -177,52 +179,53 @@ def struct_to_cif_httk(struct, ioa, header=None):
 
     ioa.close()
 
+
 def cif_reader_that_can_only_read_isotropy_cif(ioa):
 
     def cell_length(results, match):
-        results['length_'+match.group(1)]=FracVector.create(match.group(2))
+        results['length_'+match.group(1)] = FracVector.create(match.group(2))
 
     def cell_angle(results, match):
-        results['angle_'+match.group(1)]=FracVector.create(match.group(2))
+        results['angle_'+match.group(1)] = FracVector.create(match.group(2))
 
     def print_hm_and_hall(results):
-        grpnbr=results['grpnbr']
-        setting=results['setting']
-        hmsymb=results['hmfull']
-        hallsymb=spacegroups.spacegroup_get_hall(str(grpnbr)+":"+setting)
-        results['hall_symbol']=hallsymb
+        grpnbr = results['grpnbr']
+        setting = results['setting']
+        hmsymb = results['hmfull']
+        hallsymb = spacegroups.spacegroup_get_hall(str(grpnbr)+":"+setting)
+        results['hall_symbol'] = hallsymb
 
-    def hm_symbol_origin(results,match):
-        results['out']=True
-        results['hmfull']=match.group(1);
-        results['hm']=match.group(2);
-        if match.group(3)=='hexagonal axes':
-            results['setting']='1';
+    def hm_symbol_origin(results, match):
+        results['out'] = True
+        results['hmfull'] = match.group(1)
+        results['hm'] = match.group(2)
+        if match.group(3) == 'hexagonal axes':
+            results['setting'] = '1'
         else:
-            results['setting']=str(match.group(3));
+            results['setting'] = str(match.group(3))
         if 'hm' in results and 'grpnbr' in results:
             print_hm_and_hall(results)
 
-    def hm_symbol_no_origin(results,match):
-        results['out']=True
-        results['hmfull']=match.group(1);
-        results['hm']=match.group(1);
-        results['setting']="1";
+    def hm_symbol_no_origin(results, match):
+        results['out'] = True
+        results['hmfull'] = match.group(1)
+        results['hm'] = match.group(1)
+        results['setting'] = "1"
         if 'hm' in results and 'grpnbr' in results:
             print_hm_and_hall(results)
 
-    def groupnbr(results,match):
-        results['grpnbr']=match.group(1);
+    def groupnbr(results, match):
+        results['grpnbr'] = match.group(1)
         if 'hm' in results and 'grpnbr' in results:
             print_hm_and_hall(results)
         
-    def coords(results,match):
-        newcoord = httk.FracVector.create([match.group(5),match.group(6),match.group(7)])
-        occup = {'atom':periodictable.atomic_number(match.group(2)),'ratio':FracVector.create(match.group(8)),}
+    def coords(results, match):
+        newcoord = httk.FracVector.create([match.group(5), match.group(6), match.group(7)])
+        occup = {'atom': periodictable.atomic_number(match.group(2)), 'ratio': FracVector.create(match.group(8)), }
         if match.group(4) == 'alpha':
-            wyckoff='&'
+            wyckoff = '&'
         else:
-            wyckoff=match.group(4)
+            wyckoff = match.group(4)
         multiplicities = int(match.group(3))            
         if newcoord in results['seen_coords']:
             idx = results['seen_coords'][newcoord]
@@ -235,34 +238,35 @@ def cif_reader_that_can_only_read_isotropy_cif(ioa):
             results['multiplicities'].append(multiplicities)      
             results['idx'] += 1
         
-    results = {'idx':0, 'occups':[], 'wyckoff':[],'multiplicities':[],'coords':[],'seen_coords':{}}
-    httk.basic.micro_pyawk(ioa,[
-            ['^_cell_length_([^ ]*) (.*) *$',None,cell_length],
-            ['^_cell_angle_([^ ]*) (.*) *$',None,cell_angle],           
-            ['^_symmetry_Int_Tables_number +(.*)$',None,groupnbr],
-            ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$',None,hm_symbol_origin],
-            ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$',None,hm_symbol_origin],
-            ['^_symmetry_space_group_name_H-M +"([^()]+)" *$',None,hm_symbol_no_origin],
-            ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$',None,coords],
-            ],debug=False,results=results)
+    results = {'idx': 0, 'occups': [], 'wyckoff': [], 'multiplicities': [], 'coords': [], 'seen_coords': {}}
+    httk.basic.micro_pyawk(ioa, [
+        ['^_cell_length_([^ ]*) (.*) *$', None, cell_length],
+        ['^_cell_angle_([^ ]*) (.*) *$', None, cell_angle],           
+        ['^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
+        ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
+        ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
+        ['^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
+        ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
+    ], debug=False, results=results)
 
-    struct = Structure.create(rc_a=results['length_a'],rc_b=results['length_b'],rc_c=results['length_c'],
-                              rc_alpha=results['angle_alpha'],rc_beta=results['angle_beta'],rc_gamma=results['angle_gamma'], 
+    struct = Structure.create(rc_a=results['length_a'], rc_b=results['length_b'], rc_c=results['length_c'],
+                              rc_alpha=results['angle_alpha'], rc_beta=results['angle_beta'], rc_gamma=results['angle_gamma'], 
                               rc_reduced_occupationscoords=results['coords'], rc_occupancies=results['occups'], 
-                              spacegroup=results['hall_symbol'],wyckoff_symbols=results['wyckoff'],multiplicities=results['multiplicities'])
+                              spacegroup=results['hall_symbol'], wyckoff_symbols=results['wyckoff'], multiplicities=results['multiplicities'])
     return struct
+
 
 def cif_reader_httk_preprocessed(ioa):
     ioa = IoAdapterStringList.use(ioa)
     for i in range(len(ioa.stringlist)):
         if ioa.stringlist[i].startswith("INPUT"):
-            ioa.stringlist[i]=""
-    newstruct = cif_to_struct(ioa,backends=['cif2cell_reduce'])        
+            ioa.stringlist[i] = ""
+    newstruct = cif_to_struct(ioa, backends=['cif2cell_reduce'])        
     for i in range(len(ioa.stringlist)):
         if ioa.stringlist[i].startswith("# Data extracted using the FINDSYM utility follows"):
-            ioa.stringlist=ioa.stringlist[i:]
+            ioa.stringlist = ioa.stringlist[i:]
             break
-    only_rc_struct = cif_to_struct(ioa,backends=['cif_reader_that_can_only_read_isotropy_cif'])
+    only_rc_struct = cif_to_struct(ioa, backends=['cif_reader_that_can_only_read_isotropy_cif'])
     if only_rc_struct.assignments.hexhash != newstruct.assignments.hexhash:
         # This happens IF the rc representation is broken due to the use of 
         # different but equivalent sites. In this case we have already lost, and need
@@ -271,7 +275,7 @@ def cif_reader_httk_preprocessed(ioa):
         # This will all be solved when we implement our own cif reader.
         return newstruct
     
-    newstruct.rc_sites.wyckoff_symbols=only_rc_struct.rc_sites.wyckoff_symbols
+    newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
     
     # Cell basis can only be constructed from the cif approximately
     only_rc_struct._rc_cell = newstruct._rc_cell
@@ -286,6 +290,7 @@ def cif_reader_httk_preprocessed(ioa):
         raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
     return newstruct
 
+
 def cifdata_to_struct(cifdata):
     #import pprint
     #pp = pprint.PrettyPrinter()
@@ -295,8 +300,8 @@ def cifdata_to_struct(cifdata):
     #del element['symmetry_equiv_pos_as_xyz']
     #pp.pprint(dict(element))
 
-    rc_lengths = FracVector.create([element['cell_length_a'],element['cell_length_b'],element['cell_length_c']])
-    rc_angles = FracVector.create([element['cell_angle_alpha'],element['cell_angle_beta'],element['cell_angle_gamma']])
+    rc_lengths = FracVector.create([element['cell_length_a'], element['cell_length_b'], element['cell_length_c']])
+    rc_angles = FracVector.create([element['cell_angle_alpha'], element['cell_angle_beta'], element['cell_angle_gamma']])
 
     hall_symbol = None
     hm_symbol = None
@@ -335,8 +340,8 @@ def cifdata_to_struct(cifdata):
             ratio = 1
         symbol = element['atom_site_label'][atom].rstrip('1234567890')
         
-        occup = {'atom':periodictable.atomic_number(symbol),'ratio':FracVector.create(ratio),}
-        coord = [element['atom_site_fract_x'][atom],element['atom_site_fract_y'][atom],element['atom_site_fract_z'][atom]]
+        occup = {'atom': periodictable.atomic_number(symbol), 'ratio': FracVector.create(ratio), }
+        coord = [element['atom_site_fract_x'][atom], element['atom_site_fract_y'][atom], element['atom_site_fract_z'][atom]]
 
         rc_occupancies += [occup]
         rc_reduced_occupationscoords += [coord]
@@ -359,7 +364,7 @@ def cifdata_to_struct(cifdata):
             authorparts = author.partition(",")
             lastname = authorparts[0].strip()
             givennames = authorparts[2].strip()
-            authorlist += [Author.create(lastname,givennames)]
+            authorlist += [Author.create(lastname, givennames)]
 
     # I didn't find this in the spec, on the other hand, the publ_ space is "not specified", so, this seems
     # as a logical extension of the author list in case of a cif file that has been published in a book.
@@ -374,7 +379,7 @@ def cifdata_to_struct(cifdata):
             editorparts = editor.partition(",")
             lastname = editorparts[0].strip()
             givennames = editorparts[2].strip()
-            editorlist += [Author.create(lastname,givennames)]
+            editorlist += [Author.create(lastname, givennames)]
         
     refs = None
     if 'journal_name_full' in element or 'journal_name_abbrev' in element:
@@ -385,7 +390,7 @@ def cifdata_to_struct(cifdata):
         journal_title = None
         journal_book_title = None
         journal_issue = None
-        journal_publisher=None
+        journal_publisher = None
         journal_publisher_city = None
         if 'journal_name_abbrev' in element:
             journal = element['journal_name_abbrev']
@@ -415,8 +420,8 @@ def cifdata_to_struct(cifdata):
             journal_publisher_city = element['journal_book_publisher_city']
         
         refs = [Reference.create(authors=authorlist, editors=editorlist, journal=journal, journal_issue=journal_issue, journal_volume=journal_volume, 
-                 page_first=journal_page_first, page_last=journal_page_last, title=journal_title, year=journal_year, book_publisher=journal_publisher,
-                 book_publisher_city=journal_publisher_city, book_title=journal_book_title)]
+                                 page_first=journal_page_first, page_last=journal_page_last, title=journal_title, year=journal_year, book_publisher=journal_publisher,
+                                 book_publisher_city=journal_publisher_city, book_title=journal_book_title)]
 
     # This is based on some assumptions... IF a journal_* type tree exists, then we assume this is a 'published' cif, and
     # in that case the only reference we want to keep is the one to the published work. Citations in the citation_* tree is going to be
@@ -424,11 +429,11 @@ def cifdata_to_struct(cifdata):
     # if no journal_* tree exists, then this is a 'generic' structure cif, where the citations should point to all publications of 
     # this structure; and we don't want to assume 'citation_coordinate_linkage'
     add_all_citations = False
-    if refs == None or len(refs) == 0:
+    if refs is None or len(refs) == 0:
         add_all_citations = True
 
     if 'citation_journal_full' in element or 'citation_journal_abbrev' in element or 'citation_book_title' in element:
-        if refs == None:
+        if refs is None:
             refs = []
         if 'citation_journal_full' in element:
             N = len(element['citation_journal_full'])
@@ -446,7 +451,7 @@ def cifdata_to_struct(cifdata):
             journal_title = None
             journal_book_title = None
             journal_issue = None
-            journal_publisher=None
+            journal_publisher = None
             journal_publisher_city = None
             if 'citation_journal_full' in element:
                 journal = element['citation_journal_full'][i]
@@ -475,19 +480,18 @@ def cifdata_to_struct(cifdata):
                      page_first=journal_page_first, page_last=journal_page_last, title=journal_title, year=journal_year, book_publisher=journal_publisher,
                      book_publisher_city=journal_publisher_city, book_title=journal_book_title)]
 
-                            
     struct = Structure.create(rc_lengths=rc_lengths,
                               rc_angles=rc_angles, 
                               rc_reduced_occupationscoords=rc_reduced_occupationscoords, 
                               rc_occupancies=rc_occupancies, 
                               spacegroup=spacegroup, setting=setting, 
                               periodicity=0, 
-                              wyckoff_symbols=wyckoff_symbols,multiplicities=multiplicities, tags=tags, refs=refs)
+                              wyckoff_symbols=wyckoff_symbols, multiplicities=multiplicities, tags=tags, refs=refs)
     
     return struct
     
 
-def struct_to_cifdata(struct,entryid=None):
+def struct_to_cifdata(struct, entryid=None):
     entry = OrderedDict()
         
     wyckoffsymbols = None
@@ -510,22 +514,22 @@ def struct_to_cifdata(struct,entryid=None):
         hmsymbol = 'P 1'
         
     try:
-        if struct.get_tag('name') != None:
-            entry["chemical_name_common"]=struct.get_tag('name').value   
+        if struct.get_tag('name') is not None:
+            entry["chemical_name_common"] = struct.get_tag('name').value   
     except Exception:
         pass
     if struct.has_uc_repr:
-        entry["chemical_formula_sum"]=struct.uc_formula_spaceseparated    
+        entry["chemical_formula_sum"] = struct.uc_formula_spaceseparated    
 
-    entry["cell_length_a"]=str(float(la[0]))
-    entry["cell_length_b"]=str(float(la[1]))
-    entry["cell_length_c"]=str(float(la[2]))
-    entry["cell_angle_alpha"]=str(float(la[3]))
-    entry["cell_angle_beta"]=str(float(la[4]))
-    entry["cell_angle_gamma"]=str(float(la[5]))
+    entry["cell_length_a"] = str(float(la[0]))
+    entry["cell_length_b"] = str(float(la[1]))
+    entry["cell_length_c"] = str(float(la[2]))
+    entry["cell_angle_alpha"] = str(float(la[3]))
+    entry["cell_angle_beta"] = str(float(la[4]))
+    entry["cell_angle_gamma"] = str(float(la[5]))
 
     entry["symmetry_space_group_name_hall"] = str(hall)
-    if hmsymbol != None:
+    if hmsymbol is not None:
         entry["symmetry_space_group_name_h-m"] = str(hmsymbol)
         entry["symmetry_Int_Tables_number"] = str(sgnumber)
         # Add setting
@@ -533,14 +537,14 @@ def struct_to_cifdata(struct,entryid=None):
     entry["symmetry_space_group_name_hall"] = str(hall)
 
     refs = struct.get_refs()
-    if len(refs)>0:
+    if len(refs) > 0:
         entry["loop_1"] = ["citation_id",
-                           "citation_journal_full","citation_journal_issue","citation_journal_volume",
-                           "citation_page_first","citation_page_last",
-                           "citation_title","citation_year","citation_book_publisher",
-                           "citation_book_publisher_city","citation_book_title","citation_coordinate_linkage"]
-        entry["loop_2"] = ["citation_author_citation_id","citation_author_name"]
-        entry["loop_3"] = ["citation_editor_citation_id","citation_editor_name"]
+                           "citation_journal_full", "citation_journal_issue", "citation_journal_volume",
+                           "citation_page_first", "citation_page_last",
+                           "citation_title", "citation_year", "citation_book_publisher",
+                           "citation_book_publisher_city", "citation_book_title", "citation_coordinate_linkage"]
+        entry["loop_2"] = ["citation_author_citation_id", "citation_author_name"]
+        entry["loop_3"] = ["citation_editor_citation_id", "citation_editor_name"]
         for key in entry["loop_1"] + entry['loop_2'] + entry['loop_3']:
             entry[key] = []
         for i in range(len(refs)):
@@ -560,37 +564,36 @@ def struct_to_cifdata(struct,entryid=None):
             data['citation_coordinate_linkage'] = "yes"
             for key in entry["loop_1"]:
                 entry[key] += [data[key]]
-            if ref.authors != None:
+            if ref.authors is not None:
                 for author in ref.authors:
                     entry['citation_author_citation_id'] += [str(i)]
                     entry['citation_author_name'] += [author.last_name + ", "+author.given_names]
-            if ref.editors != None:
+            if ref.editors is not None:
                 for editor in ref.editors:
                     entry['citation_editor_citation_id'] += [str(i)]
                     entry['citation_author_name'] += [editor.last_name + ", "+editor.given_names]
 
-
-        if 'citation_author_citation_id' in entry and len(entry['citation_author_citation_id'])==0:
+        if 'citation_author_citation_id' in entry and len(entry['citation_author_citation_id']) == 0:
                 del entry['citation_author_citation_id']
                 del entry['citation_author_name']
                 del entry['loop_2']
 
-        if 'citation_editor_citation_id' in entry and len(entry['citation_editor_citation_id'])==0:
+        if 'citation_editor_citation_id' in entry and len(entry['citation_editor_citation_id']) == 0:
                 del entry['citation_editor_citation_id']
                 del entry['citation_editor_name']
                 del entry['loop_3']
 
-    entry["loop_0"] = ["atom_site_label","atom_site_type_symbol"]
-    if wyckoffsymbols != None:
-        entry["loop_0"] += ["atom_site_symmetry_multiplicity","atom_site_Wyckoff_symbol"]
-    entry["loop_0"] += ["atom_site_fract_x","atom_site_fract_y","atom_site_fract_z","atom_site_occupancy"]
+    entry["loop_0"] = ["atom_site_label", "atom_site_type_symbol"]
+    if wyckoffsymbols is not None:
+        entry["loop_0"] += ["atom_site_symmetry_multiplicity", "atom_site_Wyckoff_symbol"]
+    entry["loop_0"] += ["atom_site_fract_x", "atom_site_fract_y", "atom_site_fract_z", "atom_site_occupancy"]
 
     for key in entry["loop_0"]:
         entry[key] = []
 
     seen = {}
     
-    for i,cg in enumerate(coordgroups):
+    for i, cg in enumerate(coordgroups):
         for coord in cg:
             x = coord[0]
             y = coord[1]
@@ -601,13 +604,13 @@ def struct_to_cifdata(struct,entryid=None):
                 symbol = symbols[occ]
                 ratio = ratios[occ]
                 if symbol in seen:
-                    seen[symbol]+=1
+                    seen[symbol] += 1
                     idx = seen[symbol]
                 else:
-                    seen[symbol]=1
+                    seen[symbol] = 1
                     idx = 1
                 label = symbol+str(idx)
-                if wyckoffsymbols != None:
+                if wyckoffsymbols is not None:
                     multiplicity = multiplicities[i]
                     wyckoffsymbol = wyckoffsymbols[i]
                     data = (label, symbol, multiplicity, wyckoffsymbol, float(x), float(y), float(z), float(ratio))
@@ -616,8 +619,7 @@ def struct_to_cifdata(struct,entryid=None):
                 for j in range(len(entry["loop_0"])):
                     entry[entry["loop_0"][j]] += [data[j]]
 
-
-    if entryid == None:
+    if entryid is None:
         entryid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))    
     cifdata = [(entryid, entry)]
     

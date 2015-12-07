@@ -19,6 +19,7 @@
 from httk.atomistic.data import periodictable
 from httk.core import *
 
+
 def rc_structure_to_symbols_and_scaled_positions(struct):
 
     symbols = []
@@ -29,6 +30,7 @@ def rc_structure_to_symbols_and_scaled_positions(struct):
     scaled_positions = struct.rc_reduced_coords
 
     return symbols, scaled_positions
+
 
 def uc_structure_to_symbols_and_scaled_positions(struct):
 

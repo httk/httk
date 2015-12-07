@@ -3,7 +3,7 @@
 # This program just loads a structure object
 
 from httk.core import *
-import httk.io
+import httk.httkio
 import httk.iface.vasp_if
 import httk.atomistic.atomisticio
 

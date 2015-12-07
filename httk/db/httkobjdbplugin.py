@@ -18,6 +18,7 @@
 from httk.core.httkobject import HttkPlugin, HttkObject, HttkPluginWrapper
 from httk.db.storable import Storable
 
+
 class HttkObjDbPlugin(HttkPlugin):
             
     def plugin_init(self, obj):
@@ -29,8 +30,8 @@ class HttkObjDbPlugin(HttkPlugin):
         self.derived = self.types['derived']
         self.derived_keydict = dict(self.types['derived'])
         self.index = self.types['index']
-        self.storable = Storable({"name":self.object_name, "keys":self.keys, "keydict":self.keydict, "index":self.index, 
-                                  "derived":self.derived, "derived_keydict":self.derived_keydict})
+        self.storable = Storable({"name": self.object_name, "keys": self.keys, "keydict": self.keydict, "index": self.index, 
+                                  "derived": self.derived, "derived_keydict": self.derived_keydict})
         self.sid = None
 
     def store_codependent_data(self, store):
@@ -38,25 +39,24 @@ class HttkObjDbPlugin(HttkPlugin):
             entry.db.store(store)
 
     def fetch_codependent_data(self, store):
-        if hasattr(self.obj,'_codependent_info'):
+        if hasattr(self.obj, '_codependent_info'):
             for c in self.obj._codependent_info:
                 search = store.searcher()
                 p = search.variable(c['class'])
                 search.add(p.__getattr__(c['column']) == self.obj)
-                search.output(p,'object')
+                search.output(p, 'object')
                 results = list(search)
                 if len(results) > 0:
-                    getattr(self.obj,c['add_method'])([x[0][0] for x in results])
+                    getattr(self.obj, c['add_method'])([x[0][0] for x in results])
         
-
-    def store(self,store,avoid_duplicate=True):
+    def store(self, store, avoid_duplicate=True):
         self.storable.storable_init(store)
         if avoid_duplicate:
             if 'hexhash' in self.derived_keydict and hasattr(self.obj, 'hexhash'):
                 hexhash = self.obj.hexhash
                 p = self.storable.find_one(store, self.obj, 'hexhash', hexhash, self.types)
-                if p != None:
-                    self.sid =  p.db.sid
+                if p is not None:
+                    self.sid = p.db.sid
                     self.storable = p.db.storable
             else:
                 search = store.searcher()
@@ -64,38 +64,38 @@ class HttkObjDbPlugin(HttkPlugin):
                 definedvariables = []
                 definedvariableidx = 0
                 for variables in self.keys:
-                    if issubclass(variables[1],HttkObject):
+                    if issubclass(variables[1], HttkObject):
                         definedvariables += [search.variable(variables[1])]
                 
                 p = search.variable(self.obj.__class__)
                 for variables in self.keys:
-                    shouldbe = getattr(self.obj,variables[0])
-                    if shouldbe == None:
-                        search.add(p.__getattr__(variables[0]) == None)
-                    elif issubclass(variables[1],HttkObject):
+                    shouldbe = getattr(self.obj, variables[0])
+                    if shouldbe is None:
+                        search.add(p.__getattr__(variables[0]) is None)
+                    elif issubclass(variables[1], HttkObject):
                         q = definedvariables[definedvariableidx]
                         definedvariableidx += 1
                         search.add(q.hexhash == shouldbe.hexhash)
                         search.add(p.__getattr__(variables[0]) == q)
                     else:
                         search.add(p.__getattr__(variables[0]) == shouldbe)
-                search.output(p,'object')
+                search.output(p, 'object')
                 results = list(search)
                 if len(results) > 0:
                     p = results[0][0][0]
-                    self.sid =  p.db.sid
+                    self.sid = p.db.sid
                     self.storable = p.db.storable
         
         data = {}
         for key in dict(self.keydict):
-            data[key] = getattr(self.obj,key) 
+            data[key] = getattr(self.obj, key) 
         for key in self.derived_keydict:
-            data[key] = getattr(self.obj,key) 
+            data[key] = getattr(self.obj, key) 
 
-        if self.sid != None:
-            self.storable.storable_init(store,updatesid=-self.sid,**data) 
+        if self.sid is not None:
+            self.storable.storable_init(store, updatesid=-self.sid, **data) 
         else:
-            self.storable.storable_init(store,**data) 
+            self.storable.storable_init(store, **data) 
         self.sid = self.storable.store.sid
 
         self.store_codependent_data(store)

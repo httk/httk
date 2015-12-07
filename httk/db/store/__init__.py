@@ -23,7 +23,7 @@ TODO: Note: since a few changes back I think neither trivialstore or dictstore c
 """
 
 from httk.core import citation
-citation.add_src_citation("httk_db","Rickard Armiento")
+citation.add_src_citation("httk_db", "Rickard Armiento")
 
 from dictstore import DictStore
 from sqlstore import SqlStore

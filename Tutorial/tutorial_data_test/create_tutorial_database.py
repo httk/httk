@@ -14,7 +14,7 @@ except Exception:
 
 from httk.atomistic import *
 import httk.db
-import httk.io
+import httk.httkio
 import httk.iface
 import httk.atomistic.vis
 
@@ -86,7 +86,7 @@ def main():
             print "Filename:"+filename
             # Uncomment for better control in how to load structures
             #if filename.endswith(".cif"):
-            #    struct = httk.io.cif_to_struct(filename,backends=['cif2cell_reduce'])
+            #    struct = httk.httkio.cif_to_struct(filename,backends=['cif2cell_reduce'])
             #elif filename.endswith(".vasp"):
             #    struct = httk.iface.vasp_if.poscar_to_structure(filename)
             struct = httk.load(filename).clean()

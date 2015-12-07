@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core import citation
-citation.add_src_citation("httk","Rickard Armiento")
+citation.add_src_citation("httk", "Rickard Armiento")
 
 import periodictable
 import spacegroups

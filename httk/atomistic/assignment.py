@@ -19,12 +19,14 @@ from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_propert
 from data import periodictable
 from httk.core.fracvector import FracVector, FracScalar
 
+
 class Assignment(HttkObject):
+
     """
     Represents a possible vector of assignments
     """
-    @httk_typed_init({'atomic_number':int, 'weight':FracScalar, 'ratio':FracScalar, 'magnetic_moment':(FracScalar,1,3)},index=['atomic_number','weight','ratio'])
-    def __init__(self, atomic_number, weight,ratio, magnetic_moment):
+    @httk_typed_init({'atomic_number': int, 'weight': FracScalar, 'ratio': FracScalar, 'magnetic_moment': (FracScalar, 1, 3)}, index=['atomic_number', 'weight', 'ratio'])
+    def __init__(self, atomic_number, weight, ratio, magnetic_moment):
         """
         Private constructor, as per httk coding guidelines. Use Assignment.create instead.
         """    
@@ -41,10 +43,10 @@ class Assignment(HttkObject):
           atomic number or symbol 
         """
         #TODO: Convert assignments into strict internal representation
-        if isinstance(siteassignment,Assignment):
+        if isinstance(siteassignment, Assignment):
             return siteassignment
 
-        if isinstance(siteassignment,dict):
+        if isinstance(siteassignment, dict):
             if 'atom' in siteassignment:
                 atom = siteassignment['atom']
             if 'weight' in siteassignment:
@@ -53,35 +55,35 @@ class Assignment(HttkObject):
                 ratio = siteassignment['ratio']
             if 'magnetic_moment' in siteassignment:
                 magnetic_moment = siteassignment['magnetic_moment']
-        elif siteassignment != None:
+        elif siteassignment is not None:
             return cls(periodictable.atomic_number(siteassignment), None, 1, [None, None, None])
                 
-        if atom==None:
+        if atom is None:
             raise Exception("SiteAssignment needs at least an atom specification")
 
         atom = periodictable.atomic_number(atom)
 
-        if magnetic_moment == None:
-            magnetic_moment=[None, None, None]
+        if magnetic_moment is None:
+            magnetic_moment = [None, None, None]
 
-        if ratio==None:
-            ratio=1
+        if ratio is None:
+            ratio = 1
                 
-        return cls(atom, weight,ratio, magnetic_moment)
+        return cls(atom, weight, ratio, magnetic_moment)
 
     def get_extensions(self):
         extensions = []
-        if self.weight!=None:
+        if self.weight is not None:
             extensions += ['isotope']
-        if self.ratio!=None and self.ratio!=1:
+        if self.ratio is not None and self.ratio != 1:
             extensions += ['disordered']
-        if self.magnetic_moment!=None and self.magnetic_moment != [None, None, None]:
+        if self.magnetic_moment is not None and self.magnetic_moment != [None, None, None]:
             extensions += ['magnetic_moments']
         return extensions
 
     @classmethod
-    def use(cls,old):
-        if isinstance(old,Assignment):
+    def use(cls, old):
+        if isinstance(old, Assignment):
             return old
         try:
             return old.to_ssignment()
@@ -96,10 +98,11 @@ class Assignment(HttkObject):
         return periodictable.atomic_symbol(self.atomic_number)
 
     def get_weight(self):
-        if self.weight == None:
+        if self.weight is None:
             return periodictable.most_common_mass(self.atom)
         else:
             return self.weight
+
 
 def main():
     pass

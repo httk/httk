@@ -18,6 +18,7 @@
 import httk.external.ase_glue
 import ase.visualize
 
+
 class AseStructureVisualizer(object):
 
     def __init__(self, struct, params={}):

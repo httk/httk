@@ -31,7 +31,7 @@ except ImportError:
     # Python 3
     import configparser
 
-_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 
 config = configparser.ConfigParser()
 config_files = []
@@ -40,7 +40,7 @@ global_cfgpathstr = os.path.expanduser('~/.httk.cfg')
 if os.path.exists(global_cfgpathstr):
     config_files.append(global_cfgpathstr)
 
-local_cfgpathstr = os.path.join(_realpath,'..','httk.cfg')
+local_cfgpathstr = os.path.join(_realpath, '..', 'httk.cfg')
 if os.path.exists(local_cfgpathstr):
     config_files.append(local_cfgpathstr)
 
@@ -48,11 +48,11 @@ if config_files:
     config.read(config_files)
 else:
     sys.stderr.write("Warning: no httk.cfg found. Using httk.cfg.default settings.\n")
-    config.read(os.path.join(_realpath,'..','httk.cfg.default'))
+    config.read(os.path.join(_realpath, '..', 'httk.cfg.default'))
 
 
 #: The path to the main httk directory
-httk_dir = os.path.join(_realpath,'..')
+httk_dir = os.path.join(_realpath, '..')
 
 
 

@@ -21,13 +21,14 @@ from httk.atomistic.data import periodictable
 from math import sqrt
 import httk
 
+
 def generate_fake_potentials(species):
     potentials = ""
     potentials += "atomab\n"
     for s1 in species:
         ss1 = periodictable.atomic_symbol(s1)
         ns1 = periodictable.atomic_number(s1)
-        potentials += "%s core %.4f %.4f 0 0\n" % (ss1,sqrt(0.5*ns1),pow(0.75*ns1,3.0/2.0))
+        potentials += "%s core %.4f %.4f 0 0\n" % (ss1, sqrt(0.5*ns1), pow(0.75*ns1, 3.0/2.0))
     #potentials = "lennard combine 12 6\n"
     potentials += "lennard 12 6 combine all\n"
     potentials += "0.0 20.0\n"
@@ -39,6 +40,7 @@ def generate_fake_potentials(species):
 
     return potentials
 
+
 def generate_fake_potentials_try2(species):
     potentials = ""
     potentials += "epsilon\n"
@@ -47,14 +49,15 @@ def generate_fake_potentials_try2(species):
         ns1 = periodictable.atomic_number(s1)
         #potentials += "%s core %.4f %.4f 0 0\n" % (ss1,sqrt(0.5*ns1),pow(0.75*ns1,3.0/2.0))
 #        potentials += "%s core %.4f %.4f 0 0\n" % (ss1,pow(ns1,0.9783276738),pow(ns1,1.124243243))
-        potentials += "%s core %.4f %.4f 0 0\n" % (ss1,0.1*ns1,0.1*ns1)
+        potentials += "%s core %.4f %.4f 0 0\n" % (ss1, 0.1*ns1, 0.1*ns1)
 
     potentials += "lennard zero epsilon combine all\n"
     potentials += "0.0 12.0\n"
 
     return potentials
 
-def structure_to_gulp(iof,struct,runspec="single conp",postcards=[],potentials=None):
+
+def structure_to_gulp(iof, struct, runspec="single conp", postcards=[], potentials=None):
     """
     Writes a file on gulp input format.
     """        
@@ -73,7 +76,7 @@ def structure_to_gulp(iof,struct,runspec="single conp",postcards=[],potentials=N
         #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
     for card in postcards:
         f.write(card+"\n")
-    if potentials == None:
+    if potentials is None:
         f.write(generate_fake_potentials(set(struct.p1assignments)))
     f.write("\n")
     iof.close()

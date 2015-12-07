@@ -24,6 +24,6 @@ httk Interface module
 """
 
 from httk.core import citation
-citation.add_src_citation("httk","Rickard Armiento")
+citation.add_src_citation("httk", "Rickard Armiento")
 
 import ase_if, cif2cell_if, gulp_if, isotropy_if, jmol_if, spglib_if, vasp_if, platon_if

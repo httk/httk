@@ -3,7 +3,7 @@
 # This program just loads a structure object
 
 from httk.core import *
-import httk.io
+import httk.httkio
 import httk.atomistic.atomisticio
 
 files=["../../Tutorial/tutorial_data/all_spacegroups/cifs/53.cif"]

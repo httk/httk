@@ -23,6 +23,7 @@ from httk.core import FracVector
 import httk  
 from httk.atomistic import *
 
+
 def out_to_struct(ioa):
     """
     Example input::
@@ -49,7 +50,7 @@ def out_to_struct(ioa):
         Unit cell volume  : 328.6477016 A^3
         Unit cell density :   3.5764559 u/A^3 =   5.9388437 g/cm^3
     """
-    results={}
+    results = {}
     results['output_cell'] = []
     results['input_cell'] = []
     results['coords'] = []
@@ -69,13 +70,13 @@ def out_to_struct(ioa):
     results['idx'] = 0
     results['sgidx'] = 0
     
-    def read_cell(results,match):
+    def read_cell(results, match):
         if results['in_input']:
-            results['input_cell'].append([(match.group(1)),(match.group(2)),(match.group(3))])
+            results['input_cell'].append([(match.group(1)), (match.group(2)), (match.group(3))])
         elif results['in_output']:
-            results['output_cell'].append([(match.group(1)),(match.group(2)),(match.group(3))])
+            results['output_cell'].append([(match.group(1)), (match.group(2)), (match.group(3))])
 
-    def read_coords_occs(results,match):
+    def read_coords_occs(results, match):
         if results['in_input']:
             coordstr = 'sgcoords'
             occstr = 'sgoccupancies'
@@ -89,13 +90,13 @@ def out_to_struct(ioa):
         else:
             return
 
-        newcoord = (match.group(2),match.group(3),match.group(4))
+        newcoord = (match.group(2), match.group(3), match.group(4))
         #newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()
         species = match.group(1).split("/")
         occups = match.group(6).split("/")
 
         for j in range(len(species)):        
-            occup = {'atom':periodictable.atomic_number(species[j]),'ratio':FracVector.create(occups[j]),}
+            occup = {'atom': periodictable.atomic_number(species[j]), 'ratio': FracVector.create(occups[j]), }
     
             if newcoord in results[seenstr]:
                 idx = results[seenstr][newcoord]
@@ -108,7 +109,7 @@ def out_to_struct(ioa):
                 results[idxstr] += 1
                 #print "NEW",results[occstr],results[idxstr]
                           
-    def read_coords(results,match):
+    def read_coords(results, match):
         if results['in_input']:
             coordstr = 'sgcoords'
             occstr = 'sgoccupancies'
@@ -122,10 +123,10 @@ def out_to_struct(ioa):
         else:
             return
 
-        newcoord = (match.group(2),match.group(3),match.group(4))
+        newcoord = (match.group(2), match.group(3), match.group(4))
         #newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()
         species = match.group(1)
-        occup = {'atom':periodictable.atomic_number(species)}        
+        occup = {'atom': periodictable.atomic_number(species)}        
 
         if newcoord in results[seenstr]:
             idx = results[seenstr][newcoord]
@@ -145,88 +146,100 @@ def out_to_struct(ioa):
         #    results['coords'].append(newcoord)
         #    results['occupancies'].append(periodictable.atomic_symbol(match.group(1)))
  
-    def read_volume(results,match):
+    def read_volume(results, match):
         results['volume'] = match.group(1)
 
-    def read_hall(results,match):
+    def read_hall(results, match):
         if results['in_input']:
-            results['sghall']=match.group(1)
+            results['sghall'] = match.group(1)
         elif results['in_output']:
-            results['hall']=match.group(1)
+            results['hall'] = match.group(1)
 
-    def read_id(results,match):
-        results['id']=match.group(1)
+    def read_id(results, match):
+        results['id'] = match.group(1)
 
-    def coords_stop(results,match):
+    def coords_stop(results, match):
         results['in_coords'] = False
-    def coords_start(results,match):
+
+    def coords_start(results, match):
         if results['in_input']:
             results['in_input_coords'] = True
         elif results['in_output']:
             results['in_coords'] = True
-    def cell_stop(results,match):
+
+    def cell_stop(results, match):
         results['in_cell'] = False
-    def input_cell_stop(results,match):
+
+    def input_cell_stop(results, match):
         results['in_input_cell'] = False
-    def cell_start(results,match):
+
+    def cell_start(results, match):
         results['in_cell'] = True
-    def input_cell_start(results,match):
+
+    def input_cell_start(results, match):
         results['in_input_cell'] = True
-    def output_start(results,match):
+
+    def output_start(results, match):
         results['in_output'] = True        
         results['in_input'] = False
-    def read_version(results,match):
+
+    def read_version(results, match):
         results['version'] = match.group(1)
-    def read_name(results,match):
+
+    def read_name(results, match):
         expr = httk.basic.parse_parexpr(match.group(1))
         # Grab the last, nested, parenthesed expression 
         p = ""
         for x in expr:
             if x[0] == 0:
-                p=x[1]
+                p = x[1]
         results['name'] = p
-    def read_bib(results,match):
+
+    def read_bib(results, match):
         if match.group(1).strip() != 'Failed to get author information, No journal information':
             results['bib'] += match.group(1).strip()
-    def bib_start(results,match):
+
+    def bib_start(results, match):
         results['in_bib'] = True
-    def bib_stop_input_start(results,match):
+
+    def bib_stop_input_start(results, match):
         results['in_bib'] = False
         results['in_input'] = True
-    def read_source(results,match):        
+
+    def read_source(results, match):        
         results['source'] = match.group(1).rstrip('.')
                 
-    out = httk.basic.micro_pyawk(ioa,[
-            ['^ *INPUT CELL INFORMATION *$',None,bib_stop_input_start],
-            ['^ *CIF2CELL ([0-9.]*)',None,read_version],
-            ['^ *Output for (.*\)) *$',None,read_name],
-            ['^ *Database reference code: *([0-9]+)',None,read_id],
-            ['^ *All sites, (lattice coordinates): *$',lambda results,match: results['in_cell'],cell_stop],
-            ['^ *Representative sites *: *$',lambda results,match: results['in_input_cell'],input_cell_stop],
-            ['^ *$',lambda results,match: results['in_coords'],coords_stop],
-            ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$',lambda results,match: results['in_cell'] or results['in_input_cell'],read_cell],
-            ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$',lambda results,match: results['in_coords'] or results['in_input_coords'],read_coords],
-            ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$',lambda results,match: results['in_coords'] or results['in_input_coords'],read_coords_occs],
-#            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
-            ['^ *Hall symbol *: *(.*)$',lambda results,match: results['in_output'] or results['in_input'],read_hall],
-            ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$',lambda results,match: results['in_output'],read_volume],
-            ['^ *Bravais lattice vectors : *$',lambda results,match: results['in_output'],cell_start],
-            ['^ *Lattice parameters: *$',lambda results,match: results['in_input'],input_cell_start],
-            ['^ *Atom +a1 +a2 +a3',lambda results,match: results['in_output'] or results['in_input'],coords_start],
-            ['^ *OUTPUT CELL INFORMATION *$',None,output_start],
-            ['^([^\n]*)$',lambda results,match: results['in_bib'],read_bib],
-            ['^ *BIBLIOGRAPHIC INFORMATION *$',None,bib_start],
-            ['CIF file exported from +(.*) *$',None,read_source]
+    out = httk.basic.micro_pyawk(ioa, [
+        ['^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
+        ['^ *CIF2CELL ([0-9.]*)', None, read_version],
+        ['^ *Output for (.*\)) *$', None, read_name],
+        ['^ *Database reference code: *([0-9]+)', None, read_id],
+        ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
+        ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
+        ['^ *$', lambda results, match: results['in_coords'], coords_stop],
+        ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
+        ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
+        ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
+        #            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
+        ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
+        ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
+        ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
+        ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
+        ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
+        ['^ *OUTPUT CELL INFORMATION *$', None, output_start],
+        ['^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
+        ['^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
+        ['CIF file exported from +(.*) *$', None, read_source]
           
-          ],debug=False,results=results)
+    ], debug=False, results=results)
 
     out['bib'] = out['bib'].strip()
 
-    rc_a,rc_b,rc_c = [float(x) for x in out['input_cell'][0]]
-    rc_alpha,rc_beta,rc_gamma = [float(x) for x in out['input_cell'][1]]
+    rc_a, rc_b, rc_c = [float(x) for x in out['input_cell'][0]]
+    rc_alpha, rc_beta, rc_gamma = [float(x) for x in out['input_cell'][1]]
 
-    uc_a,uc_b,uc_c = [float(x) for x in out['output_cell'][0]]
-    uc_alpha,uc_beta,uc_gamma = [float(x) for x in out['output_cell'][1]]
+    uc_a, uc_b, uc_c = [float(x) for x in out['output_cell'][0]]
+    uc_alpha, uc_beta, uc_gamma = [float(x) for x in out['output_cell'][1]]
 
     rc_cell = FracVector.create(out['input_cell'])
     uc_cell = FracVector.create(out['output_cell'])
@@ -237,13 +250,13 @@ def out_to_struct(ioa):
     sghall_symbol = out['sghall']
     tags = {}
     if 'source' in out:
-        tags['source']=out['source']+":"+out['id']
+        tags['source'] = out['source']+":"+out['id']
     if 'bib' in out and out['bib'] != '':
-        refs=[out['bib']]
+        refs = [out['bib']]
     else:
         refs = None
     if 'name' in out:
-        tags['name']=filter(lambda x: x in string.printable, out['name'])
+        tags['name'] = filter(lambda x: x in string.printable, out['name'])
 
     # This is to handle a weird corner case, where atoms in a disordered structure
     # are placed on equivalent but different sites in the representative representation; then
@@ -280,7 +293,7 @@ def out_to_struct(ioa):
 
     # A bit of santiy check to trigger on possible bugs from cif2cell
     if len(struct.uc_sites.counts) != len(struct.rc_sites.counts):
-        print struct.uc_sites.counts,struct.rc_sites.counts
+        print struct.uc_sites.counts, struct.rc_sites.counts
         raise Exception("cif2cell_if.out_to_struct: non-sensible parsing of cif2cell output.")
 
     #if 'volume' in out:

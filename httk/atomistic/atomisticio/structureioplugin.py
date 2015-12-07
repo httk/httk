@@ -19,16 +19,17 @@ from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic import Structure
 from structure_io import load_struct, save_struct
 
+
 class StructureIoPlugin(HttkPlugin):
             
     def plugin_init(self, struct):
         self.struct = struct
 
     @classmethod
-    def load(cls,ioa, ext=None, filename=None):
+    def load(cls, ioa, ext=None, filename=None):
         return load_struct(ioa, ext=ext, filename=filename)        
 
-    def save(self,ioa, ext=None):
+    def save(self, ioa, ext=None):
         return save_struct(self.struct, ioa, ext)        
     
 Structure.io = HttkPluginWrapper(StructureIoPlugin)

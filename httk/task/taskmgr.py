@@ -60,8 +60,8 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     try:
         os.chdir(taskpath)
         # try:
-        print "INSTANTIATE_NAME",taskpath
-        execfile(instantiate_name, args, {})
+        print "INSTANTIATE_NAME", taskpath
+        exec(compile(open(instantiate_name).read(), instantiate_name, 'exec'), args, {})
         # except:
         #    with open(instantiate_name) as f:
         #        code = compile(f.read(), instantiate_name, 'exec')

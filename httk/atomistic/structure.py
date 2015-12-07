@@ -32,7 +32,9 @@ from unitcellstructure import UnitcellStructure
 from representativestructure import RepresentativeStructure
 from spacegrouputils import spacegroup_get_number_and_setting
 
+
 class Structure(HttkObject):  
+
     """
     A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
     The structure object is meant to be immutable and assumes that no internal variables are changed after its creation. 
@@ -265,61 +267,61 @@ class Structure(HttkObject):
         if uc_sites is not None:
             uc_sites = UnitcellSites.use(uc_sites)
         else:
-            if uc_reduced_coordgroups == None and \
-                    uc_reduced_coords == None and \
-                    uc_occupancies != None:
+            if uc_reduced_coordgroups is None and \
+                    uc_reduced_coords is None and \
+                    uc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
                 if uc_reduced_occupationscoords is not None:
-                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
+                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords, uc_occupancies)
             
-            if uc_reduced_coordgroups != None or \
-                    uc_reduced_coords != None:
+            if uc_reduced_coordgroups is not None or \
+                    uc_reduced_coords is not None:
 
                 try:
                     uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
-                                                   reduced_coords=uc_reduced_coords, 
-                                                   counts=uc_counts, 
-                                                   periodicity=periodicity, occupancies=uc_occupancies)
+                                                    reduced_coords=uc_reduced_coords, 
+                                                    counts=uc_counts, 
+                                                    periodicity=periodicity, occupancies=uc_occupancies)
                 except Exception:
                     uc_sites = None
             
             else:
                 uc_sites = None
 
-        if uc_sites == None and uc_reduced_coordgroups == None and \
-               uc_reduced_coords == None and uc_reduced_occupationscoords == None:
+        if uc_sites is None and uc_reduced_coordgroups is None and \
+                uc_reduced_coords is None and uc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if uc_cartesian_coordgroups == None and uc_cartesian_coords == None and \
-                    uc_occupancies != None and uc_cartesian_occupationscoords != None:
-                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
+            if uc_cartesian_coordgroups is None and uc_cartesian_coords is None and \
+                    uc_occupancies is not None and uc_cartesian_occupationscoords is not None:
+                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords, uc_occupancies)
              
-            if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:
+            if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
                 uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 
-            if uc_cell != None: 
-                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_cell)
+            if uc_cell is not None: 
+                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups, uc_cell)
 
-        if isinstance(rc_sites,RepresentativeSites):
+        if isinstance(rc_sites, RepresentativeSites):
             rc_sites = rc_sites
-        if isinstance(rc_sites,Sites):
+        if isinstance(rc_sites, Sites):
             rc_sites = RepresentativeSites.use(rc_sites)
         else:
-            if rc_reduced_coordgroups == None and \
-                    rc_reduced_coords == None and \
-                    rc_occupancies != None:
+            if rc_reduced_coordgroups is None and \
+                    rc_reduced_coords is None and \
+                    rc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-                if rc_reduced_occupationscoords != None:     
-                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)
+                if rc_reduced_occupationscoords is not None:     
+                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords, rc_occupancies)
 
-            if rc_reduced_coordgroups != None or \
-                    rc_reduced_coords != None:
+            if rc_reduced_coordgroups is not None or \
+                    rc_reduced_coords is not None:
                                                                                     
                 try:
                     rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
-                                                   reduced_coords=rc_reduced_coords, 
-                                                   counts=rc_counts,
-                                                   hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
-                                                   multiplicities=multiplicities,occupancies=rc_occupancies)
+                                                          reduced_coords=rc_reduced_coords, 
+                                                          counts=rc_counts,
+                                                          hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
+                                                          multiplicities=multiplicities, occupancies=rc_occupancies)
                 except Exception as e:
                     raise
                     #print "Ex",e
@@ -327,24 +329,24 @@ class Structure(HttkObject):
             else:
                 rc_sites = None
 
-        if rc_sites == None and rc_reduced_coordgroups == None and \
-               rc_reduced_coords == None and rc_reduced_occupationscoords == None:
+        if rc_sites is None and rc_reduced_coordgroups is None and \
+                rc_reduced_coords is None and rc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if rc_cartesian_coordgroups == None and rc_cartesian_coords == None and \
-                    rc_occupancies != None and rc_cartesian_occupationscoords != None:
-                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)
+            if rc_cartesian_coordgroups is None and rc_cartesian_coords is None and \
+                    rc_occupancies is not None and rc_cartesian_occupationscoords is not None:
+                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords, rc_occupancies)
              
-            if rc_cartesian_coords != None and rc_cartesian_coordgroups == None:
+            if rc_cartesian_coords is not None and rc_cartesian_coordgroups is None:
                 rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)
 
-            if rc_cell != None:  
-                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_cell)
+            if rc_cell is not None:  
+                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups, rc_cell)
             
-        if rc_sites == None and uc_sites == None:
+        if rc_sites is None and uc_sites is None:
             raise Exception("Structure.create: representative and unitcell sites specifications both invalid.")
 
-        if assignments != None:
-            if isinstance(assignments,Assignments):
+        if assignments is not None:
+            if isinstance(assignments, Assignments):
                 assignments = assignments
             else:
                 assignments = Assignments.create(assignments=assignments)
@@ -413,7 +415,7 @@ class Structure(HttkObject):
     @property
     def cc(self):
         if 'cc' not in self._other_reps:
-            cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_sites = self.rc_sites.get_uc_sites(), uc_cell=self.rc_cell)
+            cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_sites=self.rc_sites.get_uc_sites(), uc_cell=self.rc_cell)
             self._other_reps['uc'] = cc_struct
             self._other_reps['cc'] = cc_struct
         return self._other_reps['cc']
@@ -421,7 +423,7 @@ class Structure(HttkObject):
     @property
     def rc(self):
         if 'rc' not in self._other_reps:
-            rc_struct = RepresentativeStructure.create(assignments=self.assignments, rc_sites = self.rc_sites, rc_cell=self.rc_cell)
+            rc_struct = RepresentativeStructure.create(assignments=self.assignments, rc_sites=self.rc_sites, rc_cell=self.rc_cell)
             self._other_reps['rc'] = rc_struct
         return self._other_reps['rc']
 
@@ -684,7 +686,7 @@ class Structure(HttkObject):
     def number_of_elements(self):
         seen = {}
         for symbol in self.formula_symbols:
-            seen[symbol]=True
+            seen[symbol] = True
         return len(seen)
     
     @httk_typed_property((bool, 1, 3))
@@ -767,7 +769,7 @@ class Structure(HttkObject):
     @httk_typed_property([str])
     def uc_formula_symbols(self):
         parts = self.uc_formula_parts
-        return [symbol for symbol,count in parts]
+        return [symbol for symbol, count in parts]
 
     @httk_typed_property([FracScalar])
     def uc_formula_counts(self):
@@ -798,28 +800,28 @@ class Structure(HttkObject):
 
     @httk_typed_property(str)
     def element_wyckoff_sequence(self):        
-        if self.rc_sites.wyckoff_symbols == None:
+        if self.rc_sites.wyckoff_symbols is None:
             return None        
-        symbols=[]
+        symbols = []
         for a in self.assignments:
             if is_sequence(a):
-                if len(a)==1:
+                if len(a) == 1:
                     if a[0].ratio == 1:
-                        symbols+=[a[0].symbol]
+                        symbols += [a[0].symbol]
                     else:
-                        symbols+=["("+a[0].symbol + "%d.%02d" % (a[0].ratio.floor(),((a[0].ratio-a[0].ratio.floor())*100).floor())+")"]
+                        symbols += ["("+a[0].symbol + "%d.%02d" % (a[0].ratio.floor(), ((a[0].ratio-a[0].ratio.floor())*100).floor())+")"]
                 else:
-                    def checkratio(symbol,ratio):
-                        if ratio==1:
+                    def checkratio(symbol, ratio):
+                        if ratio == 1:
                             return symbol
                         else:
-                            return "%s%d.%02d" % (symbol, ratio.floor(),((ratio-ratio.floor())*100).floor())
-                    symbols+=["("+"".join([checkratio(x.symbol,x.ratio) for x in a])+")"]
+                            return "%s%d.%02d" % (symbol, ratio.floor(), ((ratio-ratio.floor())*100).floor())
+                    symbols += ["("+"".join([checkratio(x.symbol, x.ratio) for x in a])+")"]
             else:
                 if a.ratio == 1:
-                    symbols+=[a.symbol]
+                    symbols += [a.symbol]
                 else:
-                    symbols+=["("+a.symbol + "%d.%02d" % (a.ratio.floor(),((a.ratio-a.ratio.floor())*100).floor())+")"]
+                    symbols += ["("+a.symbol + "%d.%02d" % (a.ratio.floor(), ((a.ratio-a.ratio.floor())*100).floor())+")"]
         
         data = {}
         idx = 0
@@ -830,19 +832,19 @@ class Structure(HttkObject):
                     wsymb = 'zz'
                 # Note the extra self.assignments[i].to_tuple() that makes sure we are not mixing non-equivalent sites
                 # even if they are non-equivalent in something that isn't readily visible in the symbol (!)
-                key = (wsymb,symbols[i],self.assignments[i].to_tuple())
+                key = (wsymb, symbols[i], self.assignments[i].to_tuple())
                 if key in data:
-                    data[key]=(wsymb,data[key][1]+1,symbols[i])
+                    data[key] = (wsymb, data[key][1]+1, symbols[i])
                 else:
-                    data[key]=(wsymb,1,symbols[i])
+                    data[key] = (wsymb, 1, symbols[i])
                 idx += 1
         sortedcounts = sorted(data.values())
-        symbol=""
+        symbol = ""
         for i in range(len(sortedcounts)):
-            wsymb=sortedcounts[i][0]
+            wsymb = sortedcounts[i][0]
             if wsymb == 'zz':
-                wsymb='&'            
-            symbol+=str(sortedcounts[i][1])+wsymb+sortedcounts[i][2]
+                wsymb = '&'            
+            symbol += str(sortedcounts[i][1])+wsymb+sortedcounts[i][2]
         return symbol
                 
     @httk_typed_property(str)
@@ -859,7 +861,7 @@ class Structure(HttkObject):
         formula = normalized_formula_parts(self.assignments.symbollists, self.assignments.ratioslist, self.uc_sites.counts)
         for key in sorted(formula.iterkeys()):            
             if is_sequence(key):
-                key = "".join([str(x[0])+str(("%.2f"%x[1])) for x in key])
+                key = "".join([str(x[0])+str(("%.2f" % x[1])) for x in key])
             symbols += [key]
         return symbols
 
@@ -936,9 +938,10 @@ class Structure(HttkObject):
 
 
 class StructureTag(HttkObject):                               
-    @httk_typed_init({'structure':Structure,'tag':str,'value':str},index=['structure', 'tag', ('tag','value'),('structure','tag','value')],skip=['hexhash'])    
+
+    @httk_typed_init({'structure': Structure, 'tag': str, 'value': str}, index=['structure', 'tag', ('tag', 'value'), ('structure', 'tag', 'value')], skip=['hexhash'])    
     def __init__(self, structure, tag, value):
-        super(StructureTag,self).__init__()
+        super(StructureTag, self).__init__()
         self.tag = tag
         self.structure = structure
         self.value = value
@@ -948,15 +951,17 @@ class StructureTag(HttkObject):
 
 
 class StructureRef(HttkObject):
-    @httk_typed_init({'structure':Structure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
+
+    @httk_typed_init({'structure': Structure, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
     def __init__(self, structure, reference):
-        super(StructureRef,self).__init__()
+        super(StructureRef, self).__init__()
         self.structure = structure
         self.reference = reference
 
     def __str__(self):
         return str(self.reference.ref)
     
+
 def main():
     print "Test"
         

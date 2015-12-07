@@ -24,8 +24,10 @@ if httk.core.python_major_version >= 3:
 else:
     from Queue import Queue, Empty
 
+
 class Command(object):
-    def __init__(self, cmd, args, cwd=None, inputstr = None, stophook=None):
+
+    def __init__(self, cmd, args, cwd=None, inputstr=None, stophook=None):
         self.args = args
         self.cmd = cmd
         self.process = None
@@ -35,22 +37,22 @@ class Command(object):
         self.cwd = cwd
         self.stophook = stophook
 
-    def run(self, timeout,debug=False):
+    def run(self, timeout, debug=False):
 
         self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE, 
-                                   stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd)
+                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd)
         
         def target():
             if debug:
-                print "Command: Launching subprocess:",self.cmd," with args ",self.args
+                print "Command: Launching subprocess:", self.cmd, " with args ", self.args
             
             if debug:
-                print "Command: Running communicate with inputstr:",self.inputstr
+                print "Command: Running communicate with inputstr:", self.inputstr
             
             self.out, self.err = self.process.communicate(input=self.inputstr)
 
             if debug:
-                print "Command: Got back",self.out,self.err
+                print "Command: Got back", self.out, self.err
 
         thread = threading.Thread(target=target)
         thread.start()
@@ -61,7 +63,7 @@ class Command(object):
             thread.join()
             completed = None
         else:
-            if self.process != None:
+            if self.process is not None:
                 completed = self.process.returncode
             else:
                 completed = None
@@ -72,7 +74,7 @@ class Command(object):
 
     def start(self):
 
-        if self.process != None:
+        if self.process is not None:
             self.stop()
 
         # I really don't know if the windows support works as I have not tested anything on Windows myself
@@ -81,12 +83,12 @@ class Command(object):
             # from msdn [1]
             CREATE_NEW_PROCESS_GROUP = 0x00000200  # note: could get it from subprocess
             DETACHED_PROCESS = 0x00000008          # 0x8 | 0x200 == 0x208
-            kwargs['creationflags']=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+            kwargs['creationflags'] = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
         elif sys.version_info < (3, 2):  # assume posix
-            kwargs['preexec_fn']=os.setsid
-            kwargs['close_fds']='posix' in sys.builtin_module_names
+            kwargs['preexec_fn'] = os.setsid
+            kwargs['close_fds'] = 'posix' in sys.builtin_module_names
         else:  # Python 3.2+ and Unix
-            kwargs['start_new_session']=True        
+            kwargs['start_new_session'] = True        
         
         def enqueue_output(out, queue):
             for line in iter(out.readline, b''):
@@ -94,14 +96,14 @@ class Command(object):
             out.close()
         
         self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE, 
-                                       stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, bufsize=1, **kwargs)
+                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, bufsize=1, **kwargs)
     
         self.output_queue = Queue()
         self.output_thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self.output_queue))
         self.output_thread.start()
 
-    def wait_finish(self,timeout=None):
-        if self.process != None:                 
+    def wait_finish(self, timeout=None):
+        if self.process is not None:                 
             def target():            
                 self.process.wait()
     
@@ -114,7 +116,7 @@ class Command(object):
                 thread.join()
 
     def _terminate(self):
-        if self.process.poll() == None:
+        if self.process.poll() is None:
             try:
                 os.killpg(self.process.pid, signal.SIGTERM)
             except OSError:
@@ -132,9 +134,9 @@ class Command(object):
         self.process = None            
     
     def stop(self):
-        if self.process != None:                 
+        if self.process is not None:                 
             
-            if self.stophook != None:
+            if self.stophook is not None:
                 self.stophook(self)
             
             self._terminate()            
@@ -150,7 +152,7 @@ class Command(object):
         
         return lines
     
-    def send(self,command):
+    def send(self, command):
         self.process.stdin.write(command)
 
     @property

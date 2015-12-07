@@ -41,8 +41,8 @@ from structurephasediagram import StructurePhaseDiagram
 
 import io as _atomistic_io
 
-__all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites","Assignments",
-            "Compound", "CompoundStructure", "StructurePhaseDiagram","StructureRef","StructureTag",
-            "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure"]
+__all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites", "Assignments",
+           "Compound", "CompoundStructure", "StructurePhaseDiagram", "StructureRef", "StructureTag",
+           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure"]
 
 import atomisticio

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*- 
-# 
+# -*- coding: utf-8 -*-
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Format: 
+# Format:
 #   Columns:
 #     - hall symbol according to 2001 International Tables of Crystallography
 #       http://cci.lbl.gov/sginfo/itvb_2001_table_a1427_hall_symbols.html
@@ -29,26 +29,26 @@
 #     - Non-standard hall symbols
 
 # Origin and setting choices:
-# 
+#
 #   Monoclinic                  code  =  <unique axis><cell choice>
 #        Unique axis choices(+          b  -b  c  -c  a  -a
 #        Cell choices(+                 1  2  3
-# 
+#
 #   Orthorhombic                code  =  <origin choice><setting>
 #        Origin choices                 1  2
 #        Setting choices(+              abc  ba-c  cab  -cba  bca  a-cb
-# 
+#
 #   Tetragonal, Cubic           code  =  <origin choice>
 #        Origin choices                 1  2
-# 
+#
 #   Trigonal                    code  =  <cell choice>
 #        Cell choices                   h (hex)   r (rhomb)
-# 
+#
 import re
 
 from httk.core import FracVector, MutableFracVector, citation
 
-spacegroupdatastr="""P 1;1;P 1;;C1.1;0
+spacegroupdatastr = """P 1;1;P 1;;C1.1;0
 -P 1;2;P -1;;Ci.1;0,1
 P 2y;3:b;P 1 2 1,P 2;;C2.1;0,2;0,2
 P 2;3:c;P 1 1 2;;C2.1;0,3
@@ -580,7 +580,7 @@ F 4d 2 3 -1ad;228:1;F d -3 c:1;F 4d 2 3 -1cd;Th.7;0,526,14,527,4,528,11,529,226,
 -I 4bd 2c 3;230;I a -3 d;;Th.7;0,186,16,187,57,206,51,207,226,566,325,567,357,552,360,545,227,570,345,571,359,548,361,565,12,190,54,191,19,208,11,209,348,542,356,551,342,568,335,569,352,562,358,547,338,572,331,573,47,194,29,195,40,210,34,211,368,644,482,653,395,646,390,655,372,648,484,657,392,650,387,659,1,198,37,199,32,212,26,213,236,652,383,645,483,654,480,647,237,656,398,649,485,658,481,651
 """
 
-symopsstr="""x,y,z
+symopsstr = """x,y,z
 -x,-y,-z
 -x,y,-z
 -x,-y,z
@@ -1467,91 +1467,92 @@ x+1/2,-z+3/4,-y+3/4
 
 # Valid settings, from: http://www.mx.iucr.org/iucr-top/cif/cif_core/definitions/Cdata_symmetry_cell_setting.html
 # These are really crystal systems...
-crystal_system=[
-'triclinic', 
-'monoclinic', 
-'orthorhombic', 
-'tetragonal', 
-'rhombohedral', 
-'trigonal',
-'hexagonal',
-'cubic'
+crystal_system = [
+    'triclinic',
+    'monoclinic',
+    'orthorhombic',
+    'tetragonal',
+    'rhombohedral',
+    'trigonal',
+    'hexagonal',
+    'cubic'
 ]
 
 # Valid origin, from: http://www.iucr.org/__data/iucr/cif/software/ciftools/ciftools/dict/cif_sym_1.0.dic
-settings=[['b1','monoclinic unique axis b, cell choice 1, abc'],
-['b2','monoclinic unique axis b, cell choice 2, abc'],
-['b3','monoclinic unique axis b, cell choice 3, abc'],
-['-b1','monoclinic unique axis b, cell choice 1, c-ba'],
-['-b2','monoclinic unique axis b, cell choice 2, c-ba'],
-['-b3','monoclinic unique axis b, cell choice 3, c-ba'],
-['c1','monoclinic unique axis c, cell choice 1, abc'],
-['c2','monoclinic unique axis c, cell choice 2, abc'],
-['c3','monoclinic unique axis c, cell choice 3, abc'],
-['-c1','monoclinic unique axis c, cell choice 1, ba-c'],
-['-c2','monoclinic unique axis c, cell choice 2, ba-c'],
-['-c3','monoclinic unique axis c, cell choice 3, ba-c'],
-['a1','monoclinic unique axis a, cell choice 1, abc'],
-['a2','monoclinic unique axis a, cell choice 2, abc'],
-['a3','monoclinic unique axis a, cell choice 3, abc'],
-['-a1','monoclinic unique axis a, cell choice 1, -acb'],
-['-a2','monoclinic unique axis a, cell choice 2, -acb'],
-['-a3','monoclinic unique axis a, cell choice 3, -acb'],
-['abc','orthorhombic'],
-['ba-c','orthorhombic'],
-['cab','orthorhombic'],
-['-cba','orthorhombic'],
-['bca','orthorhombic'],
-['a-cb','orthorhombic'],
-['1abc','orthorhombic origin choice 1'],
-['1ba-c','orthorhombic origin choice 1'],
-['1cab','orthorhombic origin choice 1'],
-['1-cba','orthorhombic origin choice 1'],
-['1bca','orthorhombic origin choice 1'],
-['1a-cb','orthorhombic origin choice 1'],
-['2abc','orthorhombic origin choice 2'],
-['2ba-c','orthorhombic origin choice 2'],
-['2cab','orthorhombic origin choice 2'],
-['2-cba','orthorhombic origin choice 2'],
-['2bca','orthorhombic origin choice 2'],
-['2a-cb','orthorhombic origin choice 2'],
-['1','tetragonal or cubic origin choice 1'],
-['2','tetragonal or cubic origin choice 2'],
-['h','trigonal using hexagonal axes'],
-['r','trigonal using rhombohedral axes']]
+settings = [['b1', 'monoclinic unique axis b, cell choice 1, abc'],
+           ['b2', 'monoclinic unique axis b, cell choice 2, abc'],
+           ['b3', 'monoclinic unique axis b, cell choice 3, abc'],
+           ['-b1', 'monoclinic unique axis b, cell choice 1, c-ba'],
+           ['-b2', 'monoclinic unique axis b, cell choice 2, c-ba'],
+           ['-b3', 'monoclinic unique axis b, cell choice 3, c-ba'],
+           ['c1', 'monoclinic unique axis c, cell choice 1, abc'],
+           ['c2', 'monoclinic unique axis c, cell choice 2, abc'],
+           ['c3', 'monoclinic unique axis c, cell choice 3, abc'],
+           ['-c1', 'monoclinic unique axis c, cell choice 1, ba-c'],
+           ['-c2', 'monoclinic unique axis c, cell choice 2, ba-c'],
+           ['-c3', 'monoclinic unique axis c, cell choice 3, ba-c'],
+           ['a1', 'monoclinic unique axis a, cell choice 1, abc'],
+           ['a2', 'monoclinic unique axis a, cell choice 2, abc'],
+           ['a3', 'monoclinic unique axis a, cell choice 3, abc'],
+           ['-a1', 'monoclinic unique axis a, cell choice 1, -acb'],
+           ['-a2', 'monoclinic unique axis a, cell choice 2, -acb'],
+           ['-a3', 'monoclinic unique axis a, cell choice 3, -acb'],
+           ['abc', 'orthorhombic'],
+           ['ba-c', 'orthorhombic'],
+           ['cab', 'orthorhombic'],
+           ['-cba', 'orthorhombic'],
+           ['bca', 'orthorhombic'],
+           ['a-cb', 'orthorhombic'],
+           ['1abc', 'orthorhombic origin choice 1'],
+           ['1ba-c', 'orthorhombic origin choice 1'],
+           ['1cab', 'orthorhombic origin choice 1'],
+           ['1-cba', 'orthorhombic origin choice 1'],
+           ['1bca', 'orthorhombic origin choice 1'],
+           ['1a-cb', 'orthorhombic origin choice 1'],
+           ['2abc', 'orthorhombic origin choice 2'],
+           ['2ba-c', 'orthorhombic origin choice 2'],
+           ['2cab', 'orthorhombic origin choice 2'],
+           ['2-cba', 'orthorhombic origin choice 2'],
+           ['2bca', 'orthorhombic origin choice 2'],
+           ['2a-cb', 'orthorhombic origin choice 2'],
+           ['1', 'tetragonal or cubic origin choice 1'],
+           ['2', 'tetragonal or cubic origin choice 2'],
+           ['h', 'trigonal using hexagonal axes'],
+           ['r', 'trigonal using rhombohedral axes']]
 
 spacegroupdata = None
 symmetryops = None
 
+
 def preprocess():
     global spacegroupdata, symmetryops
-    symmetryops=symopsstr.splitlines()
+    symmetryops = symopsstr.splitlines()
     spacegroupdata = {}
     for line in iter(spacegroupdatastr.splitlines()):
         fields = line.split(";")
         hall = fields[0]
-        intnbr=list(fields[1].partition(":"))
-        intnbr[0]=int(intnbr[0])
+        intnbr = list(fields[1].partition(":"))
+        intnbr[0] = int(intnbr[0])
         hms = fields[2].split(",")
         old_halls = tuple(fields[3].split(","))
-        if old_halls==('',):
-            old_halls=()
+        if old_halls == ('',):
+            old_halls = ()
         sf = fields[4]
         symops = tuple([int(x) for x in fields[5].split(",")])
-        data = (intnbr[0],intnbr[2],hms,old_halls,sf,symops)
+        data = (intnbr[0], intnbr[2], hms, old_halls, sf, symops)
         spacegroupdata[hall] = data
 
 
 preprocess()
 
 
-def symopsmatrix(symop):   
+def symopsmatrix(symop):
     transl = [0, 0, 0]
     transf = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     row = symop.split(",")
 
     for i in range(len(row)):
-        
+
         parts = [x for x in re.split("([xyz+-])", row[i]) if x != '']
         if parts[0] not in ['+', '-']:
             parts.insert(0, '+')
@@ -1575,7 +1576,7 @@ def symopsmatrix(symop):
                     transl[i] = val
                 val = None
                 var = None
-                sign = None                    
+                sign = None
             if data == '+':
                 sign = ""
             elif data == '-':
@@ -1599,10 +1600,12 @@ def symopsmatrix(symop):
 
     return FracVector.create(transf), FracVector.create(transl)
 
+
 def get_hall(hall):
     if hall in spacegroupdata:
         return hall
     return None
+
 
 def get_symops(hall):
     if hall in spacegroupdata:
@@ -1610,11 +1613,13 @@ def get_symops(hall):
         return [symopsmatrix(symmetryops[x]) for x in spacegroupdata[hall][5]]
     return None
 
+
 def get_symops_strs(hall):
     if hall in spacegroupdata:
         #print [symmetryops[x] for x in spacegroupdata[hall][5]]
         return [symmetryops[x] for x in spacegroupdata[hall][5]]
     return None
+
 
 def get_nonstandard_hall(nonstd_hall):
     if nonstd_hall in spacegroupdata:
@@ -1624,9 +1629,10 @@ def get_nonstandard_hall(nonstd_hall):
             return hall
     return None
 
-def get_itcnbr_setting(itcnbr,setting):
+
+def get_itcnbr_setting(itcnbr, setting):
     try:
-        itcnbr=int(itcnbr)
+        itcnbr = int(itcnbr)
     except Exception:
         return None
     for hall in spacegroupdata:
@@ -1634,187 +1640,195 @@ def get_itcnbr_setting(itcnbr,setting):
             return hall
     return None
 
-def get_hm_setting(hm,setting):
-    hmsymb=hm+":"+(setting.tolower())
+
+def get_hm_setting(hm, setting):
+    hmsymb = hm+":"+(setting.tolower())
     for hall in spacegroupdata:
         if hmsymb in spacegroupdata[hall][2]:
             return hall
     return None
 
 
-def filter_itcnbr_setting(itcnbr,setting=None,halls=None):
+def filter_itcnbr_setting(itcnbr, setting=None, halls=None):
     try:
-        itcnbr=int(itcnbr)
+        itcnbr = int(itcnbr)
     except Exception:
         return []
-    if halls==None:
+    if halls is None:
         halls = spacegroupdata.keys()
-    if setting != None:
-        result = get_itcnbr_setting(itcnbr,setting)
+    if setting is not None:
+        result = get_itcnbr_setting(itcnbr, setting)
         if result in halls:
             return [result]
         else:
             return []
-    outhalls=[]
+    outhalls = []
     for hall in halls:
         if itcnbr == spacegroupdata[hall][0]:
             outhalls.append(hall)
     return outhalls
 
-def filter_hm(hm,setting=None,halls=None):
-    if halls==None:
+
+def filter_hm(hm, setting=None, halls=None):
+    if halls is None:
         halls = spacegroupdata.keys()
-    if setting != None:
-        result = get_hm_setting(hm,setting)
+    if setting is not None:
+        result = get_hm_setting(hm, setting)
         if result in halls:
             return [result]
         else:
             return []
-    outhalls=[]
+    outhalls = []
     for hall in halls:
         if hm in spacegroupdata[hall][2]:
             outhalls.append(hall)
     return outhalls
 
-def filter_sf(sf,halls=None):
-    if halls==None:
+
+def filter_sf(sf, halls=None):
+    if halls is None:
         halls = spacegroupdata.keys()
-    outhalls=[]
+    outhalls = []
     for hall in halls:
         if sf == spacegroupdata[hall][4]:
             outhalls.append(hall)
     return outhalls
 
+
 def spacegroup_filter(parse):
-    parse = str(parse).strip().replace("_"," ")
+    parse = str(parse).strip().replace("_", " ")
 
     # 1. Is this a proper hall symbol?
     hallparse = parse
-    if hallparse[0]=='-':
-        hallparse="-"+hallparse[1].upper() + (hallparse[2:].lower());
+    if hallparse[0] == '-':
+        hallparse = "-"+hallparse[1].upper() + (hallparse[2:].lower())
     else:
-        hallparse=hallparse[0].upper() + (hallparse[1:].lower());    
+        hallparse = hallparse[0].upper() + (hallparse[1:].lower())
     hall = get_hall(hallparse)
-    if hall != None:
+    if hall is not None:
         return [hall]
-    
+
     # 2. Is this a non-standard hall symbol?
     hall = get_nonstandard_hall(hallparse)
-    if hall != None:
+    if hall is not None:
         return [hall]
-    
+
     p = parse.partition(':')
     data = p[0]
     if p[2].strip() == '':
         setting = None
     else:
-        setting = p[2].tolower() 
+        setting = p[2].tolower()
 
-    if setting == None:
+    if setting is None:
         for s in settings:
             if s[1] in data:
                 setting = s[0]
-                data = data.replace(s[1],"").strip()
-    
+                data = data.replace(s[1], "").strip()
+
     # 3. ITC number (and setting)
-    halls = filter_itcnbr_setting(data,setting)
-    if len(halls)>0:
+    halls = filter_itcnbr_setting(data, setting)
+    if len(halls) > 0:
         return halls
 
     # 4. HM symbol (and setting)
-    halls = filter_hm(data,setting)
-    if len(halls)>0:
+    halls = filter_hm(data, setting)
+    if len(halls) > 0:
         return halls
 
     # 5. sf symbol
     halls = filter_sf(data)
-    if len(halls)>0:
+    if len(halls) > 0:
         return halls
 
     return []
 
 
-def spacegroup_filter_specific(hall=None,hm=None,itcnbr=None,setting=None, halls=None, symops=None):
-    if halls == None:
+def spacegroup_filter_specific(hall=None, hm=None, itcnbr=None, setting=None, halls=None, symops=None):
+    if halls is None:
         halls = spacegroupdata.keys()
 
     # 1. Is this a proper hall symbol?
-    if hall != None:
-        hallparse = str(hall).strip().replace("_"," ")
-        if hallparse[0]=='-':
-            hallparse="-"+hallparse[1].upper() + (hallparse[2:].lower());
+    if hall is not None:
+        hallparse = str(hall).strip().replace("_", " ")
+        if hallparse[0] == '-':
+            hallparse = "-"+hallparse[1].upper() + (hallparse[2:].lower())
         else:
-            hallparse=hallparse[0].upper() + (hallparse[1:].lower());    
+            hallparse = hallparse[0].upper() + (hallparse[1:].lower())
         hall = get_hall(hallparse)
         if hall in halls:
-            halls=[hall]
-    
+            halls = [hall]
+
         # 2. Is this a non-standard hall symbol?
         hall = get_nonstandard_hall(hallparse)
         if hall in halls:
-            halls=[hall]
+            halls = [hall]
 
-    if symops != None:
+    if symops is not None:
         raise Exception("Debug: to be implemented, filter spacegroups with symops")
 
-    if itcnbr != None:    
-        itcnbr=str(itcnbr) 
-        if setting == None:
+    if itcnbr is not None:
+        itcnbr = str(itcnbr)
+        if setting is None:
             p = itcnbr.partition(':')
             data = p[0]
             if p[2].strip() == '':
                 setting = None
             else:
-                setting = p[2].tolower() 
-    
-        if setting == None:
+                setting = p[2].tolower()
+
+        if setting is None:
             for s in settings:
                 if s[1] in data:
                     setting = s[0]
-                    data = data.replace(s[1],"").strip()
-    
-        # 3. ITC number (and setting)
-        halls = filter_itcnbr_setting(data,setting,halls=halls)
+                    data = data.replace(s[1], "").strip()
 
-    if hm != None:    
+        # 3. ITC number (and setting)
+        halls = filter_itcnbr_setting(data, setting, halls=halls)
+
+    if hm is not None:
         p = hm.partition(':')
         data = p[0]
         if p[2].strip() == '':
             setting = None
         else:
-            setting = p[2].tolower() 
+            setting = p[2].tolower()
 
         # 4. HM symbol (and setting)
-        halls = filter_hm(data,setting,halls=halls)
+        halls = filter_hm(data, setting, halls=halls)
 
     return halls
 
 
-
 def spacegroup_parse(parse):
     result = spacegroup_filter(parse)
-    if len(result)==1:
+    if len(result) == 1:
         return result[0]
-    elif len(result)==0:
+    elif len(result) == 0:
         raise Exception("No matching spacegroup found.")
-    raise Exception("Spacegroup not uniquely defined from given information.") 
+    raise Exception("Spacegroup not uniquely defined from given information.")
+
 
 def spacegroup_get_schoenflies(parse):
     return spacegroupdata[spacegroup_parse(parse)][4]
 
+
 def spacegroup_get_hm(parse):
     return spacegroupdata[spacegroup_parse(parse)][2][0]
+
 
 def spacegroup_get_hall(parse):
     return spacegroup_parse(parse)
 
+
 def spacegroup_get_number(parse):
     return spacegroupdata[spacegroup_parse(parse)][1]
 
+
 def spacegroup_get_number_and_setting(parse):
     hall = spacegroup_parse(parse)
-    return spacegroupdata[hall][0],spacegroupdata[hall][1]
- 
+    return spacegroupdata[hall][0], spacegroupdata[hall][1]
+
 # lattice_translations = {
 #     "P":[],
 #     "I":["1n"],
@@ -1826,7 +1840,7 @@ def spacegroup_get_number_and_setting(parse):
 #     "S":["1s","1s"],
 #     "T":["1t","1t"]
 # }
-#  
+#
 # hall_rotations = {
 #  "1_"   : [[ 1, 0, 0],[ 0, 1, 0],[ 0, 0, 1]], #"+00 0+0 00+",
 #  "2x"   : [[ 1, 0, 0],[ 0,-1, 0],[ 0, 0,-1]], # "+00 0-0 00-",
@@ -1849,9 +1863,9 @@ def spacegroup_get_number_and_setting(parse):
 #  "4z"   : [[ 0,-1, 0],[ 1, 0, 0],[ 0, 0, 1]], # "0-0 +00 00+",
 #  "6x"   : [[ 1, 0, 0],[ 0, 1,-1],[ 0, 1, 0]], # "+00 0+- 0+0",
 #  "6y"   : [[ 0, 0, 1],[ 0, 1, 0],[-1, 0, 1]], # "00+ 0+0 -0+",
-#  "6z"   : [[ 1,-1, 0],[ 1, 0, 0],[ 0, 0, 1]] # "+-0 +00 00+"                   
+#  "6z"   : [[ 1,-1, 0],[ 1, 0, 0],[ 0, 0, 1]] # "+-0 +00 00+"
 # }
-# 
+#
 # hall_translations = {
 #   'a': {6:[6, 0, 0]},
 #   'b': {0:[0, 6, 0]},
@@ -1869,12 +1883,12 @@ def spacegroup_get_number_and_setting(parse):
 #    ## extension to handle rhombohedral lattice as primitive
 #   'r': {4:[4, 8, 8]},
 #   's': {8:[8, 8, 4]},
-#   't': {8:[8, 4, 8]}                     
+#   't': {8:[8, 4, 8]}
 # }
-# 
+#
 # for key in hall_rotations:
 #     hall_rotations[key] = FracVector.create(hall_rotations[key])
-# 
+#
 # def hall_rotation_term(code, prev_order, prev_axis_type, nbr_rotations, vector):
 #     code += "   "
 #     if code[0] == '-':
@@ -1914,25 +1928,25 @@ def spacegroup_get_number_and_setting(parse):
 #             axis_type = 'x'
 #         else:
 #             axis_type = "'"
-#   
+#
 #     code = code[0] + axis_type + code[1:]
 #     if axis_type == '_':
 #         primitive_code += "1"
 #     else:
-#         primitive_code += code[0:1]        
-# 
+#         primitive_code += code[0:1]
+#
 #     if diagonal_reference_axis != '0':
 #         code = code[0] + diagonal_reference_axis + axis_type + code[ptr:];
 #         primitive_code += diagonal_reference_axis;
-#         ptr = 3;        
-#   
+#         ptr = 3;
+#
 #     lookup_code = code[0:ptr]
 #     rotation = hall_rotations[lookup_code]
-# 
-#     translation_string = ""    
+#
+#     translation_string = ""
 #     rotation_shift = 0
 #     vector_shift = FracVector.create([0,0,0])
-#     
+#
 #     for i in range(len(code)):
 #         translation_code = code[i]
 #         if not translation_code in hall_translations:
@@ -1944,45 +1958,45 @@ def spacegroup_get_number_and_setting(parse):
 #             t = t[0]
 #         else:
 #             continue
-#         translation_string += translation_code 
+#         translation_string += translation_code
 #         rotation_shift += t[1]
 #         vector_shift += FracVector.create(t)
-#     
+#
 #     seitz = MutableFracVector.create([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]])
-#    
-#    
+#
+#
 #     if improper:
 #         primitive_code = '-' + primitive_code
 #         seitz[0:3,0:3] = [-x for x in rotation]
 #     else:
 #         seitz[0:3,0:3] = rotation
-#     
+#
 #     seitz[0:3,3] = vector_shift
-# 
+#
 #     if vector != None:
 #         m1 = MutableFracVector.create([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]])
 #         m2 = MutableFracVector.create([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]])
 #         m1[0:3,3] = vector
 #         m2[0:3,3] = -vector
 #         seitz = m1 * seitz * m2
-#         
+#
 #     return seitz, order, axis_type, primitive_code
-#         
+#
 # # Loosly inspired by algorithm from jmol source code, Miguel
 # def parse_hall_symbol(hall_symbol):
 #     elements = hall_symbol.split()
-#     
+#
 #     if elements[0][0]=='-':
 #         centrosymmetric = True
 #         lattice_code = elements[0][1]
 #     else:
 #         centrosymmetric = False
 #         lattice_code = elements[0][0]
-#     
+#
 #     lattice_extension = lattice_translations[lattice_code]
 #     if centrosymmetric:
 #         lattice_extension += ["-1"]
-# 
+#
 #     if "(" in hall_symbol:
 #         if not ")" in hall_symbol:
 #             raise Exception("parse_hall_symbol: malformed hall symbol")
@@ -1991,13 +2005,13 @@ def spacegroup_get_number_and_setting(parse):
 #         elements = hall_symbol_parts[0].split(" ")
 #     else:
 #         vector = None
-#     
+#
 #     rotation_terms = []
-# 
+#
 #     prev_order = 0
 #     prev_axis_type = "0"
 #     primitive_hall_symbol = "P"
-#     
+#
 #     for i in range(1,len(elements)):
 #         element = elements[i]
 #         seitz, order, axis_type, primitive_code = hall_rotation_term(element, prev_order, prev_axis_type, i-1, vector)
@@ -2005,33 +2019,35 @@ def spacegroup_get_number_and_setting(parse):
 #         prev_axis_type = axis_type
 #         rotation_terms += [seitz]
 #         primitive_hall_symbol += " "+primitive_code
-# 
+#
 #     if vector != None:
 #         primitive_hall_symbol += "("+" ".join(vector)+")"
-#     
+#
 #     return primitive_hall_symbol, rotation_terms
-#     
+#
 
 # Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
-Rhomb2HexHall = { 'P 3*'     : 'R 3',
-                  '-P 3*'    : '-R 3',
-                  'P 3* 2'   : 'R 3 2"',
-                  'P 3* -2'  : 'R 3 -2"',
-                  'P 3* -2n' : 'R 3 -2"c',
-                  '-P 3* 2'  : '-R 3 2"',
-                  '-P 3* 2n' : '-R 3 2"c'}
+Rhomb2HexHall = {'P 3*': 'R 3',
+                 '-P 3*': '-R 3',
+                 'P 3* 2': 'R 3 2"',
+                 'P 3* -2': 'R 3 -2"',
+                 'P 3* -2n': 'R 3 -2"c',
+                 '-P 3* 2': '-R 3 2"',
+                 '-P 3* 2n': '-R 3 2"c'}
 
 Hex2RhombHall = dict([])
-for k,v in Rhomb2HexHall.iteritems():
+for k, v in Rhomb2HexHall.iteritems():
     Hex2RhombHall[v] = k
 
-citation.add_src_citation("imported code from cif2cell","Torbjörn Björkman")
+citation.add_src_citation("imported code from cif2cell", "Torbjörn Björkman")
 # Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
+
+
 def crystal_system_from_spacegroupnbr(spacegroupnr):
     # Determine crystal system
     if 0 < spacegroupnr <= 2:
         return "triclinic"
-    elif 2 < spacegroupnr <=15:
+    elif 2 < spacegroupnr <= 15:
         return "monoclinic"
     elif 15 < spacegroupnr <= 74:
         return "orthorhombic"
@@ -2046,19 +2062,19 @@ def crystal_system_from_spacegroupnbr(spacegroupnr):
     else:
         return "unknown"
 
+
 def crystal_system(hall_symb):
     numb = spacegroup_get_number(hall_symb)
     return crystal_system_from_spacegroupnbr(numb)
 
+
 def main():
- 
-     result = spacegroup_filter('134')
-     print result
-     
-     pass
+
+    result = spacegroup_filter('134')
+    print result
+
+    pass
 
 
 if __name__ == "__main__":
-    main()   
-    
-    
+    main()

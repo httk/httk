@@ -30,7 +30,7 @@ from collections import OrderedDict
 # TODO: Convert to using real instances of the core.reference.Reference class instead.
 
 from httk.config import config
-from reference import Reference, Author
+from .reference import Reference, Author
 
 module_citations = OrderedDict()
 external_citations = OrderedDict()
@@ -74,7 +74,7 @@ def print_citations():
     print "This program uses the high-throughput toolkit (httk) (c) 2012-2015"
     print "Credits for httk modules used in this run:"
     for module in module_citations:
-        print "  ("+module+")",",".join(module_citations[module])
+        print "  ("+module+")", ",".join(module_citations[module])
         #print ", ".join(creditlist)
     if external_citations != {}:
         print "From within httk the following software was also used:"

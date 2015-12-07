@@ -22,7 +22,7 @@ httk Io module
 
 """
 from httk.core import citation
-citation.add_src_citation("httk","Rickard Armiento")
+citation.add_src_citation("httk", "Rickard Armiento")
 
 from load import load
 from save import save

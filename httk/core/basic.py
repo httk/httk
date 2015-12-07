@@ -49,11 +49,11 @@ def is_sequence(arg):
 
 
 import re, errno, os, itertools, sys, tempfile, shutil, collections
-from ioadapters import IoAdapterFileReader
+from .ioadapters import IoAdapterFileReader
 
 
 def is_unary(e):
-    if type(e) == str:
+    if isinstance(e, str):
         return True
     try:
         dummy = iter(e)
@@ -165,7 +165,7 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
             match = search[i][0].search(line)
             if debug and match: 
                 sys.stdout.write(": MATCH")
-            if match and (search[i][1] == None or search[i][1](results, line)):
+            if match and (search[i][1] is None or search[i][1](results, line)):
                 if debug:
                     sys.stdout.write(": TRIGGER")
                 if debugfunc is not None:
@@ -197,7 +197,7 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
     if dim == 1:
         for e in eles:
             yield (e,)
-            if end[0] != None and e >= end[0]:
+            if end[0] is not None and e >= end[0]:
                 return
    
     for e in eles:
@@ -220,7 +220,7 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
                 else:
                     yield base
 
-        if end[0] != None and e >= end[0]:
+        if end[0] is not None and e >= end[0]:
             return
 
 

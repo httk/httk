@@ -16,9 +16,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import shlex, StringIO, os, sys, shutil
 from string import Template
-from basic import mkdir_p
+from .basic import mkdir_p
 
-def apply_template(template,output,envglobals=None,envlocals=None):
+
+def apply_template(template, output, envglobals=None, envlocals=None):
     """
     Simple Python template engine. 
 
@@ -31,12 +32,12 @@ def apply_template(template,output,envglobals=None,envlocals=None):
     to load the file it eventually will replace.
     """
 
-    if envlocals == None:
+    if envlocals is None:
         envlocals = {}
     else:
         envlocals = envlocals.copy()
 
-    if envglobals == None:
+    if envglobals is None:
         envglobals = {}
     else:
         envglobals = envglobals.copy()
@@ -55,24 +56,28 @@ def apply_template(template,output,envglobals=None,envlocals=None):
     exec_nesting = 0
     for token in lexer:
         if(eval_nesting == 0 and exec_nesting == 0):
-            if(token == '\\'): token += lexer.get_token()
-            if(token == '$'): token += lexer.get_token()
-            if(token == '$('): # eval command
-                eval_nesting=1
-                command=''
+            if(token == '\\'):
+                token += lexer.get_token()
+            if(token == '$'):
+                token += lexer.get_token()
+            if(token == '$('):  # eval command
+                eval_nesting = 1
+                command = ''
                 continue
-            if(token == '${'): # exec command
-                exec_nesting=1
-                command=''
+            if(token == '${'):  # exec command
+                exec_nesting = 1
+                command = ''
                 continue
-            if(token == '\\$'): # escaped $ -> send $ to output
-                token='$'
+            if(token == '\\$'):  # escaped $ -> send $ to output
+                token = '$'
             result_step2 += token
 
         elif(exec_nesting != 0):
-            if(token == '{'): exec_nesting+=1
-            if(token == '}'): exec_nesting-=1
-            if(exec_nesting==0):
+            if(token == '{'):
+                exec_nesting += 1
+            if(token == '}'):
+                exec_nesting -= 1
+            if(exec_nesting == 0):
                 sys.stdout = StringIO.StringIO()
                 try:
                     exec(command, envglobals, envlocals) 
@@ -80,15 +85,18 @@ def apply_template(template,output,envglobals=None,envlocals=None):
                     print "Failed to execute:"+command
                     raise 
                 result_step2 += sys.stdout.getvalue()
-                if result_step2.endswith('\n'): result_step2 = result_step2[:-1]
+                if result_step2.endswith('\n'):
+                    result_step2 = result_step2[:-1]
                 sys.stdout = sys.__stdout__                
                 continue
             command += token
 
         elif(eval_nesting != 0):
-            if(token == '('): eval_nesting+=1
-            if(token == ')'): eval_nesting-=1
-            if(eval_nesting==0):
+            if(token == '('):
+                eval_nesting += 1
+            if(token == ')'):
+                eval_nesting -= 1
+            if(eval_nesting == 0):
                 try:
                     result_step2 += str(eval(command, envglobals, envlocals)) 
                 except:
@@ -106,7 +114,8 @@ def apply_template(template,output,envglobals=None,envlocals=None):
     output_file.write(result_step2)
     output_file.close()
 
-def apply_templates(inputpath,outpath,template_suffixes="template",envglobals=None,envlocals=None, mkdir=True):
+
+def apply_templates(inputpath, outpath, template_suffixes="template", envglobals=None, envlocals=None, mkdir=True):
     """
     Apply one or a series of templates throughout directory tree.
 
@@ -121,7 +130,8 @@ def apply_templates(inputpath,outpath,template_suffixes="template",envglobals=No
         os.mkdir(outpath)
 
     # Make sure template_suffixies is a list so we can iterate over it
-    if isinstance(template_suffixes, str): template_suffixes=[template_suffixes]
+    if isinstance(template_suffixes, str):
+        template_suffixes = [template_suffixes]
 
     # Loop over all files in the directory tree and run all templates that are found
     #main_path = os.getcwd()    
@@ -130,22 +140,22 @@ def apply_templates(inputpath,outpath,template_suffixes="template",envglobals=No
     for root, dirs, files in os.walk(inputpath):
         for filename in files:
             for suffix in template_suffixes:
-                rp = os.path.relpath(root,inputpath)
+                rp = os.path.relpath(root, inputpath)
                 if rp == '.':
-                    rp=''
+                    rp = ''
                 else:
-                    mkdir_p(os.path.join(outpath,rp))
+                    mkdir_p(os.path.join(outpath, rp))
                 if(filename.endswith("."+suffix)):
-                    newname=filename[:-len("."+suffix)]
+                    newname = filename[:-len("."+suffix)]
                     #os.chdir(os.path.join("./",outpath,root))
                     #mkdir_p(os.path.dirname(newname))
                     #apply_template("./"+filename,"./"+newname,locals,envglobals=None,envlocals=None)        
                     #os.chdir(path)
-                    apply_template(os.path.join(root,filename),os.path.join(outpath,rp,newname),envglobals=envglobals,envlocals=envlocals)      
-                    shutil.copymode(os.path.join(root,filename),os.path.join(outpath,rp,newname))
+                    apply_template(os.path.join(root, filename), os.path.join(outpath, rp, newname), envglobals=envglobals, envlocals=envlocals)      
+                    shutil.copymode(os.path.join(root, filename), os.path.join(outpath, rp, newname))
                     #print "Instanceiate",os.path.join(root,filename),os.path.join(outpath,rp,newname)
                 else:
                     #print "Copy",shutil.copyfile(os.path.join(root,filename),os.path.join(outpath,rp,filename)) 
-                    shutil.copy(os.path.join(root,filename),os.path.join(outpath,rp,filename)) 
+                    shutil.copy(os.path.join(root, filename), os.path.join(outpath, rp, filename)) 
 
     #os.chdir(main_path)

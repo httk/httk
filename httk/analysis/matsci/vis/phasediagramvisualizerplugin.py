@@ -17,6 +17,7 @@
 
 from httk.core.httkobject import HttkPlugin
 
+
 class PhaseDiagramVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, phasediagram):
@@ -25,13 +26,13 @@ class PhaseDiagramVisualizerPlugin(HttkPlugin):
         self.visualizer = None
 
     def wait(self):
-        if self.visualizer != None:
+        if self.visualizer is not None:
             self.visualizer.wait()
 
     def params(self):
         return self.visualizer.params
 
-    def show(self,params={},backends=['matplotlib'],debug=False):
+    def show(self, params={}, backends=['matplotlib'], debug=False):
         for backend in backends:
             if backend == 'matplotlib':
                 try:

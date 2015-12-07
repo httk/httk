@@ -17,7 +17,9 @@
 
 from httk.core.httkobject import HttkObject, httk_typed_init
 
+
 class Author(HttkObject):
+
     """
     Object for keeping track of tags for other objects
     """
@@ -26,7 +28,7 @@ class Author(HttkObject):
     #    return cls.types_declare((('reference',str),),
     #                             index=('reference'))
     
-    @httk_typed_init({'last_name':str,'given_names':str},index=['last_name','given_names'])    
+    @httk_typed_init({'last_name': str, 'given_names': str}, index=['last_name', 'given_names'])    
     def __init__(self, last_name, given_names):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -46,6 +48,7 @@ class Author(HttkObject):
 
 
 class Reference(HttkObject):
+
     """
     A reference citation
     """
@@ -54,13 +57,13 @@ class Reference(HttkObject):
     #    return cls.types_declare((('reference',str),),
     #                             index=('reference'))
     
-    @httk_typed_init({'ref':str,'authors':[Author],'editors':[Author],
-                           "journal":str,"journal_issue":str,"journal_volume":str,
-                           "page_first":str,"page_last":str,
-                           "title":str,"year":str,            
-                           "book_publisher":str,
-                           "book_publisher_city":str,"book_title":str},
-                     index=['ref', 'authors','journal','journal_issue','journal_volume','page_first','page_last','title','year','book_publisher','book_publisher_city','book_title'])
+    @httk_typed_init({'ref': str, 'authors': [Author], 'editors': [Author],
+                      "journal": str, "journal_issue": str, "journal_volume": str,
+                      "page_first": str, "page_last": str,
+                      "title": str, "year": str,            
+                      "book_publisher": str,
+                      "book_publisher_city": str, "book_title": str},
+                     index=['ref', 'authors', 'journal', 'journal_issue', 'journal_volume', 'page_first', 'page_last', 'title', 'year', 'book_publisher', 'book_publisher_city', 'book_title'])
     def __init__(self, ref, authors=None, editors=None, journal=None, journal_issue=None, journal_volume=None, 
                  page_first=None, page_last=None, title=None, year=None, book_publisher=None,
                  book_publisher_city=None, book_title=None):
@@ -86,45 +89,45 @@ class Reference(HttkObject):
         
     @classmethod
     def create(cls, ref=None, authors=None, editors=None, journal=None, journal_issue=None, journal_volume=None, 
-                 page_first=None, page_last=None, title=None, year=None, book_publisher=None,
-                 book_publisher_city=None, book_title=None):
+               page_first=None, page_last=None, title=None, year=None, book_publisher=None,
+               book_publisher_city=None, book_title=None):
         """
         Create a Reference object.
         """        
-        if ref==None:
+        if ref is None:
             ref = ""
-            if authors != None:
+            if authors is not None:
                 ref += ", ".join([x.given_names+" "+x.last_name for x in authors])
-            if book_title == None:
-                if journal != None:
+            if book_title is None:
+                if journal is not None:
                     ref += ", "+journal
-                if journal_volume != None:
+                if journal_volume is not None:
                     ref += " "+str(journal_volume)
-                if page_first != None:
+                if page_first is not None:
                     ref += ", "+str(page_first)
-                if year != None:
+                if year is not None:
                     ref += " ("+str(year)+")"
             else:
-                if title != None:
+                if title is not None:
                     ref += ", "+title+" in "
                 ref += book_title
-                if page_first != None:
+                if page_first is not None:
                     ref += ", "+str(page_first)
-                if editors != None:
+                if editors is not None:
                     ref += ", ed. ".join([x.given_names+" "+x.last_name for x in editors])                
-                if year != None:
+                if year is not None:
                     yearstr = +", "+str(year)
                 else:
                     yearstr = ""
-                if book_publisher != None:
-                    if book_publisher_city == None:
+                if book_publisher is not None:
+                    if book_publisher_city is None:
                         ref += " ("+book_publisher+yearstr+")"
                     else:
                         ref += " ("+book_publisher+","+book_publisher_city+yearstr+")"
          
-        return cls(ref,authors=authors, editors=editors, journal=journal, journal_issue=journal_issue, journal_volume=journal_volume, 
-                 page_first=page_first, page_last=page_last, title=title, year=year, book_publisher=book_publisher,
-                 book_publisher_city=book_publisher_city, book_title=book_title)
+        return cls(ref, authors=authors, editors=editors, journal=journal, journal_issue=journal_issue, journal_volume=journal_volume, 
+                   page_first=page_first, page_last=page_last, title=title, year=year, book_publisher=book_publisher,
+                   book_publisher_city=book_publisher_city, book_title=book_title)
 
    
 def main():

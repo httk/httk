@@ -15,11 +15,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httkobject import HttkObject, httk_typed_init
-from reference import Reference
+from .httkobject import HttkObject, httk_typed_init
+from .reference import Reference
 
 
 class Code(HttkObject):
+
     """
     Object for keeping track of httk data about a computer software or script
     """
@@ -109,6 +110,7 @@ class Code(HttkObject):
     
     
 class CodeTag(HttkObject):
+
     @httk_typed_init({'code': Code, 'tag': str, 'value': str},
                      index=['code', 'tag', ('tag', 'value'), ('structure', 'tag', 'value')], skip=['hexhash'])
     def __init__(self, structure, tag, value):
@@ -121,6 +123,7 @@ class CodeTag(HttkObject):
 
 
 class CodeRef(HttkObject):
+
     @httk_typed_init({'code': Code, 'reference': Reference}, index=['code', 'reference'], skip=['hexhash'])
     def __init__(self, code, reference):
         self.code = code

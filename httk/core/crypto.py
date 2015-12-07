@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,11 +19,11 @@ Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
 import hashlib, os.path, base64, re
 try:
-	import bz2
+    import bz2
 except Exception:
-	pass
+    pass
 import ConfigParser
-from ioadapters import IoAdapterFileReader, IoAdapterFileWriter
+from .ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
 
 
@@ -71,7 +71,7 @@ def hexhash_ioa(ioa, prepend=None):
 #         excludes = ['ht.manifest']
 #     else:
 #         excludes.append('ht.manifest')
-#     
+#
 #     for i in range(len(filenames)):
 #         f = filenames[i]
 #         if skip_filenames:
@@ -94,24 +94,24 @@ def hexhash_ioa(ioa, prepend=None):
 #                 hash_manifest += relpath+" "+hexhash_ioa(f)+"\n"
 #             except IOError:
 #                 hash_manifest += relpath+" "+"0\n"
-# 
+#
 #     hash_hex = hexhash_str(hash_manifest)
-# 
+#
 #     if write != None:
 #         ioa = IoAdapterFileWriter.use(os.path.join(basedir,"ht.manifest"))
 #         ioa.file.write(hash_manifest)
 #         ioa.file.close()
-#     
+#
 #     return (hash_manifest,hash_hex)
 
 # def generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=False):
 #     filelist = []
-# 
+#
 #     for root, dirs, files in os.walk(basedir):
 #         filelist += [os.path.join(root,x) for x in files]
 #         # Make sure we always generate the same manifest
 #     filelist = sorted(filelist)
-# 
+#
 #     return generate_manifest_for_files(codename, codever, basedir, filelist, fakenames=fakenames, skip_filenames=skip_filenames,write=write,excludes=excludes)
 #
 #
@@ -123,7 +123,7 @@ def hexhash_ioa(ioa, prepend=None):
 #         excludes = ['ht.manifest']
 #     else:
 #         excludes.append('ht.manifest')
-# 
+#
 #     if os.path.exists(manifestpath):
 #         # Just verify that manifest is correct
 #         (manifest, hexhash) = generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=False)
@@ -141,7 +141,7 @@ def hexhash_ioa(ioa, prepend=None):
 #             raise Exception("Manifest mismatch, the ht.manifest in the directory does not match the actual files! Hashes are:"+str(hexhash)+" vs. "+str(hexhash2))
 #     else:
 #         # Generate a new manifest
-#         (manifest, hexhash) = generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=True)        
+#         (manifest, hexhash) = generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False,write=True)
 #
 #     return (manifest, hexhash)
 
@@ -160,7 +160,7 @@ def tuple_to_str(t):
 
 
 def read_keys(keydir):
-    import ed25519
+    from . import ed25519
 
     f = open(os.path.join(keydir, 'key1.priv'), "r")
     b64sk = f.read()
@@ -186,7 +186,7 @@ def sha256file(filename):
 
 
 def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=False, force=False):
-    import ed25519
+    from . import ed25519
 
     message = ""
 
@@ -231,7 +231,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     message += "\n"
 
     for root, unsorteddirs, unsortedfiles in os.walk(basedir, topdown=True, followlinks=False):
-        if root == basedir: 
+        if root == basedir:
             root = ""
         else:
             root = os.path.relpath(root, basedir)
@@ -241,7 +241,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
         for i, f in enumerate(files):
             filename = filenames[i]
             for exclude in excludes:
-                if re.match(exclude, f) != None or re.match(exclude, filename) != None:
+                if re.match(exclude, f) is not None or re.match(exclude, filename) is not None:
                     break
             else:
                 truefilename = os.path.join(basedir, filename)
@@ -274,7 +274,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
         unsorteddirs[:] = keepdirs
 
     #print "===="+message+"===="
-    
+
     sig = ed25519.signature(message, sk, pk)
     b64sig = base64.b64encode(sig)
 
@@ -282,7 +282,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     manifestfile.write(b64sig)
     manifestfile.write("\n")
 
-    
+
 #def generate_rsa_keys(path,extraargs=[]):
 #    args = ['ssh-keygen','-q','-N','','-f']+extraargs+[path]
 #    p = Popen(args, stdout=PIPE)
@@ -303,7 +303,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
 #     if p.returncode != 0:
 #         raise Exception("httk.crypto.crypto: failed to generate keys")
 #     return stdout
-#     
+#
 # def sign_message_ssl(msg,key):
 #     args = ['openssl','genrsa','-sign','-key',key]
 #     p = Popen(args, stdout=PIPE, stdin=msg)
@@ -311,15 +311,15 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
 #     if p.returncode != 0:
 #         raise Exception("httk.crypto.crypto: failed to sign message")
 #     return stdout
-#     
-# def encrypt_message_ssl(msg,pubkey):    
+#
+# def encrypt_message_ssl(msg,pubkey):
 #     args = ['openssl','rsautl','-encrypt','-pubin','-inkey',pubkey]
 #     p = Popen(args, stdout=PIPE, stdin=msg)
 #     stdout = p.communicate()[0]
 #     if p.returncode != 0:
 #         raise Exception("httk.crypto.crypto: failed to encrypt message")
 #     return stdout
-# 
+#
 # def decrypt_message_sll(msg,key):
 #     args = ['openssl','rsautl','-decrypt','-inkey',key]
 #     p = Popen(args, stdout=PIPE, stdin=msg)
@@ -333,7 +333,7 @@ def generate_keys(public_key_path, secret_key_path):
     """
     Generates a public and a private key pair and stores them in respective files
     """
-    import ed25519
+    from . import ed25519
     try:
         secret_key = os.urandom(64)
         #sr = random.SystemRandom()
@@ -351,12 +351,12 @@ def generate_keys(public_key_path, secret_key_path):
 
     secfile = IoAdapterFileWriter.use(secret_key_path)
     secfile.file.write(b64secret_key)
-    secfile.close()    
+    secfile.close()
 
 
 def get_crypto_signature(message, secret_key_path):
-    import ed25519
-    
+    from . import ed25519
+
     ioa = IoAdapterFileReader.use(secret_key_path)
     b64secret_key = ioa.file.read()
     ioa.close()
@@ -368,27 +368,27 @@ def get_crypto_signature(message, secret_key_path):
 
 
 def verify_crytpo_signature(signature, message, public_key):
-    import ed25519
-    
+    from . import ed25519
+
     binsignature = base64.b64decode(signature)
     binpublic_key = base64.b64decode(public_key)
     return ed25519.checkvalid(binsignature, message, binpublic_key)
-    
-    
+
+
 def verify_crytpo_signature_old(signature, message, public_key_path):
-    import ed25519
-    
+    from . import ed25519
+
     ioa = IoAdapterFileReader.use(public_key_path)
     b64public_key = ioa.file.read()
     ioa.close()
     binsignature = base64.b64decode(signature)
     public_key = base64.b64decode(b64public_key)
     return ed25519.checkvalid(binsignature, message, public_key)
-    
-    
+
+
 def main():
     print "Generating keys, this may take some time."
-    generate_keys("/tmp/pub.key", "/tmp/priv.key")  
+    generate_keys("/tmp/pub.key", "/tmp/priv.key")
     message = "This is my message."
     print "Signing message"
     my_signature = get_crypto_signature(message, "/tmp/priv.key")
@@ -401,6 +401,6 @@ def main():
     result = verify_crytpo_signature(my_signature, forged_message, "/tmp/pub.key")
     print "Forged message validates", result
     print "Finished"
-    
+
 if __name__ == "__main__":
     main()

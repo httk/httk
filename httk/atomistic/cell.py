@@ -23,20 +23,23 @@ from cellutils import *
 from cellshape import CellShape
 
 #TODO: Make this inherit CellShape
+
+
 class Cell(HttkObject):
+
     """
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
     """
  
-    @httk_typed_init({'niggli_matrix':(FracVector,3,2),'orientation':int})       
-    def __init__(self, niggli_matrix, orientation=1, basis = None):
+    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'orientation': int})       
+    def __init__(self, niggli_matrix, orientation=1, basis=None):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
         """    
         self.niggli_matrix = niggli_matrix
         self.orientation = orientation
-        if basis == None:
-            basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=orientation))
+        if basis is None:
+            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=orientation))
         
         self._basis = basis
  
@@ -58,10 +61,10 @@ class Cell(HttkObject):
     @classmethod
     def create(cls, cell=None, basis=None, metric=None, niggli_matrix=None, 
                a=None, b=None, c=None, alpha=None, beta=None, gamma=None,
-                                  lengths=None, angles=None, scale=None, 
-                                  scaling=None, volume=None, periodicity=None, 
-                                  nonperiodic_vecs=None, orientation=1,
-                                  lattice_system=None):
+               lengths=None, angles=None, scale=None, 
+               scaling=None, volume=None, periodicity=None, 
+               nonperiodic_vecs=None, orientation=1,
+               lattice_system=None):
         """
         Create a new cell object, 
         
@@ -86,7 +89,7 @@ class Cell(HttkObject):
             integer: number of non-periodic basis vectors 
         
         """
-        if isinstance(cell,Cell):
+        if isinstance(cell, Cell):
             basis = cell.basis
         elif cell is not None:
             basis = cell_to_basis(cell)
@@ -94,39 +97,39 @@ class Cell(HttkObject):
         if basis is not None:
             basis = FracVector.use(basis)
 
-        if niggli_matrix != None:
+        if niggli_matrix is not None:
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=orientation))
+            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=orientation))
 
-        if niggli_matrix == None and basis != None:
+        if niggli_matrix is None and basis is not None:
             niggli_matrix, orientation = basis_to_niggli(basis)
 
-        if niggli_matrix == None and lengths != None and angles != None:
-            niggli_matrix = lengths_angles_to_niggli(lengths,angles)
+        if niggli_matrix is None and lengths is not None and angles is not None:
+            niggli_matrix = lengths_angles_to_niggli(lengths, angles)
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=1))
+            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=1))
 
-        if niggli_matrix == None and not (a==None or b==None or c==None or alpha==None or beta==None or gamma==None):
-            niggli_matrix = lengths_angles_to_niggli([a,b,c],[alpha,beta,gamma])
+        if niggli_matrix is None and not (a is None or b is None or c is None or alpha is None or beta is None or gamma is None):
+            niggli_matrix = lengths_angles_to_niggli([a, b, c], [alpha, beta, gamma])
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=1))
+            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=1))
 
-        if niggli_matrix == None:
+        if niggli_matrix is None:
             raise Exception("cell.create: Not enough information to specify a cell given.")
                 
-        if scaling == None and scale != None:
+        if scaling is None and scale is not None:
             scaling = scale
 
-        if scaling != None and volume != None:
+        if scaling is not None and volume is not None:
             raise Exception("Cell.create: cannot specify both scaling and volume!")
             
-        if volume != None:
-            scaling = vol_to_scale(basis,volume)
+        if volume is not None:
+            scaling = vol_to_scale(basis, volume)
 
-        if scaling != None:
+        if scaling is not None:
             scaling = FracVector.use(scaling)
             niggli_matrix = (niggli_matrix*scaling*scaling).simplify()
-            if basis != None:
+            if basis is not None:
                 basis = (basis*scaling).simplify()
 
 #       Lets skip including the lattice_system for now. Why do we need this? When important, it
@@ -168,35 +171,35 @@ class Cell(HttkObject):
     def volume(self):
         return self._volume
 
-    @httk_typed_property((FracVector,3,3))
+    @httk_typed_property((FracVector, 3, 3))
     def basis(self):
         return self._basis
 
     def scaling(self):
         return -self.volume
 
-    def coords_reduced_to_cartesian(self,coords):
+    def coords_reduced_to_cartesian(self, coords):
         coords = FracVector.use(coords)
         return coords*self.basis
 
-    def coordgroups_reduced_to_cartesian(self,coordgroups):    
+    def coordgroups_reduced_to_cartesian(self, coordgroups):    
         newcoordgroups = []    
         for coordgroup in coordgroups:
             newcoordgroups += [self.coords_reduced_to_cartesian(coordgroup)]    
         return FracVector.stack(newcoordgroups)
 
-    def coords_cartesian_to_reduced(self,coords):
+    def coords_cartesian_to_reduced(self, coords):
         coords = FracVector.use(coords)
         return coords*self.inv
 
-    def coordgroups_cartesian_to_reduced(self,coordgroups):    
+    def coordgroups_cartesian_to_reduced(self, coordgroups):    
         newcoordgroups = []    
         for coordgroup in coordgroups:
             newcoordgroups += [self.coords_cartesian_to_reduced(coordgroup)]    
         return FracVector.stack(newcoordgroups)
 
-    def is_point_inside(self,cartesian_coord):
-        is_point_inside_cell(self.basis,cartesian_coord)
+    def is_point_inside(self, cartesian_coord):
+        is_point_inside_cell(self.basis, cartesian_coord)
 
 #     # Type translators where convenient types and primitive types differ
 #     @classmethod
@@ -239,7 +242,7 @@ class Cell(HttkObject):
     def clean(self):
         newbasis = self.basis.limit_denominator(5000000)
         new_niggli_matrix = self.niggli_matrix.limit_denominator(5000000)
-        return self.__class__(new_niggli_matrix,orientation=self.orientation,basis=newbasis)
+        return self.__class__(new_niggli_matrix, orientation=self.orientation, basis=newbasis)
 
     @property
     def normalization_scale(self):
@@ -253,14 +256,15 @@ class Cell(HttkObject):
         # (prototypes created from lengths and angles is another matter)
         #        
         c = self.basis
-        maxele = max(c[0,0],c[0,1],c[0,2],c[1,0],c[1,1],c[1,2],c[2,0],c[2,1],c[2,2])
-        maxeleneg = max(-c[0,0],-c[0,1],-c[0,2],-c[1,0],-c[1,1],-c[1,2],-c[2,0],-c[2,1],-c[2,2])
+        maxele = max(c[0, 0], c[0, 1], c[0, 2], c[1, 0], c[1, 1], c[1, 2], c[2, 0], c[2, 1], c[2, 2])
+        maxeleneg = max(-c[0, 0], -c[0, 1], -c[0, 2], -c[1, 0], -c[1, 1], -c[1, 2], -c[2, 0], -c[2, 1], -c[2, 2])
         if maxeleneg > maxele:
             scale = (-maxeleneg).simplify()
         else:
             scale = (maxele).simplify()
         return scale
         
+
 def main():
     pass
 

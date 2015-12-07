@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import fractions, random, operator, itertools
+from functools import reduce
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
@@ -51,6 +52,7 @@ def nested_map_fractions_tuple(op, *ls):
 
 
 class FracVector(object):
+
     """
     FracVector is a general *immutable* N-dimensional vector (tensor) class for performing linear algebra with fractional numbers. 
     
@@ -992,6 +994,7 @@ class FracVector(object):
     
     
 class FracScalar(FracVector):
+
     """
     Represents the fractional number nom/denom. This is a subclass of FracVector with the purpose of making 
     it clear when a scalar fracvector is needed/used.

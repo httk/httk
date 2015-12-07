@@ -23,7 +23,9 @@ from data import spacegroups
 from structureutils import *
 from spacegroup import Spacegroup
 
+
 class RepresentativeStructure(HttkObject):
+
     """
     A RepresentativeStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
     It keeps track of a set of representative atoms in a unit cell (the conventional cell) and the symmetry group / operations
@@ -139,22 +141,22 @@ class RepresentativeStructure(HttkObject):
         if rc_sites is not None:
             rc_sites = RepresentativeSites.use(rc_sites)
         else:
-            if rc_reduced_coordgroups == None and \
-                    rc_reduced_coords == None and \
-                    rc_occupancies != None:
+            if rc_reduced_coordgroups is None and \
+                    rc_reduced_coords is None and \
+                    rc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-                if rc_reduced_occupationscoords != None:     
-                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)
+                if rc_reduced_occupationscoords is not None:     
+                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords, rc_occupancies)
 
-            if rc_reduced_coordgroups != None or \
-                    rc_reduced_coords != None:
+            if rc_reduced_coordgroups is not None or \
+                    rc_reduced_coords is not None:
                                                                                     
                 try:
                     rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
-                                                   reduced_coords=rc_reduced_coords, 
-                                                   counts=rc_counts,
-                                                   hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
-                                                   multiplicities=multiplicities,occupancies=rc_occupancies)
+                                                          reduced_coords=rc_reduced_coords, 
+                                                          counts=rc_counts,
+                                                          hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
+                                                          multiplicities=multiplicities, occupancies=rc_occupancies)
                 except Exception as e:
                     raise
                     #print "Ex",e
@@ -162,20 +164,20 @@ class RepresentativeStructure(HttkObject):
             else:
                 rc_sites = None
 
-        if rc_sites == None and rc_reduced_coordgroups == None and \
-               rc_reduced_coords == None and rc_reduced_occupationscoords == None:
+        if rc_sites is None and rc_reduced_coordgroups is None and \
+                rc_reduced_coords is None and rc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if rc_cartesian_coordgroups == None and rc_cartesian_coords == None and \
-                    rc_occupancies != None and rc_cartesian_occupationscoords != None:
-                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)
+            if rc_cartesian_coordgroups is None and rc_cartesian_coords is None and \
+                    rc_occupancies is not None and rc_cartesian_occupationscoords is not None:
+                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords, rc_occupancies)
              
-            if rc_cartesian_coords != None and rc_cartesian_coordgroups == None:
+            if rc_cartesian_coords is not None and rc_cartesian_coordgroups is None:
                 rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)
 
-            if rc_cell != None:  
-                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_cell)
+            if rc_cell is not None:  
+                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups, rc_cell)
             
-        if rc_sites == None:
+        if rc_sites is None:
             raise Exception("Structure.create: representative sites specifications invalid.")
 
         if assignments is not None:
@@ -269,6 +271,7 @@ class RepresentativeStructure(HttkObject):
         new.add_tags(self.get_tags())
         new.add_refs(self.get_refs())               
         return new
+
 
 def main():
     print "Test"

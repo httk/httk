@@ -16,13 +16,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from signature import Signature, SignatureKey
-from code import Code
-from project import Project
-from reference import Reference
+from .signature import Signature, SignatureKey
+from .code import Code
+from .project import Project
+from .reference import Reference
 
 
 class Computation(HttkObject):
+
     """
     Object for keeping track of httk data about a specific computation run
     """
@@ -147,6 +148,7 @@ class Computation(HttkObject):
 
 
 class ComputationTag(HttkObject):
+
     @httk_typed_init({'computation': Computation, 'tag': str, 'value': str},
                      index=['computation', 'tag', ('tag', 'value'), ('computation', 'tag', 'value')], skip=['hexhash'])    
     def __init__(self, computation, tag, value):
@@ -159,6 +161,7 @@ class ComputationTag(HttkObject):
 
 
 class ComputationRef(HttkObject):
+
     @httk_typed_init({'computation': Computation, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
     def __init__(self, computation, reference):
         self.computation = computation
@@ -169,6 +172,7 @@ class ComputationRef(HttkObject):
 
 
 class ComputationRelated(HttkObject):
+
     """
     Object for keeping track of httk data about a specific computation run
     """
@@ -191,6 +195,7 @@ class ComputationRelated(HttkObject):
 
 
 class ComputationProject(HttkObject):
+
     """
     """
     @httk_typed_init({'computation': Computation, 'project': Project},
@@ -211,6 +216,7 @@ class ComputationProject(HttkObject):
 
 
 class Result(HttkObject):
+
     """
     Intended as a base class for results tables for computations
     """

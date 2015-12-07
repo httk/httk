@@ -19,13 +19,14 @@ from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic.structurephasediagram import StructurePhaseDiagram
 import httk.analysis.matsci.vis
 
+
 class StructurePhaseDiagramVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, structurephasediagram):
         print "PhaseDiagramVisualizerPlugin called"
         self.structurephasediagram = structurephasediagram
 
-    def show(self,**params):        
+    def show(self, **params):        
         self.structurephasediagram.get_phasediagram().vis.show(**params)
 
 StructurePhaseDiagram.vis = HttkPluginWrapper(StructurePhaseDiagramVisualizerPlugin)

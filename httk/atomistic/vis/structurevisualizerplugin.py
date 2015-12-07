@@ -18,6 +18,7 @@
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic import Structure, UnitcellStructure
 
+
 class StructureVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, struct):
@@ -26,18 +27,18 @@ class StructureVisualizerPlugin(HttkPlugin):
         self.visualizer = None
 
     def wait(self):
-        if self.visualizer != None:
+        if self.visualizer is not None:
             self.visualizer.wait()
 
     def params(self):
         return self.visualizer.params
 
-    def show(self,params={},backends=['jmol','ase'],debug=False):
+    def show(self, params={}, backends=['jmol', 'ase'], debug=False):
         for backend in backends:
             if backend == 'jmol':
                 try:
                     from jmolstructurevisualizer import JmolStructureVisualizer
-                    self.visualizer = JmolStructureVisualizer(self.struct,params)
+                    self.visualizer = JmolStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     #self.visualizer.rotate()
                     return
@@ -48,7 +49,7 @@ class StructureVisualizerPlugin(HttkPlugin):
             if backend == 'ase':
                 try:
                     from asestructurevisualizer import AseStructureVisualizer
-                    self.visualizer = AseStructureVisualizer(self.struct,params)
+                    self.visualizer = AseStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     return
                 except ImportError:

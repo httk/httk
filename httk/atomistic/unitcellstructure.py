@@ -23,7 +23,9 @@ from data import spacegroups
 from structureutils import *
 from spacegroup import Spacegroup
 
+
 class UnitcellStructure(HttkObject):
+
     """
     A UnitcellStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
     It keeps track of all the copies of the atoms within a unitcell.
@@ -196,51 +198,50 @@ class UnitcellStructure(HttkObject):
         if uc_sites is not None:
             uc_sites = UnitcellSites.use(uc_sites)
         else:
-            if uc_reduced_coordgroups == None and \
-                    uc_reduced_coords == None and \
-                    uc_occupancies != None:
+            if uc_reduced_coordgroups is None and \
+                    uc_reduced_coords is None and \
+                    uc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-                if uc_reduced_occupationscoords != None:
-                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
+                if uc_reduced_occupationscoords is not None:
+                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords, uc_occupancies)
             
-            if uc_reduced_coordgroups != None or \
-                    uc_reduced_coords != None:
+            if uc_reduced_coordgroups is not None or \
+                    uc_reduced_coords is not None:
 
                 try:
                     uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
-                                                   reduced_coords=uc_reduced_coords, 
-                                                   counts=uc_counts, 
-                                                   periodicity=periodicity, occupancies=uc_occupancies)
+                                                    reduced_coords=uc_reduced_coords, 
+                                                    counts=uc_counts, 
+                                                    periodicity=periodicity, occupancies=uc_occupancies)
                 except Exception:
                     uc_sites = None
             
             else:
                 uc_sites = None
 
-        if uc_sites == None and uc_reduced_coordgroups == None and \
-               uc_reduced_coords == None and uc_reduced_occupationscoords == None:
+        if uc_sites is None and uc_reduced_coordgroups is None and \
+                uc_reduced_coords is None and uc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if uc_cartesian_coordgroups == None and uc_cartesian_coords == None and \
-                    uc_occupancies != None and uc_cartesian_occupationscoords != None:
-                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
+            if uc_cartesian_coordgroups is None and uc_cartesian_coords is None and \
+                    uc_occupancies is not None and uc_cartesian_occupationscoords is not None:
+                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords, uc_occupancies)
              
-            if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:
+            if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
                 uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 
-            if uc_cell != None: 
-                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_cell)
+            if uc_cell is not None: 
+                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups, uc_cell)
 
-        if assignments != None:
+        if assignments is not None:
             assignments = Assignments.use(assignments)
 
-        if uc_sites == None:
+        if uc_sites is None:
             raise Exception("Structure.create: not enough information for information about sites.")
 
         new = cls(assignments=assignments, uc_sites=uc_sites, uc_cell=uc_cell)
 
         return new
         
-
     @classmethod
     def use(cls, other):
         from structure import Structure
@@ -326,5 +327,5 @@ class UnitcellStructure(HttkObject):
     def uc_counts(self):
         return self.uc_sites.counts
 
-    def transform(self,matrix,max_search_cells=20, max_atoms=1000):
-        return transform(self,matrix,max_search_cells=max_search_cells,max_atoms=max_atoms)
+    def transform(self, matrix, max_search_cells=20, max_atoms=1000):
+        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
