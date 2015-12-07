@@ -160,10 +160,10 @@ def struct_process_with_isotropy(struct):
         return newstruct
     else:
         print "ISOTROPY STDERR:"
-        #print inputstr
+        print inputstr
         print "========"
-        #print out
-        #print "========"
+        print out
+        print "========"
         print err
         print "========"
 

@@ -21,8 +21,8 @@ struct = httk.load("POSCAR2")
 origbasis = struct.uc_basis
 # By printing the orthogonal transformation and see how it builds an orthogonal cell, 
 # you can then paste that into struct.build_supercell adjust manually adjust the supercell
-print (struct.orthogonal_supercell_transformation(tolerance=20))
-struct = struct.build_orthogonal_supercell(tolerance=20)
+#print (struct.orthogonal_supercell_transformation(tolerance=20))
+struct = struct.supercell.orthogonal(tolerance=20)
  
 struct.vis.show({'bonds':True, 'extbonds':True, 'polyhedra':False, 'extmetals':False,
                   'defaults':'publish','angle':'{0 0 0} 20.0', 'perspective':False,

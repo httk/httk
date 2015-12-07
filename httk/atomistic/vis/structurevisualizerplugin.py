@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
-from httk.atomistic import Structure
+from httk.atomistic import Structure, UnitcellStructure
 
 class StructureVisualizerPlugin(HttkPlugin):
             
@@ -58,3 +58,4 @@ class StructureVisualizerPlugin(HttkPlugin):
         raise Exception("StructureVisualizerPlugin.show: None of the requested / available backends available, tried:"+str(backends))
 
 Structure.vis = HttkPluginWrapper(StructureVisualizerPlugin)
+UnitcellStructure.vis = HttkPluginWrapper(StructureVisualizerPlugin)

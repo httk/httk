@@ -22,6 +22,7 @@ from spacegroup import Spacegroup
 from sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from sites import Sites
+from unitcellsites import UnitcellSites
 
 class RepresentativeSites(Sites):
     """
@@ -47,7 +48,8 @@ class RepresentativeSites(Sites):
 
         self.wyckoff_symbols = wyckoff_symbols
         self._multiplicities = multiplicities
-
+    
+    #TODO: Recreate multiplicities (and perhaps also wyckoff_symbols) if those are not given in construction
     @classmethod           
     def create(cls, sites=None, reduced_coordgroups=None, 
                 reduced_coords=None, 
@@ -87,6 +89,8 @@ class RepresentativeSites(Sites):
 
     @httk_typed_property([int])
     def multiplicities(self):
+        #if self._multiplicities is None:
+        #    raise Exception("Representativesites.multiplicities: Not yet implemented getting multiplicities when not given.")
         return self._multiplicities
                                         
     @httk_typed_property(str)
@@ -144,7 +148,13 @@ class RepresentativeSites(Sites):
         #exit(0)
         return out
 
+    @property
+    def total_number_of_atoms(self):
+        return sum(self._multiplicities)
 
+    def get_uc_sites(self):
+        filled_reduced_coordgroups = coordgroups_reduced_to_unitcell(self.reduced_coordgroups, self.hall_symbol)
+        return UnitcellSites.create(reduced_coordgroups=filled_reduced_coordgroups, pbc=self.pbc)
 
     def clean(self):
         c = super(RepresentativeSites,self).clean()

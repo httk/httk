@@ -15,21 +15,17 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import httk.external.ase_glue
-import ase.visualize
+from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
+from representativestructure import RepresentativeStructure
+from unitcellstructure import UnitcellStructure
 
-class AseStructureVisualizer(object):
 
-    def __init__(self, struct, params={}):
+class StructureFormulaPlugin(HttkPlugin):
+            
+    def plugin_init(self, struct):
         self.struct = struct
-        self.params = params
-         
-    def show(self):
-        ase_atoms = self.struct.ase.to_Atoms()
-        #ase_atoms = httk.iface.ase_if.ase_atoms_to_structure(self.struct)
-        ase.visualize.view(ase_atoms)
-        
-    def wait(self):
-        pass
 
-    
+RepresentativeStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
+UnitcellStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
+
+

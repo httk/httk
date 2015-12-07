@@ -26,11 +26,13 @@ import httk
 
 #from httk.core import *
 from structure import Structure, StructureRef, StructureTag
-from scalelessstructure import ScalelessStructure
-from cell import Cell
 from unitcellstructure import UnitcellStructure
+from representativestructure import RepresentativeStructure
 from representativesites import RepresentativeSites
 from unitcellsites import UnitcellSites
+import formulautils
+import supercellutils
+from cell import Cell
 #from representativesitesstructure import RepresentativeSitesStructure
 from assignments import Assignments
 from spacegroup import Spacegroup
@@ -39,8 +41,8 @@ from structurephasediagram import StructurePhaseDiagram
 
 import io as _atomistic_io
 
-__all__ = ["Structure", "ScalelessStructure", "Cell", "UnitcellStructure", "RepresentativeSites", "UnitcellSites","Assignments",
+__all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites","Assignments",
             "Compound", "CompoundStructure", "StructurePhaseDiagram","StructureRef","StructureTag",
-            "CompoundTag", "CompoundRef"]
+            "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure"]
 
 import atomisticio

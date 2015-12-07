@@ -65,8 +65,12 @@ class Spacegroup(HttkObject):
         raise Exception("Spacegroup.create: not enough input parameters given to create a spacegroup object.")
 
     @property
-    def spacegroup_number_and_setting(self):
+    def number_and_setting(self):
         return spacegroup_get_number_and_setting(self.hall_symbol)
+
+    @property
+    def number(self):
+        return spacegroup_get_number_and_setting(self.hall_symbol)[0]
 
 def main():
     pass

@@ -23,7 +23,7 @@ from httk.core.template import apply_templates
 
 
 def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',
-                      instantiate_name='ht_instantiate.py', overwrite=False, overwrite_head_dir=True, remove_instantiate=True, name=None, priority=3):
+                      instantiate_name='ht.instantiate.py', overwrite=False, overwrite_head_dir=True, remove_instantiate=True, name=None, priority=3):
     global instantiate_args, instantiate_to_path
 
     if args is None:
@@ -60,6 +60,7 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     try:
         os.chdir(taskpath)
         # try:
+        print "INSTANTIATE_NAME",taskpath
         execfile(instantiate_name, args, {})
         # except:
         #    with open(instantiate_name) as f:

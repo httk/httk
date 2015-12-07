@@ -18,7 +18,7 @@
 from httk.core import citation
 citation.add_ext_citation('Jmol', "An open-source Java viewer for chemical structures in 3D. http://www.jmol.org/")
 
-import os, time, threading, subprocess, signal, sys
+import os, time, threading, subprocess, signal, sys, glob
 
 import httk
 from httk.iface.jmol_if import *
@@ -29,11 +29,14 @@ from command import Command
 
 try:
     jmol_path=config.get('paths', 'jmol')
-    jmol_dirpath, jmol_filename = os.path.split(jmol_path)
-
+    if jmol_path == "":
+        raise Exception("No jmol path set.")
+    jmol_path = glob.glob(os.path.expandvars(os.path.expanduser(jmol_path)))[0]
+    jmol_dirpath, jmol_filename = os.path.split(jmol_path)    
 except Exception:
+    raise
     jmol_path = distutils.spawn.find_executable("jmol") 
-    if jmol_path == None:
+    if jmol_path is None:
         raise Exception("jmol_ext: No path is set for jmol in httk configuration, and no jmol executable was found.")
 
 jmol_version = None
@@ -43,7 +46,7 @@ def check_works():
     global jmol_version, jmol_version_date
 
     if jmol_path == "" or not os.path.exists(jmol_path):
-        raise ImportError("httk.external.jmol imported without access to a jmol binary to run.")
+        raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
     
     out, err, completed = Command(jmol_path,['-n','-o'],cwd='./').run(15,debug=False)
     if completed == None or completed != 0:

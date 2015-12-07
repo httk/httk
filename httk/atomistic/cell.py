@@ -88,10 +88,10 @@ class Cell(HttkObject):
         """
         if isinstance(cell,Cell):
             basis = cell.basis
-        elif cell != None:
+        elif cell is not None:
             basis = cell_to_basis(cell)
 
-        if basis != None:
+        if basis is not None:
             basis = FracVector.use(basis)
 
         if niggli_matrix != None:

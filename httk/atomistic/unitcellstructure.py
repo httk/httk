@@ -22,60 +22,112 @@ from unitcellsites import UnitcellSites
 from data import spacegroups
 from structureutils import *
 from spacegroup import Spacegroup
-from structure import Structure, StructureTag, StructureRef
 
 class UnitcellStructure(HttkObject):
     """
-    FullSitesStructure essentially just wraps Structure, and provides a strict subset of the functionality therein. This is needed, 
-    because in interaction with, e.g., databases, we sometimes need to restrict the available fields to those properties
-    accessible via this object.
+    A UnitcellStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
+    It keeps track of all the copies of the atoms within a unitcell.
     
-    """
+    The structure object is meant to be immutable and assumes that no internal variables are changed after its creation. 
+    All methods that 'changes' the object creates and returns a new, updated, structure object.
+    
+    Naming conventions in httk.atomistic:
 
-    @httk_typed_init({'assignments':Assignments, 'uc_sites':UnitcellSites, 'uc_cell':Cell},
-                 index=['assignments','uc_sites', 'uc_cell'])    
-    def __init__(self, cell=None, assignments=None, rc_sites=None, uc_sites = None, struct=None, uc_cell=None):
+    For cells:
+        cell = an abstract name for any reasonable representation of a 'cell' that defines 
+               the basis vectors used for representing the structure. When a 'cell' is returned,
+               it is an object of type Cell
+
+        basis = a 3x3 sequence-type with (in rows) the three basis vectors (for a periodic system, defining the unit cell, and defines the unit of repetition for the periodic dimensions)
+
+        lengths_and_angles = (a,b,c,alpha,beta,gamma): the basis vector lengths and angles
+
+        niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3, 2*v2*v3)) where v1, v2, v3 are the vectors forming the basis
+
+        metric = ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))
+
+    For sites:
+        These following prefixes are used to describe types of site specifications:
+            representative cell/rc = only representative atoms are given, which are then to be 
+            repeated by structure symmetry group to give all sites
+
+            unit cell/uc = all atoms in unitcell
+            
+            reduced = coordinates given in cell vectors
+            
+            cartesian = coordinates given as direct cartesian coordinates
+
+        sites = used as an abstract name for any sensible representation of a list of coordinates and a cell,
+                when a 'sites' is returned, it is an object of type Sites 
+                  
+        counts = number of atoms of each type (one per entry in assignments)
+      
+        coordgroups = coordinates represented as a 3-level-list of coordinates, e.g. 
+        [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]] where level-1 list = groups: one group for each equivalent atom
+
+        counts and coords = one list with the number of atoms of each type (one per entry in assignments)
+        and a 2-level list of coordinates.
+
+    For assignments of atoms, etc. to sites:
+        assignments = abstract name for any representation of assignment of atoms.
+        When returned, will be object of type Assignment.
+
+        atomic_numbers = a sequence of integers for the atomic number of each species
+
+        occupations = a sequence where the assignments are *repeated* for each coordinate as needed 
+        (prefixed with uc or rc depending on which coordinates)
+
+    For cell scaling:
+        scaling = abstract name for any representation of cell scaling
+        
+        scale = multiply all basis vectors with this number
+
+        volume = rescaling the cell such that it takes this volume
+
+    For periodicity:
+        periodicity = abstract name of a representation of periodicity
+
+        pbc = 'periodic boundary conditions' = sequence of True and False for which basis vectors are periodic / non-periodic
+
+        nonperiodic_vecs = integer, number of basis vectors, counted from the first, which are non-periodic
+
+    For spacegroup:
+        spacegroup = abstract name for any spacegroup representation. When returned, is of type Spacegroup.
+
+        hall_symbol = specifically the hall_symbol string representation of the spacegroup      
+   
+    """
+    @httk_typed_init({'assignments': Assignments, 'uc_sites': UnitcellSites, 'uc_cell': Cell},
+                     index=['assignments', 'uc_sites', 'uc_cell'])    
+    def __init__(self, assignments=None, uc_sites=None, uc_cell=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
         """
-        if rc_sites != None:
-            raise Exception("FullSitesStructure.__init__: Trying to create a FullSitesStructure with a non-None unique_sites.")
-
-        if struct != None:
-            self._struct = struct
-        else:
-            self._struct = Structure(assignments, rc_sites = None, uc_sites = uc_sites, rc_cell=None, uc_cell=uc_cell)
-
-        self.assignments = self._struct.assignments
-
-        self._tags = None
-        self._refs = None
-
-        self._codependent_callbacks = []
-        self._codependent_data = []
-        self._codependent_info = [{'class':UCStructureTag,'column':'structure','add_method':'add_tags'},
-                                  {'class':UCStructureRef,'column':'structure','add_method':'add_refs'}]
-
-        
+        self.assignments = assignments
+        self.uc_cell = uc_cell
+        self.uc_sites = uc_sites
 
     @classmethod
     def create(cls,
-               structure = None,
+               structure=None,
                
-               uc_cell=None, uc_basis=None, uc_lengths =None, 
-               uc_angles = None, uc_niggli_matrix=None, uc_metric=None, 
+               uc_cell=None, uc_basis=None, uc_lengths=None, 
+               uc_angles=None, uc_niggli_matrix=None, uc_metric=None, 
                uc_a=None, uc_b=None, uc_c=None, 
                uc_alpha=None, uc_beta=None, uc_gamma=None,
-               uc_sites = None, 
-               uc_reduced_coordgroups = None, uc_cartesian_coordgroups = None,  
-               uc_reduced_coords = None, uc_cartesian_coords = None,  
-               uc_reduced_occupationscoords = None, uc_cartesian_occupationscoords = None,  
+               uc_sites=None, 
+               uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None,
+               uc_reduced_coords=None, uc_cartesian_coords=None,
+               uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None,
                uc_occupancies=None, uc_counts=None,
-               uc_scale=None, uc_scaling=None, uc_volume=None, 
+               uc_scale=None, uc_scaling=None, uc_volume=None, volume_per_atom=None,
                    
                assignments=None, 
                
-               periodicity = None, nonperiodic_vecs = None, 
+               periodicity=None, nonperiodic_vecs=None, 
+
+               other_reps=None,
+               
                refs=None, tags=None):
         """
         A FullStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement, where the positions
@@ -93,262 +145,186 @@ class UnitcellStructure(HttkObject):
            - sites: a sensible representation of location / coordinates of the sites.
 
         Note: `uc_`-prefixes are consistently enforced for any quantity that would be different in a UniqueSitesStructure. This is to 
-        allow for painless change between the various structure-type objects.
+        allow for painless change between the various structure-type objects without worrying about accidently using
+        the wrong type of sites object.  
       
         Note: see help(Structure) for parameter naming conventions, i.e., what type of object is expected given a parameter name.      
            
         Input parameters:
 
-           - ONE OF: 'cell'; 'basis', 'length_and_angles'; 'niggli_matrix'; 'metric'; all of: a,b,c, alpha, beta, gamma. 
+           - ONE OF: 'uc_cell'; 'uc_basis', 'uc_length_and_angles'; 'uc_niggli_matrix'; 'uc_metric'; 
+             all of: uc_a,uc_b,uc_c, uc_alpha, uc_beta, uc_gamma. 
              (cell requires a Cell object or a very specific format, so unless you know what you are doing, use one of the others.)
 
-           - ONE OF: 'assignments', 'atomic_numbers', 'occupations'
-             (assignments requires an Assignments object or a sequence.), occupations repeats similar site assignments as needed
+           - ONE OF: 'uc_assignments', 'uc_atomic_numbers', 'uc_occupations'
+             (uc_assignments requires an Assignments object or a sequence.), uc_occupations repeats similar site assignments as needed
            
            - ONE OF: 'uc_sites', 'uc_coords' (IF uc_occupations OR uc_counts are also given), or
              'uc_B_C', where B=reduced or cartesian, C=coordgroups, coords, or occupationscoords
 
              Notes: 
 
-                  - occupationscoords may differ by coords by *order*, since giving occupations as, e.g., ['H','O','H'] does not necessarily
-                    have the same order of the coordinates as the format of counts+coords as (2,1), ['H','O'], and we cannot just re-order
-                    the coordinates at creation time (since presevation of the order is sometimes important.)
+                  - occupationscoords may differ from coords by *order*, since giving occupations as, e.g., ['H','O','H'] does not necessarily
+                    have the same order of the coordinates as the format of counts+coords as (2,1), ['H','O'].
 
                   - uc_sites requires a Sites object or a python list on a very specific format, (so unless you know what you are doing, 
                     use one of the others.)
                            
-           - ONE OF: 'spacegroup' or 'hall_symbol', OR NEITHER (in which case the spacegroup is regarded as unknown)                
-
-           - ONE OF: scale or volume: 
+           - ONE OF: uc_scale, uc_volume, or volume_per_atom: 
                 scale = multiply the basis vectors with this scaling factor, 
-                volume = rescale the cell into this volume (overrides 'scale' if both are given)
+                volume = the unit cell volume (overrides 'scale' if both are given)
+                volume_per_atom = cell volume / number of atoms
 
            - ONE OF periodicity or nonperiodic_vecs
            
         """          
-        if isinstance(structure,Structure):
-            new = cls(struct=structure)
-            new.add_tags(structure.get_tags())
-            new.add_refs(structure.get_refs())
-            return new
+        if structure is not None:
+            UnitcellStructure.use(structure)
+
+        #TODO: Handle that vollume_per_atom is given instead, move this block below sorting out sites and if uc_volume is not set,
+        #calculate a new volume
+        if uc_cell is not None:
+            Cell.use(uc_cell)
+        else:
+            uc_cell = Cell.create(cell=uc_cell, basis=uc_basis, metric=uc_metric, 
+                                  niggli_matrix=uc_niggli_matrix, 
+                                  a=uc_a, b=uc_b, c=uc_c, 
+                                  alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
+                                  lengths=uc_lengths, angles=uc_angles,
+                                  scale=uc_scale, scaling=uc_scaling, volume=uc_volume)
         
-        args = locals()  
-        del(args['cls'])
-        struct=Structure.create(**args)
-        return cls(struct=struct)
-
-
-    @property
-    def uc_sites(self):
-        return self._struct.uc_sites
-
-    @property
-    def uc_cell(self):
-        return self._struct.uc_cell
+        if uc_sites is not None:
+            uc_sites = UnitcellSites.use(uc_sites)
+        else:
+            if uc_reduced_coordgroups == None and \
+                    uc_reduced_coords == None and \
+                    uc_occupancies != None:
+                    # Structure created by occupationscoords and occupations, this is a slightly tricky representation
+                if uc_reduced_occupationscoords != None:
+                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
             
-    @property
-    def has_rc_repr(self):
-        """
-        Returns True if the structure already contains the representative coordinates + spacegroup, and thus can be queried for this data
-        without launching an expensive symmetry finder operation. 
-        """
-        return False
+            if uc_reduced_coordgroups != None or \
+                    uc_reduced_coords != None:
+
+                try:
+                    uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
+                                                   reduced_coords=uc_reduced_coords, 
+                                                   counts=uc_counts, 
+                                                   periodicity=periodicity, occupancies=uc_occupancies)
+                except Exception:
+                    uc_sites = None
+            
+            else:
+                uc_sites = None
+
+        if uc_sites == None and uc_reduced_coordgroups == None and \
+               uc_reduced_coords == None and uc_reduced_occupationscoords == None:
+            # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
+            if uc_cartesian_coordgroups == None and uc_cartesian_coords == None and \
+                    uc_occupancies != None and uc_cartesian_occupationscoords != None:
+                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
+             
+            if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:
+                uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
+
+            if uc_cell != None: 
+                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_cell)
+
+        if assignments != None:
+            assignments = Assignments.use(assignments)
+
+        if uc_sites == None:
+            raise Exception("Structure.create: not enough information for information about sites.")
+
+        new = cls(assignments=assignments, uc_sites=uc_sites, uc_cell=uc_cell)
+
+        return new
+        
+
+    @classmethod
+    def use(cls, other):
+        from structure import Structure
+        from representativestructure import RepresentativeStructure
+        if isinstance(other, UnitcellStructure):
+            return other
+        elif isinstance(other, Structure):
+            return UnitcellStructure(other.assignments, other.uc_sites, other.uc_cell)
+        elif isinstance(other, RepresentativeStructure):
+            return cls.use(Structure.use(other))
+        raise Exception("RepresentativeStructure.use: do not know how to use object of class:"+str(other.__class__))
            
     @property
-    def has_uc_repr(self):
-        """
-        Returns True if the structure contains the primcell coordinate representation, and thus can be queried for this data
-        without launching a somewhat expensive cell filling operation. 
-        """
-        return True
-    
-    @property
-    def uc_reduced_coordgroups(self):
-        return self._struct.uc_reduced_coordgroups
+    def uc_cartesian_occupationscoords(self):
+        raise Exception("UnitcellStructure.uc_cartesian_occupationscoords: not implemented")
+        return 
 
     @property
     def uc_cartesian_coordgroups(self):
-        return self._struct.uc_cartesian_coordgroups
-
-    @property
-    def uc_counts(self):
-        return self._struct.uc_counts
-
-    @property
-    def uc_nbr_atoms(self):
-        return self._struct.uc_nbr_atoms
-
-    @property
-    def uc_reduced_coords(self):
-        return self._struct.uc_reduced_coords
+        return self.uc_sites.get_cartesian_coordgroups(self.uc_cell)
 
     @property
     def uc_cartesian_coords(self):
-        return self._struct.uc_cartesian_coords
-
-    @httk_typed_property(str)
-    def formula(self):
-        return self._struct.formula
-
-    @httk_typed_property(str)
-    def anonymous_formula(self):
-        return self._struct.anonymous_formula
+        return self.uc_sites.get_cartesian_coords(self.uc_cell)
 
     @property
+    def uc_reduced_coords(self):
+        return self.uc_sites.reduced_coords
+
+    @property
+    def uc_lengths_and_angles(self):
+        return [self.uc_a, self.uc_b, self.uc_c, self.uc_alpha, self.uc_beta, self.uc_gamma]
+
+    @httk_typed_property(float)
     def uc_a(self):
-        return self._struct.uc_a
+        return self.uc_cell.a
 
-    @property
+    @httk_typed_property(float)
     def uc_b(self):
-        return self._struct.uc_b
+        return self.uc_cell.b
 
-    @property
+    @httk_typed_property(float)
     def uc_c(self):
-        return self._struct.uc_c
+        return self.uc_cell.c
 
-    @property
+    @httk_typed_property(float)
     def uc_alpha(self):
-        return self._struct.uc_alpha
+        return self.uc_cell.alpha
 
-    @property
+    @httk_typed_property(float)
     def uc_beta(self):
-        return self._struct.uc_beta
+        return self.uc_cell.beta
 
-    @property
+    @httk_typed_property(float)
     def uc_gamma(self):
-        return self._struct.uc_gamma
-
-    @property
-    def uc_cell_orientation(self):
-        return self._struct.cell_orientation
+        return self.uc_cell.gamma
 
     @property
     def uc_basis(self):
-        return self._struct.uc_basis
+        return self.uc_cell.basis
 
-    @property
+    @httk_typed_property(float)
     def uc_volume(self):
-        return self._struct.uc_volume
+        return self.uc_cell.volume
 
-    @property
-    def uc_symbols(self):
-        return self._struct.uc_symbols
+    @httk_typed_property(float)
+    def uc_volume_per_atom(self):
+        return self.uc_cell.volume/self.uc_sites.total_number_of_atoms
 
-    @property
-    def uc_reduced_occupationscoords(self):
-        return self._struct.uc_reduced_occupationscoords
-
-    @property
-    def uc_cartesian_occupationscoords(self):
-        return self._struct.uc_cartesian_occupationscoords
-
-    @property
-    def uc_occupancies(self):
-        return self._struct.uc_occupancies
-
-    def get_normalized(self):
-        newstruct = self._struct.get_normalized()
-        return self.__class__(struct=newstruct)
-
-    def _fill_codependent_data(self):
-        self._tags = {}
-        self._refs = []
-        for x in self._codependent_callbacks:
-            x(self)            
-
-    def add_tag(self,tag,val):
-        if self._tags == None:
-            self._fill_codependent_data()
-        new = UCStructureTag(self,tag,val)
-        self._tags[tag]=new
-        self._codependent_data += [new]
-
-    def add_tags(self,tags):
-        for tag in tags:
-            if isinstance(tags,dict):
-                tagdata = tags[tag]
-            else:
-                tagdata = tag
-            if isinstance(tagdata,UCStructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
-            elif isinstance(tagdata,StructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
-            else:
-                self.add_tag(tag,tagdata)
-
-    def get_tags(self):
-        if self._tags == None:
-            self._fill_codependent_data()
-        return self._tags
-
-    def get_tag(self,tag):
-        if self._tags == None:
-            self._fill_codependent_data()
-        return self._tags[tag]
-
-    def get_refs(self):
-        if self._refs == None:
-            self._fill_codependent_data()
-        return self._refs
-
-    def add_ref(self,ref):        
-        if self._refs == None:
-            self._fill_codependent_data()
-        if isinstance(ref,UCStructureRef):
-            refobj = ref.reference
-        elif isinstance(ref,StructureRef):
-            refobj = ref.reference
-        else:
-            refobj = Reference.use(ref)
-        new = UCStructureRef(self,refobj)
-        self._refs += [new]
-        self._codependent_data += [new]
-
-    def add_refs(self,refs):
-        for ref in refs:
-            self.add_ref(ref)
-
-    @httk_typed_property(bool)
-    def extended(self):
-        return self._struct.extended
-
-    @httk_typed_property([str])
-    def extensions(self):
-        return self._struct.extensions
-
-    @httk_typed_property([str])
-    def formula_symbols(self):
-        return self._struct.formula_symbols
+    @httk_typed_property(int)
+    def uc_cell_orientation(self):
+        return self.uc_cell.orientation
     
-    @property
-    def uc_formula(self):
-        return self._struct.uc_formula
+    @httk_typed_property((bool, 1, 3))
+    def pbc(self):
+        return self.uc_sites.pbc
 
     @property
-    def uc_formula_symbols(self):
-        return self._struct.uc_formula_symbols
-     
-    @property
-    def uc_formula_counts(self):
-        return self._struct.uc_formula_counts
-        
-class UCStructureTag(HttkObject):                               
-    @httk_typed_init({'structure':UnitcellStructure,'tag':str,'value':str},index=['structure', 'tag', ('tag','value'),('structure','tag','value')],skip=['hexhash'])    
-    def __init__(self, structure, tag, value):
-        self.tag = tag
-        self.structure = structure
-        self.value = value
+    def uc_reduced_coordgroups(self):
+        return self.uc_sites.reduced_coordgroups
 
-    def __str__(self):
-        return "(Tag) "+self.tag+": "+self.value+""
+    @httk_typed_property([int])
+    def uc_counts(self):
+        return self.uc_sites.counts
 
-class UCStructureRef(HttkObject):
-    @httk_typed_init({'structure':UnitcellStructure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
-    def __init__(self, structure, reference):
-        self.structure = structure
-        self.reference = reference
-
-    def __str__(self):
-        return str(self.reference)
-
-
+    def transform(self,matrix,max_search_cells=20, max_atoms=1000):
+        return transform(self,matrix,max_search_cells=max_search_cells,max_atoms=max_atoms)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 # 
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
@@ -45,7 +46,7 @@
 # 
 import re
 
-from httk.core import FracVector, MutableFracVector
+from httk.core import FracVector, MutableFracVector, citation
 
 spacegroupdatastr="""P 1;1;P 1;;C1.1;0
 -P 1;2;P -1;;Ci.1;0,1
@@ -1605,10 +1606,15 @@ def get_hall(hall):
 
 def get_symops(hall):
     if hall in spacegroupdata:
-        print [symmetryops[x] for x in spacegroupdata[hall][5]]
+        #print [symmetryops[x] for x in spacegroupdata[hall][5]]
         return [symopsmatrix(symmetryops[x]) for x in spacegroupdata[hall][5]]
     return None
 
+def get_symops_strs(hall):
+    if hall in spacegroupdata:
+        #print [symmetryops[x] for x in spacegroupdata[hall][5]]
+        return [symmetryops[x] for x in spacegroupdata[hall][5]]
+    return None
 
 def get_nonstandard_hall(nonstd_hall):
     if nonstd_hall in spacegroupdata:
@@ -1803,7 +1809,7 @@ def spacegroup_get_hall(parse):
     return spacegroup_parse(parse)
 
 def spacegroup_get_number(parse):
-    return spacegroupdata[spacegroup_parse(parse)[0]]
+    return spacegroupdata[spacegroup_parse(parse)][1]
 
 def spacegroup_get_number_and_setting(parse):
     hall = spacegroup_parse(parse)
@@ -2005,6 +2011,44 @@ def spacegroup_get_number_and_setting(parse):
 #     
 #     return primitive_hall_symbol, rotation_terms
 #     
+
+# Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
+Rhomb2HexHall = { 'P 3*'     : 'R 3',
+                  '-P 3*'    : '-R 3',
+                  'P 3* 2'   : 'R 3 2"',
+                  'P 3* -2'  : 'R 3 -2"',
+                  'P 3* -2n' : 'R 3 -2"c',
+                  '-P 3* 2'  : '-R 3 2"',
+                  '-P 3* 2n' : '-R 3 2"c'}
+
+Hex2RhombHall = dict([])
+for k,v in Rhomb2HexHall.iteritems():
+    Hex2RhombHall[v] = k
+
+citation.add_src_citation("imported code from cif2cell","Torbjörn Björkman")
+# Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
+def crystal_system_from_spacegroupnbr(spacegroupnr):
+    # Determine crystal system
+    if 0 < spacegroupnr <= 2:
+        return "triclinic"
+    elif 2 < spacegroupnr <=15:
+        return "monoclinic"
+    elif 15 < spacegroupnr <= 74:
+        return "orthorhombic"
+    elif 74 < spacegroupnr <= 142:
+        return "tetragonal"
+    elif 142 < spacegroupnr <= 167:
+        return "trigonal"
+    elif 167 < spacegroupnr <= 194:
+        return "hexagonal"
+    elif 194 < spacegroupnr <= 230:
+        return "cubic"
+    else:
+        return "unknown"
+
+def crystal_system(hall_symb):
+    numb = spacegroup_get_number(hall_symb)
+    return crystal_system_from_spacegroupnbr(numb)
 
 def main():
  
