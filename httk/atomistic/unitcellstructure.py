@@ -99,24 +99,13 @@ class UnitcellStructure(HttkObject):
     """
     @httk_typed_init({'assignments': Assignments, 'uc_sites': UnitcellSites, 'uc_cell': Cell},
                      index=['assignments', 'uc_sites', 'uc_cell'])    
-    def __init__(self, assignments=None, uc_sites=None, uc_cell=None, other_reps=None):
+    def __init__(self, assignments=None, uc_sites=None, uc_cell=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
         """
         self.assignments = assignments
         self.uc_cell = uc_cell
         self.uc_sites = uc_sites
-        if other_reps is None:
-            other_reps = {}        
-        self._other_reps = other_reps
-
-        self._tags = None
-        self._refs = None
-
-        self._codependent_callbacks = []
-        self._codependent_data = []
-        self._codependent_info = [{'class': UCStructureTag, 'column': 'structure', 'add_method': 'add_tags'},
-                                  {'class': UCStructureRef, 'column': 'structure', 'add_method': 'add_refs'}]
 
     @classmethod
     def create(cls,
@@ -189,8 +178,8 @@ class UnitcellStructure(HttkObject):
            - ONE OF periodicity or nonperiodic_vecs
            
         """          
-        if isinstance(structure, UnitcellStructure):
-            return structure
+        if structure is not None:
+            UnitcellStructure.use(structure)
 
         #TODO: Handle that vollume_per_atom is given instead, move this block below sorting out sites and if uc_volume is not set,
         #calculate a new volume
@@ -247,44 +236,23 @@ class UnitcellStructure(HttkObject):
         if uc_sites == None:
             raise Exception("Structure.create: not enough information for information about sites.")
 
-        new = cls(assignments=assignments, uc_sites=uc_sites, uc_cell=uc_cell, other_reps=other_reps)
-
-        if tags!=None:
-            new.add_tags(tags)
-        if refs!=None:
-            new.add_refs(refs)               
+        new = cls(assignments=assignments, uc_sites=uc_sites, uc_cell=uc_cell)
 
         return new
         
 
     @classmethod
     def use(cls, other):
+        from structure import Structure
+        from representativestructure import RepresentativeStructure
         if isinstance(other, UnitcellStructure):
             return other
-        if isinstance(other, Structure):
-            return other.get_uc_structure()
-        #TODO: Implement
-        raise Exception("Not yet implemented.")
+        elif isinstance(other, Structure):
+            return UnitcellStructure(other.assignments, other.uc_sites, other.uc_cell)
+        elif isinstance(other, RepresentativeStructure):
+            return cls.use(Structure.use(other))
+        raise Exception("RepresentativeStructure.use: do not know how to use object of class:"+str(other.__class__))
            
-    @property
-    def has_rc_repr(self):
-        """
-        Returns True if the structure already contains the representative coordinates + spacegroup, and thus can be queried for this data
-        without launching an expensive symmetry finder operation. 
-        """
-        if 'rc' in self._other_reps:
-            return True
-        else:
-            return False
-           
-    @property
-    def has_uc_repr(self):
-        """
-        Returns True if the structure contains any unit cell-type coordinate representation, and thus can be queried for this data
-        without launching a somewhat expensive cell filling operation. 
-        """
-        return True
-
     @property
     def uc_cartesian_occupationscoords(self):
         raise Exception("UnitcellStructure.uc_cartesian_occupationscoords: not implemented")
@@ -358,131 +326,5 @@ class UnitcellStructure(HttkObject):
     def uc_counts(self):
         return self.uc_sites.counts
 
-    @httk_typed_property(str)
-    def formula(self):
-        return normalized_formula(self.assignments.symbollists, self.assignments.ratioslist, self.uc_counts)
-
-    def get_symmetryfinder_rc_structure(self):
-        if 'rc' in self._other_reps:
-            return self._other_reps['rc']
-        else:
-            raise Exception("Not yet implemented.")
-
-    def get_primitive_uc_structure(self):
-        if 'pc' in self._other_reps:
-            return self._other_reps['pc']
-        else:
-            raise Exception("Not yet implemented.")
-
-    def get_conventional_uc_structure(self):
-        if 'cc' in self._other_reps:
-            return self._other_reps['cc']
-        else:
-            raise Exception("Not yet implemented.")
-
     def transform(self,matrix,max_search_cells=20, max_atoms=1000):
         return transform(self,matrix,max_search_cells=max_search_cells,max_atoms=max_atoms)
-
-    #TODO: Create some kind of automatic setup for Tags and Refs rather than copying the below code everywhere.
-    def _fill_codependent_data(self):
-        self._tags = {}
-        self._refs = []
-        for x in self._codependent_callbacks:
-            x(self)            
-
-    def add_tag(self, tag, val):
-        if self._tags is None:
-            self._fill_codependent_data()
-        new = UCStructureTag(self, tag, val)
-        self._tags[tag] = new
-        self._codependent_data += [new]
-
-    def add_tags(self, tags):
-        for tag in tags:
-            if isinstance(tags, dict):
-                tagdata = tags[tag]
-            else:
-                tagdata = tag
-            if isinstance(tagdata, UCStructureTag):
-                self.add_tag(tagdata.tag, tagdata.value)
-            else:
-                self.add_tag(tag, tagdata)
-
-    def get_tags(self):
-        if self._tags is None:
-            self._fill_codependent_data()
-        return self._tags
-
-    def get_tag(self, tag):
-        if self._tags is None:
-            self._fill_codependent_data()
-        return self._tags[tag]
-
-    def get_refs(self):
-        if self._refs is None:
-            self._fill_codependent_data()
-        return self._refs
-
-    def add_ref(self, ref):
-        if self._refs is None:
-            self._fill_codependent_data()
-        if isinstance(ref, UCStructureRef):
-            refobj = ref.reference
-        else:
-            refobj = Reference.use(ref)
-        new = UCStructureRef(self, refobj)
-        self._refs += [new]
-        self._codependent_data += [new]
-
-    def add_refs(self, refs):
-        for ref in refs:
-            self.add_ref(ref)
-
-    @httk_typed_property(bool)
-    def extended(self):
-        return self._struct.extended
-
-    @httk_typed_property([str])
-    def extensions(self):
-        return self._struct.extensions
-
-    @httk_typed_property([str])
-    def formula_symbols(self):
-        return self._struct.formula_symbols
-    
-    @property
-    def uc_formula(self):
-        return self._struct.uc_formula
-
-    @property
-    def uc_formula_symbols(self):
-        return self._struct.uc_formula_symbols
-     
-    @property
-    def uc_formula_counts(self):
-        return self._struct.uc_formula_counts
-        
-
-
-class UCStructureTag(HttkObject):                               
-    @httk_typed_init({'structure':UnitcellStructure,'tag':str,'value':str},index=['structure', 'tag', ('tag','value'),('structure','tag','value')],skip=['hexhash'])    
-    def __init__(self, structure, tag, value):
-        super(UCStructureTag,self).__init__()
-        self.tag = tag
-        self.structure = structure
-        self.value = value
-
-    def __str__(self):
-        return "(Tag) "+self.tag+": "+self.value+""
-
-
-class UCStructureRef(HttkObject):
-    @httk_typed_init({'structure':UnitcellStructure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
-    def __init__(self, structure, reference):
-        super(UCStructureRef,self).__init__()
-        self.structure = structure
-        self.reference = reference
-
-    def __str__(self):
-        return str(self.reference.ref)
-

@@ -25,10 +25,8 @@ assignments = ['Pb','Ti','O']
 # To create a structure, the primary thing to keep track of is what coordinate representation is used (and what its name is in 
 # the Structure.create constructor
 struct = Structure.create(uc_cell=cell,uc_reduced_coordgroups=coordgroups,assignments=assignments,uc_volume=62.79)
-uc_struct = UnitcellStructure.create(uc_cell=cell,uc_reduced_coordgroups=coordgroups,assignments=assignments,uc_volume=62.79)
 
 print "The formula is:",struct.formula+" ("+struct.anonymous_formula+")"
-print "Again, the formula is:",uc_struct.formula+" ("+uc_struct.anonymous_formula+")"
 
 # Now we create the same structure based only the represenative coordinates + the hall symbol of the group, which is 'P m -3 m'
 

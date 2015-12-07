@@ -48,7 +48,8 @@ class RepresentativeSites(Sites):
 
         self.wyckoff_symbols = wyckoff_symbols
         self._multiplicities = multiplicities
-
+    
+    #TODO: Recreate multiplicities (and perhaps also wyckoff_symbols) if those are not given in construction
     @classmethod           
     def create(cls, sites=None, reduced_coordgroups=None, 
                 reduced_coords=None, 
@@ -88,6 +89,8 @@ class RepresentativeSites(Sites):
 
     @httk_typed_property([int])
     def multiplicities(self):
+        #if self._multiplicities is None:
+        #    raise Exception("Representativesites.multiplicities: Not yet implemented getting multiplicities when not given.")
         return self._multiplicities
                                         
     @httk_typed_property(str)

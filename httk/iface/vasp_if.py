@@ -295,13 +295,13 @@ def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None,
     if comment == None:
         comment = structure_to_comment(struct)
     if primitive_cell:
-        basis = struct.pc_basis
-        coords = struct.pc_reduced_coords
-        vol = float(struct.pc_volume)
+        basis = struct.pc.uc_basis
+        coords = struct.pc.uc_reduced_coords
+        vol = float(struct.pc.uc_volume)
     else:
-        basis = struct.cc_basis
-        coords = struct.cc_reduced_coords
-        vol = float(struct.cc_volume)
+        basis = struct.cc.uc_basis
+        coords = struct.cc.uc_reduced_coords
+        vol = float(struct.cc.uc_volume)
         
     if basis.det() < 0:
         if fix_negative_determinant:

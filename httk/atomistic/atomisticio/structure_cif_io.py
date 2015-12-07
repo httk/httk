@@ -90,7 +90,6 @@ def struct_to_cif(struct, ioa, backends=['httk']):
     raise Exception("struct_to_cif: None of the requested / available backends available, tried:"+str(backends))
 
 
-
 def struct_to_cif_httk(struct, ioa, header=None):
     ioa = IoAdapterFileWriter.use(ioa)
     f = ioa.file
@@ -100,7 +99,7 @@ def struct_to_cif_httk(struct, ioa, header=None):
         la = struct.rc_lengths_and_angles
         coordgroups = struct.rc_sites.reduced_coordgroups
         hall = struct.hall_symbol        
-        sgnumber = struct.spacegroup_number
+        sgnumber = struct.spacegroup.number
         try:
             hmsymbol = spacegroups.get_proper_hm_symbol(hall)
         except Exception:
@@ -125,8 +124,8 @@ def struct_to_cif_httk(struct, ioa, header=None):
             f.write("_chemical_name_systematic '"+struct.get_tag('name').value+"'\n")   
     except Exception:
         pass
-    if struct.has_uc_repr:
-        f.write("_chemical_formula_sum '"+struct.uc_formula_spaceseparated+"'\n")    
+    #if struct.has_uc_repr:
+    f.write("_chemical_formula_sum '"+struct.formula_spaceseparated+"'\n")    
     f.write("\n")
     f.write("_cell_length_a       "+str(float(la[0]))+"\n")
     f.write("_cell_length_b       "+str(float(la[1]))+"\n")

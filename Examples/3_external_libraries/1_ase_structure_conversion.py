@@ -69,7 +69,7 @@ print "== FCC111 surface using ase.lattice.surface.fcc111"
 slab = ase.lattice.surface.fcc111('Al', size=(2,2,3), vacuum=10.0)
 struct5 = struct.ase.from_Atoms(slab)
 
-print "httk structure: formula:",struct5.formula+" ("+struct5.anonymous_formula+")", ", volume:",float(struct5.uc_volume), ", basis:",struct5.uc_basis.to_floats(), "pbc=",struct5.uc_sitesobj.pbc
+print "httk structure: formula:",struct5.formula+" ("+struct5.anonymous_formula+")", ", volume:",float(struct5.uc_volume), ", basis:",struct5.uc_basis.to_floats(), "pbc=",struct5.uc_sites.pbc
 
 print
 print "==== Creating systems using ASE, converting it to httk, and find its spacegroup"
@@ -90,6 +90,6 @@ AuCu3struct = AuCu3factory(symbol=('Au','Cu'),latticeconstant=3.6)
 struct5 = struct.ase.from_Atoms(AuCu3struct)
 
 # This needs to run a symmetry finder
-print "Spacegroup:",struct5.spacegroup_number
+print "Spacegroup:",struct5.spacegroup.number
 
 
