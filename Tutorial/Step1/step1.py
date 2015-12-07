@@ -23,4 +23,4 @@ print("Assignments", struct.assignments.symbols)
 print("Counts:", struct.cc.uc_counts)
 print("Coords", struct.cc.uc_reduced_coords.to_floats())
 
-httk.save(struct,'test.vasp')
+httk.save(struct, 'test.vasp')

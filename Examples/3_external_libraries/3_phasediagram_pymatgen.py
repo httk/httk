@@ -7,8 +7,10 @@ import pymatgen, pymatgen.phasediagram.plotter, pymatgen.phasediagram.pdmaker, p
 from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen.matproj.rest import MPRester
 
+
 class TotalEnergyResult(httk.Result):
-    @httk.httk_typed_init({'computation':httk.Computation, 'structure':Structure, 'total_energy':float})
+
+    @httk.httk_typed_init({'computation': httk.Computation, 'structure': Structure, 'total_energy': float})
     def __init__(self, computation, structure, total_energy):
         self.computation = computation
         self.structure = structure
@@ -22,7 +24,7 @@ search = store.searcher()
 search_total_energy = search.variable(TotalEnergyResult)
 search_struct = search.variable(Structure)
 search.add(search_total_energy.structure == search_struct)
-search.add_all(search_struct.formula_symbols.is_in('O','Ca','Ti'))
+search.add_all(search_struct.formula_symbols.is_in('O', 'Ca', 'Ti'))
 search.output(search_total_energy, 'total_energy_result')
 
 entries = []
@@ -45,5 +47,5 @@ for match, header in search:
 #     entries += [ComputedEntry(form, random.randrange(-10,0)*s)]
     
 pd = pymatgen.phasediagram.pdmaker.PhaseDiagram(entries)
-plotter = pymatgen.phasediagram.plotter.PDPlotter(pd,show_unstable=False)
+plotter = pymatgen.phasediagram.plotter.PDPlotter(pd, show_unstable=False)
 plotter.show() 

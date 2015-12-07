@@ -3,4 +3,4 @@
 
 from httk.iface.vasp_if import structure_to_poscar
 
-structure_to_poscar('POSCAR',structure,fix_negative_determinant=True)         
+structure_to_poscar('POSCAR', structure, fix_negative_determinant=True)         

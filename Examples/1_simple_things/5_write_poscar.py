@@ -12,15 +12,15 @@ cell = [[1.0, 0.0, 0.0],
 
 coordgroups = [[
                [0.5, 0.5, 0.5]
-            ],[
+               ], [
                [0.0, 0.0, 0.0]
-            ],[
-               [0.5, 0.0, 0.0],[0.0, 0.5, 0.0],[0.0, 0.0, 0.5]
-            ]]
+               ], [
+               [0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]
+               ]]
 
-assignments = ['Pb','Ti','O']
+assignments = ['Pb', 'Ti', 'O']
 
-struct = Structure.create(uc_cell=cell,uc_reduced_coordgroups=coordgroups,assignments=assignments,uc_volume=62.79)
+struct = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
 
 # One alternative
 struct.io.save("PbTiO3.vasp")
@@ -37,17 +37,17 @@ cell = [[1.0, 0.0, 0.0],
 
 coordgroups = [[
                [0.5, 0.5, 0.5]
-            ],[
+               ], [
                [0.0, 0.0, 0.0]
-            ],[
+               ], [
                [0.5, 0.0, 0.0]
-            ]]
+               ]]
 
-assignments = ['Pb','Ti','O']
+assignments = ['Pb', 'Ti', 'O']
 
 spacegroup = 'P m -3 m'
 
-struct = Structure.create(rc_cell=cell,rc_reduced_coordgroups=coordgroups,assignments=assignments,rc_volume=62.79,spacegroup=spacegroup)
+struct = Structure.create(rc_cell=cell, rc_reduced_coordgroups=coordgroups, assignments=assignments, rc_volume=62.79, spacegroup=spacegroup)
 
 struct.io.save("PbTiO3_alt2.vasp")
 print ("PbTiO3_alt2.vasp saved (POSCAR format)")

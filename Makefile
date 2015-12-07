@@ -8,6 +8,11 @@ VERSION:
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cp httk.cfg.default httk.cfg; fi
 
+autopep8:
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
+
 clean: preclean
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
 

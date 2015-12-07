@@ -5,6 +5,7 @@ from httk.atomistic import Structure
 
 
 class StructureIsEdible(httk.HttkObject):
+
     @httk.httk_typed_init({'structure': Structure, 'is_edible': bool})
     def __init__(self, structure, is_edible):
         self.structure = structure

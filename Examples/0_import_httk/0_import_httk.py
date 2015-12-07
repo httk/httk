@@ -26,10 +26,10 @@ try:
 except Exception:
     # This variable must be set to the path where you downloaded
     # and uncompressed httk:
-    PATH_TO_HTTK="~/path/to/httk"
+    PATH_TO_HTTK = "~/path/to/httk"
     sys.path.insert(1, os.path.expanduser(PATH_TO_HTTK))
     import httk
 #############################################################
 
-print("httk imported. Version:",httk.version)
+print("httk imported. Version:", httk.version)
 

@@ -20,13 +20,13 @@ store.save(struct)
 
 search = store.searcher()
 search_struct = search.variable(Structure)
-search.add(search_struct.uc_nbr_atoms<40)
+search.add(search_struct.uc_nbr_atoms < 40)
 
-search.output (search_struct,'structure ')
+search.output(search_struct, 'structure ')
 
 for match in search:
     structure = match[0][0]
-    print("Found:",struct.formula)
+    print("Found:", struct.formula)
 
 
 
