@@ -33,7 +33,7 @@ def build_supercell_old(structure, transformation, max_search_cells=1000):
     if transformation.denom != 1:
         raise Exception("Structure.build_supercell requires integer transformation matrix")
     
-    old_cell = structure.uc_sites.cell.get_normalized()
+    old_cell = structure.uc_sites.cell.get_normalized_longestvec()
     new_cell = Cell.create(basis=transformation*old_cell.basis)
     #conversion_matrix = (new_cell.inv*old_cell.basis).T().simplify()
     conversion_matrix = (old_cell.basis*new_cell.inv).T().simplify()

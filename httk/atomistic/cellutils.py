@@ -2,6 +2,7 @@
 # 
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
+#    Some parts imported from cif2cell, (C) Torbjörn Björkman 
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,7 +22,60 @@ from httk.core.fracvector import FracVector
 from math import sqrt, acos, cos, sin, pi
 from httk.core.basic import *
 from fractions import Fraction
-from spacegrouputils import Hex2RhombHall, Rhomb2HexHall, crystal_system
+from spacegrouputils import crystal_system
+
+# Adapted from cif2cell by Torbjörn Björkman, uctools.py
+def niggli_to_standard_basis(niggli_matrix, lattice_system, orientation=1, eps=0.001):
+    niggli_matrix = niggli_matrix.to_floats()
+
+    s11, s22, s33 = niggli_matrix[0][0], niggli_matrix[0][1], niggli_matrix[0][2]
+    s23, s13, s12 = niggli_matrix[1][0]/2.0, niggli_matrix[1][1]/2.0, niggli_matrix[1][2]/2.0
+    
+    a, b, c = sqrt(s11), sqrt(s22), sqrt(s33)
+    alphar, betar, gammar = acos(s23/(b*c)), acos(s13/(c*a)), acos(s12/(a*b))
+
+    alpha120 = abs(float(alphar-120*180/pi)) < 1e-4
+    beta120 = abs(float(betar-120*180/pi)) < 1e-4
+    gamma120 = abs(float(gammar-120*180/pi)) < 1e-4
+
+    if lattice_system == 'cubic' or lattice_system == 'tetragonal' or crystal_system == 'orthorhombic':
+        basis = FracVector.create([[a, 0, 0],
+                                   [0, b, 0],
+                                   [0, 0, c]])*orientation
+    elif lattice_system == 'hexagonal':
+        if gamma120:
+            basis = FracVector.create([[a*sin(gammar), a*cos(gammar), 0],
+                                       [0, b, 0],
+                                       [0, 0, c]])*orientation
+        elif alpha120:
+            basis = FracVector.create([[a, 0, 0],
+                                       [0, b*sin(alphar), b*cos(alphar)],
+                                       [0, 0, c]])*orientation
+        elif beta120:
+            basis = FracVector.create([[a, 0, 0],
+                                       [0, b, 0],
+                                       [c*sin(alphar), 0, c*cos(alphar)]])*orientation
+    #elif lattice_system == 'triclinic' or lattice_system == 'monoclinic' or lattice_system == 'rhombohedral' or lattice_system == 'unknown':
+    elif lattice_system == 'rhombohedral':
+        vc = cos(alphar)
+        tx = sqrt((1-vc)/2.0)
+        ty = sqrt((1-vc)/6.0)
+        tz = sqrt((1+2*vc)/3.0)
+        #basis = FracVector.create([[a*tx, -a*ty, a*tz],
+        #                           [0, 2*b*ty, b*tz],
+        #                           [-c*tx, -c*ty, c*tz]])*orientation        
+
+        # Order vectors to match cif2cell output
+        basis = FracVector.create([[2*a*ty, 0, a*tz],
+                                   [-b*ty, b*tx, b*tz],
+                                   [-c*ty, -c*tx, c*tz]])*orientation        
+    else:
+        angfac1 = (cos(alphar) - cos(betar)*cos(gammar))/sin(gammar)
+        angfac2 = sqrt(sin(gammar)**2 - cos(betar)**2 - cos(alphar)**2 + 2*cos(alphar)*cos(betar)*cos(gammar))/sin(gammar)
+        basis = FracVector.create([[a, 0, 0], 
+                                   [b*cos(gammar), b*sin(gammar), 0], 
+                                   [c*cos(betar), c*angfac1, c*angfac2]])*orientation
+    return basis
 
 
 def niggli_to_basis(niggli_matrix, orientation=1):
@@ -47,12 +101,12 @@ def niggli_to_basis(niggli_matrix, orientation=1):
 
     if orientation < 0:
         basis = [[-a, 0.0, 0.0],
-                [-b*cos(gamma_rad), -b*sin(gamma_rad), 0.0],
-                [-c*cos(beta_rad), -c*(cos(alpha_rad)-cos(beta_rad)*cos(gamma_rad))/sin(gamma_rad), -c*v/sin(gamma_rad)]]
+                 [-b*cos(gamma_rad), -b*sin(gamma_rad), 0.0],
+                 [-c*cos(beta_rad), -c*(cos(alpha_rad)-cos(beta_rad)*cos(gamma_rad))/sin(gamma_rad), -c*v/sin(gamma_rad)]]
     else:
         basis = [[a, 0.0, 0.0],
-                [b*cos(gamma_rad), b*sin(gamma_rad), 0.0],
-                [c*cos(beta_rad), c*(cos(alpha_rad)-cos(beta_rad)*cos(gamma_rad))/sin(gamma_rad), c*v/sin(gamma_rad)]]
+                 [b*cos(gamma_rad), b*sin(gamma_rad), 0.0],
+                 [c*cos(beta_rad), c*(cos(alpha_rad)-cos(beta_rad)*cos(gamma_rad))/sin(gamma_rad), c*v/sin(gamma_rad)]]
 
     for i in range(3):
         for j in range(3):

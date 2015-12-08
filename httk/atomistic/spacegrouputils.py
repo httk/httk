@@ -2,6 +2,7 @@
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
+#    Some parts imported from cif2cell, (C) Torbjörn Björkman 
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -2026,23 +2027,8 @@ def spacegroup_get_number_and_setting(parse):
 #     return primitive_hall_symbol, rotation_terms
 #
 
-# Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
-Rhomb2HexHall = {'P 3*': 'R 3',
-                 '-P 3*': '-R 3',
-                 'P 3* 2': 'R 3 2"',
-                 'P 3* -2': 'R 3 -2"',
-                 'P 3* -2n': 'R 3 -2"c',
-                 '-P 3* 2': '-R 3 2"',
-                 '-P 3* 2n': '-R 3 2"c'}
-
-Hex2RhombHall = dict([])
-for k, v in Rhomb2HexHall.iteritems():
-    Hex2RhombHall[v] = k
-
 citation.add_src_citation("imported code from cif2cell", "Torbjörn Björkman")
-# Taken from cif2cell by Torbjörn Björkman, spacegroupdata.py
-
-
+# Imported from cif2cell by Torbjörn Björkman, spacegroupdata.py
 def crystal_system_from_spacegroupnbr(spacegroupnr):
     # Determine crystal system
     if 0 < spacegroupnr <= 2:
@@ -2063,7 +2049,7 @@ def crystal_system_from_spacegroupnbr(spacegroupnr):
         return "unknown"
 
 
-def crystal_system(hall_symb):
+def crystal_system_from_hall(hall_symb):
     numb = spacegroup_get_number(hall_symb)
     return crystal_system_from_spacegroupnbr(numb)
 

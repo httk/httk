@@ -2,6 +2,7 @@
 # 
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
+#    Some parts imported from cif2cell, (C) Torbjörn Björkman 
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -26,7 +27,7 @@ import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
 from data import periodictable
 from fractions import Fraction
-from httk.atomistic.spacegrouputils import crystal_system, Hex2RhombHall, Rhomb2HexHall
+from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
 
 def sort_coordgroups(coordgroups, individual_data):
@@ -705,9 +706,7 @@ def structure_tidy(struct, backends=['platon']):
                 pass
     raise Exception("structure_tidy: None of the available backends available.")
 
-# Taken from cif2cell by Torbjörn Björkman, uctools.py
-
-
+# Imported from cif2cell by Torbjörn Björkman, uctools.py
 def get_primitive_basis_transform(basis, hall_symbol, eps=0.001):
     basis = FracVector.use(basis)
     niggli, orientation = basis_to_niggli(basis)
@@ -720,12 +719,12 @@ def get_primitive_basis_transform(basis, hall_symbol, eps=0.001):
     one = Fraction(1)
     third = Fraction(1, 3)
     spacegroupsetting = hall_symbol.lstrip("-")[0][0]
-    system = crystal_system(hall_symbol)
+    system = crystal_system_from_hall(hall_symbol)
     
     if spacegroupsetting == 'I':
         # Body centered
-        transvecs = [FracVector.create([zero, zero, zero]),
-                     FracVector.create([half, half, half])]
+        #transvecs = [FracVector.create([zero, zero, zero]),
+        #             FracVector.create([half, half, half])]
         if system == 'cubic':
             lattrans = FracVector.create([[-half, half, half],
                                           [half, -half, half],
@@ -736,56 +735,63 @@ def get_primitive_basis_transform(basis, hall_symbol, eps=0.001):
                                           [half, half, half]])
     elif spacegroupsetting == 'F':
         # face centered
-        transvecs = [FracVector.create([zero, zero, zero]),
-                     FracVector.create([half, half, zero]),
-                     FracVector.create([half, zero, half]),
-                     FracVector.create([zero, half, half])]
+        #transvecs = [FracVector.create([zero, zero, zero]),
+        #             FracVector.create([half, half, zero]),
+        #             FracVector.create([half, zero, half]),
+        #             FracVector.create([zero, half, half])]
         lattrans = FracVector.create([[half, half, zero],
                                       [half, zero, half],
                                       [zero, half, half]])
     elif spacegroupsetting == 'A':
         # A-centered
-        transvecs = [FracVector.create([zero, zero, zero]),
-                     FracVector.create([zero, half, half])]
+        #transvecs = [FracVector.create([zero, zero, zero]),
+        #             FracVector.create([zero, half, half])]
         lattrans = FracVector.create([[one, zero, zero],
                                       [zero, half, -half],
                                       [zero, half, half]])
     elif spacegroupsetting == 'B':
         # B-centered
-        transvecs = [FracVector.create([zero, zero, zero]),
-                     FracVector.create([half, zero, half])]
+        #transvecs = [FracVector.create([zero, zero, zero]),
+        #             FracVector.create([half, zero, half])]
         lattrans = FracVector.create([[half, zero, -half],
                                       [zero, one, zero],
                                       [half, zero, half]])
     elif spacegroupsetting == 'C':
         # C-centered
-        transvecs = [FracVector.create([zero, zero, zero]),
-                     FracVector.create([half, half, zero])]
+        #transvecs = [FracVector.create([zero, zero, zero]),
+        #             FracVector.create([half, half, zero])]
         lattrans = FracVector.create([[half, -half, zero],
                                       [half, half, zero],
                                       [zero, zero, one]])
-    elif hall_symbol in Hex2RhombHall or hall_symbol in Rhomb2HexHall:
-        if abs(gamma - 120) < eps:
-            # rhombohedral from hexagonal setting
-            rhombohedral = True
-            transvecs = [FracVector.create([zero, zero, zero]),
-                         FracVector.create([third, 2*third, 2*third]),
-                         FracVector.create([2*third, third, third])]
-            lattrans = FracVector.create([[2*third, third, third],
-                                          [-third, third, third],
-                                          [-third, -2*third, third]])
-        else:
-            transvecs = [FracVector.create([zero, zero, zero])]
-            lattrans = FracVector.create([[1, 0, 0],
-                                          [0, 1, 0],
-                                          [0, 0, 1]])
+    #elif hall_symbol in Hex2RhombHall or hall_symbol in Rhomb2HexHall:
+    #elif hall_symbol in Hex2RhombHall or hall_symbol in Rhomb2HexHall:
+        #if hall_symbol in Rhomb2HexHall and abs(gamma - 120) > eps:
+        #    rhomb2hextrans = FracVector.create([[2*third, third, third],
+        #                                        [-third, third, third],
+        #                                        [-third, -2*third, third]])
+        #else:
+        #    rhomb2hextrans = 1
+        #if abs(gamma - 120) < eps:
+        #    # rhombohedral from hexagonal setting
+        #    # rhombohedral = True
+        #    # transvecs = [FracVector.create([zero, zero, zero]),
+        #    #             FracVector.create([third, 2*third, 2*third]),
+        #    #             FracVector.create([2*third, third, third])]
+        #    lattrans = FracVector.create([[2*third, third, third],
+        #                                  [-third, third, third],
+        #                                  [-third, -2*third, third]])
+        #else:
+        #    #transvecs = [FracVector.create([zero, zero, zero])]
+        #    lattrans = FracVector.create([[1, 0, 0],
+        #                                  [0, 1, 0],
+        #                                  [0, 0, 1]])
+        #lattrans = lattrans*rhomb2hextrans
     else:
-        transvecs = [FracVector.create([zero, zero, zero])]
+        #transvecs = [FracVector.create([zero, zero, zero])]
         lattrans = FracVector.create([[1, 0, 0],
                                       [0, 1, 0],
                                       [0, 0, 1]])
     # Transform to primitive cell
-    tmp = []
     return lattrans
 
 

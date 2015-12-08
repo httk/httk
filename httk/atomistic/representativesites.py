@@ -165,6 +165,9 @@ class RepresentativeSites(Sites):
 
     def tidy(self):
         return sites_tidy(self)
+
+    def __str__(self):
+        return "<RepresentativeSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+">" 
                                         
 
 def main():

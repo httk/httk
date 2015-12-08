@@ -104,6 +104,9 @@ class Assignments(HttkObject):
     def extended(self):
         return len(self.extensions) > 0
 
+    def __str__(self):
+        return "<Assignments:"+str(self.symbollists)+">" 
+
 #     @classmethod
 #     def use(cls,old):
 #         if isinstance(old,Assignments):

@@ -223,6 +223,11 @@ class Structure(HttkObject):
            
         See help(Structure) for more information on the data format of all these data representations.
         """                  
+        rc_cell_exception = None
+        uc_cell_exception = None
+        rc_sites_exception = None
+        uc_sites_exception = None
+
         if structure is not None:
             return cls.use(structure)
 
@@ -232,7 +237,7 @@ class Structure(HttkObject):
             try:
                 spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting) 
                 hall_symbol = spacegroupobj.hall_symbol
-            except Exception as spacegroup_exception:                
+            except Exception as spacegroup_exception:                                
                 spacegroupobj = None                
                 hall_symbol = None
 
@@ -248,7 +253,8 @@ class Structure(HttkObject):
                                       alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
                                       lengths=uc_lengths, angles=uc_angles,
                                       scale=uc_scale, scaling=uc_scaling, volume=uc_volume)
-            except Exception:
+            except Exception as e:
+                uc_cell_exception = (e, None, sys.exc_info()[2])
                 uc_cell = None
 
         if isinstance(rc_cell, Cell):
@@ -261,7 +267,8 @@ class Structure(HttkObject):
                                       alpha=rc_alpha, beta=rc_beta, gamma=rc_gamma,
                                       lengths=rc_lengths, angles=rc_angles, 
                                       scale=rc_scale, scaling=rc_scaling, volume=rc_volume)
-            except Exception:
+            except Exception as e:
+                rc_cell_exception = (e, None, sys.exc_info()[2])
                 rc_cell = None
 
         if uc_sites is not None:
@@ -282,7 +289,8 @@ class Structure(HttkObject):
                                                     reduced_coords=uc_reduced_coords, 
                                                     counts=uc_counts, 
                                                     periodicity=periodicity, occupancies=uc_occupancies)
-                except Exception:
+                except Exception as e:
+                    uc_sites_exception = (e, None, sys.exc_info()[2])
                     uc_sites = None
             
             else:
@@ -323,8 +331,7 @@ class Structure(HttkObject):
                                                           hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
                                                           multiplicities=multiplicities, occupancies=rc_occupancies)
                 except Exception as e:
-                    raise
-                    #print "Ex",e
+                    rc_sites_exception = (e, None, sys.exc_info()[2])
                     rc_sites = None
             else:
                 rc_sites = None
@@ -352,6 +359,14 @@ class Structure(HttkObject):
                 assignments = Assignments.create(assignments=assignments)
 
         if assignments is None or ((uc_sites is None or uc_cell is None) and (rc_sites is None or rc_cell is None or hall_symbol is None)):
+            if rc_cell_exception is not None:
+                raise rc_cell_exception[0], rc_cell_exception[1], rc_cell_exception[2]
+            if rc_sites_exception is not None:
+                raise rc_sites_exception[0], rc_sites_exception[1], rc_sites_exception[2]
+            if uc_cell_exception is not None:
+                raise uc_cell_exception[0], uc_cell_exception[1], uc_cell_exception[2]
+            if uc_sites_exception is not None:
+                raise uc_sites_exception[0], uc_sites_exception[1], uc_sites_exception[2]
             raise Exception("Structure.create: not enough information given to create a structure object.")
 
         if uc_sites is not None and uc_cell is not None:
@@ -936,6 +951,8 @@ class Structure(HttkObject):
         for ref in refs:
             self.add_ref(ref)
 
+    def __str__(self):
+        return "<httk Structure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(tag) for tag in self._tags])+"\n  Refs:"+str([str(ref) for ref in self._refs])+"\n>" 
 
 class StructureTag(HttkObject):                               
 

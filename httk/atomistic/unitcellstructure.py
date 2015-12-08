@@ -329,3 +329,7 @@ class UnitcellStructure(HttkObject):
 
     def transform(self, matrix, max_search_cells=20, max_atoms=1000):
         return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
+
+    def __str__(self):
+        return "<httk UnitcellStructure object:\n  "+str(self.uc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.uc_sites)+"\n>" 
+

@@ -21,6 +21,7 @@ from httk.core.fracvector import FracVector, FracScalar
 from httk.core.basic import is_sequence
 from cellutils import *
 from cellshape import CellShape
+from spacegrouputils import crystal_system_from_hall
 
 #TODO: Make this inherit CellShape
 
@@ -31,15 +32,16 @@ class Cell(HttkObject):
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
     """
  
-    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'orientation': int})       
-    def __init__(self, niggli_matrix, orientation=1, basis=None):
+    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'crystal_system': str, 'orientation': int})       
+    def __init__(self, niggli_matrix, crystal_system, orientation=1, basis=None):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
         """    
         self.niggli_matrix = niggli_matrix
         self.orientation = orientation
+        self.crystal_system = crystal_system
         if basis is None:
-            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=orientation))
+            basis = FracVector.use(niggli_to_regular_basis(niggli_matrix, crystal_system, orientation=orientation))
         
         self._basis = basis
  
@@ -63,7 +65,7 @@ class Cell(HttkObject):
                a=None, b=None, c=None, alpha=None, beta=None, gamma=None,
                lengths=None, angles=None, scale=None, 
                scaling=None, volume=None, periodicity=None, 
-               nonperiodic_vecs=None, orientation=1,
+               nonperiodic_vecs=None, orientation=1, hall=None,
                lattice_system=None):
         """
         Create a new cell object, 
@@ -87,8 +89,11 @@ class Cell(HttkObject):
         periodicity: free form input parsed for periodicity
             sequence: True/False for each basis vector being periodic
             integer: number of non-periodic basis vectors 
+
+        hall: giving the hall symbol makes it possible to figure out the regular basis for this cell     
         
-        """
+        lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
+        """        
         if isinstance(cell, Cell):
             basis = cell.basis
         elif cell is not None:
@@ -99,7 +104,6 @@ class Cell(HttkObject):
 
         if niggli_matrix is not None:
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=orientation))
 
         if niggli_matrix is None and basis is not None:
             niggli_matrix, orientation = basis_to_niggli(basis)
@@ -107,12 +111,10 @@ class Cell(HttkObject):
         if niggli_matrix is None and lengths is not None and angles is not None:
             niggli_matrix = lengths_angles_to_niggli(lengths, angles)
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=1))
 
         if niggli_matrix is None and not (a is None or b is None or c is None or alpha is None or beta is None or gamma is None):
             niggli_matrix = lengths_angles_to_niggli([a, b, c], [alpha, beta, gamma])
             niggli_matrix = FracVector.use(niggli_matrix)
-            basis = FracVector.use(niggli_to_basis(niggli_matrix, orientation=1))
 
         if niggli_matrix is None:
             raise Exception("cell.create: Not enough information to specify a cell given.")
@@ -132,40 +134,49 @@ class Cell(HttkObject):
             if basis is not None:
                 basis = (basis*scaling).simplify()
 
-#       Lets skip including the lattice_system for now. Why do we need this? When important, it
-#       can be derived from the hall_symbol.
         # Determination of the lattice system can only be made approximately, so it is recommended
         # that it is given to the constructor if possible
-#         if lattice_system == None:
-#             [a,b,c],[alpha,beta,gamma] = niggli_to_lengths_angles(niggli_matrix)
-#             abeq = float(abs(a-b))<1e-4
-#             aceq = float(abs(a-c))<1e-4
-#             bceq = float(abs(b-c))<1e-4
-#             alpha90 = float(alpha-90)<1e-4
-#             beta90 = float(alpha-90)<1e-4
-#             gamma90 = float(alpha-90)<1e-4
-#             equals = sum([abeq,aceq,bceq])+1
-#             orthos = sum([alpha90,beta90,gamma90])
-#             if equals == 3 and orthos == 3:
-#                 # Cubic
-#                 lattice_system = 'C'
-#             elif equals==2 and orthos == 3:
-#                 # Tetragonal
-#                 lattice_system = 'T'
-#             elif equals==3 and orthos == 0:
-#                 # Rhombohedral
-#                 lattice_system = 'R'
-#             elif equals==1 and orthos == 3:
-#                 # Orthorombic
-#                 lattice_system = 'O'
-#             elif equals==1 and orthos == 2:
-#                 # Monoclinic
-#                 lattice_system = 'M'
-#             elif equals==1 and orthos == 1:
-#                 # Triclinic or hex?
-#                 lattice_system = 'P'
+
+        if (lattice_system is None or lattice_system == 'unknown') and hall is not None:
+            crystal_system = crystal_system_from_hall(hall)
+            if crystal_system in ['cubic', 'tetragonal', 'orthorhombic', 'monoclinic', 'triclinic']:
+                lattice_system = crystal_system
+
+        if lattice_system is None or lattice_system == 'unknown':
+            [a, b, c], [alpha, beta, gamma] = niggli_to_lengths_angles(niggli_matrix)
+            abeq = abs(float(abs(a-b))) < 1e-4
+            aceq = abs(float(abs(a-c))) < 1e-4
+            bceq = abs(float(abs(b-c))) < 1e-4
+            alpha90 = abs(float(alpha-90)) < 1e-4
+            beta90 = abs(float(beta-90)) < 1e-4
+            gamma90 = abs(float(gamma-90)) < 1e-4
+            alpha120 = abs(float(alpha-120)) < 1e-4
+            beta120 = abs(float(beta-120)) < 1e-4
+            gamma120 = abs(float(gamma-120)) < 1e-4
+            equals = sum([abeq, aceq, bceq])
+            if equals == 1:
+                equals = 2
+            orthos = sum([alpha90, beta90, gamma90])
+            hexangles = sum([alpha120, beta120, gamma120])
+            if equals == 3 and orthos == 3:
+                lattice_system = 'cubic'
+            elif equals == 2 and orthos == 3:
+                lattice_system = 'tetragonal'
+            elif equals == 0 and orthos == 3:
+                lattice_system = 'orthorombic'
+            elif hexangles >= 1 and orthos == 2 and equals == 2:
+                lattice_system = 'hexagonal'
+            elif orthos == 2:
+                lattice_system = 'monoclinic'
+            elif equals == 3:
+                lattice_system = 'rhombohedral'
+            else:
+                lattice_system = 'triclinic'
+
+        if basis is None:
+            basis = FracVector.use(niggli_to_standard_basis(niggli_matrix, lattice_system, orientation=orientation))
       
-        return cls(niggli_matrix, orientation, basis)
+        return cls(niggli_matrix, lattice_system, orientation, basis)
 
     @httk_typed_property(FracScalar)
     def volume(self):
@@ -223,19 +234,10 @@ class Cell(HttkObject):
 #             del(data['volume'])
 #         return data
 
-    def get_normalized(self):
-        # We use the somewhat unusual normalization where the largest one element
+    def get_normalized_longestvec(self):
+        # Somewhat unusual normalization where the largest one element
         # in the cell = 1, this way we avoid floating point operations for prototypes created from cell vectors
         # (prototypes created from lengths and angles is another matter)
-        #
-        #c = self.basis
-        #maxele = max(c[0,0],c[0,1],c[0,2],c[1,0],c[1,1],c[1,2],c[2,0],c[2,1],c[2,2])
-        #maxeleneg = max(-c[0,0],-c[0,1],-c[0,2],-c[1,0],-c[1,1],-c[1,2],-c[2,0],-c[2,1],-c[2,2])
-        #if maxeleneg > maxele:
-        #    maxnorm_basis = ((-c)/(maxeleneg)).simplify()
-        #else:
-        #    maxnorm_basis = (c/maxele).simplify()
-        #return Cell(maxnorm_basis)
         scale = self.normalization_scale.inv()
         return Cell.create(basis=self.basis*scale.simplify())
 
@@ -245,7 +247,7 @@ class Cell(HttkObject):
         return self.__class__(new_niggli_matrix, orientation=self.orientation, basis=newbasis)
 
     @property
-    def normalization_scale(self):
+    def normalization_longestvec_scale(self):
         """
         Get the factor with which a normalized version of this cell needs to be multiplied to reproduce this cell.
 
@@ -263,6 +265,19 @@ class Cell(HttkObject):
         else:
             scale = (maxele).simplify()
         return scale
+
+    @property
+    def normalization_scale(self):
+        """
+        """
+        return FracScalar.create(pow(float(self.basis.det()), 0.33333333333333333333333))
+
+    def get_normalized(self):
+        scale = self.normalization_scale.inv()
+        return Cell.create(basis=self.basis*scale.simplify())
+
+    def __str__(self):
+        return "<Cell: %.8f * \n    [" % (self.normalization_scale)+"\n     ".join(["% .8f % .8f % .8f" % (x[0], x[1], x[2]) for x in self.get_normalized().basis.to_floats()])+"]>" 
         
 
 def main():
