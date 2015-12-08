@@ -41,7 +41,7 @@ class Cell(HttkObject):
         self.orientation = orientation
         self.crystal_system = crystal_system
         if basis is None:
-            basis = FracVector.use(niggli_to_regular_basis(niggli_matrix, crystal_system, orientation=orientation))
+            basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, crystal_system, orientation=orientation))
         
         self._basis = basis
  
@@ -174,7 +174,7 @@ class Cell(HttkObject):
                 lattice_system = 'triclinic'
 
         if basis is None:
-            basis = FracVector.use(niggli_to_standard_basis(niggli_matrix, lattice_system, orientation=orientation))
+            basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
       
         return cls(niggli_matrix, lattice_system, orientation, basis)
 

@@ -419,7 +419,7 @@ class Structure(HttkObject):
     @property
     def pc(self):
         if 'pc' not in self._other_reps:
-            prim_t = get_primitive_basis_transform(self.rc_cell.basis, self.rc_sites.hall_symbol)
+            prim_t = get_primitive_basis_transform(self.rc_sites.hall_symbol)
             #print "PRIM TRANSFORM",prim_t.to_floats(),self.rc_cell.basis.to_floats()
             self._other_reps['pc'] = self.cc.transform(prim_t)            
             if 'uc' not in self._other_reps:
@@ -952,7 +952,7 @@ class Structure(HttkObject):
             self.add_ref(ref)
 
     def __str__(self):
-        return "<httk Structure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(tag) for tag in self._tags])+"\n  Refs:"+str([str(ref) for ref in self._refs])+"\n>" 
+        return "<httk Structure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(tag) for tag in self.get_tags()])+"\n  Refs:"+str([str(ref) for ref in self.get_refs()])+"\n>" 
 
 class StructureTag(HttkObject):                               
 

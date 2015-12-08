@@ -1481,45 +1481,45 @@ crystal_system = [
 
 # Valid origin, from: http://www.iucr.org/__data/iucr/cif/software/ciftools/ciftools/dict/cif_sym_1.0.dic
 settings = [['b1', 'monoclinic unique axis b, cell choice 1, abc'],
-           ['b2', 'monoclinic unique axis b, cell choice 2, abc'],
-           ['b3', 'monoclinic unique axis b, cell choice 3, abc'],
-           ['-b1', 'monoclinic unique axis b, cell choice 1, c-ba'],
-           ['-b2', 'monoclinic unique axis b, cell choice 2, c-ba'],
-           ['-b3', 'monoclinic unique axis b, cell choice 3, c-ba'],
-           ['c1', 'monoclinic unique axis c, cell choice 1, abc'],
-           ['c2', 'monoclinic unique axis c, cell choice 2, abc'],
-           ['c3', 'monoclinic unique axis c, cell choice 3, abc'],
-           ['-c1', 'monoclinic unique axis c, cell choice 1, ba-c'],
-           ['-c2', 'monoclinic unique axis c, cell choice 2, ba-c'],
-           ['-c3', 'monoclinic unique axis c, cell choice 3, ba-c'],
-           ['a1', 'monoclinic unique axis a, cell choice 1, abc'],
-           ['a2', 'monoclinic unique axis a, cell choice 2, abc'],
-           ['a3', 'monoclinic unique axis a, cell choice 3, abc'],
-           ['-a1', 'monoclinic unique axis a, cell choice 1, -acb'],
-           ['-a2', 'monoclinic unique axis a, cell choice 2, -acb'],
-           ['-a3', 'monoclinic unique axis a, cell choice 3, -acb'],
-           ['abc', 'orthorhombic'],
-           ['ba-c', 'orthorhombic'],
-           ['cab', 'orthorhombic'],
-           ['-cba', 'orthorhombic'],
-           ['bca', 'orthorhombic'],
-           ['a-cb', 'orthorhombic'],
-           ['1abc', 'orthorhombic origin choice 1'],
-           ['1ba-c', 'orthorhombic origin choice 1'],
-           ['1cab', 'orthorhombic origin choice 1'],
-           ['1-cba', 'orthorhombic origin choice 1'],
-           ['1bca', 'orthorhombic origin choice 1'],
-           ['1a-cb', 'orthorhombic origin choice 1'],
-           ['2abc', 'orthorhombic origin choice 2'],
-           ['2ba-c', 'orthorhombic origin choice 2'],
-           ['2cab', 'orthorhombic origin choice 2'],
-           ['2-cba', 'orthorhombic origin choice 2'],
-           ['2bca', 'orthorhombic origin choice 2'],
-           ['2a-cb', 'orthorhombic origin choice 2'],
-           ['1', 'tetragonal or cubic origin choice 1'],
-           ['2', 'tetragonal or cubic origin choice 2'],
-           ['h', 'trigonal using hexagonal axes'],
-           ['r', 'trigonal using rhombohedral axes']]
+            ['b2', 'monoclinic unique axis b, cell choice 2, abc'],
+            ['b3', 'monoclinic unique axis b, cell choice 3, abc'],
+            ['-b1', 'monoclinic unique axis b, cell choice 1, c-ba'],
+            ['-b2', 'monoclinic unique axis b, cell choice 2, c-ba'],
+            ['-b3', 'monoclinic unique axis b, cell choice 3, c-ba'],
+            ['c1', 'monoclinic unique axis c, cell choice 1, abc'],
+            ['c2', 'monoclinic unique axis c, cell choice 2, abc'],
+            ['c3', 'monoclinic unique axis c, cell choice 3, abc'],
+            ['-c1', 'monoclinic unique axis c, cell choice 1, ba-c'],
+            ['-c2', 'monoclinic unique axis c, cell choice 2, ba-c'],
+            ['-c3', 'monoclinic unique axis c, cell choice 3, ba-c'],
+            ['a1', 'monoclinic unique axis a, cell choice 1, abc'],
+            ['a2', 'monoclinic unique axis a, cell choice 2, abc'],
+            ['a3', 'monoclinic unique axis a, cell choice 3, abc'],
+            ['-a1', 'monoclinic unique axis a, cell choice 1, -acb'],
+            ['-a2', 'monoclinic unique axis a, cell choice 2, -acb'],
+            ['-a3', 'monoclinic unique axis a, cell choice 3, -acb'],
+            ['abc', 'orthorhombic'],
+            ['ba-c', 'orthorhombic'],
+            ['cab', 'orthorhombic'],
+            ['-cba', 'orthorhombic'],
+            ['bca', 'orthorhombic'],
+            ['a-cb', 'orthorhombic'],
+            ['1abc', 'orthorhombic origin choice 1'],
+            ['1ba-c', 'orthorhombic origin choice 1'],
+            ['1cab', 'orthorhombic origin choice 1'],
+            ['1-cba', 'orthorhombic origin choice 1'],
+            ['1bca', 'orthorhombic origin choice 1'],
+            ['1a-cb', 'orthorhombic origin choice 1'],
+            ['2abc', 'orthorhombic origin choice 2'],
+            ['2ba-c', 'orthorhombic origin choice 2'],
+            ['2cab', 'orthorhombic origin choice 2'],
+            ['2-cba', 'orthorhombic origin choice 2'],
+            ['2bca', 'orthorhombic origin choice 2'],
+            ['2a-cb', 'orthorhombic origin choice 2'],
+            ['1', 'tetragonal or cubic origin choice 1'],
+            ['2', 'tetragonal or cubic origin choice 2'],
+            ['h', 'trigonal using hexagonal axes'],
+            ['r', 'trigonal using rhombohedral axes']]
 
 spacegroupdata = None
 symmetryops = None
@@ -1823,7 +1823,7 @@ def spacegroup_get_hall(parse):
 
 
 def spacegroup_get_number(parse):
-    return spacegroupdata[spacegroup_parse(parse)][1]
+    return spacegroupdata[spacegroup_parse(parse)][0]
 
 
 def spacegroup_get_number_and_setting(parse):
@@ -2029,6 +2029,8 @@ def spacegroup_get_number_and_setting(parse):
 
 citation.add_src_citation("imported code from cif2cell", "Torbjörn Björkman")
 # Imported from cif2cell by Torbjörn Björkman, spacegroupdata.py
+
+
 def crystal_system_from_spacegroupnbr(spacegroupnr):
     # Determine crystal system
     if 0 < spacegroupnr <= 2:
@@ -2047,6 +2049,19 @@ def crystal_system_from_spacegroupnbr(spacegroupnr):
         return "cubic"
     else:
         return "unknown"
+
+lattice_systems = {'P': 'primitive', 'I': 'body-centered', 
+                   'F': 'face-centered', 'A': 'base-centered',
+                   'B': 'base-centered', 'C': 'base-centered',
+                   'R': 'rhombohedral'}
+
+
+def lattice_symbol_from_hall(hall):
+    return hall.lstrip("-")[0][0]
+
+
+def lattice_system_from_hall(hall):
+    return lattice_systems[lattice_symbol_from_hall(hall)]
 
 
 def crystal_system_from_hall(hall_symb):

@@ -23,6 +23,7 @@ from sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from sites import Sites
 from unitcellsites import UnitcellSites
+from httk.atomistic.spacegrouputils import crystal_system_from_hall, lattice_symbol_from_hall, lattice_system_from_hall
 
 
 class RepresentativeSites(Sites):
@@ -162,6 +163,18 @@ class RepresentativeSites(Sites):
         c = super(RepresentativeSites, self).clean()
         return self.__class__(reduced_coords=c.reduced_coords, counts=c.counts, 
                               hall_symbol=self.hall_symbol, pbc=c.pbc, wyckoff_symbols=self.wyckoff_symbols, multiplicities=self.multiplicities)
+
+    @httk_typed_property(str)
+    def lattice_symbol(self):
+        return lattice_symbol_from_hall(self.hall_symbol)
+
+    @property
+    def lattice_system(self):
+        return lattice_system_from_hall(self.hall_symbol)
+
+    @httk_typed_property(str)
+    def crystal_system(self):
+        return crystal_system_from_hall(self.hall)
 
     def tidy(self):
         return sites_tidy(self)

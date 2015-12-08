@@ -24,8 +24,9 @@ from httk.core.basic import *
 from fractions import Fraction
 from spacegrouputils import crystal_system
 
+
 # Adapted from cif2cell by Torbjörn Björkman, uctools.py
-def niggli_to_standard_basis(niggli_matrix, lattice_system, orientation=1, eps=0.001):
+def niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=1, eps=1e-4):
     niggli_matrix = niggli_matrix.to_floats()
 
     s11, s22, s33 = niggli_matrix[0][0], niggli_matrix[0][1], niggli_matrix[0][2]
@@ -34,27 +35,51 @@ def niggli_to_standard_basis(niggli_matrix, lattice_system, orientation=1, eps=0
     a, b, c = sqrt(s11), sqrt(s22), sqrt(s33)
     alphar, betar, gammar = acos(s23/(b*c)), acos(s13/(c*a)), acos(s12/(a*b))
 
-    alpha120 = abs(float(alphar-120*180/pi)) < 1e-4
-    beta120 = abs(float(betar-120*180/pi)) < 1e-4
-    gamma120 = abs(float(gammar-120*180/pi)) < 1e-4
+    #TODO: I'm sure these tests can be written much more elegantly in the niggli matrix elements
+    abeq = abs(float(abs(a-b))) < eps
+    aceq = abs(float(abs(a-c))) < eps
+    bceq = abs(float(abs(b-c))) < eps
+
+    alpha120 = abs(float(alphar-120*180/pi)) < eps
+    beta120 = abs(float(betar-120*180/pi)) < eps
+    gamma120 = abs(float(gammar-120*180/pi)) < eps
+    gamma90 = abs(float(gammar-90*180/pi)) < eps
 
     if lattice_system == 'cubic' or lattice_system == 'tetragonal' or crystal_system == 'orthorhombic':
+
+        if not abeq:
+            if aceq:
+                b, c = c, b
+            elif bceq:
+                a, c = c, a
+        
         basis = FracVector.create([[a, 0, 0],
                                    [0, b, 0],
                                    [0, 0, c]])*orientation
-    elif lattice_system == 'hexagonal':
-        if gamma120:
-            basis = FracVector.create([[a*sin(gammar), a*cos(gammar), 0],
-                                       [0, b, 0],
-                                       [0, 0, c]])*orientation
-        elif alpha120:
-            basis = FracVector.create([[a, 0, 0],
-                                       [0, b*sin(alphar), b*cos(alphar)],
-                                       [0, 0, c]])*orientation
-        elif beta120:
-            basis = FracVector.create([[a, 0, 0],
-                                       [0, b, 0],
-                                       [c*sin(alphar), 0, c*cos(alphar)]])*orientation
+    elif lattice_system == 'hexagonal' and (alpha120 or beta120 or gamma120):
+
+        if alpha120:
+            gammar, alphar = alphar, gammar
+            a, c = c, a 
+        if beta120:
+            gammar, betar = betar, gammar
+            b, c = c, b
+
+        basis = FracVector.create([[a, 0, 0],
+                                   [-0.5*b, b*sqrt(3.0)/2.0, 0],
+                                   [0, 0, c]])*orientation
+
+    elif lattice_system == 'monoclinic':
+
+        if not gamma90:
+            gammar, alphar = alphar, gammar
+            a, c = c, a 
+            
+        basis = FracVector.create([[a, 0, 0],
+                                   [b*cos(gammar), b*sin(gammar), 0],
+                                   [0, 0, c]])*orientation
+
+    
     #elif lattice_system == 'triclinic' or lattice_system == 'monoclinic' or lattice_system == 'rhombohedral' or lattice_system == 'unknown':
     elif lattice_system == 'rhombohedral':
         vc = cos(alphar)
