@@ -21,7 +21,7 @@ from httk.core.fracvector import FracVector, FracScalar
 from httk.core.basic import is_sequence
 from cellutils import *
 from cellshape import CellShape
-from spacegrouputils import crystal_system_from_hall
+from spacegrouputils import crystal_system_from_hall, lattice_system_from_hall
 
 #TODO: Make this inherit CellShape
 
@@ -32,16 +32,16 @@ class Cell(HttkObject):
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
     """
  
-    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'crystal_system': str, 'orientation': int})       
-    def __init__(self, niggli_matrix, crystal_system, orientation=1, basis=None):
+    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'lattice_system': str, 'orientation': int})       
+    def __init__(self, niggli_matrix, lattice_system, orientation=1, basis=None):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
         """    
         self.niggli_matrix = niggli_matrix
         self.orientation = orientation
-        self.crystal_system = crystal_system
+        self.lattice_system = lattice_system
         if basis is None:
-            basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, crystal_system, orientation=orientation))
+            basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
         
         self._basis = basis
  
@@ -90,10 +90,10 @@ class Cell(HttkObject):
             sequence: True/False for each basis vector being periodic
             integer: number of non-periodic basis vectors 
 
-        hall: giving the hall symbol makes it possible to figure out the regular basis for this cell     
+        hall: giving the hall symbol makes it possible to determine the lattice system without numerical inaccuracy    
         
         lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
-        """        
+        """ 
         if isinstance(cell, Cell):
             basis = cell.basis
         elif cell is not None:
@@ -138,40 +138,10 @@ class Cell(HttkObject):
         # that it is given to the constructor if possible
 
         if (lattice_system is None or lattice_system == 'unknown') and hall is not None:
-            crystal_system = crystal_system_from_hall(hall)
-            if crystal_system in ['cubic', 'tetragonal', 'orthorhombic', 'monoclinic', 'triclinic']:
-                lattice_system = crystal_system
+            lattice_system = lattice_system_from_hall(hall)
 
         if lattice_system is None or lattice_system == 'unknown':
-            [a, b, c], [alpha, beta, gamma] = niggli_to_lengths_angles(niggli_matrix)
-            abeq = abs(float(abs(a-b))) < 1e-4
-            aceq = abs(float(abs(a-c))) < 1e-4
-            bceq = abs(float(abs(b-c))) < 1e-4
-            alpha90 = abs(float(alpha-90)) < 1e-4
-            beta90 = abs(float(beta-90)) < 1e-4
-            gamma90 = abs(float(gamma-90)) < 1e-4
-            alpha120 = abs(float(alpha-120)) < 1e-4
-            beta120 = abs(float(beta-120)) < 1e-4
-            gamma120 = abs(float(gamma-120)) < 1e-4
-            equals = sum([abeq, aceq, bceq])
-            if equals == 1:
-                equals = 2
-            orthos = sum([alpha90, beta90, gamma90])
-            hexangles = sum([alpha120, beta120, gamma120])
-            if equals == 3 and orthos == 3:
-                lattice_system = 'cubic'
-            elif equals == 2 and orthos == 3:
-                lattice_system = 'tetragonal'
-            elif equals == 0 and orthos == 3:
-                lattice_system = 'orthorombic'
-            elif hexangles >= 1 and orthos == 2 and equals == 2:
-                lattice_system = 'hexagonal'
-            elif orthos == 2:
-                lattice_system = 'monoclinic'
-            elif equals == 3:
-                lattice_system = 'rhombohedral'
-            else:
-                lattice_system = 'triclinic'
+            lattice_system = lattice_system_from_niggli(niggli_matrix)
 
         if basis is None:
             basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
@@ -185,6 +155,9 @@ class Cell(HttkObject):
     @httk_typed_property((FracVector, 3, 3))
     def basis(self):
         return self._basis
+
+    def get_axes_standard_order_transform(self):
+        return standard_order_axes_transform(self.niggli_matrix, self.lattice_system)
 
     def scaling(self):
         return -self.volume

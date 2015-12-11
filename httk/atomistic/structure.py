@@ -419,9 +419,13 @@ class Structure(HttkObject):
     @property
     def pc(self):
         if 'pc' not in self._other_reps:
-            prim_t = get_primitive_basis_transform(self.rc_sites.hall_symbol)
+            prim_t = get_primitive_basis_transform(self.rc_sites.hall_symbol)            
             #print "PRIM TRANSFORM",prim_t.to_floats(),self.rc_cell.basis.to_floats()
-            self._other_reps['pc'] = self.cc.transform(prim_t)            
+            asotf = self.rc_cell.get_axes_standard_order_transform()
+            if asotf is not None:
+                self._other_reps['pc'] = self.cc.transform(prim_t*asotf)            
+            else:
+                self._other_reps['pc'] = self.cc.transform(prim_t)            
             if 'uc' not in self._other_reps:
                 self._other_reps['uc'] = self._other_reps['pc']
             #print "RESULT",self._other_reps['pc'].uc_basis.to_floats(), self._other_reps['pc'].uc_sites.reduced_coordgroups.to_floats()

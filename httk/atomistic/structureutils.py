@@ -707,7 +707,10 @@ def structure_tidy(struct, backends=['platon']):
     raise Exception("structure_tidy: None of the available backends available.")
 
 
-def get_primitive_basis_transform(hall_symbol):    
+def get_primitive_basis_transform(hall_symbol): 
+    """
+    Transform to be applied to conventional unit cell to give the primitive unit cell
+    """   
     half = Fraction(1, 2)
     lattice_symbol = hall_symbol.lstrip("-")[0][0]   
     crystal_system = crystal_system_from_hall(hall_symbol)
@@ -716,11 +719,11 @@ def get_primitive_basis_transform(hall_symbol):
     unit = FracVector.create([[1, 0, 0],
                               [0, 1, 0],
                               [0, 0, 1]])
-    
-    if crystal_system == 'cubic':
-        if lattice_symbol == 'P':
-            lattrans = unit
-        elif lattice_symbol == 'F':
+
+    if lattice_symbol == 'P':
+        lattrans = unit    
+    elif crystal_system == 'cubic':
+        if lattice_symbol == 'F':
             lattrans = FracVector.create([[half, half, 0],
                                           [half, 0, half],
                                           [0, half, half]])
@@ -728,25 +731,26 @@ def get_primitive_basis_transform(hall_symbol):
             lattrans = FracVector.create([[half, half, half],
                                           [-half, half, half],
                                           [-half, -half, half]])
-    elif (crystal_system == 'hexagonal' or crystal_system == 'trigonal'):
-        if lattice_symbol == 'P':
-            # Conventional cell should already be primitive hexagonal one
-            lattrans = unit
-        elif lattice_symbol == 'R':
-            # Conventional cell should already be primitive rhombohedral one
+    elif crystal_system == 'hexagonal' or crystal_system == 'trigonal':
+        if lattice_symbol == 'R':
             lattrans = unit
         
     elif crystal_system == 'tetragonal':
-        if lattice_symbol == 'P':
-            lattrans = unit
-        elif lattice_symbol == 'I':
+        if lattice_symbol == 'I':
             lattrans = FracVector.create([[half, -half, half],
                                           [half, half, half],
                                           [-half, -half, half]])
+                
     elif crystal_system == 'orthorhombic':
-        if lattice_symbol == 'P':
-            lattrans = unit
+        if lattice_symbol == 'A':
+            lattrans = FracVector.create([[1, 0, 0],
+                                          [0, half, half],
+                                          [0, -half, half]])
         elif lattice_symbol == 'B':
+            lattrans = FracVector.create([[half, 0, half],
+                                          [0, 1, 0],
+                                          [-half, 0, half]])
+        elif lattice_symbol == 'C':
             lattrans = FracVector.create([[half, half, 0],
                                           [-half, half, 0],
                                           [0, 0, 1]])
@@ -760,12 +764,18 @@ def get_primitive_basis_transform(hall_symbol):
                                           [-half, -half, half]])
 
     elif crystal_system == 'monoclinic':
-        if lattice_symbol == 'P':
-            lattrans = unit
-        elif lattice_symbol == 'B':
+        if lattice_symbol == 'A':
+                lattrans = FracVector.create([[1, 0, 0],
+                                              [0, half, -half],
+                                              [0, half, half]])
+        if lattice_symbol == 'B':
             lattrans = FracVector.create([[half, 0, -half],
                                           [0, 1, 0],
                                           [half, 0, half]])
+        if lattice_symbol == 'C':
+                lattrans = FracVector.create([[half, -half, 0],
+                                              [half, half, 0],
+                                              [0, 0, 1]])
 
     elif crystal_system == 'triclinic':
         lattrans = unit
@@ -777,6 +787,79 @@ def get_primitive_basis_transform(hall_symbol):
         raise Exception("structureutils.get_primitive_basis_transform: no match for lattice transform.")
         
     return lattrans
+
+
+# def get_primitive_basis_transform(hall_symbol, niggli_matrix):    
+#     half = Fraction(1, 2)
+#     lattice_symbol = hall_symbol.lstrip("-")[0][0]   
+#     crystal_system = crystal_system_from_hall(hall_symbol)
+# 
+#     lattrans = None
+#     unit = FracVector.create([[1, 0, 0],
+#                               [0, 1, 0],
+#                               [0, 0, 1]])
+#     
+#     if crystal_system == 'cubic':
+#         if lattice_symbol == 'P':
+#             lattrans = unit
+#         elif lattice_symbol == 'F':
+#             lattrans = FracVector.create([[half, half, 0],
+#                                           [half, 0, half],
+#                                           [0, half, half]])
+#         elif lattice_symbol == 'I':
+#             lattrans = FracVector.create([[half, half, half],
+#                                           [-half, half, half],
+#                                           [-half, -half, half]])
+#     elif (crystal_system == 'hexagonal' or crystal_system == 'trigonal'):
+#         if lattice_symbol == 'P':
+#             # Conventional cell should already be primitive hexagonal one
+#             lattrans = unit
+#         elif lattice_symbol == 'R':
+#             # Conventional cell should already be primitive rhombohedral one
+#             lattrans = unit
+#         
+#     elif crystal_system == 'tetragonal':
+#         if lattice_symbol == 'P':
+#             lattrans = unit
+#         elif lattice_symbol == 'I':
+#             lattrans = FracVector.create([[half, -half, half],
+#                                           [half, half, half],
+#                                           [-half, -half, half]])
+#     elif crystal_system == 'orthorhombic':
+#         if lattice_symbol == 'P':
+#             lattrans = unit
+#         elif lattice_symbol == 'B':
+#             lattrans = FracVector.create([[half, half, 0],
+#                                           [-half, half, 0],
+#                                           [0, 0, 1]])
+#         elif lattice_symbol == 'F' or lattice_symbol == 'A' or lattice_symbol == 'B' or lattice_symbol == 'C':
+#             lattrans = FracVector.create([[half, 0, half],
+#                                           [half, half, 0],
+#                                           [0, half, half]])
+#         elif lattice_symbol == 'I':
+#             lattrans = FracVector.create([[half, half, half],
+#                                           [-half, half, half],
+#                                           [-half, -half, half]])
+# 
+#     elif crystal_system == 'monoclinic':
+#         if lattice_symbol == 'P':
+#             lattrans = unit
+#         elif lattice_symbol == 'B':
+#             lattrans = FracVector.create([[half, 0, -half],
+#                                           [0, 1, 0],
+#                                           [half, 0, half]])
+# 
+#     elif crystal_system == 'triclinic':
+#         lattrans = unit
+# 
+#     else:
+#         raise Exception("structureutils.get_primitive_basis_transform: unknown crystal system, "+str(crystal_system))
+# 
+#     if lattrans is None:
+#         raise Exception("structureutils.get_primitive_basis_transform: no match for lattice transform.")
+#         
+#     return lattrans
+
 
 
 # Imported from cif2cell by Torbjörn Björkman, uctools.py and heavily modified

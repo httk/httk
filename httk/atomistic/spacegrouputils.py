@@ -2050,7 +2050,7 @@ def crystal_system_from_spacegroupnbr(spacegroupnr):
     else:
         return "unknown"
 
-lattice_systems = {'P': 'primitive', 'I': 'body-centered', 
+lattice_types = {'P': 'primitive', 'I': 'body-centered', 
                    'F': 'face-centered', 'A': 'base-centered',
                    'B': 'base-centered', 'C': 'base-centered',
                    'R': 'rhombohedral'}
@@ -2059,10 +2059,19 @@ lattice_systems = {'P': 'primitive', 'I': 'body-centered',
 def lattice_symbol_from_hall(hall):
     return hall.lstrip("-")[0][0]
 
-
 def lattice_system_from_hall(hall):
-    return lattice_systems[lattice_symbol_from_hall(hall)]
+    crystal_system = crystal_system_from_hall(hall)
+    if crystal_system != 'triclinic':
+        return crystal_system
+    lattice_symbol = lattice_symbol_from_hall(hall)
+    if lattice_symbol == 'R':
+        return 'rhombohedral'
+    else:
+        return 'hexagonal'
+    
 
+def lattice_type_from_hall(hall):
+    return lattice_types[lattice_symbol_from_hall(hall)]
 
 def crystal_system_from_hall(hall_symb):
     numb = spacegroup_get_number(hall_symb)

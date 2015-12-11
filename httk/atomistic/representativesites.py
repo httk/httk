@@ -174,7 +174,7 @@ class RepresentativeSites(Sites):
 
     @httk_typed_property(str)
     def crystal_system(self):
-        return crystal_system_from_hall(self.hall)
+        return crystal_system_from_hall(self.hall_symbol)
 
     def tidy(self):
         return sites_tidy(self)
