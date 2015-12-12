@@ -345,3 +345,16 @@ def add_directive_header(self, sig):
     # Rest of original method ignored
 
 DataDocumenter.add_directive_header = add_directive_header
+
+# Monkey patch bug in text writer:
+import sphinx.writers.text
+import docutils.nodes
+
+def monkey_patched_visit_raw(self, node):
+    if 'text' in node.get('format', '').split():          
+        self.new_state(0)                                 
+        self.add_text(node.astext())                      
+        self.end_state(wrap = False)                      
+    raise docutils.nodes.SkipNode
+        
+sphinx.writers.text.TextTranslator.visit_raw = monkey_patched_visit_raw
