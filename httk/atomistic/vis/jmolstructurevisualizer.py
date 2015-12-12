@@ -243,7 +243,13 @@ class JmolStructureVisualizer(object):
             for i in range(3):
                 unitcellstrs += ["{"+str(newbasis[i][0])+" "+str(newbasis[i][1])+" "+str(newbasis[i][2])+"}"]
             unitcellstr += ", ".join(unitcellstrs)+" ];\n"
-            unitcellstr += "unitcell {1 1 1};\n"
+            jmol_version = httk.external.jmol.jmol_version.split('.')
+            if (int(jmol_version[0]) == 14 and int(jmol_version[1]) == 0 and int(jmol_version[1]) == 13):
+                # This happened to be the jmol version I had installed when I first programmed this part,
+                # so it seemed relevant to add this bug workaround...
+                unitcellstr += "unitcell {1 1 1};\n"
+            else:
+                unitcellstr += "unitcell {0 0 0};\n"
             unitcellstr += "unitcell on;\nunitcell 0.025;\n"
     
             self.jmol.send(unitcellstr)

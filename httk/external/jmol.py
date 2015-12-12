@@ -27,17 +27,16 @@ from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from command import Command
 
-try:
-    jmol_path = config.get('paths', 'jmol')
-    if jmol_path == "":
-        raise Exception("No jmol path set.")
-    jmol_path = glob.glob(os.path.expandvars(os.path.expanduser(jmol_path)))[0]
-    jmol_dirpath, jmol_filename = os.path.split(jmol_path)    
-except Exception:
-    raise
-    jmol_path = distutils.spawn.find_executable("jmol") 
-    if jmol_path is None:
+jmol_path_conf = config.get('paths', 'jmol')
+if jmol_path_conf == "":
+    jmol_path_conf = distutils.spawn.find_executable("jmol") 
+    if jmol_path_conf is None:
         raise Exception("jmol_ext: No path is set for jmol in httk configuration, and no jmol executable was found.")
+jmol_path = glob.glob(os.path.expandvars(os.path.expanduser(jmol_path_conf)))
+if len(jmol_path) == 0:
+    raise IOError("jmol_ext: Configured jmol executable not found:"+jmol_path_conf)
+jmol_path = jmol_path[0]
+jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
 jmol_version = None
 jmol_version_date = None
@@ -86,8 +85,11 @@ def _jmol_stophook(command):
 def start(cwd='./', args=['-I']):
 
     version = jmol_version.split('.')
-    if int(version[0]) < 12 or (int(version[0]) == 12 and int(version[1]) < 3):
-        raise Exception("jmol_ext.start_jmol: requires at least jmol version 12.3, your version:"+str(jmol_version))
+    if len(version) < 3:
+        version += [0] * (3 - len(version))
+    #if int(version[0]) < 12 or (int(version[0]) == 12 and int(version[1]) < 3):
+    if int(version[0]) < 13 or (int(version[0]) == 13 and int(version[1]) == 2 and int(version[2]) < 8):
+        raise Exception("jmol_ext.start_jmol: requires at least jmol version 13.2.8, your version:"+str(jmol_version))
 
     command = Command(jmol_path, args, cwd=cwd, stophook=_jmol_stophook)
     command.start()
