@@ -94,10 +94,8 @@ class Cell(HttkObject):
         
         lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
         """ 
-        if isinstance(cell, Cell):
-            basis = cell.basis
-        elif cell is not None:
-            basis = cell_to_basis(cell)
+        if cell is not None:
+            return Cell.use(cell)
 
         if basis is not None:
             basis = FracVector.use(basis)
@@ -145,8 +143,24 @@ class Cell(HttkObject):
 
         if basis is None:
             basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
-      
+            
         return cls(niggli_matrix, lattice_system, orientation, basis)
+
+    @classmethod
+    def use(cls, other):
+        if isinstance(other, Cell):
+            return other
+        else:
+            try:
+                if len(other) == 3:
+                    return cls.create(basis=other)        
+                elif len(other) == 2:
+                    return cls.create(niggli_matrix=other)
+                elif len(other) == 1:
+                    return cls.create(a=other[0], b=other[1], c=other[2], alpha=other[3], beta=other[4], gamma=other[5])
+            except Exception:
+                pass
+        raise Exception("Cell.use: do not know how to use an object of class:"+str(other.__class__))
 
     @httk_typed_property(FracScalar)
     def volume(self):

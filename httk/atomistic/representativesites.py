@@ -33,7 +33,7 @@ class RepresentativeSites(Sites):
     """
     
     @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int], 
-                      'hall_symbol': str, 'pbc': (bool, 1, 3), 'wyckoff_symbols': [str]},
+                      'hall_symbol': str, 'pbc': (bool, 1, 3), 'wyckoff_symbols': [str], 'multiplicities': [int]},
                      index=['counts', 'hall_symbol', 'pbc', 'wyckoff_symbols',
                             'wyckoff_sequence', 'anonymous_wyckoff_sequence'])
     def __init__(self, reduced_coordgroups=None, 

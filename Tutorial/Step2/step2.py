@@ -15,7 +15,7 @@ from httk.atomistic import Structure
 ### Example 1
 
 struct = Structure.io.load("POSCAR")
-
+print(struct)
 struct.vis.show({'bonds': True, 'extbonds': False, 'polyhedra': False})
 struct.vis.wait()
 

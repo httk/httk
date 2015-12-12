@@ -243,11 +243,11 @@ class Structure(HttkObject):
 
         #TODO: Handle that vollume_per_atom is given instead, move this block below sorting out sites and if uc_volume is not set,
         #calculate a new volume
-        if isinstance(uc_cell, Cell):
-            uc_cell = uc_cell
+        if uc_cell is not None:
+            uc_cell = Cell.use(uc_cell)
         else:
             try:                        
-                uc_cell = Cell.create(cell=uc_cell, basis=uc_basis, metric=uc_metric, 
+                uc_cell = Cell.create(basis=uc_basis, metric=uc_metric, 
                                       niggli_matrix=uc_niggli_matrix, 
                                       a=uc_a, b=uc_b, c=uc_c, 
                                       alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
@@ -257,9 +257,9 @@ class Structure(HttkObject):
                 uc_cell_exception = (e, None, sys.exc_info()[2])
                 uc_cell = None
 
-        if isinstance(rc_cell, Cell):
-            rc_cell = rc_cell
-        else:                        
+        if rc_cell is not None:
+            rc_cell = Cell.use(rc_cell)
+        else:
             try:                        
                 rc_cell = Cell.create(cell=rc_cell, basis=rc_basis, metric=rc_metric, 
                                       niggli_matrix=rc_niggli_matrix, 
@@ -395,8 +395,8 @@ class Structure(HttkObject):
             #TODO: Implement simple symmetry finder that is better than this 
             return cls.create(assignments=other.assignments, rc_cell=other.uc_cell, 
                               rc_reduced_coordgroups=other.uc_reduced_coordgroups, 
-                              wyckoff_symbols=['a']*len(other.uc_reduced_coordgroups), 
-                              multiplicities=[1]*len(other.uc_reduced_coordgroups),
+                              wyckoff_symbols=['a']*sum([len(x) for x in other.uc_reduced_coordgroups]), 
+                              multiplicities=[1]*sum([len(x) for x in other.uc_reduced_coordgroups]),
                               hall_symbol='P 1')
         if isinstance(other, RepresentativeStructure):
             #TODO: Implement simple symmetry finder that is better than this 
@@ -956,7 +956,8 @@ class Structure(HttkObject):
             self.add_ref(ref)
 
     def __str__(self):
-        return "<httk Structure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(tag) for tag in self.get_tags()])+"\n  Refs:"+str([str(ref) for ref in self.get_refs()])+"\n>" 
+        return "<httk Structure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(self.get_tags()[tag]) for tag in self.get_tags()])+"\n  Refs:"+str([str(ref) for ref in self.get_refs()])+"\n>" 
+
 
 class StructureTag(HttkObject):                               
 
