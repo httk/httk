@@ -14,9 +14,9 @@ import httk.external.ase_glue
 import ase
 import ase.lattice.surface
 
-cell = [[1.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0],
-        [0.0, 0.0, 1.0]]
+basis = [[1.0, 0.0, 0.0],
+         [0.0, 1.0, 0.0],
+         [0.0, 0.0, 1.0]]
 
 coordgroups = [[
                [0.5, 0.5, 0.5]
@@ -27,7 +27,7 @@ coordgroups = [[
                ]]
 
 assignments = ['Pb', 'Ti', 'O']
-struct1 = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79).find_symmetry()
+struct1 = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79).find_symmetry()
 
 print "Formula:", struct1.formula
 print "Volume", float(struct1.uc_volume)

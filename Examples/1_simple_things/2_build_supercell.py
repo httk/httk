@@ -7,7 +7,7 @@ from httk import *
 from httk.atomistic import *
 import httk.atomistic.vis 
 
-cell = [[1.0, 0.0, 0.0],
+basis = [[1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
         [0.0, 0.0, 1.0]]
 
@@ -23,7 +23,7 @@ assignments = ['Pb', 'Ti', 'O']
 
 print "==== Building simple supercell 1x2x3"
 
-struct = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
+struct = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
 print "The formula is:", struct.formula+" ("+struct.anonymous_formula+")", " vol=", float(struct.uc_volume)
 
 supercell = struct.transform([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
