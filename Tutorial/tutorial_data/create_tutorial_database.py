@@ -28,6 +28,7 @@ def main():
     args = parser.parse_args()    
 
     debug = args.debug
+    #debug = True
     process_with_isotropy = True
     process_with_tidy = True
 
@@ -55,6 +56,7 @@ def main():
     print "==== Db import program started: "+today
     
     if len(args.file) == 0:
+        #files = ['/export/home/rar/Dropbox/Research/Codes/httk/httk/../Tutorial/tutorial_data/CaTiO3/TiO.cif']
         #files = ['/export/home/rar/Dropbox/Research/Codes/httk/trunk/httk/../Tutorial/tutorial_data/CaTiO3/O.cif']
         files = [os.path.join(httk.httk_dir, 'Tutorial/tutorial_data')]
     else:
@@ -104,6 +106,8 @@ def main():
                 except Exception as e:
                     print "Isotropy failed with:"+str(e)
                     struct.add_tag("isotropy", "failed")
+                    if debug:
+                        raise
 
             if process_with_tidy:
                 try:
@@ -113,6 +117,8 @@ def main():
                 except Exception as e:
                     print "Structure tidy failed with:"+str(e)
                     struct.add_tag("structure_tidy", "failed")
+                    if debug:
+                        raise
             
             store.save(struct)            
             compound = Compound.create(base_on_structure=struct)

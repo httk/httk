@@ -50,10 +50,6 @@ class Spacegroup(HttkObject):
         if isinstance(spacegroup, Spacegroup):
             return spacegroup
 
-        print "GOT:", spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting
-
-        exit(0)
-
         if spacegroup is not None:
             hall_symbol = any_to_hall_symbol(spacegroup, setting)
 

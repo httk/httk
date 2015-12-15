@@ -155,7 +155,7 @@ def tuple_to_str(t):
             #tuplestr += "\n"
             strlist.append(tuplestr)
         else:
-            strlist.append(str(i))
+            strlist.append(unicode(i).encode("utf-8"))
     return " ".join(strlist)
 
 

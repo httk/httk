@@ -25,17 +25,9 @@ from httk.iface.jmol_if import *
 import distutils.spawn
 from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
-from command import Command
+from command import Command, find_executable
 
-jmol_path_conf = config.get('paths', 'jmol')
-if jmol_path_conf == "":
-    jmol_path_conf = distutils.spawn.find_executable("jmol") 
-    if jmol_path_conf is None:
-        raise Exception("jmol_ext: No path is set for jmol in httk configuration, and no jmol executable was found.")
-jmol_path = glob.glob(os.path.expandvars(os.path.expanduser(jmol_path_conf)))
-if len(jmol_path) == 0:
-    raise IOError("jmol_ext: Configured jmol executable not found:"+jmol_path_conf)
-jmol_path = jmol_path[0]
+jmol_path = find_executable('jmol.sh','jmol')
 jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
 jmol_version = None

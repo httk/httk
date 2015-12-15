@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, hashlib, random, string
+import os, hashlib, random, string, re
 from collections import OrderedDict 
 import httk
 import httk.httkio
@@ -291,17 +291,25 @@ def cif_reader_httk_preprocessed(ioa):
     return newstruct
 
 
-def cifdata_to_struct(cifdata):
-    #import pprint
-    #pp = pprint.PrettyPrinter()
+def cifdata_to_struct(cifdata, debug=False):
     if len(cifdata) > 1:
         raise Exception("httk.atomistic.atomisticio.structure_cif_io: cifdata to struct with more than one image in cifdata.")
     element = cifdata[0][1]
-    #del element['symmetry_equiv_pos_as_xyz']
-    #pp.pprint(dict(element))
+    
+    if debug:
+        import pprint
+        pp = pprint.PrettyPrinter()
+        debugout = dict(element)
+        if 'symmetry_equiv_pos_as_xyz' in debugout:
+            del debugout['symmetry_equiv_pos_as_xyz']
+        if 'space_group_symop_operation_xyz' in debugout:
+            del debugout['space_group_symop_operation_xyz']
+        if 'space_group_symop_id' in debugout:
+            del debugout['space_group_symop_id']
+        pp.pprint(debugout)
 
-    rc_lengths = FracVector.create([element['cell_length_a'], element['cell_length_b'], element['cell_length_c']])
-    rc_angles = FracVector.create([element['cell_angle_alpha'], element['cell_angle_beta'], element['cell_angle_gamma']])
+    rc_lengths = FracVector.create([re.sub(r'\(.+?\)', '', s) for s in [element['cell_length_a'], element['cell_length_b'], element['cell_length_c']]])
+    rc_angles = FracVector.create([re.sub(r'\(.+?\)', '', s) for s in [element['cell_angle_alpha'], element['cell_angle_beta'], element['cell_angle_gamma']]])
 
     hall_symbol = None
     hm_symbol = None
@@ -310,17 +318,20 @@ def cifdata_to_struct(cifdata):
     symops = None
     if 'symmetry_space_group_name_hall' in element:
         hall_symbol = element['symmetry_space_group_name_hall']
-    elif '_space_group_symop_operation_xyz' in element:
-        symops = element['_space_group_symop_operation_xyz']
-    elif 'symmetry_space_group_name_h-m' in element:
+    if 'space_group_symop_operation_xyz' in element:
+        symops = element['space_group_symop_operation_xyz']
+    elif 'symmetry_equiv_pos_as_xyz' in element:
+        symops = element['symmetry_equiv_pos_as_xyz']
+    if 'symmetry_space_group_name_h-m' in element:
         hm_symbol = element['symmetry_space_group_name_h-m']
-    elif 'symmetry_Int_Tables_number' in element:
+    if 'symmetry_Int_Tables_number' in element:
         spacegroupnumber = int(element['symmetry_Int_Tables_number'])
-        # cif verb symmetry_cell_setting really isn't what it seems, it is useless here
-        #if 'symmetry_cell_setting' in element:
-        #    setting = element['symmetry_cell_setting']
-        #else:
-        sys.stderr.write("Warning: reading cif data for structure, only spacegroup number given without setting information. Standard setting assumed.\n")
+    # cif verb symmetry_cell_setting really is not defined as it would seems logical. Due to ensuing confusion, we better simply ignore it
+    #if 'symmetry_cell_setting' in element:
+    #    setting = element['symmetry_cell_setting']
+
+    if hall_symbol is None and symops is None and hm_symbol is None and spacegroupnumber is None:
+        raise Exception("No symmetry information given in cif file, impossible to interpret coordinate data!")
 
     spacegroup = Spacegroup.create(hall_symbol=hall_symbol, hm_symbol=hm_symbol, spacegroupnumber=spacegroupnumber, setting=setting, symops=symops)
 
@@ -330,6 +341,9 @@ def cifdata_to_struct(cifdata):
     multiplicities = None
     if 'atom_site_wyckoff_symbol' in element:
         wyckoff_symbols = element['atom_site_wyckoff_symbol']
+    elif 'atom_site_wyckoff_label' in element:
+        wyckoff_symbols = element['atom_site_wyckoff_label']
+
     if 'atom_site_symmetry_multiplicity' in element:
         multiplicities = [int(x) for x in element['atom_site_symmetry_multiplicity']]
     
@@ -341,7 +355,7 @@ def cifdata_to_struct(cifdata):
         symbol = element['atom_site_label'][atom].rstrip('1234567890')
         
         occup = {'atom': periodictable.atomic_number(symbol), 'ratio': FracVector.create(ratio), }
-        coord = [element['atom_site_fract_x'][atom], element['atom_site_fract_y'][atom], element['atom_site_fract_z'][atom]]
+        coord = [re.sub(r'\(.+?\)', '', s) for s in [element['atom_site_fract_x'][atom], element['atom_site_fract_y'][atom], element['atom_site_fract_z'][atom]]]
 
         rc_occupancies += [occup]
         rc_reduced_occupationscoords += [coord]

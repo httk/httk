@@ -15,8 +15,10 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading, subprocess, sys, os, signal
+import threading, subprocess, sys, os, signal, glob, distutils.spawn
 import httk.core
+from httk import config
+from httk.config import httk_dir    
 import platform
 
 if httk.core.python_major_version >= 3:
@@ -160,3 +162,24 @@ class Command(object):
         return self.process.stdin
 
 
+def find_executable(executable, config_name):
+    path_conf = config.get('paths', config_name)
+    if path_conf != "":
+        paths = glob.glob(os.path.expandvars(os.path.expanduser(path_conf)))
+        if len(paths) == 0:
+            raise IOError("find_executable: Configured executable in httk.cfg for "+str(config_name)+" not found in "+path_conf)
+        return paths[0]
+    else:
+        try:
+            path = os.path.join(httk_dir, 'External')
+            externaldirs = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+            extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == config_name]    
+            extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))    
+            bestversion = config_name+'-'+extvers[-1]
+            return os.path.join(path, bestversion, executable)
+        except Exception:
+            path = distutils.spawn.find_executable(executable) 
+            if path is None:
+                raise Exception("find_executable: executable for "+str(config_name)+" not found. No path set in httk.cfg, and no binary '"+str(executable)+"' found in subdirectories to External/, or otherwise in the system path.")
+            return path
+        

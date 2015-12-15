@@ -22,7 +22,7 @@ This module is a mess and in need of heavy cleanup.
 import re, sys
 
 from httk.core import FracVector
-from httk.atomistic import Structure
+from httk.atomistic import Structure, Spacegroup
 from httk.atomistic.data import periodictable, spacegroups
 import httk  
 
@@ -568,8 +568,8 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         results['cell']['rc_gamma'] = float(match.group(6))
 
     def spacegroup(results, match):
-        results['spacegroup']['symbol'] = match.group(1)
-        results['spacegroup']['number'] = int(match.group(2))
+        results['spacegroup']['symbol'] = match.group(1).strip()
+        results['spacegroup']['number'] = match.group(2).strip()
     #def setting_start(results,match):
     #    results['setting'].append({'coords':[],'occupancies':[],'wycoff':[]})
     #    results['in_setting'] = True
@@ -626,17 +626,18 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         sgstruct = Structure.create(**structdata)        
     else:
         # Handle both normal structures and scaleless structures
+        sg = Spacegroup.create(hm_symbol=out['spacegroup']['symbol'], spacegroupnumber=out['spacegroup']['number'])
         try:
             rc_cell = based_on_struct.rc_cell
             structdata = dict(out['cell'].items() + 
                               [('rc_reduced_occupationscoords', out['setting'][0]['coords']),
                                ('rc_occupancies', out['setting'][0]['occupancies']),
-                                  ('spacegroup', out['spacegroup']['symbol']),
+                                  ('spacegroup', sg), 
                                   ('rc_cell', rc_cell),
                                   ('wyckoff_symbols', out['setting'][0]['wyckoff']),
                                   ('multiplicities', out['setting'][0]['multiplicities'])
                                ]
-                              )        
+                              )   
             sgstruct = based_on_struct.create(**structdata)        
             sgstruct.add_tags(based_on_struct.get_tags())
             sgstruct.add_refs(based_on_struct.get_refs())
@@ -645,7 +646,7 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
             structdata = dict(out['cell'].items() + 
                               [('rc_reduced_occupationscoords', out['setting'][0]['coords']),
                                ('rc_occupancies', out['setting'][0]['occupancies']),
-                                  ('spacegroup', out['spacegroup']['symbol']),                             
+                                  ('spacegroup', sg),                             
                                   ('wyckoff_symbols', out['setting'][0]['wyckoff']),
                                   ('multiplicities', out['setting'][0]['multiplicities'])
                                ]

@@ -106,6 +106,6 @@ try:
 except Exception:
     pass
 
-httk_author_rickard_armiento = Author.create("Armiento", "Rickard")
-httk_author_torbjorn_bjorkman = Author.create("Björkman", "Torbjörn")
+httk_author_rickard_armiento = Author.create(u"Armiento", u"Rickard")
+httk_author_torbjorn_bjorkman = Author.create(u"Björkman", u"Torbjörn")
 httk_reference_main = Reference.create(ref="The high-throughput toolkit (httk) (2012-2015)", authors=[httk_author_rickard_armiento, httk_author_torbjorn_bjorkman])

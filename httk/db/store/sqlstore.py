@@ -222,6 +222,8 @@ class SqlStore(object):
                 else:
                     try:
                         val = t(val)
+                    except UnicodeEncodeError:
+                        val = unicode(val)
                     except TypeError:
                         print "HUH", val, t
                         raise

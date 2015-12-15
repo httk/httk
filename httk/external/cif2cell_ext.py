@@ -16,7 +16,7 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os
+import os, distutils, glob
 
 from httk.core import citation, IoAdapterString
 from httk.atomistic.atomisticio.structure_cif_io import struct_to_cif_httk
@@ -24,17 +24,12 @@ from httk.atomistic import Structure
 citation.add_ext_citation('cif2cell', "Torbjörn Björkman")
 
 from httk import config
-from command import Command
+from command import Command, find_executable
 import httk
 import httk.iface
 
-try:   
-    cif2cell_path = config.get('paths', 'cif2cell')
-except Exception:
-    #return [name for name in os.listdir(a_dir)
-    #        if os.path.isdir(os.path.join(a_dir, name))]    
-    cif2cell_path = None
-    #raise Exception("httk.external.cif2cell imported with no cif2cell path set in httk.cfg")
+cif2cell_path = find_executable('cif2cell','cif2cell')
+jmol_dirpath, jmol_filename = os.path.split(cif2cell_path)
 
 if cif2cell_path is None or cif2cell_path == "":
     from httk.config import httk_dir    

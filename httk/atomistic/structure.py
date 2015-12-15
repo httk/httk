@@ -227,6 +227,7 @@ class Structure(HttkObject):
         uc_cell_exception = None
         rc_sites_exception = None
         uc_sites_exception = None
+        spacegroup_exception = None
 
         if structure is not None:
             return cls.use(structure)
@@ -237,7 +238,8 @@ class Structure(HttkObject):
             try:
                 spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting) 
                 hall_symbol = spacegroupobj.hall_symbol
-            except Exception as spacegroup_exception:                                
+            except Exception as e:                                
+                spacegroup_exception = (e, None, sys.exc_info()[2])
                 spacegroupobj = None                
                 hall_symbol = None
 
@@ -359,10 +361,13 @@ class Structure(HttkObject):
                 assignments = Assignments.create(assignments=assignments)
 
         if assignments is None or ((uc_sites is None or uc_cell is None) and (rc_sites is None or rc_cell is None or hall_symbol is None)):
+            print "WE ARE HERE", assignments, uc_sites, uc_cell, rc_sites, rc_cell, hall_symbol
             if rc_cell_exception is not None:
                 raise rc_cell_exception[0], rc_cell_exception[1], rc_cell_exception[2]
             if rc_sites_exception is not None:
                 raise rc_sites_exception[0], rc_sites_exception[1], rc_sites_exception[2]
+            if rc_cell is not None and rc_sites is not None and hall_symbol is None:
+                raise spacegroup_exception[0], spacegroup_exception[1], spacegroup_exception[2]
             if uc_cell_exception is not None:
                 raise uc_cell_exception[0], uc_cell_exception[1], uc_cell_exception[2]
             if uc_sites_exception is not None:
@@ -558,6 +563,10 @@ class Structure(HttkObject):
     @property
     def spacegroup_number_and_setting(self):
         return spacegroup_get_number_and_setting(self.rc_sites.hall_symbol)
+
+    @httk_typed_property(int)
+    def spacegroup_number(self):
+        return int(spacegroup_get_number_and_setting(self.rc_sites.hall_symbol)[0])
     
     @property
     def uc_cartesian_occupationscoords(self):
