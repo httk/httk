@@ -41,11 +41,14 @@ def symopshash(symops):
 
 def val_to_tuple(val):
     frac = Fraction(val)
-    return (frac.numerator, frac.denominator)
+    if frac.denominator != 1:
+        return (frac.numerator, frac.denominator)
+    else:
+        return frac.numerator
 
 
 def symopstuple(symop, val_transform=val_to_tuple):
-    symop = symop.replace(" ","")
+    symop = symop.replace(" ", "")
     transl = [0, 0, 0]
     transf = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     row = symop.split(",")
@@ -72,6 +75,8 @@ def symopstuple(symop, val_transform=val_to_tuple):
                 else:
                     if val is None:
                         val = '0'
+                    if val == '1':  # why?!, who does this?
+                        val = '0'
                     transl[i] = val_transform(val)
                 val = None
                 var = None
@@ -94,6 +99,8 @@ def symopstuple(symop, val_transform=val_to_tuple):
             transf[i][var] = val_transform(sign + val)
         else:
             if val is None:
+                val = '0'
+            if val == '1':  # why?!, who does this?
                 val = '0'
             transl[i] = val_transform(val)
 
@@ -274,7 +281,12 @@ def filter_symops(symops, halls=None):
         if symop_hall in halls:
             return [symop_hall]
 
-    print "FAILED?"
+    #print "FAILED?", halls, symops_hash, spacegroupdata[halls[0]]['symops_hash']
+    #print "************"
+    #print sorted([(x,symopstuple(x)) for x in symops])
+    #print "************"
+    #print sorted([(x,symopstuple(x)) for x in spacegroupdata[halls[0]]['symops_mtrx']])
+    #print "************"
 
     return []
 

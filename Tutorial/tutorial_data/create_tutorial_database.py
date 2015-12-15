@@ -56,7 +56,7 @@ def main():
     print "==== Db import program started: "+today
     
     if len(args.file) == 0:
-        #files = ['/export/home/rar/Dropbox/Research/Codes/httk/httk/../Tutorial/tutorial_data/CaTiO3/TiO.cif']
+        #files = ['/export/home/rar/Dropbox/Research/Codes/httk/httk/../Tutorial/tutorial_data/all_spacegroups/cifs/108.cif']
         #files = ['/export/home/rar/Dropbox/Research/Codes/httk/trunk/httk/../Tutorial/tutorial_data/CaTiO3/O.cif']
         files = [os.path.join(httk.httk_dir, 'Tutorial/tutorial_data')]
     else:
