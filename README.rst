@@ -28,16 +28,21 @@ Getting started with *httk*
 Download
 ========
 
-The latest download information for *httk* is found at
-   http://httk.openmaterialsdb.se/downloads.html
+The latest download information for *httk* is found at http://httk.openmaterialsdb.se/downloads.html
 
 OR
 
-Clone the github repository and run make (to create necessary dependent files)
-````
-> git clone https://github.com/rartino/httk
->  make
-````
+Clone the github development repository and run make to create necessary dependent files::
+
+  > git clone https://github.com/rartino/httk
+  > make
+
+For github source, note that many of the documents refered to below will not appear in your main httk directory until you 
+run::
+
+  > make docs
+
+(But you can find their restructuredtext source files in the Docs/ directory in the github source tree)
 
 Installation
 ============
@@ -64,7 +69,7 @@ We track our bugs using the issue tracker at github.
 If you find a bug, please search to see if someone else
 has reported it here:
 
-  https://github.com/rartino/httk/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen
+  https://github.com/rartino/httk/issues
 
 If you cannot find it already reported, please click the 'new issue' 
 button and report the bug.
@@ -83,7 +88,7 @@ This is presently the preferred citation to the httk framework itself:
 
    The High-Throughput Toolkit (httk), R. Armiento et al., http://httk.openmaterialsdb.se/.
 
-Since the *httk* can call upon many other pieces of software quite
+Since *httk* can call upon many other pieces of software quite
 transparently, it may not be initially obvious what other software
 should be cited. Unless configured otherwise, *httk* prints out a list
 of citations when the program ends. You should take note of those
