@@ -1,18 +1,15 @@
-===================================
-  httk git repository README file
-===================================
+===============================
+httk git repository README file
+===============================
 
-The High-Throughput Toolkit (httk)
+|  The High-Throughput Toolkit (httk)
+|  Copyright (c) 2012-2015, Rickard Armiento
+|  For License information see the file COPYING.
+|  Contact: httk [at] openmaterialsdb.se
 
-Copyright (c) 2012-2015, Rickard Armiento
-
-For License information see the file COPYING.
-
-Contact: httk [at] openmaterialsdb.se
-
--------------------------------------
-  About the High-Throughput Toolkit
--------------------------------------
+---------------------------------
+About the High-Throughput Toolkit
+---------------------------------
 
 The High-Throughput Toolkit (httk) is a toolkit for preparing and
 running calculations, analyzing the results, and store them in a
@@ -24,9 +21,9 @@ atomistic calculations in materials science and electronic
 structure, but aims to be extended into a library useful also
 outside those areas.
 
--------------------------------
-  Getting started with *httk*
--------------------------------
+---------------------------
+Getting started with *httk*
+---------------------------
 
 Download
 ========
@@ -34,6 +31,13 @@ Download
 The latest download information for *httk* is found at
    http://httk.openmaterialsdb.se/downloads.html
 
+OR
+
+Clone the github repository and run make (to create necessary dependent files)
+````
+> git clone https://github.com/rartino/httk
+>  make
+````
 
 Installation
 ============
