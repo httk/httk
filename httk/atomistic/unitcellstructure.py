@@ -24,7 +24,9 @@ from structureutils import *
 from spacegroup import Spacegroup
 from structure import Structure, StructureTag, StructureRef
 
+
 class UnitcellStructure(HttkObject):
+
     """
     FullSitesStructure essentially just wraps Structure, and provides a strict subset of the functionality therein. This is needed, 
     because in interaction with, e.g., databases, we sometimes need to restrict the available fields to those properties
@@ -32,19 +34,19 @@ class UnitcellStructure(HttkObject):
     
     """
 
-    @httk_typed_init({'assignments':Assignments, 'uc_sites':UnitcellSites, 'uc_cell':Cell},
-                 index=['assignments','uc_sites', 'uc_cell'])    
-    def __init__(self, cell=None, assignments=None, rc_sites=None, uc_sites = None, struct=None, uc_cell=None):
+    @httk_typed_init({'assignments': Assignments, 'uc_sites': UnitcellSites, 'uc_cell': Cell},
+                     index=['assignments', 'uc_sites', 'uc_cell'])    
+    def __init__(self, cell=None, assignments=None, rc_sites=None, uc_sites=None, struct=None, uc_cell=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
         """
-        if rc_sites != None:
+        if rc_sites is not None:
             raise Exception("FullSitesStructure.__init__: Trying to create a FullSitesStructure with a non-None unique_sites.")
 
-        if struct != None:
+        if struct is not None:
             self._struct = struct
         else:
-            self._struct = Structure(assignments, rc_sites = None, uc_sites = uc_sites, rc_cell=None, uc_cell=uc_cell)
+            self._struct = Structure(assignments, rc_sites=None, uc_sites=uc_sites, rc_cell=None, uc_cell=uc_cell)
 
         self.assignments = self._struct.assignments
 
@@ -53,29 +55,27 @@ class UnitcellStructure(HttkObject):
 
         self._codependent_callbacks = []
         self._codependent_data = []
-        self._codependent_info = [{'class':UCStructureTag,'column':'structure','add_method':'add_tags'},
-                                  {'class':UCStructureRef,'column':'structure','add_method':'add_refs'}]
-
-        
+        self._codependent_info = [{'class': UCStructureTag, 'column': 'structure', 'add_method': 'add_tags'},
+                                  {'class': UCStructureRef, 'column': 'structure', 'add_method': 'add_refs'}]
 
     @classmethod
     def create(cls,
-               structure = None,
+               structure=None,
                
-               uc_cell=None, uc_basis=None, uc_lengths =None, 
-               uc_angles = None, uc_niggli_matrix=None, uc_metric=None, 
+               uc_cell=None, uc_basis=None, uc_lengths=None, 
+               uc_angles=None, uc_niggli_matrix=None, uc_metric=None, 
                uc_a=None, uc_b=None, uc_c=None, 
                uc_alpha=None, uc_beta=None, uc_gamma=None,
-               uc_sites = None, 
-               uc_reduced_coordgroups = None, uc_cartesian_coordgroups = None,  
-               uc_reduced_coords = None, uc_cartesian_coords = None,  
-               uc_reduced_occupationscoords = None, uc_cartesian_occupationscoords = None,  
+               uc_sites=None, 
+               uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None,  
+               uc_reduced_coords=None, uc_cartesian_coords=None,  
+               uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None,  
                uc_occupancies=None, uc_counts=None,
                uc_scale=None, uc_scaling=None, uc_volume=None, 
                    
                assignments=None, 
                
-               periodicity = None, nonperiodic_vecs = None, 
+               periodicity=None, nonperiodic_vecs=None, 
                refs=None, tags=None):
         """
         A FullStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement, where the positions
@@ -126,7 +126,7 @@ class UnitcellStructure(HttkObject):
            - ONE OF periodicity or nonperiodic_vecs
            
         """          
-        if isinstance(structure,Structure):
+        if isinstance(structure, Structure):
             new = cls(struct=structure)
             new.add_tags(structure.get_tags())
             new.add_refs(structure.get_refs())
@@ -134,9 +134,8 @@ class UnitcellStructure(HttkObject):
         
         args = locals()  
         del(args['cls'])
-        struct=Structure.create(**args)
+        struct = Structure.create(**args)
         return cls(struct=struct)
-
 
     @property
     def uc_sites(self):
@@ -256,55 +255,55 @@ class UnitcellStructure(HttkObject):
         for x in self._codependent_callbacks:
             x(self)            
 
-    def add_tag(self,tag,val):
-        if self._tags == None:
+    def add_tag(self, tag, val):
+        if self._tags is None:
             self._fill_codependent_data()
-        new = UCStructureTag(self,tag,val)
-        self._tags[tag]=new
+        new = UCStructureTag(self, tag, val)
+        self._tags[tag] = new
         self._codependent_data += [new]
 
-    def add_tags(self,tags):
+    def add_tags(self, tags):
         for tag in tags:
-            if isinstance(tags,dict):
+            if isinstance(tags, dict):
                 tagdata = tags[tag]
             else:
                 tagdata = tag
-            if isinstance(tagdata,UCStructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
-            elif isinstance(tagdata,StructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
+            if isinstance(tagdata, UCStructureTag):
+                self.add_tag(tagdata.tag, tagdata.value)
+            elif isinstance(tagdata, StructureTag):
+                self.add_tag(tagdata.tag, tagdata.value)
             else:
-                self.add_tag(tag,tagdata)
+                self.add_tag(tag, tagdata)
 
     def get_tags(self):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
-    def get_tag(self,tag):
-        if self._tags == None:
+    def get_tag(self, tag):
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
 
     def get_refs(self):
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         return self._refs
 
-    def add_ref(self,ref):        
-        if self._refs == None:
+    def add_ref(self, ref):        
+        if self._refs is None:
             self._fill_codependent_data()
-        if isinstance(ref,UCStructureRef):
+        if isinstance(ref, UCStructureRef):
             refobj = ref.reference
-        elif isinstance(ref,StructureRef):
+        elif isinstance(ref, StructureRef):
             refobj = ref.reference
         else:
             refobj = Reference.use(ref)
-        new = UCStructureRef(self,refobj)
+        new = UCStructureRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
 
-    def add_refs(self,refs):
+    def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
 
@@ -332,8 +331,10 @@ class UnitcellStructure(HttkObject):
     def uc_formula_counts(self):
         return self._struct.uc_formula_counts
         
+
 class UCStructureTag(HttkObject):                               
-    @httk_typed_init({'structure':UnitcellStructure,'tag':str,'value':str},index=['structure', 'tag', 'value'],skip=['hexhash'])    
+
+    @httk_typed_init({'structure': UnitcellStructure, 'tag': str, 'value': str}, index=['structure', 'tag', 'value'], skip=['hexhash'])    
     def __init__(self, structure, tag, value):
         self.tag = tag
         self.structure = structure
@@ -342,8 +343,10 @@ class UCStructureTag(HttkObject):
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
 
+
 class UCStructureRef(HttkObject):
-    @httk_typed_init({'structure':UnitcellStructure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
+
+    @httk_typed_init({'structure': UnitcellStructure, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
     def __init__(self, structure, reference):
         self.structure = structure
         self.reference = reference

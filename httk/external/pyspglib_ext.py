@@ -30,25 +30,25 @@ from subimport import submodule_import_external
 import httk
 
 try:
-    pyspglib_path=config.get('paths', 'pyspglib')
+    pyspglib_path = config.get('paths', 'pyspglib')
 except Exception:
     pyspglib_path = None
 
 try:
-    spglib_path=config.get('paths', 'spglib')
+    spglib_path = config.get('paths', 'spglib')
 except Exception:
     spglib_path = None
 
-if pyspglib_path != None and spglib_path != None:
+if pyspglib_path is not None and spglib_path is not None:
     # Import spglib from pyspglib, with some magic to enable use of pyspglib.Atoms for the pyspglib ASE atoms emulation class
-    pyspglib = submodule_import_external(os.path.join(pyspglib_path,'lib','python'),'pyspglib')
+    pyspglib = submodule_import_external(os.path.join(pyspglib_path, 'lib', 'python'), 'pyspglib')
     from pyspglib import spglib
-    atoms = submodule_import_external(os.path.join(spglib_path,'python','ase','test'),'atoms')
+    atoms = submodule_import_external(os.path.join(spglib_path, 'python', 'ase', 'test'), 'atoms')
     spglib.Atoms = atoms.Atoms
-    del atoms # Lets not pollute the namespace
+    del atoms  # Lets not pollute the namespace
 else:
     try:
-        external=config.get('general', 'allow_system_libs')
+        external = config.get('general', 'allow_system_libs')
     except Exception:
         external = 'yes'
     if external == 'yes':
@@ -67,27 +67,29 @@ def structure_to_spglib_atoms(struct):
         name = httk.htdata.periodictable.atomic_symbol(struct.assignments[i])
         symbols += [name]*struct.counts[i]
 
-    print "SYMBOLS",symbols, struct.N
+    print "SYMBOLS", symbols, struct.N
 
     cell = struct.cell.to_floats()
 
     scaled_positions = struct.coords
     
-    atoms = spglib.Atoms( symbols=symbols,
-                      cell=cell,
-                      scaled_positions=scaled_positions,
-                      pbc=True)
+    atoms = spglib.Atoms(symbols=symbols,
+                         cell=cell,
+                         scaled_positions=scaled_positions,
+                         pbc=True)
 
     return atoms
 
-def analysis(struct,symprec=1e-5):
+
+def analysis(struct, symprec=1e-5):
     atoms = structure_to_spglib_atoms(struct)
     val = spglib.get_spacegroup(atoms)
     print "Spacegroup is:", val 
     val = spglib.refine_cell(atoms, symprec=symprec)
-    print "Primitive",val
+    print "Primitive", val
 
-def primitive(struct,symprec=1e-5):
+
+def primitive(struct, symprec=1e-5):
     atoms = structure_to_spglib_atoms(struct)
     prim = spglib.refine_cell(atoms, symprec=symprec)
     sg = spglib.get_spacegroup(atoms)

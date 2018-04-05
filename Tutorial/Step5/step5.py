@@ -8,7 +8,7 @@ import httk.iface.vasp_if
 poscarspath = None
 
 struct = Structure.io.load("example.cif")
-httk.iface.vasp_if.prepare_single_run("Run", struct, template='template',poscarspath=poscarspath, overwrite=True)            
+httk.iface.vasp_if.prepare_single_run("Run", struct, template='template', poscarspath=poscarspath, overwrite=True)            
 
 # Note: one can also use, e.g., t:/vasp/single/static as template. The 't:' prefix indicates subdirectories to Execution/tasks-templates in 
 # the httk main directory.

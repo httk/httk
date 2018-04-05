@@ -33,18 +33,21 @@ from reference import Reference, Author
 module_citations = {}
 external_citations = {}
 
+
 def add_src_citation(module, author):
     if not module in module_citations:
         module_citations[module] = set()
     module_citations[module].add(author)
+
 
 def add_ext_citation(software, author):
     if not software in external_citations:
         external_citations[software] = set()
     external_citations[software].add(author)
 
-auto_print_citations_at_exit=False
+auto_print_citations_at_exit = False
 cancel_print_citations = False
+
 
 def print_citations():
     global cancel_print_citations
@@ -66,7 +69,7 @@ def print_citations():
     print ""
     print "===================================================="
     print "This program uses the high-throughput toolkit (httk)"
-    print "  (c) 2012-2015",", ".join(creditlist)
+    print "  (c) 2012-2015", ", ".join(creditlist)
     if external_citations != {}:
         print "From within httk the following software was also used:"
     
@@ -75,6 +78,7 @@ def print_citations():
             print "  * "+software+" by "+", ".join(external_citations[software])
     print "===================================================="
 
+
 def print_citations_at_exit():
     global auto_print_citations_at_exit, cancel_print_citations
     if not auto_print_citations_at_exit:
@@ -82,6 +86,7 @@ def print_citations_at_exit():
         atexit.register(print_citations)
         auto_print_citations_at_exit = True
     cancel_print_citations = False
+
 
 def dont_print_citations_at_exit():
     global cancel_print_citations
@@ -95,8 +100,8 @@ try:
 except Exception:
     pass
 
-httk_author_rickard_armiento = Author.create("Armiento","Rickard")
-httk_reference_main = Reference.create(ref="The high-throughput toolkit (httk) (2012-2015)",authors=[httk_author_rickard_armiento])
+httk_author_rickard_armiento = Author.create("Armiento", "Rickard")
+httk_reference_main = Reference.create(ref="The high-throughput toolkit (httk) (2012-2015)", authors=[httk_author_rickard_armiento])
 
 
 

@@ -21,11 +21,12 @@ from __future__ import division
 from fracvector import FracVector
 from mutablefracvector import MutableFracVector
  
-def is_point_inside_cell(cell,point):
+
+def is_point_inside_cell(cell, point):
     """
     Checks if a given triple-vector is inside the cell given by the basis matrix in cell
     """
-    p1 = FracVector((0,0,0))
+    p1 = FracVector((0, 0, 0))
     p2 = cell[0]
     p3 = cell[1]
     p4 = cell[0]+cell[1]
@@ -35,57 +36,59 @@ def is_point_inside_cell(cell,point):
     p8 = cell[0]+cell[1]+cell[2]
  
     tetras = [None]*6    
-    tetras[0] = [p1,p2,p3,p6]
-    tetras[1] = [p2,p3,p4,p6]
-    tetras[2] = [p3,p4,p6,p8]
-    tetras[3] = [p3,p6,p7,p8]
-    tetras[4] = [p3,p5,p6,p7]
-    tetras[5] = [p1,p3,p5,p6]
+    tetras[0] = [p1, p2, p3, p6]
+    tetras[1] = [p2, p3, p4, p6]
+    tetras[2] = [p3, p4, p6, p8]
+    tetras[3] = [p3, p6, p7, p8]
+    tetras[4] = [p3, p5, p6, p7]
+    tetras[5] = [p1, p3, p5, p6]
  
     for tetra in tetras:
-        if is_point_inside_tetra(tetra,point):
+        if is_point_inside_tetra(tetra, point):
             return True
     return False
  
-def is_point_inside_tetra(tetra,point):
+
+def is_point_inside_tetra(tetra, point):
     """
     Checks if a point is inside the tretrahedra spanned by the coordinates in tetra
     """
-    D0 = FracVector(((tetra[0][0],tetra[0][1],tetra[0][2],1),(tetra[1][0],tetra[1][1],tetra[1][2],1),(tetra[2][0],tetra[2][1],tetra[2][2],1),(tetra[3][0],tetra[3][1],tetra[3][2],1)))
-    D1 = FracVector(((point[0],point[1],point[2],1)         ,(tetra[1][0],tetra[1][1],tetra[1][2],1),(tetra[2][0],tetra[2][1],tetra[2][2],1),(tetra[3][0],tetra[3][1],tetra[3][2],1)))
-    D2 = FracVector(((tetra[0][0],tetra[0][1],tetra[0][2],1),(point[0],point[1],point[2],1)         ,(tetra[2][0],tetra[2][1],tetra[2][2],1),(tetra[3][0],tetra[3][1],tetra[3][2],1)))
-    D3 = FracVector(((tetra[0][0],tetra[0][1],tetra[0][2],1),(tetra[1][0],tetra[1][1],tetra[1][2],1),(point[0],point[1],point[2],1)         ,(tetra[3][0],tetra[3][1],tetra[3][2],1)))
-    D4 = FracVector(((tetra[0][0],tetra[0][1],tetra[0][2],1),(tetra[1][0],tetra[1][1],tetra[1][2],1),(tetra[2][0],tetra[2][1],tetra[2][2],1),(point[0],point[1],point[2],1)         ))
-    d0=D0.det()
+    D0 = FracVector(((tetra[0][0], tetra[0][1], tetra[0][2], 1), (tetra[1][0], tetra[1][1], tetra[1][2], 1), (tetra[2][0], tetra[2][1], tetra[2][2], 1), (tetra[3][0], tetra[3][1], tetra[3][2], 1)))
+    D1 = FracVector(((point[0], point[1], point[2], 1), (tetra[1][0], tetra[1][1], tetra[1][2], 1), (tetra[2][0], tetra[2][1], tetra[2][2], 1), (tetra[3][0], tetra[3][1], tetra[3][2], 1)))
+    D2 = FracVector(((tetra[0][0], tetra[0][1], tetra[0][2], 1), (point[0], point[1], point[2], 1), (tetra[2][0], tetra[2][1], tetra[2][2], 1), (tetra[3][0], tetra[3][1], tetra[3][2], 1)))
+    D3 = FracVector(((tetra[0][0], tetra[0][1], tetra[0][2], 1), (tetra[1][0], tetra[1][1], tetra[1][2], 1), (point[0], point[1], point[2], 1), (tetra[3][0], tetra[3][1], tetra[3][2], 1)))
+    D4 = FracVector(((tetra[0][0], tetra[0][1], tetra[0][2], 1), (tetra[1][0], tetra[1][1], tetra[1][2], 1), (tetra[2][0], tetra[2][1], tetra[2][2], 1), (point[0], point[1], point[2], 1)))
+    d0 = D0.det()
     if d0 < 0:
         s0 = -1
     else:
         s0 = 1
-    d1=D1.det()
-    d2=D2.det()
-    d3=D3.det()
-    d4=D4.det()
+    d1 = D1.det()
+    d2 = D2.det()
+    d3 = D3.det()
+    d4 = D4.det()
  
     if abs(d0) == 0:
         return False
      
-    if (d1.sign()==s0 or d1 == 0) and (d2.sign()==s0 or d2 == 0) and (d3.sign()==s0 or d3 == 0) and (d4.sign()==s0 or d4 == 0):
+    if (d1.sign() == s0 or d1 == 0) and (d2.sign() == s0 or d2 == 0) and (d3.sign() == s0 or d3 == 0) and (d4.sign() == s0 or d4 == 0):
         return True
      
     return False
  
-def is_any_part_of_cube_inside_cell(cell,midpoint,side):
+
+def is_any_part_of_cube_inside_cell(cell, midpoint, side):
     """
     Checks if any part of a cube is inside the cell spanned by the vectors in cell
     """
-    ps = [midpoint+FracVector((x,y,z))*side for x in [-1,1] for y in [-1,1] for z in [-1,1]]      
+    ps = [midpoint+FracVector((x, y, z))*side for x in [-1, 1] for y in [-1, 1] for z in [-1, 1]]      
     for p in ps:
-        if is_point_inside_cell(cell,p):
+        if is_point_inside_cell(cell, p):
             return True
     return False
 
  
-def hull_z(points,zs):
+def hull_z(points, zs):
     """
     points: a list of points=(x,y,..) with zs= a list of z values;
     a convex half-hull is constructed over negative z-values
@@ -123,7 +126,7 @@ def hull_z(points,zs):
         a = FracVector.create([zs[j] for j in range(zvalues) if j != i])
         b = [None]*coeffs
         c = [None]*coeffs
-        includepoints = [j for j in range(len(points)) if i!=j]
+        includepoints = [j for j in range(len(points)) if i != j]
 
         for j in range(coeffs):
             b[j] = FracVector.create([points[x][j] for x in includepoints])
@@ -134,7 +137,7 @@ def hull_z(points,zs):
 #             print "B",[x.to_floats() for x in b]
 #             print "C",c
 
-        solution = simplex_le_solver(a,b,c)        
+        solution = simplex_le_solver(a, b, c)        
         val = solution[0]
 
 #         if i == 0:
@@ -161,22 +164,25 @@ def hull_z(points,zs):
         else:
             non_hull_points += [i]
 
-    return {'hull_indices':hull_points, 
-            'interior_indices':non_hull_points, 
-            'hull_distances':hull_distances, 
-            'competing_indices':closest_points, 
-            'competing_weights':closest_weights,
+    return {'hull_indices': hull_points, 
+            'interior_indices': non_hull_points, 
+            'hull_distances': hull_distances, 
+            'competing_indices': closest_points, 
+            'competing_weights': closest_weights,
             }
  
 # http://en.literateprograms.org/Quickhull_(Python,_arrays)
+
+
 def numpy_quickhull_2d(sample):
     import numpy as np
-    link = lambda a,b: np.concatenate((a,b[1:]))
-    edge = lambda a,b: np.concatenate(([a],[b]))
-    def dome(sample,base): 
+    link = lambda a, b: np.concatenate((a, b[1:]))
+    edge = lambda a, b: np.concatenate(([a], [b]))
+
+    def dome(sample, base): 
         h, t = base
-        dists = np.dot(sample-h, np.dot(((0,-1),(1,0)),(t-h)))
-        outer = np.repeat(sample, dists>0, 0)
+        dists = np.dot(sample-h, np.dot(((0, -1), (1, 0)), (t-h)))
+        outer = np.repeat(sample, dists > 0, 0)
 
         if len(outer):
             pivot = sample[np.argmax(dists)]
@@ -185,7 +191,7 @@ def numpy_quickhull_2d(sample):
         else:
             return base
     if len(sample) > 2:
-        axis = sample[:,0]
+        axis = sample[:, 0]
         base = np.take(sample, [np.argmin(axis), np.argmax(axis)], 0)
         return link(dome(sample, base),
                     dome(sample, base[::-1]))
@@ -194,7 +200,7 @@ def numpy_quickhull_2d(sample):
     
 
 # TODO: Speed up. Is FracVector really needed? Can we make a pure integer version?
-def simplex_le_solver(a,b,c):
+def simplex_le_solver(a, b, c):
     """
     Minimizie func = a[0]*x + a[1]*y + a[2]*z + ...
     With constraints::
@@ -209,24 +215,24 @@ def simplex_le_solver(a,b,c):
     """
     Na = len(a)
     Nc = len(c)
-    obj = a.get_insert(0,1)
+    obj = a.get_insert(0, 1)
     M = []
     for i in range(Nc):
         obj = obj.get_append(0)
         ident = [0]*Nc
         ident[i] = 1
-        M += [b[i].get_insert(0,0).get_extend(ident).get_append(c[i])]
+        M += [b[i].get_insert(0, 0).get_extend(ident).get_append(c[i])]
     M = MutableFracVector.create(M)    
     obj = obj.get_append(0)
-    base = range(Na,Na+Nc)
+    base = range(Na, Na+Nc)
         
     while not min(obj[1:-1]) >= 0:        
         pivot_col = obj[1:-1].argmin() + 1
-        rhs = M[:,-1]
-        lhs = M[:,pivot_col]
+        rhs = M[:, -1]
+        lhs = M[:, pivot_col]
         
         nonzero = [i for i in range(len(rhs)) if lhs[i] != 0]
-        pivot_row = min(nonzero,key=lambda i:rhs[i]/lhs[i])
+        pivot_row = min(nonzero, key=lambda i: rhs[i]/lhs[i])
 
         M[pivot_row] = (M[pivot_row]/(M[pivot_row][pivot_col])).simplify()
         for i in range(Nc):
@@ -246,21 +252,21 @@ def simplex_le_solver(a,b,c):
 
 if __name__ == '__main__':
 
-    a = FracVector.create([-3,-2])
-    b = FracVector.create([[2,1],[2,3],[3,1]])
-    c = FracVector.create([18,42,24])
+    a = FracVector.create([-3, -2])
+    b = FracVector.create([[2, 1], [2, 3], [3, 1]])
+    c = FracVector.create([18, 42, 24])
 
-    print simplex_le_solver(a,b,c)
+    print simplex_le_solver(a, b, c)
 
     exit(0)
 
     from pylab import *
 
-    xsample = FracVector.random((5,1),0,100,100)
-    xsample = FracVector.create([[x[0],1-x[0]] for x in xsample] + [[1,0]] + [[0,1]])
-    ysample = (-1*FracVector.random((5,),0,100,100)).get_extend([0,0])
+    xsample = FracVector.random((5, 1), 0, 100, 100)
+    xsample = FracVector.create([[x[0], 1-x[0]] for x in xsample] + [[1, 0]] + [[0, 1]])
+    ysample = (-1*FracVector.random((5,), 0, 100, 100)).get_extend([0, 0])
 
-    hull = hull_z(xsample,ysample)
+    hull = hull_z(xsample, ysample)
   
     hull_points = xsample[hull['hull_points']]
     hull_zs = ysample[hull['hull_points']]
@@ -272,14 +278,14 @@ if __name__ == '__main__':
     xvals = [x[0] for x in xsample]
     yvals = ysample
      
-    scatter(xvals,yvals,s=80, marker="x")
-    oldx=hull_points[0][0]
-    oldy=hull_zs[0]
-    for i in range(1,len(hull_points)):
+    scatter(xvals, yvals, s=80, marker="x")
+    oldx = hull_points[0][0]
+    oldy = hull_zs[0]
+    for i in range(1, len(hull_points)):
         x = hull_points[i][0]
         y = hull_zs[i]
         plot([oldx, x], [oldy, y], color='k', linestyle='-', linewidth=2)
-        oldx=x
-        oldy=y    
+        oldx = x
+        oldy = y    
     show()    
 

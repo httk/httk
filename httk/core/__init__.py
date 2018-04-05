@@ -37,7 +37,7 @@ except Exception:
     raise Exception("Python version too old. Httk appear to be running on a version older than python 2.0!")
 
 import citation
-citation.add_src_citation("httk","Rickard Armiento")
+citation.add_src_citation("httk", "Rickard Armiento")
 
 import basic
 from code import Code

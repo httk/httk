@@ -23,41 +23,43 @@ from sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from sites import Sites
 
+
 class RepresentativeSites(Sites):
+
     """
     Represents any collection of sites in a unitcell
     """
     
-    @httk_typed_init({'reduced_coords':(FracVector,0,3), 'counts':[int], 
-                'hall_symbol':str, 'pbc':(bool,1,3),'wyckoff_symbols':[str]},
-                     index=['counts','hall_symbol','pbc','wyckoff_symbols','element_wyckoff_sequence',
-                            'wyckoff_sequence','anonymous_wyckoff_sequence'])
+    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int], 
+                      'hall_symbol': str, 'pbc': (bool, 1, 3), 'wyckoff_symbols': [str]},
+                     index=['counts', 'hall_symbol', 'pbc', 'wyckoff_symbols', 'element_wyckoff_sequence',
+                            'wyckoff_sequence', 'anonymous_wyckoff_sequence'])
     def __init__(self, reduced_coordgroups=None, 
-                cartesian_coordgroups=None, reduced_coords=None, 
-                cartesian_coords=None, counts=None,  
-                hall_symbol=None,pbc=None,wyckoff_symbols=None):
+                 cartesian_coordgroups=None, reduced_coords=None, 
+                 cartesian_coords=None, counts=None,  
+                 hall_symbol=None, pbc=None, wyckoff_symbols=None):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
         """
-        super(RepresentativeSites,self).__init__(reduced_coordgroups=reduced_coordgroups, 
-                reduced_coords=reduced_coords, 
-                counts=counts,  
-                hall_symbol=hall_symbol,pbc=pbc)
+        super(RepresentativeSites, self).__init__(reduced_coordgroups=reduced_coordgroups, 
+                                                  reduced_coords=reduced_coords, 
+                                                  counts=counts,  
+                                                  hall_symbol=hall_symbol, pbc=pbc)
 
         self.wyckoff_symbols = wyckoff_symbols
 
     @classmethod           
     def create(cls, sites=None, reduced_coordgroups=None, 
-                reduced_coords=None, 
-                counts=None, 
-                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-                periodicity=None, wyckoff_symbols=None, occupancies=None):           
+               reduced_coords=None, 
+               counts=None, 
+               spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
+               periodicity=None, wyckoff_symbols=None, occupancies=None):           
 
-        sites = super(RepresentativeSites,cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups, 
-                reduced_coords=reduced_coords, 
-                counts=counts, 
-                spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting,
-                periodicity=periodicity,occupancies=occupancies)
+        sites = super(RepresentativeSites, cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups, 
+                                                       reduced_coords=reduced_coords, 
+                                                       counts=counts, 
+                                                       spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting,
+                                                       periodicity=periodicity, occupancies=occupancies)
         sites.wyckoff_symbols = wyckoff_symbols
         return sites
 
@@ -79,7 +81,7 @@ class RepresentativeSites(Sites):
                                         
     @httk_typed_property(str)
     def anonymous_wyckoff_sequence(self):
-        if self.wyckoff_symbols == None:
+        if self.wyckoff_symbols is None:
             return None
         data = {}
         idx = 0
@@ -89,16 +91,16 @@ class RepresentativeSites(Sites):
                 wsymb = self.wyckoff_symbols[idx]
                 if wsymb == '&':
                     wsymb = 'zz'
-                key = (wsymb,i)
+                key = (wsymb, i)
                 if key in data:
-                    data[key]=(wsymb,data[key][1]+1,i)
+                    data[key] = (wsymb, data[key][1]+1, i)
                 else:
-                    data[key]=(wsymb,1,i)
+                    data[key] = (wsymb, 1, i)
                 idx += 1
         sortedcounts = sorted(data.values())
 
-        symbol=""
-        seen={}
+        symbol = ""
+        seen = {}
         for i in range(len(sortedcounts)):
             if sortedcounts[i][2] in seen:
                 s = seen[sortedcounts[i][2]]
@@ -107,13 +109,13 @@ class RepresentativeSites(Sites):
                 seen[sortedcounts[i][2]] = s
             wsymb = sortedcounts[i][0]
             if wsymb == 'zz':
-                wsymb='&'
-            symbol+=str(sortedcounts[i][1])+wsymb+int_to_anonymous_symbol(s)
+                wsymb = '&'
+            symbol += str(sortedcounts[i][1])+wsymb+int_to_anonymous_symbol(s)
         return symbol
 
     @httk_typed_property(str)
     def wyckoff_sequence(self):
-        if self.wyckoff_symbols == None:
+        if self.wyckoff_symbols is None:
             return None
         seen = {}
         for symbol in self.wyckoff_symbols:
@@ -122,26 +124,25 @@ class RepresentativeSites(Sites):
             else:
                 seen[symbol] = 1
         sortedsymbs = sorted(seen.keys())
-        out=""
+        out = ""
         for symbol in sortedsymbs:
             if seen[symbol] > 1:  
-                out+=symbol+str(seen[symbol])
+                out += symbol+str(seen[symbol])
             else:
-                out+=symbol
+                out += symbol
         #print "OUT",out,sortedsymbs,seen
         #exit(0)
         return out
 
-
-
     def clean(self):
-        c = super(RepresentativeSites,self).clean()
+        c = super(RepresentativeSites, self).clean()
         return self.__class__(reduced_coords=c.reduced_coords, counts=c.counts, 
-                hall_symbol=self.hall_symbol, pbc=c.pbc,wyckoff_symbols=self.wyckoff_symbols)
+                              hall_symbol=self.hall_symbol, pbc=c.pbc, wyckoff_symbols=self.wyckoff_symbols)
 
     def tidy(self):
         return sites_tidy(self)
                                         
+
 def main():
     pass
 

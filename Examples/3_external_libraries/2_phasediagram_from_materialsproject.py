@@ -41,8 +41,8 @@ for i, entry in enumerate(entries):
     id = entry.data['pretty_formula']+":"+entry.data['material_id']
     symbols = entry.data['unit_cell_formula'].keys()
     counts = entry.data['unit_cell_formula'].values()    
-    pd.add_phase(symbols,counts,id,energy)
-    print "Entry",i+1,"/",len(entries),":",id
+    pd.add_phase(symbols, counts, id, energy)
+    print "Entry", i+1, "/", len(entries), ":", id
 
 pd.vis.show(debug=True)  
   

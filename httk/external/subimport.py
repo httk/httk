@@ -17,9 +17,11 @@
 
 import imp, os.path, inspect
 
-_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))    
-def submodule_import_external(modulepath,pkg):
-    pathstr = os.path.join(_realpath,modulepath)
+_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))    
+
+
+def submodule_import_external(modulepath, pkg):
+    pathstr = os.path.join(_realpath, modulepath)
     
     try:
         fp, pathname, description = imp.find_module(pkg, [pathstr])

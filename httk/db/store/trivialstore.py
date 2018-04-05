@@ -18,14 +18,17 @@
 from numpy import *
 import sys
 
+
 class TrivialStore(object):
+
     """
     Very simple storage class that just stores everything into an individual dictionary, just like regular python objects work
     """
-    def new(self,table,types,keyvals):
+
+    def new(self, table, types, keyvals):
         d = dict(keyvals)
         d['sid'] = 0
         return d
 
-    def retrieve(self,table,sid):
+    def retrieve(self, table, sid):
         raise Exception("TrivialStore.instance: You cannot load data from TrivialStore, sid must be = None.")

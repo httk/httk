@@ -29,20 +29,22 @@ from data import spacegroups
 from structureutils import *
 from spacegroup import Spacegroup
 
+
 class ScalelessStructure(HttkObject):
+
     """
     A ScalelessStructure is the same as a Structre object, only that it does NOT carry information
     about the cell (no rc_cell or uc_cell).
     """
     
     #TODO: When httk internally handles symmetry replication, consider removing UnitcellSites from here    
-    @httk_typed_init({'assignments':Assignments, 'rc_sites':RepresentativeSites},
-                 index=['assignments','rc_sites'])    
-    def __init__(self, assignments, rc_sites = None, uc_sites = None):
+    @httk_typed_init({'assignments': Assignments, 'rc_sites': RepresentativeSites},
+                     index=['assignments', 'rc_sites'])    
+    def __init__(self, assignments, rc_sites=None, uc_sites=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
         """        
-        super(ScalelessStructure,self).__init__()
+        super(ScalelessStructure, self).__init__()
 
         self.assignments = assignments
         self._rc_sites = rc_sites
@@ -54,42 +56,42 @@ class ScalelessStructure(HttkObject):
 
         self._codependent_callbacks = []
         self._codependent_data = []
-        self._codependent_info = [{'class':SlStructureCell,'column':'structure','add_method':'add_rc_cells'},
-                                  {'class':SlStructureTag,'column':'structure','add_method':'add_tags'},
-                                  {'class':SlStructureRef,'column':'structure','add_method':'add_refs'}]
+        self._codependent_info = [{'class': SlStructureCell, 'column': 'structure', 'add_method': 'add_rc_cells'},
+                                  {'class': SlStructureTag, 'column': 'structure', 'add_method': 'add_tags'},
+                                  {'class': SlStructureRef, 'column': 'structure', 'add_method': 'add_refs'}]
 
         self._rc_cell = None
         self._uc_cell = None
 
     @classmethod
     def create(cls,
-               structure = None,
+               structure=None,
 
-               uc_cellshape=None, uc_basis=None, uc_lengths =None, 
-               uc_angles = None, uc_niggli_matrix=None, uc_metric=None, 
+               uc_cellshape=None, uc_basis=None, uc_lengths=None, 
+               uc_angles=None, uc_niggli_matrix=None, uc_metric=None, 
                uc_a=None, uc_b=None, uc_c=None, 
                uc_alpha=None, uc_beta=None, uc_gamma=None,
-               uc_sites = None, 
-               uc_reduced_coordgroups = None, 
-               uc_reduced_coords = None, 
-               uc_reduced_occupationscoords = None,  
+               uc_sites=None, 
+               uc_reduced_coordgroups=None, 
+               uc_reduced_coords=None, 
+               uc_reduced_occupationscoords=None,  
                uc_occupancies=None, uc_counts=None,
 
-               rc_cellshape=None, rc_basis=None, rc_lengths =None, 
-               rc_angles = None, rc_niggli_matrix=None, rc_metric=None, 
+               rc_cellshape=None, rc_basis=None, rc_lengths=None, 
+               rc_angles=None, rc_niggli_matrix=None, rc_metric=None, 
                rc_a=None, rc_b=None, rc_c=None, 
                rc_alpha=None, rc_beta=None, rc_gamma=None,
-               rc_sites = None, 
-               rc_reduced_coordgroups = None, 
-               rc_reduced_coords = None, 
-               rc_reduced_occupationscoords = None,
+               rc_sites=None, 
+               rc_reduced_coordgroups=None, 
+               rc_reduced_coords=None, 
+               rc_reduced_occupationscoords=None,
                rc_occupancies=None, rc_counts=None, 
-               wyckoff_symbols = None,
-               spacegroup=None, hall_symbol = None, spacegroupnumber=None, setting=None,
+               wyckoff_symbols=None,
+               spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
                
                assignments=None, 
                
-               periodicity = None, nonperiodic_vecs = None, 
+               periodicity=None, nonperiodic_vecs=None, 
                refs=None, tags=None):
         """
         A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
@@ -138,16 +140,16 @@ class ScalelessStructure(HttkObject):
         See help(Structure) for more information on the data format of all these data representations.
         """                  
        
-        if isinstance(structure,ScalelessStructure):
-            rc_sites=None
-            uc_sites=None
+        if isinstance(structure, ScalelessStructure):
+            rc_sites = None
+            uc_sites = None
             if structure.has_rc_repr:
                 rc_sites = structure.rc_sites
             if structure.has_uc_repr:
                 uc_sites = structure.uc_sites
-            return cls(structure.assignments, rc_sites = rc_sites, uc_sites = uc_sites)
+            return cls(structure.assignments, rc_sites=rc_sites, uc_sites=uc_sites)
         
-        if isinstance(spacegroup,Spacegroup):
+        if isinstance(spacegroup, Spacegroup):
             hall_symbol = spacegroup.hall_symbol
         else:
             try:
@@ -157,9 +159,9 @@ class ScalelessStructure(HttkObject):
                 spacegroupobj = None                
                 hall_symbol = None
 
-        if isinstance(uc_sites,UnitcellSites):
+        if isinstance(uc_sites, UnitcellSites):
             uc_sites = uc_sites
-        if isinstance(uc_sites,Sites):
+        if isinstance(uc_sites, Sites):
             uc_sites = UnitcellSites.use(uc_sites)
         else:
             if uc_reduced_coordgroups is None and \
@@ -167,7 +169,7 @@ class ScalelessStructure(HttkObject):
                     uc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
                 if uc_reduced_occupationscoords is not None:
-                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
+                    assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords, uc_occupancies)
             
             if uc_reduced_coordgroups is not None or \
                     uc_reduced_coords is not None:
@@ -187,18 +189,18 @@ class ScalelessStructure(HttkObject):
 
                 try:
                     uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
-                                                   reduced_coords=uc_reduced_coords, 
-                                                   counts=uc_counts, 
-                                                   periodicity=periodicity, occupancies=uc_occupancies)
+                                                    reduced_coords=uc_reduced_coords, 
+                                                    counts=uc_counts, 
+                                                    periodicity=periodicity, occupancies=uc_occupancies)
                 except Exception:
                     uc_sites = None
             
             else:
                 uc_sites = None
 
-        if isinstance(rc_sites,RepresentativeSites):
+        if isinstance(rc_sites, RepresentativeSites):
             rc_sites = rc_sites
-        if isinstance(rc_sites,Sites):
+        if isinstance(rc_sites, Sites):
             rc_sites = RepresentativeSites.use(rc_sites)
         else:
             if rc_reduced_coordgroups is None and \
@@ -206,7 +208,7 @@ class ScalelessStructure(HttkObject):
                     rc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
                 if rc_reduced_occupationscoords is not None:     
-                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)
+                    assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords, rc_occupancies)
 
             if rc_reduced_coordgroups is not None or \
                     rc_reduced_coords is not None:
@@ -225,10 +227,10 @@ class ScalelessStructure(HttkObject):
                                                                     
                 try:
                     rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
-                                                   reduced_coords=rc_reduced_coords, 
-                                                   counts=rc_counts,
-                                                   hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
-                                                   occupancies=rc_occupancies)
+                                                          reduced_coords=rc_reduced_coords, 
+                                                          counts=rc_counts,
+                                                          hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
+                                                          occupancies=rc_occupancies)
                 except Exception:
                     rc_sites = None
             else:
@@ -238,7 +240,7 @@ class ScalelessStructure(HttkObject):
             raise Exception("Structure.create: neither representative, nor primcell, sites specification valid.")
 
         if assignments is not None:
-            if isinstance(assignments,Assignments):
+            if isinstance(assignments, Assignments):
                 assignments = assignments
             else:
                 assignments = Assignments.create(assignments=assignments)
@@ -247,9 +249,9 @@ class ScalelessStructure(HttkObject):
             raise Exception("Structure.create: cannot create structure from only representative sites with no spacegroup information. Error was:"+str(spacegroup_exception))
 
         new = cls(assignments, rc_sites, uc_sites)
-        if tags!=None:
+        if tags is not None:
             new.add_tags(tags)
-        if refs!=None:
+        if refs is not None:
             new.add_refs(refs)               
         return new
 
@@ -341,7 +343,7 @@ class ScalelessStructure(HttkObject):
     def number_of_elements(self):
         seen = {}
         for symbol in self.formula_symbols:
-            seen[symbol]=True
+            seen[symbol] = True
         return len(seen)
 
     @httk_typed_property(str)
@@ -364,16 +366,16 @@ class ScalelessStructure(HttkObject):
 
         symbols = formdict.keys()        
         rearrange = sorted(range(len(symbols)), key=lambda k: symbols[k])
-        formparts = [(symbols[i],formdict[symbols[i]]) for i in rearrange]
+        formparts = [(symbols[i], formdict[symbols[i]]) for i in rearrange]
         return formparts
 
     @httk_typed_property(str)
     def uc_formula(self):
         parts = self.uc_formula_parts        
         formula = ''
-        for symbol,count in parts:            
+        for symbol, count in parts:            
             count = FracScalar.use(count).set_denominator(100).simplify()
-            if count==1:
+            if count == 1:
                 formula += symbol
             elif count.denom == 1:
                 formula += symbol+"%d" % (count,)
@@ -384,12 +386,12 @@ class ScalelessStructure(HttkObject):
     @httk_typed_property([str])
     def uc_formula_symbols(self):
         parts = self.uc_formula_parts
-        return [symbol for symbol,count in parts]
+        return [symbol for symbol, count in parts]
 
     @httk_typed_property([FracScalar])
     def uc_formula_counts(self):
         parts = self.uc_formula_parts
-        return [count for symbol,count in parts]
+        return [count for symbol, count in parts]
 
     @httk_typed_property(str)
     def rc_formula(self):
@@ -402,7 +404,7 @@ class ScalelessStructure(HttkObject):
         
         for i in rearrange:            
             count = FracScalar.use((ratios[i]*counts[i])).set_denominator(100).simplify()
-            if count==1:
+            if count == 1:
                 formula += symbols[i]
             elif count.denom == 1:
                 formula += symbols[i]+"%d" % (counts[i]*ratios[i],)
@@ -425,7 +427,7 @@ class ScalelessStructure(HttkObject):
         formula = normalized_formula_parts(self.assignments.symbollists, self.assignments.ratioslist, self.uc_sites.counts)
         for key in sorted(formula.iterkeys()):            
             if is_sequence(key):
-                key = "".join([str(x[0])+str(("%.2f"%x[1])) for x in key])
+                key = "".join([str(x[0])+str(("%.2f" % x[1])) for x in key])
             symbols += [key]
         return symbols
 
@@ -437,7 +439,7 @@ class ScalelessStructure(HttkObject):
             if is_sequence(formula[key]):
                 totval = sum(formula[key])
             else:
-                totval=formula[key]
+                totval = formula[key]
             counts += [totval]
         return counts
 
@@ -445,26 +447,26 @@ class ScalelessStructure(HttkObject):
     def element_wyckoff_sequence(self):        
         if self.rc_sites.wyckoff_symbols is None:
             return None        
-        symbols=[]
+        symbols = []
         for a in self.assignments:
             if is_sequence(a):
-                if len(a)==1:
+                if len(a) == 1:
                     if a[0].ratio == 1:
-                        symbols+=[a[0].symbol]
+                        symbols += [a[0].symbol]
                     else:
-                        symbols+=["("+a[0].symbol + "%d.%02d" % (a[0].ratio.floor(),((a[0].ratio-a[0].ratio.floor())*100).floor())+")"]
+                        symbols += ["("+a[0].symbol + "%d.%02d" % (a[0].ratio.floor(), ((a[0].ratio-a[0].ratio.floor())*100).floor())+")"]
                 else:
-                    def checkratio(symbol,ratio):
-                        if ratio==1:
+                    def checkratio(symbol, ratio):
+                        if ratio == 1:
                             return symbol
                         else:
-                            return "%s%d.%02d" % (symbol, ratio.floor(),((ratio-ratio.floor())*100).floor())
-                    symbols+=["("+"".join([checkratio(x.symbol,x.ratio) for x in a])+")"]
+                            return "%s%d.%02d" % (symbol, ratio.floor(), ((ratio-ratio.floor())*100).floor())
+                    symbols += ["("+"".join([checkratio(x.symbol, x.ratio) for x in a])+")"]
             else:
                 if a.ratio == 1:
-                    symbols+=[a.symbol]
+                    symbols += [a.symbol]
                 else:
-                    symbols+=["("+a.symbol + "%d.%02d" % (a.ratio.floor(),((a.ratio-a.ratio.floor())*100).floor())+")"]
+                    symbols += ["("+a.symbol + "%d.%02d" % (a.ratio.floor(), ((a.ratio-a.ratio.floor())*100).floor())+")"]
         
         data = {}
         idx = 0
@@ -475,19 +477,19 @@ class ScalelessStructure(HttkObject):
                     wsymb = 'zz'
                 # Note the extra self.assignments[i].to_tuple() that makes sure we are not mixing non-equivalent sites
                 # even if they are non-equivalent in something that isn't readily visible in the symbol (!)
-                key = (wsymb,symbols[i],self.assignments[i].to_tuple())
+                key = (wsymb, symbols[i], self.assignments[i].to_tuple())
                 if key in data:
-                    data[key]=(wsymb,data[key][1]+1,symbols[i])
+                    data[key] = (wsymb, data[key][1]+1, symbols[i])
                 else:
-                    data[key]=(wsymb,1,symbols[i])
+                    data[key] = (wsymb, 1, symbols[i])
                 idx += 1
         sortedcounts = sorted(data.values())
-        symbol=""
+        symbol = ""
         for i in range(len(sortedcounts)):
-            wsymb=sortedcounts[i][0]
+            wsymb = sortedcounts[i][0]
             if wsymb == 'zz':
-                wsymb='&'            
-            symbol+=str(sortedcounts[i][1])+wsymb+sortedcounts[i][2]
+                wsymb = '&'            
+            symbol += str(sortedcounts[i][1])+wsymb+sortedcounts[i][2]
         return symbol
                 
     @httk_typed_property(str)
@@ -548,30 +550,30 @@ class ScalelessStructure(HttkObject):
         for x in self._codependent_callbacks:
             x(self)            
 
-    def add_tag(self,tag,val):
+    def add_tag(self, tag, val):
         if self._tags is None:
             self._fill_codependent_data()
-        new = SlStructureTag(self,tag,val)
-        self._tags[tag]=new
+        new = SlStructureTag(self, tag, val)
+        self._tags[tag] = new
         self._codependent_data += [new]
 
-    def add_tags(self,tags):
+    def add_tags(self, tags):
         for tag in tags:
-            if isinstance(tags,dict):
+            if isinstance(tags, dict):
                 tagdata = tags[tag]
             else:
                 tagdata = tag
-            if isinstance(tagdata,SlStructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
+            if isinstance(tagdata, SlStructureTag):
+                self.add_tag(tagdata.tag, tagdata.value)
             else:
-                self.add_tag(tag,tagdata)
+                self.add_tag(tag, tagdata)
 
     def get_tags(self):
         if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
-    def get_tag(self,tag):
+    def get_tag(self, tag):
         if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
@@ -581,18 +583,18 @@ class ScalelessStructure(HttkObject):
             self._fill_codependent_data()
         return self._refs
 
-    def add_ref(self,ref):        
+    def add_ref(self, ref):        
         if self._refs is None:
             self._fill_codependent_data()
-        if isinstance(ref,SlStructureRef):
+        if isinstance(ref, SlStructureRef):
             refobj = ref.reference
         else:
             refobj = Reference.use(ref)
-        new = SlStructureRef(self,refobj)
+        new = SlStructureRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
 
-    def add_refs(self,refs):
+    def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
             
@@ -601,16 +603,16 @@ class ScalelessStructure(HttkObject):
             self._fill_codependent_data()
         return self._rc_cells
 
-    def add_rc_cell(self,cell):        
+    def add_rc_cell(self, cell):        
         if self._rc_cells is None:
             self._fill_codependent_data()
-        if isinstance(cell,SlStructureCell):
+        if isinstance(cell, SlStructureCell):
             cell = cell.cell
-        new = SlStructureCell(self,cell)
+        new = SlStructureCell(self, cell)
         self._rc_cells += [new]
         self._codependent_data += [new]
 
-    def add_rc_cells(self,cells):
+    def add_rc_cells(self, cells):
         for cell in cells:
             self.add_rc_cell(cell)
 
@@ -643,10 +645,12 @@ class ScalelessStructure(HttkObject):
     io = HttkPluginPlaceholder("import httk.atomistic.io")
     vis = HttkPluginPlaceholder("import httk.atomistic.vis")
 
+
 class SlStructureTag(HttkObject):                               
-    @httk_typed_init({'structure':ScalelessStructure,'tag':str,'value':str},index=['structure', 'tag', 'value'],skip=['hexhash'])    
+
+    @httk_typed_init({'structure': ScalelessStructure, 'tag': str, 'value': str}, index=['structure', 'tag', 'value'], skip=['hexhash'])    
     def __init__(self, structure, tag, value):
-        super(SlStructureTag,self).__init__()
+        super(SlStructureTag, self).__init__()
         self.tag = tag
         self.structure = structure
         self.value = value
@@ -654,29 +658,33 @@ class SlStructureTag(HttkObject):
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
 
+
 class SlStructureRef(HttkObject):
-    @httk_typed_init({'structure':ScalelessStructure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
+
+    @httk_typed_init({'structure': ScalelessStructure, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
     def __init__(self, structure, reference):
-        super(SlStructureRef,self).__init__()
+        super(SlStructureRef, self).__init__()
         self.structure = structure
         self.reference = reference
 
     def __str__(self):
         return str(self.reference)
 
+
 class SlStructureCell(HttkObject):
-    @httk_typed_init({'structure':ScalelessStructure,'cell':Cell},index=['structure', 'cell'],skip=['hexhash'])
+
+    @httk_typed_init({'structure': ScalelessStructure, 'cell': Cell}, index=['structure', 'cell'], skip=['hexhash'])
     def __init__(self, structure, cell):
-        super(SlStructureCell,self).__init__()
+        super(SlStructureCell, self).__init__()
         self.structure = structure
         self.cell = cell
 
     @classmethod
-    def create(cls,cell,structure=None):
-        if isinstance(cell,SlStructureCell):
+    def create(cls, cell, structure=None):
+        if isinstance(cell, SlStructureCell):
             return cell
 
-        return cls(structure,cell)
+        return cls(structure, cell)
 
     def __str__(self):
         return str(self.reference)

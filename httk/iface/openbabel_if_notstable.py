@@ -23,15 +23,16 @@ from httk.atomistic import Structure
 import sys
 #from matsci.structure import structure
 
-def readstruct(ioa,struct, importers=None):
+
+def readstruct(ioa, struct, importers=None):
 
     fileadapter = ioadapters.IoAdapterFileReader(ioa)
 
     if fileadapter.ext == 'structure':
         struct.parse(fileadapter)
 
-    if importers == None:
-        try_importers = ['ase','openbabel']
+    if importers is None:
+        try_importers = ['ase', 'openbabel']
     else:
         try_importers = importers
 
@@ -44,11 +45,11 @@ def readstruct(ioa,struct, importers=None):
                 species = atoms.get_atomic_numbers()
                 coords = atoms.get_positions()
                 basis = atoms.get_cell()
-                return Structure(basis=basis,coords=coords,species=species)
+                return Structure(basis=basis, coords=coords, species=species)
             except:
-                if importers != None:
+                if importers is not None:
                     info = sys.exc_info()
-                    raise Exception("Error while trying ase importer: "+str(info[1])),None,info[2]
+                    raise Exception("Error while trying ase importer: "+str(info[1])), None, info[2]
     
         elif importer == 'openbabel':
             try:
@@ -67,24 +68,23 @@ def readstruct(ioa,struct, importers=None):
                 unitcell.FillUnitCell(obmol)
     
                 basisvecs = unitcell.GetCellVectors()
-                basis = array([[basisvecs[0].GetX(),basisvecs[0].GetY(),basisvecs[0].GetZ()],
-                               [basisvecs[1].GetX(),basisvecs[1].GetY(),basisvecs[1].GetZ()],
-                               [basisvecs[2].GetX(),basisvecs[2].GetY(),basisvecs[2].GetZ()]])
+                basis = array([[basisvecs[0].GetX(), basisvecs[0].GetY(), basisvecs[0].GetZ()],
+                               [basisvecs[1].GetX(), basisvecs[1].GetY(), basisvecs[1].GetZ()],
+                               [basisvecs[2].GetX(), basisvecs[2].GetY(), basisvecs[2].GetZ()]])
 
                 coords = []  
                 species = []              
                 for obatom in openbabel.OBMolAtomIter(obmol):
-                    cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
-                    coords.append([cart.GetX(),cart.GetY(),cart.GetZ()])
+                    cart = openbabel.vector3(obatom.GetX(), obatom.GetY(), obatom.GetZ())
+                    coords.append([cart.GetX(), cart.GetY(), cart.GetZ()])
                     species.append(obatom.GetAtomicNum())
 
-                return Structure(basis=basis,coords=coords,species=species)
+                return Structure(basis=basis, coords=coords, species=species)
 
             except:        
-                if importers != None:
+                if importers is not None:
                     info = sys.exc_info()
-                    raise Exception("Error while trying openbabel importer: "+str(info[1])),None,info[2]
-
+                    raise Exception("Error while trying openbabel importer: "+str(info[1])), None, info[2]
 
     raise Exception("Could not figure out a way to read structure")
     return None
@@ -143,7 +143,6 @@ def readstruct(ioa,struct, importers=None):
     #    #frac = unitcell.CartesianToFractional(cart)
     #    #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
     #    print "Y",[obatomout.GetX(),obatomout.GetY(),obatomout.GetZ()]
-
 
     ##print "Y",unitcell.CartesianToFractional(openbabel.double_array([obatom.GetX(),obatom.GetY(),obatom.GetZ()]))
     #basisvecs = unitcell.GetCellVectors()
@@ -213,8 +212,6 @@ def readstruct(ioa,struct, importers=None):
     #for i in range(len(filteredsites)):
     #    print "%.6f    %.6f    %.6f   %s" % (filteredsites[i][0],filteredsites[i][1],filteredsites[i][2],filteredoccs[i])
 
-    
-
     ##for i in range(len(symsites)):
     ##    print "%.6f    %.6f    %.6f   %s" % (symsites[i][0],symsites[i][1],symsites[i][2],symoccs[i])
 
@@ -225,9 +222,6 @@ def readstruct(ioa,struct, importers=None):
     ##    fv = newcell.CartesianToFractional(v)
     ##    print "%.6f    %.6f    %.6f" % (fv.GetX(),fv.GetY(),fv.GetZ())
     ##    #print "%.6f    %.6f    %.6f" % (obatom.GetX(),obatom.GetY(),obatom.GetZ())
-
-
-
 
 
 ## Needed because of bug (?) in openbabel, which does not seem to be able to reproduce the correct textual spacegroup

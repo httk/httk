@@ -20,7 +20,7 @@ import os
 from httk.core import citation
 from httk.core.basic import is_sequence
 citation.add_ext_citation("Pymatgen",
-"Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier, Michael Kocher, \
+                          "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier, Michael Kocher, \
 Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A. Persson, Gerbrand Ceder. \
 Python Materials Genomics (pymatgen) : A Robust, Open-Source Python Library for Materials Analysis. \
 Computational Materials Science, 2013, 68, 314-319. \
@@ -33,18 +33,18 @@ from httk.atomistic import Structure, UnitcellSites
 import httk.iface 
 from subimport import submodule_import_external
 try:   
-    pymatgen_path=config.get('paths', 'pymatgen')
+    pymatgen_path = config.get('paths', 'pymatgen')
 except Exception:
     pymatgen_path = None
 
 if pymatgen_path == "False":
     raise Exception("httk.external.pymatgen_glue: module pymatgen_glue imported, but pymatgen is disabled in configuration file.")
 
-if pymatgen_path != None:    
-    submodule_import_external(os.path.join(pymatgen_path),'pymatgen')
+if pymatgen_path is not None:    
+    submodule_import_external(os.path.join(pymatgen_path), 'pymatgen')
 else:
     try:
-        external=config.get('general', 'allow_system_libs')
+        external = config.get('general', 'allow_system_libs')
     except Exception:
         external = 'yes'
     #if external == 'yes':
@@ -59,7 +59,8 @@ except ImportError:
 
 from httk.iface.ase_if import *
 
-mp_key=""
+mp_key = ""
+
 
 def set_mp_key(key):
     global mp_key

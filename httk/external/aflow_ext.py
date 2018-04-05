@@ -23,17 +23,18 @@ from command import Command
 import httk
 
 try:    
-    aflow_path=config.get('paths', 'aflow')
+    aflow_path = config.get('paths', 'aflow')
 except Exception:
     aflow_path = None
     raise Exception("httk.external.aflow imported with no aflow path set in httk.cfg")
+
 
 def aflow(ioa_in, args, timeout=30):
     ioa_in = httk.IoAdapterString.use(ioa_in)
     #
     #print "COMMAND AFLOW"
     #print "SENDING IN",ioa_in.string
-    out,err,completed = Command(aflow_path,args, inputstr=ioa_in.string).run(timeout)
+    out, err, completed = Command(aflow_path, args, inputstr=ioa_in.string).run(timeout)
     #print "COMMAND AFLOW END"
     #return out, err
     #
@@ -43,12 +44,13 @@ def aflow(ioa_in, args, timeout=30):
     ioa_in.close()
     return out, err, completed
 
+
 def standard_primitive(struct):
     ioa = httk.IoAdapterString()
     
-    httk.iface.vasp_if.structure_to_poscar(ioa,struct)
+    httk.iface.vasp_if.structure_to_poscar(ioa, struct)
 
-    out,err = aflow(ioa, ["--prim"])
+    out, err = aflow(ioa, ["--prim"])
 
     print err
 

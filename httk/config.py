@@ -28,14 +28,14 @@ except ImportError:
     # Python 3
     import configparser
 
-_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+_realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 
 config = configparser.ConfigParser()
-cfgpathstr = os.path.join(_realpath,'..','httk.cfg')
+cfgpathstr = os.path.join(_realpath, '..', 'httk.cfg')
 config.read([cfgpathstr, os.path.expanduser('~/.httk.cfg')])
 
 #: The path to the main httk directory
-httk_dir = os.path.join(_realpath,'..') 
+httk_dir = os.path.join(_realpath, '..') 
 
 
 

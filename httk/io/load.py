@@ -24,7 +24,8 @@ from httk.atomistic.data import periodictable, spacegroups
 from httk.core import *
 from httk.atomistic import *
 
-def load(ioa,ext=None):
+
+def load(ioa, ext=None):
     """
     A *very* generic file reader method.
     
@@ -35,7 +36,7 @@ def load(ioa,ext=None):
         import httk.atomistic
         import httk.atomistic.io
         
-        return httk.atomistic.Structure.io.load(ioa,ext)
+        return httk.atomistic.Structure.io.load(ioa, ext)
     except Exception:
         raise
         pass        

@@ -28,16 +28,17 @@ from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from command import Command
 
 try:
-    jmol_path=config.get('paths', 'jmol')
+    jmol_path = config.get('paths', 'jmol')
     jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
 except Exception:
     jmol_path = distutils.spawn.find_executable("jmol") 
-    if jmol_path == None:
+    if jmol_path is None:
         raise Exception("jmol_ext: No path is set for jmol in httk configuration, and no jmol executable was found.")
 
 jmol_version = None
 jmol_version_date = None
+
 
 def check_works():
     global jmol_version, jmol_version_date
@@ -45,17 +46,17 @@ def check_works():
     if jmol_path == "" or not os.path.exists(jmol_path):
         raise ImportError("httk.external.jmol imported without access to a jmol binary to run.")
     
-    out, err, completed = Command(jmol_path,['-n','-o'],cwd='./').run(15,debug=False)
-    if completed == None or completed != 0:
+    out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
+    if completed is None or completed != 0:
         raise Exception("jmol_ext: Could not execute jmol. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
 
-    def get_version(results,match):
+    def get_version(results, match):
         results['version'] = match.group(1)
         results['version_date'] = match.group(2)
 
-    results = micro_pyawk(os.path.join(httk.IoAdapterString(out)),[
-            ['^ *Jmol Version: ([^ ]+) +([^ ]+)',None,get_version],
-          ],debug=False)
+    results = micro_pyawk(os.path.join(httk.IoAdapterString(out)), [
+        ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
+    ], debug=False)
 
     if not 'version' in results:
         raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))        
@@ -65,30 +66,34 @@ def check_works():
 
 check_works()
 
-def run(cwd, args,timeout=None):
+
+def run(cwd, args, timeout=None):
     #print "COMMAND JMOL"
-    out,err,completed = Command(jmol_path,args,cwd=cwd).run(timeout)
+    out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
     #print "COMMMDN JMOL END"
     return out, err, completed    
+
 
 def _jmol_stophook(command):
     # Lets be nice and let jmol close down on its own
     command.send("exitJmol;\n")    
     command.wait_finish(timeout=5)
 
+
 def start(cwd='./', args=['-I']):
 
     version = jmol_version.split('.')
-    if int(version[0])<12 or (int(version[0])==12 and int(version[1])<3):
+    if int(version[0]) < 12 or (int(version[0]) == 12 and int(version[1]) < 3):
         raise Exception("jmol_ext.start_jmol: requires at least jmol version 12.3, your version:"+str(jmol_version))
 
-    command = Command(jmol_path,args,cwd=cwd,stophook=_jmol_stophook)
+    command = Command(jmol_path, args, cwd=cwd, stophook=_jmol_stophook)
     command.start()
     
     return command
 
+
 def main():
-    print("VERSION:",jmol_version," DATE:",jmol_version_date)
+    print("VERSION:", jmol_version, " DATE:", jmol_version_date)
     jmol = start()
     jmol.send("background '#F5F5F5';\n")
     time.sleep(1)

@@ -24,31 +24,35 @@ import shlex
 from ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
 
-def hexhash_str(data,prepend=None):
+
+def hexhash_str(data, prepend=None):
     s = hashlib.sha1()
     s.update("httk\0")
-    if prepend != None:
+    if prepend is not None:
         s.update(prepend)
         s.update("\0")
     s.update(data)
     s.update("\0%u\0" % len(data))
     return s.hexdigest()
 
+
 def tuple_to_hexhash(t):
     return hexhash_str(tuple_to_str(t))
 
-def hexhash_ioa(ioa,prepend=None):
+
+def hexhash_ioa(ioa, prepend=None):
     def chunks(f, size=8192): 
         while True: 
             s = f.read(size) 
-            if not s: break 
+            if not s:
+                break 
             yield s     
     ioa = IoAdapterFileReader.use(ioa)
     f = ioa.file
     s = hashlib.sha1() 
     size = 0
     s.update("httk\0")
-    if prepend != None:
+    if prepend is not None:
         s.update("\0")
         s.update(prepend)
     for chunk in chunks(f): 
@@ -108,7 +112,6 @@ def hexhash_ioa(ioa,prepend=None):
 # 
 #     return generate_manifest_for_files(codename, codever, basedir, filelist, fakenames=fakenames, skip_filenames=skip_filenames,write=write,excludes=excludes)
 
-
     #raise Exception("generate_manifest_for_dir: Not implemented, sorry")
 
 # def check_or_generate_manifest_for_dir(codename,codever, basedir, excludes=None, fakenames=None, skip_filenames=False):
@@ -139,10 +142,11 @@ def hexhash_ioa(ioa,prepend=None):
 # 
 #     return (manifest, hexhash)
 
+
 def tuple_to_str(t):
     strlist = []
     for i in t:
-        if isinstance(i,tuple):
+        if isinstance(i, tuple):
             tuplestr = "\n"
             tuplestr += tuple_to_str(i)
             #tuplestr += "\n"
@@ -151,23 +155,26 @@ def tuple_to_str(t):
             strlist.append(str(i))
     return " ".join(strlist)
 
+
 def read_keys(keydir):
     import ed25519
 
-    f = open(os.path.join(keydir,'key1.priv'),"r")
-    b64sk=f.read()
+    f = open(os.path.join(keydir, 'key1.priv'), "r")
+    b64sk = f.read()
     f.close()
-    sk=base64.b64decode(b64sk)
-    pk=ed25519.publickey(sk)
+    sk = base64.b64decode(b64sk)
+    pk = ed25519.publickey(sk)
     return (sk, pk)
+
 
 def sha256file(filename):
     def chunks(f, size=8192): 
         while True: 
             s = f.read(size) 
-            if not s: break 
+            if not s:
+                break 
             yield s     
-    f = open(filename,'rb')
+    f = open(filename, 'rb')
     s = hashlib.sha256() 
     for chunk in chunks(f): 
         s.update(chunk) 
@@ -175,96 +182,96 @@ def sha256file(filename):
     return s.hexdigest() 
 
 
-def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, force=False):
+def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=False, force=False):
     import ed25519
 
     message = ""
 
-    excludes=[]
-    if os.path.exists(os.path.join(excludespath,"excludes")):
-        f = open(os.path.join(excludespath,"excludes"))
-        excludes=[x.strip() for x in f.readlines()]
+    excludes = []
+    if os.path.exists(os.path.join(excludespath, "excludes")):
+        f = open(os.path.join(excludespath, "excludes"))
+        excludes = [x.strip() for x in f.readlines()]
         f.close()
     try:
-        cp=ConfigParser.ConfigParser()
-        cp.read(os.path.join(excludespath,"config"))
-        excludestr=cp.get('main','excludes').strip()
-        excludes+=nested_split(excludestr,'[',']')
+        cp = ConfigParser.ConfigParser()
+        cp.read(os.path.join(excludespath, "config"))
+        excludestr = cp.get('main', 'excludes').strip()
+        excludes += nested_split(excludestr, '[', ']')
     except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
         pass
 
     if len(excludes) == 0:
         excludes = ['.*~']
-    excludes+=['ht\.manifest\..*','ht\.project/keys','ht\.project/manifest','ht\.project/computers','ht\.project/excludes','ht\.project/tags','ht\.project/references','ht\.tmp\..*']
+    excludes += ['ht\.manifest\..*', 'ht\.project/keys', 'ht\.project/manifest', 'ht\.project/computers', 'ht\.project/excludes', 'ht\.project/tags', 'ht\.project/references', 'ht\.tmp\..*']
 
-    f = open(os.path.join(keydir,'key1.pub'),"r")
-    pubkey=f.readlines()[0].strip()
+    f = open(os.path.join(keydir, 'key1.pub'), "r")
+    pubkey = f.readlines()[0].strip()
     f.close()
 
     manifestfile.write(pubkey+"\n")
-    message+=pubkey+"\n"
+    message += pubkey+"\n"
 
-    for root, unsorteddirs, unsortedfiles in os.walk(keydir,topdown=True, followlinks=False):
+    for root, unsorteddirs, unsortedfiles in os.walk(keydir, topdown=True, followlinks=False):
         files = sorted(unsortedfiles)
         for filename in files:
-            if filename != 'key1.pub' and re.match(".*\.pub",filename):
-                f = open(os.path.join(root,filename),"r")
-                filedata=f.readlines()
+            if filename != 'key1.pub' and re.match(".*\.pub", filename):
+                f = open(os.path.join(root, filename), "r")
+                filedata = f.readlines()
                 f.close()
-                pubkey=filedata[0].strip()
-                comment=filedata[1].strip()
+                pubkey = filedata[0].strip()
+                comment = filedata[1].strip()
                 manifestfile.write(pubkey+" "+str(comment)+"\n")
-                message+=pubkey+" "+str(comment)+"\n"
+                message += pubkey+" "+str(comment)+"\n"
 
     manifestfile.write("\n")
-    message+="\n"
+    message += "\n"
 
-    for root, unsorteddirs, unsortedfiles in os.walk(basedir,topdown=True, followlinks=False):
-        if root==basedir: 
+    for root, unsorteddirs, unsortedfiles in os.walk(basedir, topdown=True, followlinks=False):
+        if root == basedir: 
             root = ""
         else:
             root = os.path.relpath(root, basedir)
         files = sorted(unsortedfiles)
         dirs = sorted(unsorteddirs)
-        filenames = [os.path.join(root,x) for x in files]
-        for i,f in enumerate(files):
+        filenames = [os.path.join(root, x) for x in files]
+        for i, f in enumerate(files):
             filename = filenames[i]
             for exclude in excludes:
-                if re.match(exclude,f) != None or re.match(exclude,filename) != None:
+                if re.match(exclude, f) is not None or re.match(exclude, filename) is not None:
                     break
             else:
-                truefilename=os.path.join(basedir,filename)
+                truefilename = os.path.join(basedir, filename)
                 hh = sha256file(truefilename)
                 manifestfile.write(hh+" "+filename+"\n")
-                message+=hh+" "+filename+"\n"
+                message += hh+" "+filename+"\n"
                 if debug:
-                    print "Adding:",hh+" "+filename
+                    print "Adding:", hh+" "+filename
         keepdirs = []
         for d in dirs:
-            fulldir = os.path.join(root,d)
+            fulldir = os.path.join(root, d)
             for exclude in excludes:
-                if re.match(exclude,d) != None or re.match(exclude,fulldir) != None:
+                if re.match(exclude, d) is not None or re.match(exclude, fulldir) is not None:
                     break
             else:
-                if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir,'ht.config')):
-                    if force or (not os.path.exists(os.path.join(fulldir,'ht.manifest.bz2'))):
-                        submanifestfile = bz2.BZ2File(os.path.join(fulldir,'ht.tmp.manifest.bz2'),'w')
-                        print "Generating manifest:",os.path.join(fulldir,'ht.manifest.bz2')
-                        manifest_dir(fulldir,submanifestfile,os.path.join(fulldir,'ht.config'),keydir,sk,pk)
+                if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir, 'ht.config')):
+                    if force or (not os.path.exists(os.path.join(fulldir, 'ht.manifest.bz2'))):
+                        submanifestfile = bz2.BZ2File(os.path.join(fulldir, 'ht.tmp.manifest.bz2'), 'w')
+                        print "Generating manifest:", os.path.join(fulldir, 'ht.manifest.bz2')
+                        manifest_dir(fulldir, submanifestfile, os.path.join(fulldir, 'ht.config'), keydir, sk, pk)
                         submanifestfile.close()
-                        os.rename(os.path.join(fulldir,'ht.tmp.manifest.bz2'),os.path.join(fulldir,'ht.manifest.bz2'))
-                    hh = sha256file(os.path.join(fulldir,'ht.manifest.bz2'))
+                        os.rename(os.path.join(fulldir, 'ht.tmp.manifest.bz2'), os.path.join(fulldir, 'ht.manifest.bz2'))
+                    hh = sha256file(os.path.join(fulldir, 'ht.manifest.bz2'))
                     manifestfile.write(hh+" "+fulldir+"/\n")
-                    message+=hh+" "+fulldir+"/\n"
+                    message += hh+" "+fulldir+"/\n"
                     if debug:
-                        print "Adding:",hh+" "+fulldir+"/ "
+                        print "Adding:", hh+" "+fulldir+"/ "
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
     #print "===="+message+"===="
     
-    sig = ed25519.signature(message,sk,pk)
+    sig = ed25519.signature(message, sk, pk)
     b64sig = base64.b64encode(sig)
 
     manifestfile.write("\n")
@@ -272,8 +279,6 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
     manifestfile.write("\n")
 
      
-
- 
 #def generate_rsa_keys(path,extraargs=[]):
 #    args = ['ssh-keygen','-q','-N','','-f']+extraargs+[path]
 #    p = Popen(args, stdout=PIPE)
@@ -343,6 +348,7 @@ def generate_keys(public_key_path, secret_key_path):
     secfile.file.write(b64secret_key)
     secfile.close()    
 
+
 def get_crypto_signature(message, secret_key_path):      
     import ed25519
     
@@ -351,40 +357,43 @@ def get_crypto_signature(message, secret_key_path):
     ioa.close()
     secret_key = base64.b64decode(b64secret_key)
     public_key = ed25519.publickey(secret_key)
-    signature = ed25519.signature(message,secret_key,public_key)
+    signature = ed25519.signature(message, secret_key, public_key)
     b64signature = base64.b64encode(signature)
     return b64signature
+
 
 def verify_crytpo_signature(signature, message, public_key):      
     import ed25519
     
-    binsignature =  base64.b64decode(signature)
+    binsignature = base64.b64decode(signature)
     binpublic_key = base64.b64decode(public_key)
-    return ed25519.checkvalid(binsignature,message,binpublic_key)
+    return ed25519.checkvalid(binsignature, message, binpublic_key)
     
+
 def verify_crytpo_signature_old(signature, message, public_key_path):      
     import ed25519
     
     ioa = IoAdapterFileReader.use(public_key_path)    
     b64public_key = ioa.file.read()
     ioa.close()
-    binsignature =  base64.b64decode(signature)
+    binsignature = base64.b64decode(signature)
     public_key = base64.b64decode(b64public_key)
-    return ed25519.checkvalid(binsignature,message,public_key)
+    return ed25519.checkvalid(binsignature, message, public_key)
     
+
 def main():
     print "Generating keys, this may take some time."
-    generate_keys("/tmp/pub.key","/tmp/priv.key")  
+    generate_keys("/tmp/pub.key", "/tmp/priv.key")  
     message = "This is my message."
     print "Signing message"
-    my_signature = get_crypto_signature(message,"/tmp/priv.key")
+    my_signature = get_crypto_signature(message, "/tmp/priv.key")
     print "Signature is"
     print my_signature
     print "Check if signature is valid"
-    result = verify_crytpo_signature(my_signature,message,"/tmp/pub.key")
+    result = verify_crytpo_signature(my_signature, message, "/tmp/pub.key")
     print "True message validates", result
     forged_message = "This is not my message."
-    result = verify_crytpo_signature(my_signature,forged_message,"/tmp/pub.key")
+    result = verify_crytpo_signature(my_signature, forged_message, "/tmp/pub.key")
     print "Forged message validates", result
     print "Finished"
     

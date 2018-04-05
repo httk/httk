@@ -33,11 +33,11 @@ from core import *
 from io import load, save
 import iface
 
-citation.add_src_citation("httk","Rickard Armiento")
+citation.add_src_citation("httk", "Rickard Armiento")
 
 #: The version of httk (if you make signifcant changes to httk, please update with 
 #: a personal suffix, e.g., 1.0.7.rickard.2)
-version='1.0.7.1' 
+version = '1.0.7.1' 
 
 # This is to make the docstring work correctly 
 #: The path to the main httk directory
@@ -47,12 +47,12 @@ httk_dir = httk_dir_imported
 __all__ = ["httk_dir", "config", "load", "save", "iface", "version"]
 
 # From core:
-__all__ += ["citation","basic","Code","Computation","Result","ComputationRelated","ComputationProject",
-            "Author","Reference","Project","ProjectRef","ProjectTag","crypto","FracVector","FracScalar",
-            "MutableFracVector", "IoAdapterFileReader","IoAdapterFileWriter","IoAdapterFileAppender",
-            "IoAdapterString","IoAdapterStringList","IoAdapterStringList","HttkObject",
-            "httk_typed_property","httk_typed_init","httk_typed_property_delayed","httk_typed_init_delayed",
-            "HttkPluginWrapper","HttkPlugin","HttkPluginPlaceholder","Signature","SignatureKey"]
+__all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",
+            "Author", "Reference", "Project", "ProjectRef", "ProjectTag", "crypto", "FracVector", "FracScalar",
+            "MutableFracVector", "IoAdapterFileReader", "IoAdapterFileWriter", "IoAdapterFileAppender",
+            "IoAdapterString", "IoAdapterStringList", "IoAdapterStringList", "HttkObject",
+            "httk_typed_property", "httk_typed_init", "httk_typed_property_delayed", "httk_typed_init_delayed",
+            "HttkPluginWrapper", "HttkPlugin", "HttkPluginPlaceholder", "Signature", "SignatureKey"]
 
 # Fiddling to get Sphinx document imported modules correctly
 crypto.__module__ = "httk"

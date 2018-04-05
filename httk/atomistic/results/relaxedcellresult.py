@@ -18,8 +18,10 @@
 import httk
 from httk.atomistic import Structure, Cell, Compound
 
+
 class Result_RelaxedCellResult(httk.Result):
-    @httk.httk_typed_init({'computation':httk.Computation, 'compound':Compound, 'relaxed_structure':Structure, 'primitive_cell':Cell, 'volume_per_atom':float, 'minimum_energy':float})
+
+    @httk.httk_typed_init({'computation': httk.Computation, 'compound': Compound, 'relaxed_structure': Structure, 'primitive_cell': Cell, 'volume_per_atom': float, 'minimum_energy': float})
     def __init__(self, computation, compound, relaxed_structure, primitive_cell, volume_per_atom, minimum_energy):
         self.computation = computation
         self.compound = compound

@@ -18,26 +18,29 @@
 Basic help functions
 """
 
+
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    smalletters= "abcdefghijklmnopqrstuvwxyz"
+    smalletters = "abcdefghijklmnopqrstuvwxyz"
     if i <= 25:
         return bigletters[i]
-    high=int(i/26)-1
-    low=i%26
+    high = int(i/26)-1
+    low = i % 26
     return bigletters[high]+smalletters[low]
+
 
 def anonymous_symbol_to_int(symb):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    smalletters= "abcdefghijklmnopqrstuvwxyz"
+    smalletters = "abcdefghijklmnopqrstuvwxyz"
     s = 0
     N = len(symb)
-    for i in range(1,N+1):
-        if i<N:
+    for i in range(1, N+1):
+        if i < N:
             s += 26**(i-1)*(smalletters.index(symb[N-i])+1)
         else:
             s += 26**(i-1)*(bigletters.index(symb[N-i])+1)
     return s-1
+
 
 def is_sequence(arg):
     return (not hasattr(arg, "strip") and
@@ -48,14 +51,16 @@ def is_sequence(arg):
 import re, errno, os, itertools, sys, tempfile, shutil, collections
 from ioadapters import IoAdapterFileReader
 
+
 def is_unary(e):
-    if type(e)==str:
+    if isinstance(e, str):
         return True
     try:
         dummy = iter(e)
         return False
     except TypeError:
         return True
+
 
 def flatten(l):
     try: 
@@ -83,19 +88,23 @@ def parse_parexpr(string):
             yield (len(stack), string[start + 1: i])
 
 # Create and destroy temporary directories in a very safe way
+
+
 def create_tmpdir():
-    return tempfile.mkdtemp(".httktmp","httktmp.")
+    return tempfile.mkdtemp(".httktmp", "httktmp.")
+
 
 def destroy_tmpdir(tmpdir):
     tmpdirname = os.path.dirname(tmpdir)
     segment = os.path.basename(tmpdir)[len("httktmp."):-len(".httktmp")]
     #print "DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp")
-    shutil.rmtree(os.path.join(tmpdirname,"httktmp."+segment+".httktmp"))
+    shutil.rmtree(os.path.join(tmpdirname, "httktmp."+segment+".httktmp"))
+
 
 def tuple_to_str(t):
     strlist = []
     for i in t:
-        if isinstance(i,tuple):
+        if isinstance(i, tuple):
             tuplestr = "\n"
             tuplestr += tuple_to_str(i)
             #tuplestr += "\n"
@@ -104,13 +113,16 @@ def tuple_to_str(t):
             strlist.append(str(i))
     return " ".join(strlist)
 
+
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
+    except OSError as exc:  # Python >2.5
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
-        else: raise
+        else:
+            raise
+
 
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
@@ -136,7 +148,8 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
     ioa = IoAdapterFileReader.use(ioa)
     f = ioa.file
     
-    if results == None: results = {}
+    if results is None:
+        results = {}
 
     # Compile strings into regexs
     for entry in search:
@@ -147,44 +160,49 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
             
     for line in f:
-        if debug: sys.stdout.write("\n" + line[:-1])
+        if debug:
+            sys.stdout.write("\n" + line[:-1])
         for i in range(len(search)):
             match = search[i][0].search(line)
-            if debug and match: sys.stdout.write(": MATCH")
-            if match and (search[i][1] == None or search[i][1](results,line)):
-                if debug: sys.stdout.write(": TRIGGER")
-                if debugfunc != None:
-                    debugfunc(results,match)
-                search[i][2](results,match)
-                if postdebugfunc != None:
-                    postdebugfunc(results,match)
-    if debug: sys.stdout.write("\n")
+            if debug and match:
+                sys.stdout.write(": MATCH")
+            if match and (search[i][1] is None or search[i][1](results, line)):
+                if debug:
+                    sys.stdout.write(": TRIGGER")
+                if debugfunc is not None:
+                    debugfunc(results, match)
+                search[i][2](results, match)
+                if postdebugfunc is not None:
+                    postdebugfunc(results, match)
+    if debug:
+        sys.stdout.write("\n")
 
     ioa.close()
     return results
 
+
 def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
 
-    if start == None:
+    if start is None:
         start = (0,)*dim
     elif len(start) != dim:
         start = (start,)*dim
 
-    if end == None:
+    if end is None:
         end = [None]*dim
     elif len(end) != dim:
         end = [end]*dim
 
     eles = itertools.count(start[0])
 
-    if dim==1:
+    if dim == 1:
         for e in eles:
             yield (e,)
-            if end[0] != None and e >= end[0]:
+            if end[0] is not None and e >= end[0]:
                 return
    
     for e in eles:
-        oeles = breath_first_idxs(dim-1, start=start[1:], end=[e]*(dim-1),perm=False)
+        oeles = breath_first_idxs(dim-1, start=start[1:], end=[e]*(dim-1), perm=False)
         for oe in oeles:
             base = (e,) + oe
             if perm:
@@ -203,11 +221,11 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
                 else:
                     yield base
 
-        if end[0] != None and e >= end[0]:
+        if end[0] is not None and e >= end[0]:
             return
 
 
-def nested_split(s,start,stop):
+def nested_split(s, start, stop):
     parts = []
     if s[0] != start:
         return [s]

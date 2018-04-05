@@ -22,7 +22,8 @@ from httk.core.basic import is_sequence
 from math import sqrt
 import httk
 
-def structure_to_jmol(iof,struct,extbonds=True,repeat=None, copies=None):
+
+def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
     """
     Converts structure into jmol format.
 
@@ -45,17 +46,16 @@ def structure_to_jmol(iof,struct,extbonds=True,repeat=None, copies=None):
         zoom 0
     """            
 
-    if repeat == None:
+    if repeat is None:
         supercell = "supercell \"x, y, z\""
     else:
         supercell = "supercell \""+str(int(repeat[0]))+"x, "+str(int(repeat[1]))+"y, "+str(int(repeat[2]))+"z \""
 
-    if copies == None:
+    if copies is None:
         copies = "{ 1 1 1 }"
     else:
         copies = "{ "+str(int(copies[0]))+" "+str(int(copies[1]))+" "+str(int(copies[2]))+" }"
 
-    
     iof = httk.IoAdapterFileWriter.use(iof)
     f = iof.file
     
@@ -74,15 +74,15 @@ def structure_to_jmol(iof,struct,extbonds=True,repeat=None, copies=None):
     else:
         raise Exception("httk.jmol_if.structure_to_jmol: structure has neither representative nor primcell representation?")
 
-    symbols=[]
+    symbols = []
     for s in symbollist:
         if is_sequence(s):
-            if len(s)==1:
-                symbols+=[s[0]]
+            if len(s) == 1:
+                symbols += [s[0]]
             else:
-                symbols+=[str(s)]
+                symbols += [str(s)]
         else:
-            symbols+=[s]
+            symbols += [s]
 
     f.write("load data 'model'"+nl)
     f.write(str(len(symbols))+nl)
@@ -92,7 +92,7 @@ def structure_to_jmol(iof,struct,extbonds=True,repeat=None, copies=None):
         f.write(symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
         #print "XX",symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl)
     
-    f.write("end 'model' ");
+    f.write("end 'model' ")
     f.write(" "+copies+" "+supercell+" spacegroup '"+spacegroup+"' unitcell [ ")
     for i in range(3):
         f.write(str(basis[i][0])+" "+str(basis[i][1])+" "+str(basis[i][2])+" ")

@@ -13,23 +13,23 @@ cell = [[1.0, 0.0, 0.0],
 
 coordgroups = [[
                [0.5, 0.5, 0.5]
-            ],[
+               ], [
                [0.0, 0.0, 0.0]
-            ],[
-               [0.5, 0.0, 0.0],[0.0, 0.5, 0.0],[0.0, 0.0, 0.5]
-            ]]
+               ], [
+               [0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]
+               ]]
 
-assignments = ['Pb','Ti','O']
+assignments = ['Pb', 'Ti', 'O']
 
 print "==== Building simple supercell 1x2x3"
 
-struct = Structure.create(uc_cell=cell,uc_reduced_coordgroups=coordgroups,assignments=assignments,uc_volume=62.79)
-print "The formula is:",struct.formula+" ("+struct.anonymous_formula+")"," vol=",float(struct.uc_volume)
+struct = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
+print "The formula is:", struct.formula+" ("+struct.anonymous_formula+")", " vol=", float(struct.uc_volume)
 
-supercell = struct.build_supercell([[1, 0, 0],[0, 2, 0],[0, 0, 3]])
+supercell = struct.build_supercell([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
 print supercell.uc_reduced_coordgroups.to_floats()
 
-print "The formula is:",supercell.formula+" ("+supercell.anonymous_formula+")"," vol=",float(supercell.uc_volume)
+print "The formula is:", supercell.formula+" ("+supercell.anonymous_formula+")", " vol=", float(supercell.uc_volume)
 
 # Read a more complicated structure
 struct = httk.load("../../Tutorial/Step2/POSCAR2")
@@ -39,7 +39,7 @@ try:
 except Exception:
     print "(Skipping structure visualization due to missing external program (usually jmol).)"
 
-supercell = struct.build_supercell([[2, 0, 0],[0, 2, 0],[0, 0, 1]])
+supercell = struct.build_supercell([[2, 0, 0], [0, 2, 0], [0, 0, 1]])
 try:
     supercell.vis.show()
     supercell.vis.wait()
@@ -52,12 +52,12 @@ print "==== Building orthogonal supercells"
 print "== Exact supercell (works):"
 try:
     supercell = struct.build_orthogonal_supercell(tolerance=None)
-    print supercell.uc_nbr_atoms,[supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
+    print supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
 except Exception as e:
     print e
 
 supercell = struct.build_orthogonal_supercell(tolerance=20)
-print supercell.uc_nbr_atoms,[supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
+print supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
 
 try:
     supercell.vis.show()

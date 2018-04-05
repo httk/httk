@@ -20,12 +20,14 @@ from data import periodictable
 from httk.core import FracVector, FracScalar
 from siteassignment import SiteAssignment
 
+
 class Assignments(HttkObject):
+
     """
     Represents a possible vector of assignments
     """
    
-    @httk_typed_init({'siteassignments':[SiteAssignment],'extensions':[str]},index=['siteassignments','extensions'])
+    @httk_typed_init({'siteassignments': [SiteAssignment], 'extensions': [str]}, index=['siteassignments', 'extensions'])
     def __init__(self, siteassignments, extensions=[]):
         """
         Private constructor, as per httk coding guidelines. Use Assignments.create instead.
@@ -41,10 +43,10 @@ class Assignments(HttkObject):
        assignments: a list-style object with one entry per 'atom type'. Any sensible type accepted, most notably, 
                      integers (for atom number)
         """        
-        if isinstance(assignments,Assignments):
+        if isinstance(assignments, Assignments):
             return assignments
 
-        if isinstance(assignments,dict):
+        if isinstance(assignments, dict):
             if 'assignments' in assignments:
                 assignments = assignments['assignments']
             else:
@@ -52,17 +54,16 @@ class Assignments(HttkObject):
 
         newassignments = [SiteAssignment.use(x) for x in assignments]
 
-        extensions=set()
+        extensions = set()
         for a in newassignments:
             extensions = extensions | set(a.get_extensions())
-        extensions = list(extensions)
-        extensions.sort()
+        extensions = sorted(extensions)
         
         return cls(newassignments, extensions)
 
     @classmethod
-    def use(cls,old):
-        if isinstance(old,Assignments):
+    def use(cls, old):
+        if isinstance(old, Assignments):
             return old
         try:
             return old.to_Assignments()
@@ -96,12 +97,12 @@ class Assignments(HttkObject):
     def __len__(self):
         return len(self.siteassignments)
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self.siteassignments[key]
 
     @httk_typed_property(bool)
     def extended(self):
-        return len(self.extensions)>0
+        return len(self.extensions) > 0
 
 #     @classmethod
 #     def use(cls,old):

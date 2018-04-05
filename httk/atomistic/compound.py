@@ -20,14 +20,16 @@ from httk.core.reference import Reference
 from httk.core.computation import Computation
 from httk.core import FracScalar
 
+
 class Compound(HttkObject):
+
     """
     """   
 
-    @httk_typed_init({'element_wyckoff_sequence':str, 'formula':str, 'spacegroup_number':int, 'extended':bool, 
-                      'extensions':[str], 'pbc':(bool,1,3)}, 
-                     index=['element_wyckoff_sequence','anonymous_wyckoff_sequence','wyckoff_sequence','formula','anonymous_formula',
-                            'spacegroup_number','extended','formula_symbols','formula_counts','extensions'])
+    @httk_typed_init({'element_wyckoff_sequence': str, 'formula': str, 'spacegroup_number': int, 'extended': bool, 
+                      'extensions': [str], 'pbc': (bool, 1, 3)}, 
+                     index=['element_wyckoff_sequence', 'anonymous_wyckoff_sequence', 'wyckoff_sequence', 'formula', 'anonymous_formula',
+                            'spacegroup_number', 'extended', 'formula_symbols', 'formula_counts', 'extensions'])
     def __init__(self, element_wyckoff_sequence, formula, spacegroup_number, extended, extensions,
                  wyckoff_sequence, anonymous_wyckoff_sequence, anonymous_formula, 
                  formula_symbols, formula_counts, pbc):
@@ -52,25 +54,24 @@ class Compound(HttkObject):
         self._names = None
         self._codependent_callbacks = []
         self._codependent_data = []
-        self._codependent_info = [{'class':CompoundName,'column':'compound','add_method':'add_names'},
-                                  {'class':CompoundTag,'column':'compound','add_method':'add_tags'},
-                                  {'class':CompoundRef,'column':'compound','add_method':'add_refs'}]
-
+        self._codependent_info = [{'class': CompoundName, 'column': 'compound', 'add_method': 'add_names'},
+                                  {'class': CompoundTag, 'column': 'compound', 'add_method': 'add_tags'},
+                                  {'class': CompoundRef, 'column': 'compound', 'add_method': 'add_refs'}]
 
     @classmethod
-    def create(cls, base_on_structure=None, lift_tags = True, lift_refs = True):
+    def create(cls, base_on_structure=None, lift_tags=True, lift_refs=True):
         """
         struct: Structure object which forms the basis of this object
         """                  
-        if base_on_structure != None:
-            struct=base_on_structure
+        if base_on_structure is not None:
+            struct = base_on_structure
             new = cls(element_wyckoff_sequence=struct.element_wyckoff_sequence,
                       formula=struct.formula, spacegroup_number=struct.spacegroup_number,
-                       extended=struct.extended, extensions=struct.extensions,
-                       wyckoff_sequence=struct.wyckoff_sequence,anonymous_wyckoff_sequence=struct.anonymous_wyckoff_sequence,
-                       anonymous_formula=struct.anonymous_formula, formula_symbols=struct.formula_symbols,
-                       formula_counts=struct.formula_counts,
-                       pbc=struct.pbc)                   
+                      extended=struct.extended, extensions=struct.extensions,
+                      wyckoff_sequence=struct.wyckoff_sequence, anonymous_wyckoff_sequence=struct.anonymous_wyckoff_sequence,
+                      anonymous_formula=struct.anonymous_formula, formula_symbols=struct.formula_symbols,
+                      formula_counts=struct.formula_counts,
+                      pbc=struct.pbc)                   
             tags = base_on_structure.get_tags()
             names = []
             keeptags = {}
@@ -95,7 +96,7 @@ class Compound(HttkObject):
     def number_of_elements(self):
         seen = {}
         for symbol in self._formula_symbols:
-            seen[symbol]=True
+            seen[symbol] = True
         return len(seen)
 
     @httk_typed_property([FracScalar])     
@@ -121,79 +122,80 @@ class Compound(HttkObject):
         for x in self._codependent_callbacks:
             x(self)            
 
-    def add_tag(self,tag,val):
-        if self._tags == None:
+    def add_tag(self, tag, val):
+        if self._tags is None:
             self._fill_codependent_data()
-        new = CompoundTag(self,tag,val)
-        self._tags[tag]=new
+        new = CompoundTag(self, tag, val)
+        self._tags[tag] = new
         self._codependent_data += [new]
 
-    def add_tags(self,tags):
+    def add_tags(self, tags):
         for tag in tags:
-            if isinstance(tags,dict):
+            if isinstance(tags, dict):
                 tagdata = tags[tag]
             else:
                 tagdata = tag
-            if isinstance(tagdata,CompoundTag):
-                self.add_tag(tagdata.tag,tagdata.value)
-            if isinstance(tagdata,StructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
+            if isinstance(tagdata, CompoundTag):
+                self.add_tag(tagdata.tag, tagdata.value)
+            if isinstance(tagdata, StructureTag):
+                self.add_tag(tagdata.tag, tagdata.value)
             else:
-                self.add_tag(tag,tagdata)
+                self.add_tag(tag, tagdata)
 
     def get_tags(self):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
-    def get_tag(self,tag):
-        if self._tags == None:
+    def get_tag(self, tag):
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
 
     def get_refs(self):
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         return self._refs
 
-    def add_ref(self,ref):        
-        if self._refs == None:
+    def add_ref(self, ref):        
+        if self._refs is None:
             self._fill_codependent_data()
-        if isinstance(ref,CompoundRef):
+        if isinstance(ref, CompoundRef):
             refobj = ref.reference
-        if isinstance(ref,StructureRef):
+        if isinstance(ref, StructureRef):
             refobj = ref.reference
         else:
             refobj = Reference.use(ref)
-        new = CompoundRef(self,refobj)
+        new = CompoundRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
 
-    def add_refs(self,refs):
+    def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
 
     def get_names(self):
-        if self._names == None:
+        if self._names is None:
             self._fill_codependent_data()
         return self._names
 
-    def add_name(self,name):        
-        if self._names == None:
+    def add_name(self, name):        
+        if self._names is None:
             self._fill_codependent_data()
-        if isinstance(name,CompoundName):
+        if isinstance(name, CompoundName):
             name = name.name
-        new = CompoundName(self,name)
+        new = CompoundName(self, name)
         self._names += [new]
         self._codependent_data += [new]
 
-    def add_names(self,names):
+    def add_names(self, names):
         for name in names:
             self.add_name(name)
 
 
 class CompoundTag(HttkObject):                               
-    @httk_typed_init({'compound':Compound,'tag':str,'value':str},index=['compound', 'tag', 'value'],skip=['hexhash'])    
+
+    @httk_typed_init({'compound': Compound, 'tag': str, 'value': str}, index=['compound', 'tag', 'value'], skip=['hexhash'])    
     def __init__(self, compound, tag, value):
         self.tag = tag
         self.compound = compound
@@ -202,8 +204,10 @@ class CompoundTag(HttkObject):
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
 
+
 class CompoundRef(HttkObject):
-    @httk_typed_init({'compound':Compound,'reference':Reference},index=['compound', 'reference'],skip=['hexhash'])        
+
+    @httk_typed_init({'compound': Compound, 'reference': Reference}, index=['compound', 'reference'], skip=['hexhash'])        
     def __init__(self, compound, reference):
         self.compound = compound
         self.reference = reference
@@ -211,8 +215,10 @@ class CompoundRef(HttkObject):
     def __str__(self):
         return str(self.reference)
 
+
 class CompoundName(HttkObject):
-    @httk_typed_init({'compound':Compound,'name':str},index=['compound', 'name'],skip=['hexhash'])        
+
+    @httk_typed_init({'compound': Compound, 'name': str}, index=['compound', 'name'], skip=['hexhash'])        
     def __init__(self, compound, name):
         self.compound = compound
         self.name = name
@@ -220,25 +226,30 @@ class CompoundName(HttkObject):
     def __str__(self):
         return "[(CompoundName) "+str(self.name)+"]"
 
+
 class CompoundStructure(HttkObject):
-    @httk_typed_init({'compound':Compound, 'structure':Structure},index=['compound','structure'],skip=['hexhash'])
+
+    @httk_typed_init({'compound': Compound, 'structure': Structure}, index=['compound', 'structure'], skip=['hexhash'])
     def __init__(self, compound, structure):
         self.structure = structure
         self.compound = compound
 
     @classmethod
-    def create(cls,compound,structure):
-        return cls(compound,structure)
+    def create(cls, compound, structure):
+        return cls(compound, structure)
+
 
 class ComputationRelatedCompound(HttkObject):
-    @httk_typed_init({'computation':Computation, 'compound':Compound},index=['compound','computation'],skip=['hexhash'])
+
+    @httk_typed_init({'computation': Computation, 'compound': Compound}, index=['compound', 'computation'], skip=['hexhash'])
     def __init__(self, computation, compound):
         self.computation = computation
         self.compound = compound
 
     @classmethod
-    def create(cls,computation,compound):
-        return cls(computation,compound)
+    def create(cls, computation, compound):
+        return cls(computation, compound)
+
 
 def main():
     print "Ok"

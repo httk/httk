@@ -24,7 +24,8 @@ from httk.atomistic.data import periodictable, spacegroups
 from httk.core import *
 from httk.atomistic import *
 
-def save(obj,ioa,ext=None):
+
+def save(obj, ioa, ext=None):
     """
     A *very* generic file writer method.
     
@@ -35,8 +36,8 @@ def save(obj,ioa,ext=None):
         import httk.atomistic
         import httk.atomistic.io
 
-        if isinstance(obj,httk.atomistic.Structure):        
-            return obj.io.save(ioa,ext=ext)
+        if isinstance(obj, httk.atomistic.Structure):        
+            return obj.io.save(ioa, ext=ext)
     except Exception:
         raise
         pass        

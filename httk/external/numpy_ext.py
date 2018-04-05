@@ -25,15 +25,15 @@ from command import Command
 from subimport import submodule_import_external
 import httk
 try:   
-    path=config.get('paths', 'numpy')
+    path = config.get('paths', 'numpy')
 except Exception:
     path = None
 
-if path != None:    
-    numpy = submodule_import_external(os.path.join(path),'numpy')
+if path is not None:    
+    numpy = submodule_import_external(os.path.join(path), 'numpy')
 else:
     try:
-        external=config.get('general', 'allow_system_libs')
+        external = config.get('general', 'allow_system_libs')
     except Exception:
         external = 'yes'
     if external == 'yes':

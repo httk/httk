@@ -8,4 +8,4 @@ import httk.iface.vasp_if
 poscarspath = None
 
 struct = Structure.io.load("example.cif")
-httk.iface.vasp_if.prepare_single_run("Run", struct, template='t:vasp/single/static',poscarspath=poscarspath, overwrite=True)            
+httk.iface.vasp_if.prepare_single_run("Run", struct, template='t:vasp/single/static', poscarspath=poscarspath, overwrite=True)            

@@ -19,14 +19,15 @@ import os
 from httk.atomistic import Structure
 from httk.core import *
 
+
 def load_struct(ioa, ext=None, filename=None):
     """
     Load structure data from a file into a Structure
     """
     ioa = IoAdapterFilename.use(ioa)   
-    if ext == None:
+    if ext is None:
         try:
-            if filename == None:
+            if filename is None:
                 filename = ioa.filename
         except Exception:
             raise Exception("httk.io.load: original filename not known. Cannot open a generic file.")
@@ -55,9 +56,9 @@ def load_struct(ioa, ext=None, filename=None):
         ioa = IoAdapterString("\n".join(filedata))
         for line in filedata:
             if line.startswith("# This is a cif file prepared for use with the openmaterialsdb.se"):
-                return cif_to_struct(ioa,backends=['cif_reader_httk_preprocessed'])
+                return cif_to_struct(ioa, backends=['cif_reader_httk_preprocessed'])
         else:
-            return cif_to_struct(ioa,backends=['cif2cell_reduce'])
+            return cif_to_struct(ioa, backends=['cif2cell_reduce'])
     else:
         raise Exception("httk.io.load: I do not know what to do with the file:"+filename)
 
@@ -67,7 +68,7 @@ def save_struct(struct, ioa, ext=None):
     Save structure data from a file into a Structure
     """
     ioa = IoAdapterFilename.use(ioa)   
-    if ext == None:
+    if ext is None:
         try:
             filename = ioa.filename
         except Exception:

@@ -30,7 +30,9 @@ from structureutils import *
 from spacegroup import Spacegroup
 from scalelessstructure import ScalelessStructure
 
+
 class Structure(ScalelessStructure):
+
     """
     A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
     The structure object is meant to be immutable and assumes that no internal variables are changed after its creation. 
@@ -104,14 +106,14 @@ class Structure(ScalelessStructure):
     """
     
     #TODO: When httk internally handles symmetry replication, consider removing UnitcellSites from here    
-    @httk_typed_init({'assignments':Assignments, 'rc_sites':RepresentativeSites, 
-                 'rc_cell':Cell},
-                 index=['assignments','rc_sites','rc_cell'])    
-    def __init__(self, assignments, rc_sites = None, uc_sites = None, rc_cell=None, uc_cell=None):
+    @httk_typed_init({'assignments': Assignments, 'rc_sites': RepresentativeSites, 
+                      'rc_cell': Cell},
+                     index=['assignments', 'rc_sites', 'rc_cell'])    
+    def __init__(self, assignments, rc_sites=None, uc_sites=None, rc_cell=None, uc_cell=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
         """
-        super(Structure,self).__init__(assignments = assignments, rc_sites = rc_sites, uc_sites = uc_sites)
+        super(Structure, self).__init__(assignments=assignments, rc_sites=rc_sites, uc_sites=uc_sites)
 
         self._rc_cell = rc_cell
         self._uc_cell = uc_cell
@@ -121,40 +123,40 @@ class Structure(ScalelessStructure):
 
         self._codependent_callbacks = []
         self._codependent_data = []
-        self._codependent_info = [{'class':StructureTag,'column':'structure','add_method':'add_tags'},
-                                  {'class':StructureRef,'column':'structure','add_method':'add_refs'}]
+        self._codependent_info = [{'class': StructureTag, 'column': 'structure', 'add_method': 'add_tags'},
+                                  {'class': StructureRef, 'column': 'structure', 'add_method': 'add_refs'}]
         
     @classmethod
     def create(cls,
-               structure = None,
+               structure=None,
 
-               uc_cell=None, uc_basis=None, uc_lengths =None, 
-               uc_angles = None, uc_niggli_matrix=None, uc_metric=None, 
+               uc_cell=None, uc_basis=None, uc_lengths=None, 
+               uc_angles=None, uc_niggli_matrix=None, uc_metric=None, 
                uc_a=None, uc_b=None, uc_c=None, 
                uc_alpha=None, uc_beta=None, uc_gamma=None,
-               uc_sites = None, 
-               uc_reduced_coordgroups = None, uc_cartesian_coordgroups = None,  
-               uc_reduced_coords = None, uc_cartesian_coords = None,  
-               uc_reduced_occupationscoords = None, uc_cartesian_occupationscoords = None,  
+               uc_sites=None, 
+               uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None,  
+               uc_reduced_coords=None, uc_cartesian_coords=None,  
+               uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None,  
                uc_occupancies=None, uc_counts=None,
                uc_scale=None, uc_scaling=None, uc_volume=None, 
 
-               rc_cell=None, rc_basis=None, rc_lengths =None, 
-               rc_angles = None, rc_niggli_matrix=None, rc_metric=None, 
+               rc_cell=None, rc_basis=None, rc_lengths=None, 
+               rc_angles=None, rc_niggli_matrix=None, rc_metric=None, 
                rc_a=None, rc_b=None, rc_c=None, 
                rc_alpha=None, rc_beta=None, rc_gamma=None,
-               rc_sites = None, 
-               rc_reduced_coordgroups = None, rc_cartesian_coordgroups = None,
-               rc_reduced_coords = None, rc_cartesian_coords = None,  
-               rc_reduced_occupationscoords = None, rc_cartesian_occupationscoords = None,  
+               rc_sites=None, 
+               rc_reduced_coordgroups=None, rc_cartesian_coordgroups=None,
+               rc_reduced_coords=None, rc_cartesian_coords=None,  
+               rc_reduced_occupationscoords=None, rc_cartesian_occupationscoords=None,  
                rc_occupancies=None, rc_counts=None, 
-               wyckoff_symbols = None,
-               spacegroup=None, hall_symbol = None, spacegroupnumber=None, setting=None,
+               wyckoff_symbols=None,
+               spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
                rc_scale=None, rc_scaling=None, rc_volume=None, 
                
                assignments=None, 
                
-               periodicity = None, nonperiodic_vecs = None, 
+               periodicity=None, nonperiodic_vecs=None, 
                refs=None, tags=None):
         """
         A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
@@ -203,22 +205,22 @@ class Structure(ScalelessStructure):
         See help(Structure) for more information on the data format of all these data representations.
         """                  
         args = dict(locals())  
-        del args['cls'],args['rc_scale'],args['rc_scaling'],args['rc_volume']
-        del args['uc_scale'],args['uc_scaling'],args['uc_volume']
+        del args['cls'], args['rc_scale'], args['rc_scaling'], args['rc_volume']
+        del args['uc_scale'], args['uc_scaling'], args['uc_volume']
         del args['rc_cell'], args['uc_cell']
 
         del args['uc_cartesian_coordgroups'], args['uc_cartesian_coords'], args['uc_cartesian_occupationscoords']  
         del args['rc_cartesian_coordgroups'], args['rc_cartesian_coords'], args['rc_cartesian_occupationscoords']  
         
-        if isinstance(structure,Structure):
+        if isinstance(structure, Structure):
             return structure
 
-        if isinstance(structure,ScalelessStructure):
+        if isinstance(structure, ScalelessStructure):
             slstruct = structure
         else:
             slstruct = None
 
-        if isinstance(uc_cell,Cell):
+        if isinstance(uc_cell, Cell):
             uc_cell = uc_cell
         else:
             try:                        
@@ -226,12 +228,12 @@ class Structure(ScalelessStructure):
                                       niggli_matrix=uc_niggli_matrix, 
                                       a=uc_a, b=uc_b, c=uc_c, 
                                       alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
-                                      lengths = uc_lengths, angles=uc_angles, 
+                                      lengths=uc_lengths, angles=uc_angles, 
                                       scale=uc_scale, scaling=uc_scaling, volume=uc_volume)
             except Exception:
                 uc_cell = None
 
-        if isinstance(rc_cell,Cell):
+        if isinstance(rc_cell, Cell):
             rc_cell = rc_cell
         else:                        
             try:                        
@@ -239,44 +241,44 @@ class Structure(ScalelessStructure):
                                       niggli_matrix=rc_niggli_matrix, 
                                       a=rc_a, b=rc_b, c=rc_c, 
                                       alpha=rc_alpha, beta=rc_beta, gamma=rc_gamma,
-                                      lengths = rc_lengths, angles=rc_angles, 
+                                      lengths=rc_lengths, angles=rc_angles, 
                                       scale=rc_scale, scaling=rc_scaling, volume=rc_volume)
             except Exception:
                 rc_cell = None
 
         if uc_sites is None and uc_reduced_coordgroups is None and \
-               uc_reduced_coords is None and uc_reduced_occupationscoords is None:
+                uc_reduced_coords is None and uc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
             if uc_cartesian_coordgroups is None and uc_cartesian_coords is None and \
                     uc_occupancies is not None and uc_cartesian_occupationscoords is not None:
-                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
+                assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords, uc_occupancies)
              
             if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
                 uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 
             if uc_cell is not None: 
-                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_cell)
+                uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups, uc_cell)
                 args['uc_reduced_coordgroups'] = uc_reduced_coordgroups
 
         if rc_sites is None and rc_reduced_coordgroups is None and \
-               rc_reduced_coords is None and rc_reduced_occupationscoords is None:
+                rc_reduced_coords is None and rc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
             if rc_cartesian_coordgroups is None and rc_cartesian_coords is None and \
                     rc_occupancies is not None and rc_cartesian_occupationscoords is not None:
-                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)
+                assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords, rc_occupancies)
              
             if rc_cartesian_coords is not None and rc_cartesian_coordgroups is None:
                 rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)
 
             if rc_cell is not None:  
-                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_cell)
+                rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups, rc_cell)
                 args['rc_reduced_coordgroups'] = rc_reduced_coordgroups
 
         if slstruct is None:
-            slstruct = super(Structure,cls).create(**args)
+            slstruct = super(Structure, cls).create(**args)
 
-        rc_sites=None
-        uc_sites=None
+        rc_sites = None
+        uc_sites = None
         if slstruct.has_rc_repr:
             rc_sites = slstruct.rc_sites
         if slstruct.has_uc_repr:
@@ -284,7 +286,7 @@ class Structure(ScalelessStructure):
         
         if uc_cell is None and rc_cell is None:
             rc_cells = slstruct.get_rc_cells()
-            if len(rc_cells>0):
+            if len(rc_cells > 0):
                 rc_cell = rc_cells[0]
                             
         new = cls(slstruct.assignments, rc_sites, uc_sites, uc_cell=uc_cell, rc_cell=rc_cell)
@@ -346,11 +348,11 @@ class Structure(ScalelessStructure):
 
     @property
     def uc_lengths_and_angles(self):
-        return [self.uc_a,self.uc_b,self.uc_c,self.uc_alpha,self.uc_beta,self.uc_gamma]
+        return [self.uc_a, self.uc_b, self.uc_c, self.uc_alpha, self.uc_beta, self.uc_gamma]
 
     @property
     def rc_lengths_and_angles(self):
-        return [self.rc_a,self.rc_b,self.rc_c,self.rc_alpha,self.rc_beta,self.rc_gamma]
+        return [self.rc_a, self.rc_b, self.rc_c, self.rc_alpha, self.rc_beta, self.rc_gamma]
 
     @httk_typed_property(float)
     def uc_a(self):
@@ -424,16 +426,16 @@ class Structure(ScalelessStructure):
     def rc_cell_orientation(self):
         return self.rc_cell.orientation
 
-    @httk_typed_property((bool,1,3))
+    @httk_typed_property((bool, 1, 3))
     def pbc(self):
         if self.has_rc_repr:
             return self.rc_sites.pbc
         else:
             return self.uc_sites.pbc
 
-    def build_supercell(self,transformation,max_search_cells=20, max_atoms=1000):
+    def build_supercell(self, transformation, max_search_cells=20, max_atoms=1000):
 
-        transformation=FracVector.use(transformation).simplify()
+        transformation = FracVector.use(transformation).simplify()
         if transformation.denom != 1:
             raise Exception("Structure.build_supercell requires integer transformation matrix")
         
@@ -455,7 +457,7 @@ class Structure(ScalelessStructure):
         extendedcoordgroups = [[] for x in range(len(coordgroups))]
 
         if max_search_cells is not None:
-            max_search = [max_search_cells,max_search_cells,max_search_cells]
+            max_search = [max_search_cells, max_search_cells, max_search_cells]
         else:
             max_search = None
 
@@ -466,11 +468,11 @@ class Structure(ScalelessStructure):
                 newcoordgroup = coordgroup+FracVector([offset]*len(coordgroup))
                 new_reduced = newcoordgroup*conversion_matrix
                 #print "NEW:",FracVector.use(new_reduced).to_floats(),
-                new_reduced = [x for x in new_reduced if x[0]>=0 and x[1]>=0 and x[2]>=0 and x[0]<1 and x[1]<1 and x[2]<1]
+                new_reduced = [x for x in new_reduced if x[0] >= 0 and x[1] >= 0 and x[2] >= 0 and x[0] < 1 and x[1] < 1 and x[2] < 1]
                 extendedcoordgroups[idx] += new_reduced
                 c = len(new_reduced)
                 seek_counts[idx] -= c
-                total_seek_counts-= c
+                total_seek_counts -= c
                 #print "ADD",str(c)
                 if seek_counts[idx] < 0:
                     #print "X",offset, seek_counts
@@ -482,13 +484,12 @@ class Structure(ScalelessStructure):
 
         return self.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=self.assignments)
 
-
     # TODO: The building of supercells should be moved elsewhere and not be part of this class
-    def build_supercell_old(self,transformation,max_search_cells=1000):
+    def build_supercell_old(self, transformation, max_search_cells=1000):
         ### New basis matrix, note: works in units of old_cell.scale to avoid floating point errors
         #print "BUILD SUPERCELL",self.uc_sites.cell.basis.to_floats(), repetitions
 
-        transformation=FracVector.use(transformation).simplify()
+        transformation = FracVector.use(transformation).simplify()
         if transformation.denom != 1:
             raise Exception("Structure.build_supercell requires integer transformation matrix")
         
@@ -502,11 +503,11 @@ class Structure(ScalelessStructure):
         # Generate the reduced (old cell) coordinates of each corner in the new cell
         # This determines how far we must loop the old cell to cover all these corners  
         nb = new_cell.basis
-        corners = FracVector.create([(0,0,0),nb[0],nb[1],nb[2],nb[0]+nb[1],nb[0]+nb[2],nb[1]+nb[2],nb[0]+nb[1]+nb[2]])
+        corners = FracVector.create([(0, 0, 0), nb[0], nb[1], nb[2], nb[0]+nb[1], nb[0]+nb[2], nb[1]+nb[2], nb[0]+nb[1]+nb[2]])
         reduced_corners = corners*(old_cell.basis.inv().T())
         
-        maxvec = [int(reduced_corners[:,0].max())+2,int(reduced_corners[:,1].max())+2,int(reduced_corners[:,2].max())+2]
-        minvec = [int(reduced_corners[:,0].min())-2,int(reduced_corners[:,1].min())-2,int(reduced_corners[:,2].min())-2]
+        maxvec = [int(reduced_corners[:, 0].max())+2, int(reduced_corners[:, 1].max())+2, int(reduced_corners[:, 2].max())+2]
+        minvec = [int(reduced_corners[:, 0].min())-2, int(reduced_corners[:, 1].min())-2, int(reduced_corners[:, 2].min())-2]
     
         if max_search_cells is not None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
             raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
@@ -516,116 +517,116 @@ class Structure(ScalelessStructure):
         extendedcoordgroups = [[] for x in range(len(coordgroups))]
         for idx in range(len(coordgroups)):
             coordgroup = coordgroups[idx]
-            for i in range(minvec[0],maxvec[0]):
-                for j in range(minvec[1],maxvec[1]):
-                    for k in range(minvec[2],maxvec[2]):
-                        newcoordgroup = coordgroup+FracVector(((i,j,k),)*len(coordgroup))
+            for i in range(minvec[0], maxvec[0]):
+                for j in range(minvec[1], maxvec[1]):
+                    for k in range(minvec[2], maxvec[2]):
+                        newcoordgroup = coordgroup+FracVector(((i, j, k),)*len(coordgroup))
                         new_reduced = newcoordgroup*conversion_matrix
-                        new_reduced = [x for x in new_reduced if x[0]>=0 and x[1]>=0 and x[2]>=0 and x[0]<1 and x[1]<1 and x[2]<1]
+                        new_reduced = [x for x in new_reduced if x[0] >= 0 and x[1] >= 0 and x[2] >= 0 and x[0] < 1 and x[1] < 1 and x[2] < 1]
                         extendedcoordgroups[idx] += new_reduced
 
         # Safety check for avoiding bugs that change the ratio of atoms
         new_counts = [len(x) for x in extendedcoordgroups]
         for i in range(len(self.uc_counts)):
             if volume_ratio*self.uc_counts[i] != new_counts[i]:
-                print "Volume ratio:",float(volume_ratio), volume_ratio
-                print "Extended coord groups:",FracVector.create(extendedcoordgroups).to_floats()
-                print "Old counts:",self.uc_counts,self.assignments.symbols
-                print "New counts:",new_counts,self.assignments.symbols
+                print "Volume ratio:", float(volume_ratio), volume_ratio
+                print "Extended coord groups:", FracVector.create(extendedcoordgroups).to_floats()
+                print "Old counts:", self.uc_counts, self.assignments.symbols
+                print "New counts:", new_counts, self.assignments.symbols
                 #raise Exception("Structure.build_supercell safety check failure. Volume changed by factor "+str(float(volume_ratio))+", but atoms in group "+str(i)+" changed by "+str(float(new_counts[i])/float(self.uc_counts[i])))
         
         return self.create(uc_reduced_coordgroups=extendedcoordgroups, basis=new_cell.basis, assignments=self.assignments, cell=self.uc_cell)
 
-    def build_cubic_supercell(self,tolerance=None,max_search_cells=1000):
+    def build_cubic_supercell(self, tolerance=None, max_search_cells=1000):
         if tolerance is None:
             prim_cell = self.uc_cell.basis            
             inv = prim_cell.inv().simplify()
             transformation = (inv*inv.denom).simplify()
         else:            
-            maxtol=max(int(FracVector.use(tolerance)),2)
+            maxtol = max(int(FracVector.use(tolerance)), 2)
             bestlen = None
             bestortho = None
             besttrans = None
             #TODO: This loop may be possible to do with fewer iterations, since I suppose the only thing that
             #matter is the prime factors?
-            for tol in range(1,maxtol):
-                prim_cell =  self.uc_cell.basis        
+            for tol in range(1, maxtol):
+                prim_cell = self.uc_cell.basis        
                 approxinv = prim_cell.inv().set_denominator(tol).simplify()
-                if approxinv[0]==[0,0,0] or approxinv[1]==[0,0,0] or approxinv[2]==[0,0,0]:
+                if approxinv[0] == [0, 0, 0] or approxinv[1] == [0, 0, 0] or approxinv[2] == [0, 0, 0]:
                     continue
                 transformation = (approxinv*approxinv.denom).simplify()
                 cell = Cell.create(transformation*prim_cell)
                 ortho = (abs(cell.niggli_matrix[1][0])+abs(cell.niggli_matrix[1][1])+abs(cell.niggli_matrix[1][2])).simplify()
                 equallen = abs(cell.niggli_matrix[0][0]-cell.niggli_matrix[0][1]) + abs(cell.niggli_matrix[0][0]-cell.niggli_matrix[0][2]) 
-                if ortho==0 and equallen==0:
+                if ortho == 0 and equallen == 0:
                     # Already perfectly cubic, use this
-                    besttrans=transformation
+                    besttrans = transformation
                     break
                 if bestlen is None or not (bestortho < ortho and bestlen < equallen):
-                    bestlen=equallen
-                    bestortho=ortho
-                    besttrans=transformation
+                    bestlen = equallen
+                    bestortho = ortho
+                    besttrans = transformation
 
             transformation = besttrans
        
         #print "Running transformation with:",transformation     
-        return self.build_supercell(transformation,max_search_cells=max_search_cells)
+        return self.build_supercell(transformation, max_search_cells=max_search_cells)
 
-    def build_orthogonal_supercell(self,tolerance=None,max_search_cells=1000,ortho=[True,True,True]):
-        transformation = self.orthogonal_supercell_transformation(tolerance,max_search_cells,ortho)
+    def build_orthogonal_supercell(self, tolerance=None, max_search_cells=1000, ortho=[True, True, True]):
+        transformation = self.orthogonal_supercell_transformation(tolerance, max_search_cells, ortho)
         #print "Running transformation with:",transformation     
-        return self.build_supercell(transformation,max_search_cells=max_search_cells)
+        return self.build_supercell(transformation, max_search_cells=max_search_cells)
 
-    def orthogonal_supercell_transformation(self,tolerance=None,max_search_cells=1000,ortho=[True,True,True]):
+    def orthogonal_supercell_transformation(self, tolerance=None, max_search_cells=1000, ortho=[True, True, True]):
         # TODO: How to solve for exact orthogonal cell?
         if tolerance is None:
             prim_cell = self.uc_cell.basis         
-            print "Starting cell:",prim_cell
+            print "Starting cell:", prim_cell
             inv = prim_cell.inv().simplify()
             if ortho[0]:
                 row0 = (inv[0]/max(inv[0])).simplify()
             else:
-                row0 = [1,0,0]
+                row0 = [1, 0, 0]
             if ortho[1]:
                 row1 = (inv[1]/max(inv[1])).simplify()
             else:
-                row1 = [0,1,0]
+                row1 = [0, 1, 0]
             if ortho[2]:
                 row2 = (inv[2]/max(inv[2])).simplify()
             else:
-                row2 = [0,0,1]
-            transformation = FracVector.create([row0*row0.denom,row1*row1.denom,row2*row2.denom])
+                row2 = [0, 0, 1]
+            transformation = FracVector.create([row0*row0.denom, row1*row1.denom, row2*row2.denom])
         else:            
-            maxtol=max(int(FracVector.use(tolerance)),2)
+            maxtol = max(int(FracVector.use(tolerance)), 2)
             bestval = None
             besttrans = None
-            for tol in range(1,maxtol):
+            for tol in range(1, maxtol):
                 prim_cell = self.uc_cell.basis   
                 inv = prim_cell.inv().set_denominator(tol).simplify()
-                if inv[0]==[0,0,0] or inv[1]==[0,0,0] or inv[2]==[0,0,0]:
+                if inv[0] == [0, 0, 0] or inv[1] == [0, 0, 0] or inv[2] == [0, 0, 0]:
                     continue
                 absinv = abs(inv)
                 if ortho[0]:
                     row0 = (inv[0]/max(absinv[0])).simplify()
                 else:
-                    row0 = [1,0,0]
+                    row0 = [1, 0, 0]
                 if ortho[1]:
                     row1 = (inv[1]/max(absinv[1])).simplify()
                 else:
-                    row1 = [0,1,0]
+                    row1 = [0, 1, 0]
                 if ortho[2]:
                     row2 = (inv[2]/max(absinv[2])).simplify()
                 else:
-                    row2 = [0,0,1]
-                transformation = FracVector.create([row0*row0.denom,row1*row1.denom,row2*row2.denom])
+                    row2 = [0, 0, 1]
+                transformation = FracVector.create([row0*row0.denom, row1*row1.denom, row2*row2.denom])
                 cell = Cell.create(transformation*prim_cell)
                 maxval = (abs(cell.niggli_matrix[1][0])+abs(cell.niggli_matrix[1][1])+abs(cell.niggli_matrix[1][2])).simplify()
                 if maxval == 0:
-                    besttrans=transformation
+                    besttrans = transformation
                     break
                 if bestval is None or maxval < bestval:
-                    bestval=maxval
-                    besttrans=transformation
+                    bestval = maxval
+                    besttrans = transformation
             transformation = besttrans
        
         return transformation
@@ -647,30 +648,30 @@ class Structure(ScalelessStructure):
         for x in self._codependent_callbacks:
             x(self)            
 
-    def add_tag(self,tag,val):
+    def add_tag(self, tag, val):
         if self._tags is None:
             self._fill_codependent_data()
-        new = StructureTag(self,tag,val)
-        self._tags[tag]=new
+        new = StructureTag(self, tag, val)
+        self._tags[tag] = new
         self._codependent_data += [new]
 
-    def add_tags(self,tags):
+    def add_tags(self, tags):
         for tag in tags:
-            if isinstance(tags,dict):
+            if isinstance(tags, dict):
                 tagdata = tags[tag]
             else:
                 tagdata = tag
-            if isinstance(tagdata,StructureTag):
-                self.add_tag(tagdata.tag,tagdata.value)
+            if isinstance(tagdata, StructureTag):
+                self.add_tag(tagdata.tag, tagdata.value)
             else:
-                self.add_tag(tag,tagdata)
+                self.add_tag(tag, tagdata)
 
     def get_tags(self):
         if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
-    def get_tag(self,tag):
+    def get_tag(self, tag):
         if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
@@ -680,21 +681,20 @@ class Structure(ScalelessStructure):
             self._fill_codependent_data()
         return self._refs
 
-    def add_ref(self,ref):        
+    def add_ref(self, ref):        
         if self._refs is None:
             self._fill_codependent_data()
-        if isinstance(ref,StructureRef):
+        if isinstance(ref, StructureRef):
             refobj = ref.reference
         else:
             refobj = Reference.use(ref)
-        new = StructureRef(self,refobj)
+        new = StructureRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
 
-    def add_refs(self,refs):
+    def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
-
 
 
 def main():
@@ -756,10 +756,12 @@ def main():
     #easya = a.to_EasyStructure()
     #print(easya)
 
+
 class StructureTag(HttkObject):                               
-    @httk_typed_init({'structure':Structure,'tag':str,'value':str},index=['structure', 'tag', 'value'],skip=['hexhash'])    
+
+    @httk_typed_init({'structure': Structure, 'tag': str, 'value': str}, index=['structure', 'tag', 'value'], skip=['hexhash'])    
     def __init__(self, structure, tag, value):
-        super(StructureTag,self).__init__()
+        super(StructureTag, self).__init__()
         self.tag = tag
         self.structure = structure
         self.value = value
@@ -767,10 +769,12 @@ class StructureTag(HttkObject):
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
 
+
 class StructureRef(HttkObject):
-    @httk_typed_init({'structure':Structure,'reference':Reference},index=['structure', 'reference'],skip=['hexhash'])        
+
+    @httk_typed_init({'structure': Structure, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
     def __init__(self, structure, reference):
-        super(StructureRef,self).__init__()
+        super(StructureRef, self).__init__()
         self.structure = structure
         self.reference = reference
 

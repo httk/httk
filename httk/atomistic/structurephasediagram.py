@@ -20,8 +20,10 @@ from httk.core import FracScalar, httk_typed_init
 from httk.core.httkobject import HttkObject
 from httk.analysis.matsci.phasediagram import PhaseDiagram 
 
+
 class StructurePhaseDiagramCompetingIndicies(HttkObject):
-    @httk_typed_init({'indices':[int]})
+
+    @httk_typed_init({'indices': [int]})
     def __init__(self, indices):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -34,21 +36,22 @@ class StructurePhaseDiagramCompetingIndicies(HttkObject):
 
 
 class StructurePhaseDiagram(HttkObject):
+
     """
     Represents a phase diagram of structures
     """
  
-    @httk_typed_init({'structures':[Structure],'energies':[FracScalar],
-                      'hull_indices':[int],
-                      'competing_indices':[StructurePhaseDiagramCompetingIndicies],
-                      'hull_competing_indices':[StructurePhaseDiagramCompetingIndicies],
-                      'hull_distances':[FracScalar],
-                      'coord_system':[str],
-                      'phase_lines':[int, int]},
+    @httk_typed_init({'structures': [Structure], 'energies': [FracScalar],
+                      'hull_indices': [int],
+                      'competing_indices': [StructurePhaseDiagramCompetingIndicies],
+                      'hull_competing_indices': [StructurePhaseDiagramCompetingIndicies],
+                      'hull_distances': [FracScalar],
+                      'coord_system': [str],
+                      'phase_lines': [int, int]},
                      index=['structures'])   
-    def __init__(self, structures, energies, hull_indices,competing_indices,
-                      hull_competing_indices,
-                      hull_distances, coord_system, phase_lines):
+    def __init__(self, structures, energies, hull_indices, competing_indices,
+                 hull_competing_indices,
+                 hull_distances, coord_system, phase_lines):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
         """    
@@ -67,27 +70,28 @@ class StructurePhaseDiagram(HttkObject):
     def create(cls, structures, energies):
         """        
         """      
-        pd = setup_phasediagram(structures,energies)
+        pd = setup_phasediagram(structures, energies)
 
         competing_indices = [StructurePhaseDiagramCompetingIndicies.create(x) for x in pd.competing_indices]
         hull_competing_indices = [StructurePhaseDiagramCompetingIndicies.create(x) for x in pd.hull_competing_indices]
         
-        return cls(structures, energies, pd.hull_indices,competing_indices,
-                      hull_competing_indices,
-                      pd.hull_distances, pd.coord_system, pd.phase_lines)
+        return cls(structures, energies, pd.hull_indices, competing_indices,
+                   hull_competing_indices,
+                   pd.hull_distances, pd.coord_system, pd.phase_lines)
 
     def get_phasediagram(self):        
         competing_indices = [x.indices for x in self.competing_indices]
         hull_competing_indices = [x.indices for x in self.hull_competing_indices]
 
         pd = setup_phasediagram(self.structures, self.energies)
-        pd.set_hull_data(self.hull_indices,competing_indices,
-                      hull_competing_indices,
-                      self.hull_distances,self.coord_system, self.phase_lines)
+        pd.set_hull_data(self.hull_indices, competing_indices,
+                         hull_competing_indices,
+                         self.hull_distances, self.coord_system, self.phase_lines)
 
         return pd
 
 from httk.core import FracVector
+
 
 def setup_phasediagram(structures, energies):
     pd = PhaseDiagram() 

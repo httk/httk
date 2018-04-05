@@ -20,26 +20,28 @@ from httk.core.fracvector import FracVector
 from httk.core.mutablefracvector import MutableFracVector
 from httk.core.basic import is_sequence
 
+
 def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]
     newcoordgroups = []
     newindividual_data = []
     for group in range(len(counts)): 
-        order = sorted(range(counts[group]), key = lambda x: (coordgroups[group][x][0],coordgroups[group][x][1],coordgroups[group][x][2]))
+        order = sorted(range(counts[group]), key=lambda x: (coordgroups[group][x][0], coordgroups[group][x][1], coordgroups[group][x][2]))
         newcoordgroups.append(coordgroups[group][order])
-        if individual_data != None:
-            newindividual_data.append([ individual_data[group][i] for i in order])
+        if individual_data is not None:
+            newindividual_data.append([individual_data[group][i] for i in order])
 
-    if individual_data == None:
+    if individual_data is None:
         return coordgroups.stack(newcoordgroups), newindividual_data
     else:
         return coordgroups.stack(newcoordgroups), None
+
 
 def coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies):
     if len(occupancies) != len(coords):
         raise Exception("Occupations and coords needs to be of the same length.")
     if len(occupancies) == 0:
-        return [],FracVector((),1)
+        return [], FracVector((), 1)
 
     coordgroups = []
     group_occupancies = []
@@ -53,6 +55,7 @@ def coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies):
         coordgroups[idx].append(coords[i])
     return coordgroups, group_occupancies
         
+
 def coords_to_coordgroups(coords, counts):
     coordgroups = []
     idx = 0
@@ -62,14 +65,16 @@ def coords_to_coordgroups(coords, counts):
     
     return coordgroups
 
+
 def coordgroups_to_coords(coordgroups):
     coords = []
-    counts = [ len(x) for x in coordgroups ]
+    counts = [len(x) for x in coordgroups]
     for group in coordgroups:
         for i in range(len(group)):
             coords.append(group[i])
     coords = FracVector.stack_vecs(coords)
     return coords, counts
+
 
 def coordgroups_cartesian_to_reduced(coordgroups, basis):
     basis = FracVector.use(basis)
@@ -83,6 +88,7 @@ def coordgroups_cartesian_to_reduced(coordgroups, basis):
 
     return newcoordgroups
 
+
 def coords_and_counts_to_coordgroups(coords, counts):
     coordgroups = []
     idx = 0
@@ -92,13 +98,14 @@ def coords_and_counts_to_coordgroups(coords, counts):
     
     return coordgroups
 
-def coordswap(fromidx,toidx,cell,coordgroups):
+
+def coordswap(fromidx, toidx, cell, coordgroups):
     new_coordgroups = []
     for group in coordgroups:
         coords = MutableFracVector.from_FracVector(group)
-        rows = coords[:,toidx]
-        coords[:,toidx] = coords[:,fromidx]
-        coords[:,fromidx] = rows        
+        rows = coords[:, toidx]
+        coords[:, toidx] = coords[:, fromidx]
+        coords[:, fromidx] = rows        
         new_coordgroups.append(coords.to_FracVector())
     coordgroups = FracVector.create(new_coordgroups)
     
@@ -110,11 +117,12 @@ def coordswap(fromidx,toidx,cell,coordgroups):
 
     return (cell, coordgroups)
 
+
 def clean_coordgroups_and_assignments(coordgroups, assignments):
     if len(assignments) != len(coordgroups):
         raise Exception("Occupations and coords needs to be of the same length.")
     if len(assignments) == 0:
-        return [],FracVector((),1)
+        return [], FracVector((), 1)
 
     new_coordgroups = []
     new_assignments = []
@@ -122,7 +130,7 @@ def clean_coordgroups_and_assignments(coordgroups, assignments):
         for j in range(len(new_assignments)):
             if assignments[i] == new_assignments[j]:
                 idx = j 
-                new_coordgroups[idx] = FracVector.chain_vecs([new_coordgroups[idx],coordgroups[i]])
+                new_coordgroups[idx] = FracVector.chain_vecs([new_coordgroups[idx], coordgroups[i]])
                 break
         else:
             new_coordgroups.append(coordgroups[i])
@@ -131,11 +139,13 @@ def clean_coordgroups_and_assignments(coordgroups, assignments):
     return new_coordgroups, new_assignments
 
 # TODO: Cleanup formula generation
+
+
 def normalized_formula_parts(assignments, ratios, counts):    
         
     formula = {}
     alloccs = {}
-    maxc=0
+    maxc = 0
     for i in range(len(counts)):
         assignment = assignments[i]
         ratio = ratios[i]
@@ -162,22 +172,24 @@ def normalized_formula_parts(assignments, ratios, counts):
 
     return formula
 
+
 def abstract_symbol(count):
-    if count<27:
+    if count < 27:
         return chr(64+count)
     my = (count-1) % 26
     rec = (count-1) // 26
     return abstract_symbol(rec)+chr(97+my)
 
+
 def anonymous_formula(filled_counts):
     
-    formula = normalized_formula_parts(range(len(filled_counts)),[1]*len(filled_counts), filled_counts)
+    formula = normalized_formula_parts(range(len(filled_counts)), [1]*len(filled_counts), filled_counts)
 
-    idx=0
+    idx = 0
     abstract_formula = ""
     
-    for val in sorted(formula.items(),key=lambda x:x[1]):        
-        idx+=1
+    for val in sorted(formula.items(), key=lambda x: x[1]):        
+        idx += 1
         c = abstract_symbol(idx)
 
         xval = val[1].set_denominator(100).simplify()
@@ -187,7 +199,7 @@ def anonymous_formula(filled_counts):
             else:
                 abstract_formula += "%s%d" % (c, xval.floor())
         else:
-            abstract_formula += "%s%d.%02d" % (c, xval.floor(),((xval-xval.floor())*100).floor())
+            abstract_formula += "%s%d.%02d" % (c, xval.floor(), ((xval-xval.floor())*100).floor())
         
         #abstract_formula += "%s%g" % (c,val[1])
         
@@ -195,22 +207,24 @@ def anonymous_formula(filled_counts):
 
 
 def main():
-    cell = FracVector.create([[1,1,0],[1,0,1],[0,1,1]])
-    coordgroups = FracVector.create([[[2,3,5],[3,5,4]],[[4,6,7]]])
-    assignments = [2,5]
+    cell = FracVector.create([[1, 1, 0], [1, 0, 1], [0, 1, 1]])
+    coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
+    assignments = [2, 5]
 
     print cell, coordgroups
-    cell, coordgroups = coordswap(0,2,cell,coordgroups)
+    cell, coordgroups = coordswap(0, 2, cell, coordgroups)
     print cell, coordgroups
     
     pass
 
-def coords_reduced_to_cartesian(cell,coords):
+
+def coords_reduced_to_cartesian(cell, coords):
     cell = FracVector.use(cell)
     newcoords = coords*cell
     return newcoords
 
-def coordgroups_reduced_to_cartesian(cell,coordgroups):
+
+def coordgroups_reduced_to_cartesian(cell, coordgroups):
     cell = FracVector.use(cell)
 
     newcoordgroups = []
@@ -221,12 +235,14 @@ def coordgroups_reduced_to_cartesian(cell,coordgroups):
 
     return newcoordgroups
 
+
 def periodicity_to_pbc(periodicity):
     if is_sequence(periodicity):
         pbc = [bool(x) for x in periodicity]
     else:
         pbc = [False]*periodicity + [True]*(3-periodicity)
     return pbc
+
 
 def pbc_to_nonperiodic_vecs(pbc):
     nonperiodic_vecs = sum(pbc)
@@ -237,18 +253,19 @@ def pbc_to_nonperiodic_vecs(pbc):
 
 def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegroup, backends=['isotropy']):
     for backend in backends:
-        if backend ==  'isotropy':
+        if backend == 'isotropy':
             try:
                 from httk.external import isotropy_ext
-                return isotropy_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups,cell,spacegroup,get_wyckoff=True)
+                return isotropy_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True)
             except ImportError:
                 raise 
                 pass
     raise Exception("structure_reduced_coordgroups_to_representative: None of the available backends available.")
 
-def sites_tidy(sites,backends=['platon']):
+
+def sites_tidy(sites, backends=['platon']):
     for backend in backends:
-        if backend ==  'platon':
+        if backend == 'platon':
             try:
                 from httk.external import platon_ext        
                 return platon_ext.sites_tidy(sites)

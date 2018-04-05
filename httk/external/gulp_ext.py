@@ -26,32 +26,34 @@ import httk
 import httk.iface
 
 try:
-    jmol_path=config.get('paths', 'jmol')
+    jmol_path = config.get('paths', 'jmol')
 except Exception:
     jmol_path = None
     raise Exception("httk.external.jmol_ext imported with no jmol path set in httk.cfg")
 
-def jmol(cwd, args,timeout=10):
-    out,err,completed = Command(jmol_path,args,cwd=cwd).run(timeout)
+
+def jmol(cwd, args, timeout=10):
+    out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
     return out, err, completed    
+
 
 def show(struct):
     tmpdir = httk.utils.create_tmpdir()
     
-    f = httk.IoAdapterFilename(os.path.join(tmpdir,"atoms.gin"))
+    f = httk.IoAdapterFilename(os.path.join(tmpdir, "atoms.gin"))
     httk.iface.gulp_if.structure_to_gulp(f, struct)
     #print "Running gulp"
-    out, err, completed = gulp(tmpdir,["atoms"],timeout=30)
+    out, err, completed = gulp(tmpdir, ["atoms"], timeout=30)
     if not completed:
         raise Exception("Gulp broke:"+tmpdir)
     #print "Gulp finished",completed
     if completed:
-        def get_energy(results,match):
+        def get_energy(results, match):
             results['energy'] = float(match.group(1))
             
-        results = httk.utils.micro_pyawk(os.path.join(tmpdir,"atoms.gout"),[
-                ['^ *Total lattice energy += +([-0-9.]+) +eV',None,get_energy],
-              ])
+        results = httk.utils.micro_pyawk(os.path.join(tmpdir, "atoms.gout"), [
+            ['^ *Total lattice energy += +([-0-9.]+) +eV', None, get_energy],
+        ])
     else:
         results = {}
         

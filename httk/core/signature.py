@@ -17,12 +17,14 @@
 
 from httkobject import HttkObject, httk_typed_init
 
+
 class SignatureKey(HttkObject):
+
     """
     """    
 
-    @httk_typed_init({'keydata':str,'description':str})    
-    def __init__(self,keydata, description):
+    @httk_typed_init({'keydata': str, 'description': str})    
+    def __init__(self, keydata, description):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
         """    
@@ -36,10 +38,12 @@ class SignatureKey(HttkObject):
         """        
         return cls(keydata, description)
     
+
 class Signature(HttkObject):
+
     """
     """    
-    @httk_typed_init({'signature_data':str,'key':SignatureKey})    
+    @httk_typed_init({'signature_data': str, 'key': SignatureKey})    
     def __init__(self, signature_data, key):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -54,6 +58,7 @@ class Signature(HttkObject):
         """        
         return cls(signature_data, key)
     
+
 def main():
     import httk.db
     

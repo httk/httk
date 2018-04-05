@@ -29,18 +29,18 @@ from httk.atomistic import Structure, UnitcellSites
 import httk.iface 
 from subimport import submodule_import_external
 try:   
-    ase_path=config.get('paths', 'ase')
+    ase_path = config.get('paths', 'ase')
 except Exception:
     ase_path = None
 
 if ase_path == "False":
     raise Exception("httk.external.ase_glue: module ase_glue imported, but ase is disabled in configuration file.")
 
-if ase_path != None:    
-    submodule_import_external(os.path.join(ase_path),'ase')
+if ase_path is not None:    
+    submodule_import_external(os.path.join(ase_path), 'ase')
 else:
     try:
-        external=config.get('general', 'allow_system_libs')
+        external = config.get('general', 'allow_system_libs')
     except Exception:
         external = 'yes'
     #if external == 'yes':
@@ -63,6 +63,7 @@ from ase import version
 ase_major_version = version.version.split('.')[0]
 ase_minor_version = version.version.split('.')[1]
 
+
 def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     """Returns primitive cell given an Atoms object for a conventional
     cell and it's spacegroup.
@@ -74,6 +75,7 @@ def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     prim_cell = sg.scaled_primitive_cell  # Check if we need to transpose
     return ase.utils.geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])    
     
+
 def structure_to_ase_atoms(struct):
 
     struct = Structure.use(struct)
@@ -81,32 +83,32 @@ def structure_to_ase_atoms(struct):
     if struct.has_uc_repr:    
         symbollist, scaled_positions = httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions(struct)
         cell = struct.uc_basis.to_floats()
-        symbols=[]
+        symbols = []
         for s in symbollist:
             if is_sequence(s):
-                if len(s)==1:
-                    symbols+=[s[0]]
+                if len(s) == 1:
+                    symbols += [s[0]]
                 else:
-                    symbols+=[str(s)]
+                    symbols += [str(s)]
             else:
-                symbols+=[s]
+                symbols += [s]
                     
-        atoms = Atoms( symbols=symbols,
-                          cell=cell,
-                          scaled_positions=scaled_positions,
-                          pbc=True)
+        atoms = Atoms(symbols=symbols,
+                      cell=cell,
+                      scaled_positions=scaled_positions,
+                      pbc=True)
 
     elif struct.has_rc_repr:
         symbollist, scaled_positions = httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions(struct)    
-        symbols=[]
+        symbols = []
         for s in symbollist:
             if is_sequence(s):
-                if len(s)==1:
-                    symbols+=[s[0]]
+                if len(s) == 1:
+                    symbols += [s[0]]
                 else:
-                    symbols+=[str(s)]
+                    symbols += [str(s)]
             else:
-                symbols+=[s]
+                symbols += [s]
         
         spacegroup, setting = struct.spacegroup_number_and_setting
         atoms = crystal(symbols, scaled_positions, spacegroup, setting=setting, 
@@ -117,6 +119,7 @@ def structure_to_ase_atoms(struct):
     
     return atoms
 
+
 def ase_read_structure(f):
     ioa = httk.IoAdapterFilename.use(f)
     atoms = ase.io.read(ioa.filename)
@@ -125,9 +128,10 @@ def ase_read_structure(f):
     struct = ase_atoms_to_structure(atoms)
     return struct
 
-def coordgroups_reduced_rc_to_unitcellsites(coordgroups,basis,hall_symbol,reduce=False):
+
+def coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, reduce=False):
     # Just fake representative assignments for the coordgroups
-    assignments = range(1,len(coordgroups)+1)
+    assignments = range(1, len(coordgroups)+1)
     struct = Structure.create(rc_cell=basis, assignments=assignments, rc_reduced_coordgroups=coordgroups, hall_symbol=hall_symbol)
     rescale = 1
 
@@ -135,35 +139,37 @@ def coordgroups_reduced_rc_to_unitcellsites(coordgroups,basis,hall_symbol,reduce
     if reduce:
         beforevol = FracScalar.create(atoms.get_volume())
         spacegroup, setting = httk.atomistic.data.spacegroups.spacegroup_get_number_and_setting(hall_symbol)
-        atoms = primitive_from_conventional_cell(atoms,spacegroup,setting)
+        atoms = primitive_from_conventional_cell(atoms, spacegroup, setting)
         aftervol = FracScalar.create(atoms.get_volume())
         rescale = (rescale*aftervol/beforevol).simplify()
 
     atomic_symbols = atoms.get_chemical_symbols()
     coords = atoms.get_scaled_positions()
     cell = atoms.get_cell()
-    sites = UnitcellSites.create(cell=cell, occupancies=atomic_symbols, reduced_coords=coords, periodicity = atoms.pbc)
+    sites = UnitcellSites.create(cell=cell, occupancies=atomic_symbols, reduced_coords=coords, periodicity=atoms.pbc)
     cell = Cell(basis=cell)
     
     return sites, cell
 
-def ase_atoms_to_structure(atoms,hall_symbol):
+
+def ase_atoms_to_structure(atoms, hall_symbol):
     #occupancies = [periodictable.atomic_number(x) for x in atoms.get_chemical_symbols()]
     atomic_symbols = atoms.get_chemical_symbols()
     #counts = [1]*len(assignments)
     coords = atoms.get_scaled_positions()
     cell = atoms.get_cell()
-    if hall_symbol == None:
-        struct = Structure.create(uc_basis=cell, uc_occupancies=atomic_symbols, uc_reduced_occupationscoords=coords, periodicity = atoms.pbc)
+    if hall_symbol is None:
+        struct = Structure.create(uc_basis=cell, uc_occupancies=atomic_symbols, uc_reduced_occupationscoords=coords, periodicity=atoms.pbc)
     else:
-        struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols, rc_reduced_occupationscoords=coords, periodicity = atoms.pbc, hall_symbol=hall_symbol)
+        struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols, rc_reduced_occupationscoords=coords, periodicity=atoms.pbc, hall_symbol=hall_symbol)
     return struct
 
 
-def ase_write_struct(struct,ioa,format=None):
+def ase_write_struct(struct, ioa, format=None):
     ioa = IoAdapterFileWriter.use(ioa)
     aseatoms = structure_to_ase_atoms(struct)
-    ase.io.write(ioa.file,aseatoms,format=format)
+    ase.io.write(ioa.file, aseatoms, format=format)
+
 
 class StructureAsePlugin(HttkPlugin):
 
@@ -176,8 +182,8 @@ class StructureAsePlugin(HttkPlugin):
         return structure_to_ase_atoms(self.struct)
 
     @classmethod
-    def from_Atoms(cls,atoms):
-        return ase_atoms_to_structure(atoms,None)
+    def from_Atoms(cls, atoms):
+        return ase_atoms_to_structure(atoms, None)
 
 Structure.ase = HttkPluginWrapper(StructureAsePlugin)
 

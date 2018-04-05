@@ -32,35 +32,36 @@ from httk.atomistic.io.structure_cif_io import cif_to_struct
 from httk.atomistic.data.periodictable import atomic_symbol, atomic_number
 
 try:   
-    isotropy_path=config.get('paths', 'isotropy')
+    isotropy_path = config.get('paths', 'isotropy')
 except Exception:
     isotropy_path = None
     raise Exception("httk.external.isotropy_ext imported with no isotropy path set in httk.cfg")
 
-def isotropy(cwd,args,inputstr,timeout=30):
+
+def isotropy(cwd, args, inputstr, timeout=30):
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #print "COMMAND CIF2CELL"
-    out,err,completed = Command(os.path.join(isotropy_path,'findsym'),args,cwd=cwd,inputstr=inputstr).run(timeout)
+    out, err, completed = Command(os.path.join(isotropy_path, 'findsym'), args, cwd=cwd, inputstr=inputstr).run(timeout)
     #print "COMMAND CIF2CELL END"
     return out, err, completed
     #out, err = p.communicate()
     #return out, err
 
 
-def uc_reduced_coordgroups_process_with_isotropy(coordgroup,cell,get_wyckoff=False):
+def uc_reduced_coordgroups_process_with_isotropy(coordgroup, cell, get_wyckoff=False):
     #print "GURK",struct.formula,len(struct.uc_reduced_coords)
 
-    inputstr = httk.iface.isotropy_if.reduced_coordgroups_to_input(coordgroup,cell)
-    out,err,completed = isotropy("./", [], inputstr)
+    inputstr = httk.iface.isotropy_if.reduced_coordgroups_to_input(coordgroup, cell)
+    out, err, completed = isotropy("./", [], inputstr)
     if completed == 0:
-        cif = httk.iface.isotropy_if.out_to_cif(IoAdapterString(string=out),[atomic_symbol(x) for x in range(1,len(coordgroup)+1)])
+        cif = httk.iface.isotropy_if.out_to_cif(IoAdapterString(string=out), [atomic_symbol(x) for x in range(1, len(coordgroup)+1)])
         #print "CIF",cif
-        newstruct = cif_to_struct(IoAdapterString(string=cif),backends=['cif2cell_reduce'])
-        checkstruct = cif_to_struct(IoAdapterString(string=cif),backends=['cif2cell'])
-        only_rc_struct = cif_to_struct(IoAdapterString(string=cif),backends=['cif_reader_that_can_only_read_isotropy_cif'])
+        newstruct = cif_to_struct(IoAdapterString(string=cif), backends=['cif2cell_reduce'])
+        checkstruct = cif_to_struct(IoAdapterString(string=cif), backends=['cif2cell'])
+        only_rc_struct = cif_to_struct(IoAdapterString(string=cif), backends=['cif_reader_that_can_only_read_isotropy_cif'])
         # This is an illeelegant hack
-        newstruct.rc_sites.wyckoff_symbols=only_rc_struct.rc_sites.wyckoff_symbols
+        newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
         # Cell basis can only be constructed from the cif approximately
         cell_mismatch = sum(sum((checkstruct.rc_cell.basis - only_rc_struct.rc_cell.basis))).to_float()
         #print "CELL MISMATCH:",sum(sum((newstruct.cell.maxnorm_basis - only_rc_struct.cell.maxnorm_basis))).to_float()
@@ -70,7 +71,7 @@ def uc_reduced_coordgroups_process_with_isotropy(coordgroup,cell,get_wyckoff=Fal
         #print "CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
         #print "CHECK THIS:", newstruct.cell.to_tuple(), only_rc_struct.cell.to_tuple()
         if cell_mismatch > 1e-6 or newstruct.rc_sites.hexhash != only_rc_struct.rc_sites.hexhash:
-            print "Cell mismatch:",cell_mismatch
+            print "Cell mismatch:", cell_mismatch
             print "Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
             #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
             raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
@@ -94,8 +95,6 @@ def uc_reduced_coordgroups_process_with_isotropy(coordgroup,cell,get_wyckoff=Fal
         raise Exception("isotropy_ext: isotropy did not complete.")
 
 
-
-
 def struct_process_with_isotropy(struct):
     tmpdir = tempfile.mkdtemp(prefix='ht.tmp.isotropy_')
     
@@ -103,11 +102,11 @@ def struct_process_with_isotropy(struct):
     #print >> sys.stderr, "== Running findsym"
     #print "==================== INPUT\n",inputstr
     #print "===================="
-    out,err,completed = isotropy(tmpdir, [], inputstr)
+    out, err, completed = isotropy(tmpdir, [], inputstr)
 
     # Clean up
     try:
-        os.unlink(os.path.join(tmpdir,'findsym.log'))
+        os.unlink(os.path.join(tmpdir, 'findsym.log'))
     except IOError:
         pass
     try:
@@ -128,8 +127,8 @@ def struct_process_with_isotropy(struct):
     if completed == 0:
         #print "what?",completed
         # TODO: Clean this up with own cif reader that actually reads wyckoff sites out of cif file!
-        cif = httk.iface.isotropy_if.out_to_cif(IoAdapterString(string=out),struct.assignments)
-        newstruct = cif_to_struct(IoAdapterString(string=cif),backends=['cif2cell_reduce'])
+        cif = httk.iface.isotropy_if.out_to_cif(IoAdapterString(string=out), struct.assignments)
+        newstruct = cif_to_struct(IoAdapterString(string=cif), backends=['cif2cell_reduce'])
         #print "Rejected?"
         
         newstruct.add_tags(struct.get_tags())
@@ -137,9 +136,9 @@ def struct_process_with_isotropy(struct):
 
         #print "CHECKING",struct.uc_volume,newstruct.rc_volume
         
-        checkstruct = cif_to_struct(IoAdapterString(string=cif),backends=['cif2cell_noreduce'])
-        only_rc_struct = cif_to_struct(IoAdapterString(string=cif),backends=['cif_reader_that_can_only_read_isotropy_cif'])
-        newstruct.rc_sites.wyckoff_symbols=only_rc_struct.rc_sites.wyckoff_symbols
+        checkstruct = cif_to_struct(IoAdapterString(string=cif), backends=['cif2cell_noreduce'])
+        only_rc_struct = cif_to_struct(IoAdapterString(string=cif), backends=['cif_reader_that_can_only_read_isotropy_cif'])
+        newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
         #print "HERE", only_rc_struct.rc_sites.wyckoff_symbols
         # Cell basis can only be constructed from the cif approximately
         cell_mismatch = sum(sum((checkstruct.uc_cell.basis - only_rc_struct.rc_cell.basis))).to_float()
@@ -150,7 +149,7 @@ def struct_process_with_isotropy(struct):
         #print "CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
         #print "CHECK THIS:", newstruct.cell.to_tuple(), only_rc_struct.cell.to_tuple()
         if cell_mismatch > 1e-6 or newstruct.rc_sites.hexhash != only_rc_struct.rc_sites.hexhash:
-            print "Cell mismatch:",cell_mismatch
+            print "Cell mismatch:", cell_mismatch
             print "Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
             #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
             raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       

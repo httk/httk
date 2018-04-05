@@ -17,7 +17,9 @@
 
 from httk.core.httkobject import HttkObject, httk_typed_init
 
+
 class Author(HttkObject):
+
     """
     Object for keeping track of tags for other objects
     """
@@ -26,7 +28,7 @@ class Author(HttkObject):
     #    return cls.types_declare((('reference',str),),
     #                             index=('reference'))
     
-    @httk_typed_init({'last_name':str,'given_names':str},index=['last_name','given_names'])    
+    @httk_typed_init({'last_name': str, 'given_names': str}, index=['last_name', 'given_names'])    
     def __init__(self, last_name, given_names):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -46,6 +48,7 @@ class Author(HttkObject):
 
 
 class Reference(HttkObject):
+
     """
     A reference citation
     """
@@ -54,10 +57,10 @@ class Reference(HttkObject):
     #    return cls.types_declare((('reference',str),),
     #                             index=('reference'))
     
-    @httk_typed_init({'ref':str,'authors':[Author],'authorsstr':str,'journal':str,'volume':str,
-                      'firstpage':str,'lastpage':str,'year':str,
-                      'publisher':str,'publisher_extra':str},
-                     index=['ref', 'authorsstr','journal','volume','firstpage','lastpage','year','publisher'])
+    @httk_typed_init({'ref': str, 'authors': [Author], 'authorsstr': str, 'journal': str, 'volume': str,
+                      'firstpage': str, 'lastpage': str, 'year': str,
+                      'publisher': str, 'publisher_extra': str},
+                     index=['ref', 'authorsstr', 'journal', 'volume', 'firstpage', 'lastpage', 'year', 'publisher'])
     def __init__(self, ref, authors=None, authorsstr=None, journal=None, volume=None, firstpage=None, lastpage=None, year=None, publisher=None, publisher_extra=None):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -83,7 +86,7 @@ class Reference(HttkObject):
         """        
         # TODO: Sanely parse bibliographic info
         
-        return cls(ref,authors=authors)
+        return cls(ref, authors=authors)
 
    
 def main():

@@ -19,16 +19,18 @@ from httk.core.httkobject import HttkObject, httk_typed_init
 from httk.core.fracvector import FracVector
 from spacegrouputils import *
 
+
 class Spacegroup(HttkObject):
+
     """
     Represents a spacegroup
     """
-    @httk_typed_init({'hall_symbol':[str]},index=['hall_symbol'])
+    @httk_typed_init({'hall_symbol': [str]}, index=['hall_symbol'])
     def __init__(self, hall_symbol):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
         """    
-        super(Spacegroup,self).__init__()
+        super(Spacegroup, self).__init__()
         self.hall_symbol = hall_symbol
 
     @classmethod
@@ -45,17 +47,17 @@ class Spacegroup(HttkObject):
            
         setting = if only a spacegroup number is given, this allows also specifying a setting.
         """        
-        if isinstance(spacegroup,Spacegroup):
+        if isinstance(spacegroup, Spacegroup):
             return spacegroup
 
-        if spacegroup != None:
-            hall_symbol = any_to_hall_symbol(spacegroup,setting)
+        if spacegroup is not None:
+            hall_symbol = any_to_hall_symbol(spacegroup, setting)
 
-        if spacegroup == None and hall_symbol == None:
-            if spacegroupnumber != None:
-                hall_symbol = any_to_hall_symbol(spacegroupnumber,setting)
+        if spacegroup is None and hall_symbol is None:
+            if spacegroupnumber is not None:
+                hall_symbol = any_to_hall_symbol(spacegroupnumber, setting)
         
-        if hall_symbol != None:
+        if hall_symbol is not None:
             return cls(hall_symbol)
     
         raise Exception("Spacegroup.create: not enough input parameters given to create a spacegroup object.")
@@ -63,6 +65,7 @@ class Spacegroup(HttkObject):
     @property
     def spacegroup_number_and_setting(self):
         return spacegroup_get_number_and_setting(self.hall_symbol)
+
 
 def main():
     pass
