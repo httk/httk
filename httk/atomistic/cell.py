@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 from httk.core.geometry import is_point_inside_cell
-from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from httk.core.fracvector import FracVector, FracScalar
+from httk.core import HttkObject, httk_typed_init, httk_typed_property
+from httk.core import FracVector, FracScalar
 from httk.core.basic import is_sequence
 from cellutils import *
 from cellshape import CellShape
@@ -30,43 +30,45 @@ class Cell(HttkObject):
 
     """
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
+    
+    (The ability to represent the cell for a non-periodic system is also the reason this class is not called Lattice.)
     """
  
-    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'lattice_system': str, 'orientation': int})       
-    def __init__(self, niggli_matrix, lattice_system, orientation=1, basis=None):
+    @httk_typed_init({'basis': (FracVector, 3, 3), 'lattice_system': str, 'orientation': int})       
+    def __init__(self, basis, lattice_system, orientation=1):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
         """    
-        self.niggli_matrix = niggli_matrix
+        self.basis = basis
         self.orientation = orientation
         self.lattice_system = lattice_system
-        if basis is None:
-            basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
-        
-        self._basis = basis
+        self.niggli_matrix, self.orientation = basis_to_niggli_and_orientation(basis)
  
         self.det = basis.det()
         self.inv = basis.inv()
         self._volume = abs(self.det)
         self.metric = niggli_to_metric(self.niggli_matrix)
 
-        self.lengths, self.angles = niggli_to_lengths_angles(self.niggli_matrix)
+        self.lengths, self.angles = niggli_to_lengths_and_angles(self.niggli_matrix)
 
         self.lengths = [FracVector.use(x).simplify() for x in self.lengths]
         self.angles = [FracVector.use(x).simplify() for x in self.angles]
+        _dummy, self.cosangles, self.sinangles = niggli_to_lengths_and_trigangles(self.niggli_matrix)
         
         self.a, self.b, self.c = self.lengths
         self.alpha, self.beta, self.gamma = self.angles        
-
+        self.cosalpha, self.cosbeta, self.cosgamma = self.cosangles        
+        self.sinalpha, self.sinbeta, self.singamma = self.sinangles        
+        
     #def create(cls, basis=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, volume=None, scale=None, niggli_matrix=None, orientation=1, lengths=None, angles=None, normalize=True):
             
     @classmethod
     def create(cls, cell=None, basis=None, metric=None, niggli_matrix=None, 
-               a=None, b=None, c=None, alpha=None, beta=None, gamma=None,
-               lengths=None, angles=None, scale=None, 
+               a=None, b=None, c=None, alpha=None, beta=None, gamma=None, 
+               lengths=None, angles=None, cosangles=None, scale=None, 
                scaling=None, volume=None, periodicity=None, 
                nonperiodic_vecs=None, orientation=1, hall=None,
-               lattice_system=None):
+               lattice_system=None, eps=0):
         """
         Create a new cell object, 
         
@@ -93,28 +95,50 @@ class Cell(HttkObject):
         hall: giving the hall symbol makes it possible to determine the lattice system without numerical inaccuracy    
         
         lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
-        """ 
+        """
+        #print "Create cell:",cell,basis,angles, lengths,cosangles,a,b,c,alpha,beta,gamma
+         
         if cell is not None:
             return Cell.use(cell)
 
         if basis is not None:
             basis = FracVector.use(basis)
 
+        if angles is None and not (alpha is None or beta is None or gamma is None):
+            angles = [alpha, beta, gamma]
+
+        if lengths is None and not (a is None or b is None or c is None):
+            lengths = [a, b, c]
+        
+        if cosangles is None and angles is not None:
+            cosangles = angles_to_cosangles(angles)
+
+        if basis is None and lengths is not None and cosangles is not None:
+            if hall is not None:
+                lattice_system = lattice_system_from_hall(hall)
+            else:
+                lattice_system = lattice_system_from_lengths_and_cosangles(lengths, cosangles)
+            basis = lengths_and_cosangles_to_conventional_basis(lengths, cosangles, lattice_system, orientation=orientation, eps=eps)
+
         if niggli_matrix is not None:
             niggli_matrix = FracVector.use(niggli_matrix)
 
         if niggli_matrix is None and basis is not None:
-            niggli_matrix, orientation = basis_to_niggli(basis)
+            niggli_matrix, orientation = basis_to_niggli_and_orientation(basis)
 
-        if niggli_matrix is None and lengths is not None and angles is not None:
-            niggli_matrix = lengths_angles_to_niggli(lengths, angles)
-            niggli_matrix = FracVector.use(niggli_matrix)
+        #if niggli_matrix is None and lengths is not None and cosangles is not None:
+        #    niggli_matrix = lengths_and_cosangles_to_niggli(lengths, cosangles)
+        #    niggli_matrix = FracVector.use(niggli_matrix)
 
-        if niggli_matrix is None and not (a is None or b is None or c is None or alpha is None or beta is None or gamma is None):
-            niggli_matrix = lengths_angles_to_niggli([a, b, c], [alpha, beta, gamma])
-            niggli_matrix = FracVector.use(niggli_matrix)
+        #if niggli_matrix is None and lengths is not None and angles is not None:
+        #    niggli_matrix = lengths_and_angles_to_niggli(lengths, angles)
+        #    niggli_matrix = FracVector.use(niggli_matrix)
 
-        if niggli_matrix is None:
+        #if niggli_matrix is None and not (a is None or b is None or c is None or alpha is None or beta is None or gamma is None):
+        #    niggli_matrix = lengths_and_angles_to_niggli([a, b, c], [alpha, beta, gamma])
+        #    niggli_matrix = FracVector.use(niggli_matrix)
+
+        if basis is None:
             raise Exception("cell.create: Not enough information to specify a cell given.")
                 
         if scaling is None and scale is not None:
@@ -128,9 +152,7 @@ class Cell(HttkObject):
 
         if scaling is not None:
             scaling = FracVector.use(scaling)
-            niggli_matrix = (niggli_matrix*scaling*scaling).simplify()
-            if basis is not None:
-                basis = (basis*scaling).simplify()
+            basis = (basis*scaling).simplify()
 
         # Determination of the lattice system can only be made approximately, so it is recommended
         # that it is given to the constructor if possible
@@ -144,7 +166,7 @@ class Cell(HttkObject):
         if basis is None:
             basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
             
-        return cls(niggli_matrix, lattice_system, orientation, basis)
+        return cls(basis, lattice_system, orientation)
 
     @classmethod
     def use(cls, other):
@@ -166,9 +188,13 @@ class Cell(HttkObject):
     def volume(self):
         return self._volume
 
-    @httk_typed_property((FracVector, 3, 3))
-    def basis(self):
-        return self._basis
+    #@httk_typed_property((FracVector, 3, 3))
+    #def basis(self):
+    #    return self._basis
+
+    #@httk_typed_property((FracVector, 3, 2))
+    #def niggli_matrix(self):
+    #    return self._niggli_matrix
 
     def get_axes_standard_order_transform(self):
         return standard_order_axes_transform(self.niggli_matrix, self.lattice_system)

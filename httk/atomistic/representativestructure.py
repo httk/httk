@@ -111,7 +111,7 @@ class RepresentativeStructure(HttkObject):
            - ONE OF periodicity or nonperiodic_vecs
            
         See help(Structure) for more information on the data format of all these data representations.
-        """                          
+        """   
         if structure is not None:
             return cls.use(structure)
 
@@ -181,11 +181,11 @@ class RepresentativeStructure(HttkObject):
             raise Exception("Structure.create: representative sites specifications invalid.")
 
         if assignments is not None:
-            return Assignments.use(assignments)
+            assignments = Assignments.use(assignments)
 
         if assignments is None or (rc_sites is None or rc_cell is None or hall_symbol is None):
             raise Exception("Structure.create: not enough information given to create a structure object.")
-                                            
+
         new = cls(assignments=assignments, rc_sites=rc_sites, rc_cell=rc_cell)
 
         return new

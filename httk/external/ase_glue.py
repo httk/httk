@@ -83,6 +83,7 @@ def structure_to_ase_atoms(struct):
 
     if struct.has_uc_repr:    
         symbollist, scaled_positions = httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions(struct)
+        scaled_positions = scaled_positions.to_floats()
         cell = struct.uc_basis.to_floats()
         symbols = []
         for s in symbollist:

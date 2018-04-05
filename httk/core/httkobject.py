@@ -192,6 +192,11 @@ class HttkObject(object):
             return self._codependent_data
         return []
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__) and self.to_tuple() == other.to_tuple():
+            return True
+        else:
+            return False
 
 class HttkPluginWrapper(object):
 

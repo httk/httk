@@ -273,49 +273,10 @@ class rewindable_iterator(object):
         if rewindstr is not None:
             self._cache = rewindstr
             
-            
-# Euler's algorithm, code from https://code.google.com/p/mpmath/issues/detail?id=55
-def get_continued_fraction(p, q):
-    while q:
-        n = p // q
-        yield n
-        q, p = p - q*n, q
-
-
-#https://en.wikipedia.org/wiki/Continued_fraction#Best_rational_within_an_interval
-def best_rational_in_interval(low, high):
-    low = Fraction(low)
-    lowcf = get_continued_fraction(low.numerator, low.denominator)
-    high = Fraction(high)
-    highcf = get_continued_fraction(high.numerator, high.denominator)
-    cf = []
-    while True:
-        nextlow = lowcf.next()
-        nexthigh = highcf.next()    
-        if nextlow != nexthigh:
-            break
-        cf += [nextlow]
-    cf += [min(nexthigh, nextlow)+1]
-    return fraction_from_continued_fraction(cf)
-
-
-#http://stackoverflow.com/questions/14493901/continued-fraction-to-fraction-malfunction
-def fraction_from_continued_fraction(cf):
-    return cf[0] + reduce(lambda d, n: 1 / (d + n), cf[:0:-1], Fraction(0))
-
 
 def main():
     print int_to_anonymous_symbol(0)
     print anonymous_symbol_to_int("A")
-    print list(get_continued_fraction(10, 1333))
-
-    data = 0.33333
-
-    print best_rational_in_interval(data-0.000005, data+0.000005)    
-
-    data = 0.12312
-
-    print best_rational_in_interval(data-0.000005, data+0.000005), 41.0/333
     
     
     # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))

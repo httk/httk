@@ -212,7 +212,8 @@ def poscar_to_strs(fio):
 
     coords = []
     for i in range(N):
-        strcoord = next(fi).strip().split()[:3]
+        nxt = next(fi)
+        strcoord = nxt.strip().split()[:3]
         coord = map(lambda x: x.strip(), strcoord)
         coords.append(coord)
 
@@ -306,18 +307,20 @@ def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None,
     if primitive_cell:
         basis = struct.pc.uc_basis
         coords = struct.pc.uc_reduced_coords
-        vol = float(struct.pc.uc_volume)
+        vol = struct.pc.uc_volume
+        counts = struct.pc.uc_counts
     else:
         basis = struct.cc.uc_basis
         coords = struct.cc.uc_reduced_coords
-        vol = float(struct.cc.uc_volume)
+        vol = struct.cc.uc_volume
+        counts = struct.cc.uc_counts
         
     if basis.det() < 0:
         if fix_negative_determinant:
             basis = -basis
             coords = (-coords).normalize()
     
-    write_poscar(f, basis.to_floats(), coords.to_floats(), True, struct.uc_counts, struct.symbols, comment, vol=vol)
+    write_poscar(f, basis.to_strings(), coords.to_strings(), True, counts, struct.symbols, comment, vol=vol.to_string())
 
 
 def calculate_kpoints(struct, dens=20):

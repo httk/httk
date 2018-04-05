@@ -18,7 +18,8 @@
 import fractions
 import operator
 import itertools
-from .fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
+from fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
+from vector import MutableVector
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
@@ -38,7 +39,7 @@ def nested_inmap_list(op, *ls):
 # Class definition
 
 
-class MutableFracVector(FracVector):
+class MutableFracVector(FracVector, MutableVector):
 
     """
     Same as FracVector, only, this version allow assignment of elements, e.g., ::

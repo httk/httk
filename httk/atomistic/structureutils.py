@@ -18,9 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 
-from httk.core import is_sequence, breath_first_idxs
-from httk.core.fracvector import FracVector, FracScalar
-from httk.core.mutablefracvector import MutableFracVector
+from httk.core import is_sequence, breath_first_idxs, FracVector, FracScalar, MutableFracVector
 from cell import Cell
 from unitcellsites import UnitcellSites
 import spacegrouputils
@@ -754,7 +752,7 @@ def get_primitive_basis_transform(hall_symbol):
             lattrans = FracVector.create([[half, half, 0],
                                           [-half, half, 0],
                                           [0, 0, 1]])
-        elif lattice_symbol == 'F' or lattice_symbol == 'A' or lattice_symbol == 'B' or lattice_symbol == 'C':
+        elif lattice_symbol == 'F':  # or lattice_symbol == 'A' or lattice_symbol == 'B' or lattice_symbol == 'C':
             lattrans = FracVector.create([[half, 0, half],
                                           [half, half, 0],
                                           [0, half, half]])
@@ -860,8 +858,6 @@ def get_primitive_basis_transform(hall_symbol):
 #         
 #     return lattrans
 
-
-
 # Imported from cif2cell by Torbjörn Björkman, uctools.py and heavily modified
 # def get_primitive_basis_transform(basis, hall_symbol, eps=0.001):
 #     basis = FracVector.use(basis)
@@ -950,7 +946,6 @@ def get_primitive_basis_transform(hall_symbol):
 #     # Transform to primitive cell
 #     return lattrans
 
-
 def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
 
     transformation = FracVector.use(transformation).simplify()
@@ -963,6 +958,8 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
 
     volume_ratio = abs((new_cell.basis.det()/abs(old_cell.basis.det()))).simplify()
     seek_counts = [int((volume_ratio*x).simplify()) for x in structure.uc_counts]
+    #print "HMM",(new_cell.basis.det()/old_cell.basis.det()).simplify()
+    #print "SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation
     total_seek_counts = sum(seek_counts)
     if total_seek_counts > max_atoms:
         raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")

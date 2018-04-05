@@ -16,8 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from httk.core.fracvector import FracVector
-from httk.core.mutablefracvector import MutableFracVector
+from httk.core import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
 import spacegrouputils
 

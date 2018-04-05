@@ -29,7 +29,8 @@ except ImportError:
 
 
 def universal_opener(other):
-    if isinstance(other, file):
+    #if isinstance(other, file):
+    if hasattr(other, 'read'):
         return IoAdapterFileReader(other, name=other.name)
     elif isinstance(other, StringIO.StringIO):
         return IoAdapterFileReader(other)

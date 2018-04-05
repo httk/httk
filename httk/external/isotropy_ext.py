@@ -138,28 +138,28 @@ def struct_process_with_isotropy(struct):
 
         #print "CHECKING",struct.uc_volume,newstruct.rc_volume
         
-        only_rc_struct = cif_to_struct(IoAdapterString(string=cif), backends=['cif_reader_that_can_only_read_isotropy_cif'])
-        #newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
-        #newstruct.rc_sites._multiplicities = only_rc_struct.rc_sites._multiplicities
-        #print "HERE", only_rc_struct.rc_sites.wyckoff_symbols
-        # Cell basis can only be constructed from the cif approximately
-        cell_mismatch = sum(sum((newstruct.rc_cell.basis - only_rc_struct.rc_cell.basis))).to_float()
-        #print "CELL MISMATCH:",sum(sum((newstruct.cell.maxnorm_basis - only_rc_struct.cell.maxnorm_basis))).to_float()
-        #only_rc_struct._rc_cell = newstruct.rc_cell
-        # Make sure the hexhash is recomputed
-        #only_rc_struct.rc_sites._hexhash = None
-        #print "CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
-        #print "CHECK THIS:", newstruct.cell.to_tuple(), only_rc_struct.cell.to_tuple()
-        if cell_mismatch > 1e-6 or newstruct.rc_sites.hexhash != only_rc_struct.rc_sites.hexhash:
-            print "Cell mismatch:", cell_mismatch
-            print "Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
-            print "======"
-            print newstruct.to_tuple()
-            print "======"
-            print only_rc_struct.to_tuple()
-            print "======"
-            #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
-            raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
+#         only_rc_struct = cif_to_struct(IoAdapterString(string=cif), backends=['cif_reader_that_can_only_read_isotropy_cif'])
+#         #newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
+#         #newstruct.rc_sites._multiplicities = only_rc_struct.rc_sites._multiplicities
+#         #print "HERE", only_rc_struct.rc_sites.wyckoff_symbols
+#         # Cell basis can only be constructed from the cif approximately
+#         cell_mismatch = sum(sum((newstruct.rc_cell.basis - only_rc_struct.rc_cell.basis))).to_float()
+#         #print "CELL MISMATCH:",sum(sum((newstruct.cell.maxnorm_basis - only_rc_struct.cell.maxnorm_basis))).to_float()
+#         #only_rc_struct._rc_cell = newstruct.rc_cell
+#         # Make sure the hexhash is recomputed
+#         #only_rc_struct.rc_sites._hexhash = None
+#         #print "CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
+#         #print "CHECK THIS:", newstruct.cell.to_tuple(), only_rc_struct.cell.to_tuple()
+#         if cell_mismatch > 1e-6 or newstruct.rc_sites.hexhash != only_rc_struct.rc_sites.hexhash:
+#             print "Cell mismatch:", cell_mismatch
+#             print "Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
+#             print "======"
+#             print newstruct.to_tuple()
+#             print "======"
+#             print only_rc_struct.to_tuple()
+#             print "======"
+#             #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
+#             raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
         return newstruct
     else:
         print "ISOTROPY STDERR:"

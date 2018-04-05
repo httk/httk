@@ -18,8 +18,8 @@
 Basic geometry helper functions
 """
 from __future__ import division
-from .fracvector import FracVector
-from .mutablefracvector import MutableFracVector
+from vectors import FracVector
+from vectors import MutableFracVector
  
 
 def is_point_inside_cell(cell, point):

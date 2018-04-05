@@ -31,7 +31,7 @@ spacegroupdata = allspacegroupdata['data']
 itcnbr_index = allspacegroupdata['itc_nbr_index']
 hm_index = allspacegroupdata['hm_index']
 symops_hash_index = allspacegroupdata['symops_hash_index']
-
+all_symops = allspacegroupdata['symops']
 
 def symopshash(symops):
     data = [symopstuple(x) for x in symops]
@@ -486,10 +486,102 @@ def crystal_system_from_hall(hall_symb):
     return crystal_system_from_spacegroupnbr(numb)
 
 
-def main():
+def check_symop(coordgroups, symopv):
+    for coordgroup in coordgroups:
+        for coord in coordgroup:
+            transformed_coord = (symopv[0]*coord + symopv[1]).normalize()
+            if transformed_coord not in coordgroup:
+                return False
+    return True
 
-    result = spacegroup_filter('134')
-    print result
+
+def wyckoff_symbol_matcher(wyckoffs, coord):
+    for spec, letter in wyckoffs:
+        parts = spec.split(',')
+        spec = re.sub('([0-9]+)/([0-9]+)', r'Fraction(\1,\2)', spec)
+        x, y, z = (0, 0, 0)
+        if parts[0] == 'x':
+            x = coord[0]
+        if parts[1] == 'x':
+            x = coord[1]
+        if parts[1] == 'x':
+            x = coord[2]
+        if parts[1] == 'y':
+            y = coord[1]
+        if parts[1] == 'y':
+            y = coord[2]
+        if parts[2] == 'z':
+            z = coord[2]
+        check_coord = eval('['+spec+']', {'Fraction': Fraction}, {'x': x, 'y': y, 'z': z})
+        if coord == check_coord:
+            return letter
+    return wyckoffs[-1][1]
+
+
+def reduce_by_symops(coordgroups, symopvs, hall_symbol):
+    letters = spacegroupdata[hall_symbol]['wyckoff_letter']
+    mults = spacegroupdata[hall_symbol]['wyckoff_mult']
+    wyckoffs = []
+    for letter, spec in sorted(zip(letters, spacegroupdata[hall_symbol]['wyckoff_rep_spec_pos_op'])):
+        wyckoffs += [(spec, letter)]
+    
+    reduced_coordgroups = []
+    wyckoff_symbols = []
+    for coordgroup in coordgroups:
+        keep_coords = []
+        for coord in coordgroup:
+            for symopv in symopvs:
+                transformed_coord = (symopv[0]*coord + symopv[1]).normalize()
+                if transformed_coord in keep_coords:
+                    break
+            else:
+                keep_coords += [coord]
+                wyckoff_symbols += [wyckoff_symbol_matcher(wyckoffs, coord)]
+        reduced_coordgroups += [keep_coords]
+    
+    #wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
+    #multiplicities = [1]*sum([len(x) for x in coordgroups])
+
+    multiplicities = [mults[letters.index(x)] for x in wyckoff_symbols]
+    
+    return reduced_coordgroups, wyckoff_symbols, multiplicities
+
+
+def trivial_symmetry_reduce(coordgroups):
+    """
+    Looks for 'trivial' ways to reduce the coordinates in the given coordgroups by a standard set of symmetry operations.
+    This is not a symmetry finder (and it is not intended to be), but for a standard primitive cell taken from a standard
+    conventional cell, it reverses the primitive unit cell coordgroups into the symmetry reduced coordgroups.
+    """    
+    # TODO: Actually implement, instead of this placeholder that just gives up and returns P 1
+
+    symops = []
+    symopvs = []
+    for symop in all_symops:
+        symopv = FracVector.create(symop)
+        if check_symop(coordgroups, symopv):
+            symops += [all_symops[symop]]
+            symopvs += [symopv]
+
+    shash = symopshash(symops)
+    if shash in symops_hash_index:
+        hall_symbol = symops_hash_index[shash]
+        rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
+        return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+    
+    rc_reduced_coordgroups = coordgroups
+    hall_symbol = 'P 1'
+    wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
+    multiplicities = [1]*sum([len(x) for x in coordgroups])
+    
+    return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+
+
+def main():
+    print allspacegroupdata['symops']
+
+    #result = spacegroup_filter('134')
+    #print result
 
     pass
 

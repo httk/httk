@@ -20,7 +20,7 @@ import sys
 from httk.core.httkobject import HttkObject
 from httk.db.filteredcollection import *
 from httk.core.basic import flatten
-from httk.core.fracvector import FracVector, FracScalar
+from httk.core import FracVector, FracScalar
 from httk.db.storable import Storable
 
 #def table_exist(db,table):
