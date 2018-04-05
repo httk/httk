@@ -1,0 +1,31 @@
+# General ignores
+*.pyc
+.DS_Store
+.project
+.pydevproject
+**/*~
+# Httk specific ignores
+httk.cfg
+External
+Docs/_static/generated/**
+Docs/_build/**
+Docs/generated/**
+Docs/httk.*
+Presentation/generated/**
+Presentation/presentation.pdf
+Presentation/presentation.aux
+Presentation/presentation.fdb_latexmk
+Presentation/presentation.fls
+Presentation/presentation.log
+Presentation/presentation.nav
+Presentation/presentation.out
+Presentation/presentation.snm
+Presentation/presentation.toc
+Presentation/presentation.vrb
+DEVELOPERS_GUIDE.txt
+INSTALL.txt
+README.txt
+RUNMANAGER_DETAILS.txt
+USERS_GUIDE.txt
+VERSION
+httk_overview.pdf

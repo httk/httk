@@ -324,7 +324,7 @@ def parse_kpoints(ioa):
     ioa = IoAdapterFileReader.use(ioa)
     fi = iter(ioa)
     comment = next(fi).strip()
-    points = int(next(fi).strip())
+    points = int(next(fi).split()[0].strip())
     mode = next(fi).strip()[0].lower()
     if mode != 'l':
         raise Exception("parse_kpoints: Only line-mode supported.")
@@ -338,12 +338,14 @@ def parse_kpoints(ioa):
         try:
             fromline = next(fi).strip().split()
             toline = next(fi).strip().split()
+            #print "FROM",fromline,"TO",toline
         except StopIteration:
             break
         try:
             blankline = next(fi).strip()
-            if blankline != '':
-                raise Exception("parse_kpoints: unexpected format.")
+            #print "BLANKLINE",blankline
+            #if blankline != '':
+            #    raise Exception("parse_kpoints: unexpected format.")
         except StopIteration:
             finished = True
         kline['from_symbol'] = "".join(fromline[3:]).lstrip('! ')
@@ -619,7 +621,7 @@ def gapdata_eigenvalues(eigenvalues, kpts, fermi):
         homo = spinhomo[0]
         homo_k = spinhomo_k[0]
         
-    if spins > 1 and spinlumo[1] > spinlumo[0]:
+    if spins > 1 and spinlumo[1] < spinlumo[0]:
         lumo = spinlumo[1]
         lumo_k = spinlumo_k[1]
     else:
@@ -658,7 +660,7 @@ def gapdata_dos(energies, tdos, fermi):
                     break
         spingap[spin] = spinlumo[spin]-spinhomo[spin]
     min_of_spingaps = min(spingap)
-    homo=min(spinhomo)
+    homo=max(spinhomo)
     lumo=min(spinlumo)
     gap = lumo-homo
     

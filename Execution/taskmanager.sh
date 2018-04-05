@@ -763,7 +763,7 @@ function find_next_task {
 	    if [ "$STATUS" == "waitsubtasks" ]; then
 		logmsg 1 "Find next task: is a subtasks-type task, checking if it is finished"
 
-		ANY=$(find "$TASK" -name "ht.task.*.running" -o -name "ht.task.*.waitstart" -o -name "ht.task.*.waitstep" -o -name "ht.task.*.waitsubtasks" | wc -l)
+		ANY=$(cd "$TASK"; find . -name "ht.task.*.running" -o -name "ht.task.*.waitstart" -o -name "ht.task.*.waitstep" -o -name "ht.task.*.waitsubtasks" | wc -l)
 		if [ "$ANY" -gt 0 ]; then
 		    logmsg 1 "Find next task: subruns task not finished, waiting for all subtasks to complete."
 		    continue
