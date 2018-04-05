@@ -1,0 +1,96 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 0168fa52562bfd3e8c3091ff36a9298b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/24/9012499.cif $
+#------------------------------------------------------------------------------
+data_9012499
+loop_
+_publ_author_name
+'Crichton, W. A.'
+'Mezouar, M.'
+'Monaco, G.'
+'Falconi, S.'
+_publ_section_title
+;
+ Phosphorus: new in situ powder data from large-volume apparatus
+ Locality: synthetic
+ Sample: at P = 1.2 GPa and T = 1100 K
+;
+_journal_name_full               'Powder Diffraction'
+_journal_page_first              155
+_journal_page_last               158
+_journal_volume                  18
+_journal_year                    2003
+_chemical_name_mineral           Phosphorus
+_diffrn_ambient_pressure         1.2e+06
+_diffrn_ambient_temperature      1100
+_exptl_crystal_density_diffrn    2.770
+_cod_database_code               9012499
+_journal_paper_doi 10.1154/1.1545115
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 2/m 2/c 21/a"
+_symmetry_space_group_name_Hall '-C 2bc 2'
+_[local]_omdb_cod_original_Hall '-C 2bc 2'
+_symmetry_Int_Tables_number 64
+ 
+_cell_length_a    3.31990
+_cell_length_b    10.36780
+_cell_length_c    4.31540
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x+1/2,y,-z+1/2
+4 -x+1/2,-y,z+1/2
+5 -x,-y,-z
+6 -x,y,z
+7 x+1/2,-y,z+1/2
+8 x+1/2,y,-z+1/2
+9 x+1/2,y+1/2,z
+10 x+1/2,-y+1/2,-z
+11 -x,y+1/2,-z+1/2
+12 -x,-y+1/2,z+1/2
+13 -x+1/2,-y+1/2,-z
+14 -x+1/2,y+1/2,z
+15 x,-y+1/2,z+1/2
+16 x,y+1/2,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+P1 P 8 f 0.00000 0.10437 0.41790 1.0
+ 
+

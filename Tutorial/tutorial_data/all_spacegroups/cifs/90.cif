@@ -1,0 +1,90 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: b5b919c103e631d579a367b1b13cd555
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/98/9009817.cif $
+#------------------------------------------------------------------------------
+data_9009817
+loop_
+_publ_author_name
+'Minets, Y. V.'
+'Voroshilov, Y. V.'
+'Pan'ko, V. V.'
+_publ_section_title
+;
+ The structures of mercury chalcogenhalogenides Hg3X2Hal2
+ Note: synthetic, superstructure
+;
+_journal_name_full               'Journal of Alloys and Compounds'
+_journal_page_first              109
+_journal_page_last               114
+_journal_volume                  367
+_journal_year                    2004
+_chemical_name_mineral           Arzakite
+_exptl_crystal_density_diffrn    7.120
+_[local]_cod_chemical_formula_sum_orig 'Hg6 S4 Br3 I'
+_cod_database_code               9009817
+_journal_paper_doi 10.1016/j.jallcom.2003.08.020
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4 21 2"
+_symmetry_space_group_name_Hall 'P 4ab 2ab'
+_[local]_omdb_cod_original_Hall 'P 4ab 2ab'
+_symmetry_Int_Tables_number 90
+ 
+_cell_length_a    13.32000
+_cell_length_b    13.32000
+_cell_length_c    4.46500
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x+1/2,y+1/2,-z
+4 -x,-y,z
+5 -y,-x,-z
+6 -y+1/2,x+1/2,z
+7 y+1/2,-x+1/2,z
+8 y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Hg1 Hg 8 g 0.85040 0.61410 0.49700 1.0
+Hg2 Hg 8 g 0.30260 0.52500 -0.00100 0.5
+S1 S 8 g -0.03250 0.75040 0.50900 1.0
+Br1 Br 2 c 0.00000 0.50000 -0.00400 1.0
+Br2 Br 4 e 0.72390 0.72390 0.00000 1.0
+I1 I 2 a 0.00000 0.00000 0.00000 1.0
+ 
+

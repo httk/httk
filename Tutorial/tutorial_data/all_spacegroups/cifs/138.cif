@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: afb6a81050b230c4df835d79c07a690c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-09 13:53:25 +0000 (Thu, 09 May 2013) $
+#$Revision: 86000 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/55/9015583.cif $
+#------------------------------------------------------------------------------
+data_9015583
+loop_
+_publ_author_name
+'Keesom, W.'
+'Taconis, K.'
+_publ_section_title
+;
+ On the structure of solid chlorine
+ _cod_database_code 1010068
+;
+_journal_name_full
+'Proceedings of the Koninklijke Nederlandse Academie van Wetenschappen'
+_journal_page_first              314
+_journal_page_last               314
+_journal_volume                  39
+_journal_year                    1936
+_database_code_amcsd             0017003
+_exptl_crystal_density_diffrn    2.100
+_[local]_cod_cif_authors_sg_H-M  'P 42/n c m'
+_cod_database_code               9015583
+_amcsd_formula_title             Cl2
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42/n 21/c 2/m (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4ac 2ac'
+_[local]_omdb_cod_original_Hall 'P 4n 2ab -1n'
+_symmetry_Int_Tables_number 138
+ 
+_cell_length_a    8.56000
+_cell_length_b    8.56000
+_cell_length_c    6.12000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y,-z+1/2
+3 -x,y+1/2,-z+1/2
+4 -x+1/2,-y+1/2,z
+5 -y,-x,-z
+6 -y+1/2,x,z+1/2
+7 y,-x+1/2,z+1/2
+8 y+1/2,x+1/2,-z
+9 -x,-y,-z
+10 -x+1/2,y,z+1/2
+11 x,-y+1/2,z+1/2
+12 x+1/2,y+1/2,-z
+13 y,x,z
+14 y+1/2,-x,-z+1/2
+15 -y,x+1/2,-z+1/2
+16 -y+1/2,-x+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cl1 Cl 16 j 0.37500 -0.08300 0.85700 1.0
+ 
+

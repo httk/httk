@@ -1,0 +1,89 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 02661cd14d266e9e54a11c5833ac51d0
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/15/2101573.cif $
+#------------------------------------------------------------------------------
+data_2101573
+loop_
+_publ_author_name
+'Abrahams, S. C.'
+'Mirsky, K.'
+'Nielson, R. M.'
+_publ_section_title
+;
+ Prediction of ferroelectricity in recent Inorganic Crystal Structure
+ Database entries under space group <i>Pba</i>2
+;
+_journal_issue                   5
+_journal_name_full               'Acta Crystallographica Section B'
+_journal_page_first              806
+_journal_page_last               809
+_journal_volume                  52
+_journal_year                    1996
+_diffrn_radiation_type           Mo
+_diffrn_radiation_wavelength     0.71073
+_[local]_cod_data_source_file    an0526.cif
+_[local]_cod_data_source_block   an0526b
+_[local]_cod_chemical_formula_sum_orig 'Ba0.6 Bi1 K0.4 O2.3'
+_cod_database_code               2101573
+_journal_paper_doi 10.1107/S0108768196004582
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P b a 2"
+_symmetry_space_group_name_Hall 'P 2 -2ab'
+_[local]_omdb_cod_original_Hall 'P 2 -2ab'
+_symmetry_Int_Tables_number 32
+ 
+_cell_length_a    6.12700
+_cell_length_b    12.01600
+_cell_length_c    4.37800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x+1/2,y+1/2,z
+4 x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ba1 Ba 4 c 0.30600 0.63800 -0.01100 1.0
+Bi1 Bi 4 c 0.78300 0.61400 0.51100 1.0
+O1 O 2 a 0.00000 0.00000 0.54400 1.0
+O2 O 2 b 0.00000 0.50000 0.54400 1.0
+O3 O 4 c 0.21000 0.74600 0.55300 1.0
+O4 O 4 c 0.79900 0.61600 0.00400 1.0
+ 
+

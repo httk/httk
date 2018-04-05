@@ -1,0 +1,84 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: d025c92e78a8ae20f0fd2aec1f64491c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/89/1008916.cif $
+#------------------------------------------------------------------------------
+data_1008916
+_chemical_name_systematic          'Potassium diytterbium fluoride - $-beta'
+_publ_section_title
+;
+Structure cristalline de la phase $-beta-K Yb2 F7
+;
+loop_
+_publ_author_name
+  'le Fur, Y'
+  'Aleonard, S'
+  'Gorius, M F'
+  'Roux, M T'
+_journal_name_full                 'Journal of Solid State Chemistry'
+_journal_coden_ASTM                JSSCBI
+_journal_volume                    35
+_journal_year                      1980
+_journal_page_first                29
+_journal_page_last                 33
+_refine_ls_R_factor_all            0.04
+_cod_database_code 1008916
+_journal_paper_doi 10.1016/0022-4596(80)90459-4
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 1 2 1"
+_symmetry_space_group_name_Hall 'P 2y'
+_[local]_omdb_cod_original_Hall 'P 2y'
+_symmetry_Int_Tables_number 3
+ 
+_cell_length_a    6.43500
+_cell_length_b    4.21700
+_cell_length_c    6.52800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  115.94000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+K1 K 1 b 0.00000 0.50000 0.50000 1.0
+Yb1 Yb 2 e 0.69120 0.00000 0.80780 1.0
+F1 F 2 e 0.04540 0.00000 0.83260 1.0
+F2 F 1 c 0.50000 0.10720 0.00000 1.0
+F3 F 2 e 0.67100 0.00000 0.45700 1.0
+F4 F 2 e 0.70680 0.50000 0.78880 1.0
+ 
+

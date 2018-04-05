@@ -1,0 +1,88 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 7256fff838c884f638680ebb7a1bca2b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-02 19:45:27 +0000 (Thu, 02 May 2013) $
+#$Revision: 84659 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/12/1511272.cif $
+#------------------------------------------------------------------------------
+data_1511272
+loop_
+_publ_author_name
+'Amoussou, D.'
+'Touboul, M.'
+_publ_section_title
+;
+ Structure cristalline de Tl B O2
+;
+_journal_name_full               'Revue de Chimie Minerale'
+_journal_page_first              223
+_journal_page_last               231
+_journal_volume                  15
+_journal_year                    1978
+_chemical_name_systematic        'Tl (B O2)'
+_citation_journal_id_ASTM        RVCMA8
+_[local]_cod_data_source_file    boron0-1_394.cif
+_[local]_cod_data_source_block   B1O2Tl1
+_[local]_cod_chemical_formula_sum_orig 'B1 O2 Tl1'
+_cod_original_cell_volume        509.2422
+_cod_database_code               1511272
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 41"
+_symmetry_space_group_name_Hall 'P 4w'
+_[local]_omdb_cod_original_Hall 'P 4w'
+_symmetry_Int_Tables_number 76
+ 
+_cell_length_a    7.38000
+_cell_length_b    7.38000
+_cell_length_c    9.35000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z+1/2
+3 -y,x,z+1/4
+4 y,-x,z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+B1 B 4 a 0.13500 0.45500 0.42500 1.0
+B2 B 4 a 0.46100 0.40200 0.51400 1.0
+O1 O 4 a -0.04200 0.45400 0.44100 1.0
+O2 O 4 a 0.21300 0.50100 0.29200 1.0
+O3 O 4 a 0.25700 0.42600 0.52900 1.0
+O4 O 4 a 0.51500 0.46000 0.37700 1.0
+Tl1 Tl 4 a 0.26110 0.02250 0.40750 1.0
+Tl2 Tl 4 a 0.26180 0.26340 0.00000 1.0
+ 
+

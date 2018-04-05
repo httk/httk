@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+cd "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/"
+eval "$@"

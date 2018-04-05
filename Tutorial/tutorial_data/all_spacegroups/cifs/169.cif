@@ -1,0 +1,186 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 0006ed3cd17afc3aeef7920e3020cfd0
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 23:58:39 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120093 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/35/4313557.cif $
+#------------------------------------------------------------------------------
+data_4313557
+loop_
+_publ_author_name
+'Jeffrey B. Cornelius'
+'Robert M. Trapp'
+'Terry J. Delord'
+'Frank R. Fronczek'
+'Steven F. Watkins'
+'Jill Jasin Orosz'
+'Ronald L. Musselman'
+_publ_section_title
+;
+ One-Dimensional Collective Electronic Effects in the Helically Stacked
+ Cs2[Ni(CN)4].H2O and Cs2[Pt(CN)4].H2O: X-ray Structure, Polarized
+ Specular Reflectance, and ZINDO Calculations
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              3026
+_journal_page_last               3035
+_journal_volume                  42
+_journal_year                    2003
+_chemical_compound_source        'local laboratory'
+_computing_cell_refinement
+'Denzo and Scalepak (Otwinowski & Minor, 1997)'
+_computing_data_collection       'COLLECT (Nonius 2000)'
+_computing_data_reduction
+'Denzo and Scalepak (Otwinowski & Minor, 1997)'
+_computing_molecular_graphics    'ORTEP-3 for Windows (Farrugia, 1997)'
+_computing_publication_material  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SIR97 (Altomare, et al., 1999)'
+_diffrn_ambient_temperature      100
+_diffrn_measured_fraction_theta_full 0.999
+_diffrn_measured_fraction_theta_max 0.999
+_diffrn_measurement_device       'KappaCCD (with Oxford Cryostream)'
+_diffrn_measurement_method       '\w scans with \k offsets'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.040
+_diffrn_reflns_av_sigmaI/netI    0.0219
+_diffrn_reflns_limit_h_max       15
+_diffrn_reflns_limit_h_min       -15
+_diffrn_reflns_limit_k_max       13
+_diffrn_reflns_limit_k_min       -13
+_diffrn_reflns_limit_l_max       30
+_diffrn_reflns_limit_l_min       -30
+_diffrn_reflns_number            27168
+_diffrn_reflns_theta_full        35.0
+_diffrn_reflns_theta_max         35.0
+_diffrn_reflns_theta_min         3.2
+_diffrn_standards_decay_%        <2
+_diffrn_standards_number         0
+_exptl_absorpt_coefficient_mu    9.096
+_exptl_absorpt_correction_T_max  0.336
+_exptl_absorpt_correction_T_min  0.298
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'HKL Scalepack (Otwinowski & Minor 1997)'
+_exptl_crystal_colour            yellow
+_exptl_crystal_density_diffrn    2.973
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       fragment
+_exptl_crystal_F_000             1200
+_exptl_crystal_size_max          0.16
+_exptl_crystal_size_mid          0.15
+_exptl_crystal_size_min          0.12
+_refine_diff_density_max         0.61
+_refine_diff_density_min         -0.44
+_refine_diff_density_rms         0.113
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.017(17)
+_refine_ls_extinction_coef       0.00250(7)
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   1.119
+_refine_ls_hydrogen_treatment    refxyz
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     116
+_refine_ls_number_reflns         4396
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.118
+_refine_ls_R_factor_all          0.017
+_refine_ls_R_factor_gt           0.016
+_refine_ls_shift/su_max          0.002
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+1.6238P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.034
+_refine_ls_wR_factor_ref         0.034
+_reflns_number_gt                4335
+_reflns_number_total             4396
+_reflns_threshold_expression     I>2\s(I)
+_[local]_cod_data_source_file    ic026101asi20030128_034102.cif
+_[local]_cod_data_source_block   CsNiCNcryo
+_[local]_cod_cif_authors_sg_H-M  'P 61 '
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Hexagonal' changed to 'hexagonal'
+according to the built-in table from CIF Core dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1646 2011-03-28 12:23:43Z adriana 
+;
+_cod_database_code               4313557
+_journal_paper_doi 10.1021/ic026101a
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 61"
+_symmetry_space_group_name_Hall 'P 61'
+_[local]_omdb_cod_original_Hall 'P 61'
+_symmetry_Int_Tables_number 169
+ 
+_cell_length_a    9.52600
+_cell_length_b    9.52600
+_cell_length_c    19.04300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/6
+3 -y,x-y,z+1/3
+4 -x,-y,z+1/2
+5 -x+y,-x,z+2/3
+6 y,-x+y,z+5/6
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cs1 Cs 6 a 0.33672 0.41699 0.25379 1.0
+Cs2 Cs 6 a 0.35062 0.43710 0.00000 1.0
+Ni1 Ni 6 a 0.03301 0.86250 0.29425 1.0
+C1 C 6 a -0.01530 0.03060 0.29249 1.0
+C2 C 6 a 0.08930 0.69960 0.29608 1.0
+C3 C 6 a 0.24790 0.00850 0.27293 1.0
+C4 C 6 a 0.81670 0.71620 0.31529 1.0
+N1 N 6 a -0.04320 0.13550 0.29186 1.0
+N2 N 6 a 0.13070 0.60400 0.29681 1.0
+N3 N 6 a 0.38190 0.09750 0.25973 1.0
+N4 N 6 a 0.68220 0.62650 0.32912 1.0
+O1 O 6 a 0.32380 0.61940 0.12817 1.0
+H1 H 6 a 0.25700 0.64800 0.11400 1.0
+H2 H 6 a 0.41300 0.69700 0.13400 1.0
+ 
+

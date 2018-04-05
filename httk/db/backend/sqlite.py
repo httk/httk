@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,10 +18,10 @@
 """
 This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
 """
-
 import os, sys
 import sqlite3 as sqlite
 import atexit
+from httk.core import FracScalar
 
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
@@ -59,8 +59,6 @@ class Sqlite(object):
         self.connection.rollback()
 
     def commit(self):
-        #if self._block_commit:
-       #     raise Exception("Who is commiting?!")
         self.connection.commit()
 
     class SqliteCursor(object):
@@ -73,7 +71,7 @@ class Sqlite(object):
                 print >> sys.stderr, "DEBUG: EXECUTING SQL:"+sql+" :: "+str(values)
             try:
                 self.cursor.execute(sql,values)
-            except Exception as e:
+            except Exception:
                 info = sys.exc_info()
                 raise Exception("backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1])), None, info[2]
 
@@ -112,6 +110,10 @@ class Sqlite(object):
                 typestr = "REAL"
             elif columntypes[i] == str:
                 typestr = "TEXT"
+            elif columntypes[i] == FracScalar:
+                typestr = "INTEGER"
+            elif columntypes[i] == bool:
+                typestr = "INTEGER"
             else:
                 raise Exception("backend.Sqlite.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")                      
             

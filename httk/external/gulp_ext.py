@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -16,29 +16,26 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core import citation
-citation.add_ext_citation('General Utility Lattice Program (GULP)', "Julian D. Gale")
+citation.add_ext_citation('Jmol', "Jmol: an open-source Java viewer for chemical structures in 3D. http://www.jmol.org/")
 
 import os
 
 from httk import config
 from command import Command
 import httk
+import httk.iface
 
 try:
-    gulp_path=config.get('paths', 'gulp')
+    jmol_path=config.get('paths', 'jmol')
 except Exception:
-    gulp_path = None
-    raise Exception("httk.external.gulp imported with no gulp path set in httk.cfg")
+    jmol_path = None
+    raise Exception("httk.external.jmol_ext imported with no jmol path set in httk.cfg")
 
-def gulp(cwd, args,timeout=10):
-    #p = subprocess.Popen([gulp_path]+args, stdout=subprocess.PIPE, 
-    #                                   stderr=subprocess.PIPE, cwd=cwd)
-    #print "COMMAND GULP"
-    out,err,completed = Command(gulp_path,args,cwd=cwd).run(timeout)
-    #print "COMMMDN GULP END"
+def jmol(cwd, args,timeout=10):
+    out,err,completed = Command(jmol_path,args,cwd=cwd).run(timeout)
     return out, err, completed    
 
-def get_fake_energy(struct):
+def show(struct):
     tmpdir = httk.utils.create_tmpdir()
     
     f = httk.IoAdapterFilename(os.path.join(tmpdir,"atoms.gin"))

@@ -1,0 +1,94 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 1d9b082096d79eba6b13622f74b83e1f
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-28 13:58:47 +0000 (Sat, 28 Dec 2013) $
+#$Revision: 91933 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/2/10/12/2101236.cif $
+#------------------------------------------------------------------------------
+data_2101236
+loop_
+_publ_author_name
+'Kusz, J.'
+'B\"ohm, H.'
+_publ_section_title
+;
+ The low-temperature structure of NbTe~4~
+;
+_journal_issue                   6
+_journal_name_full               'Acta Crystallographica Section B'
+_journal_page_first              649
+_journal_page_last               655
+_journal_volume                  50
+_journal_year                    1994
+_[local]_cod_chemical_formula_sum_orig 'Nb1 Te4'
+_diffrn_radiation_type           Mo
+_diffrn_radiation_wavelength     0.7107
+_[local]_cod_data_source_file    se0142.cif
+_cod_database_code 2101236
+_journal_paper_doi 10.1107/S0108768194005161
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/m 2/c 2/c"
+_symmetry_space_group_name_Hall '-P 4 2c'
+_[local]_omdb_cod_original_Hall '-P 4 2c'
+_symmetry_Int_Tables_number 124
+ 
+_cell_length_a    6.48350
+_cell_length_b    6.48350
+_cell_length_c    6.82170
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z+1/2
+4 -x,-y,z
+5 -y,-x,-z+1/2
+6 -y,x,z
+7 y,-x,z
+8 y,x,-z+1/2
+9 -x,-y,-z
+10 -x,y,z+1/2
+11 x,-y,z+1/2
+12 x,y,-z
+13 y,x,z+1/2
+14 y,-x,-z
+15 -y,x,-z
+16 -y,-x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Nb1 Nb 2 a 0.00000 0.00000 0.25000 1.0
+Te1 Te 8 m 0.23590 0.09210 0.00000 1.0
+ 
+

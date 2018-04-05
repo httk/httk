@@ -1,0 +1,279 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 7d1ff02a513cb77bb7c57cda2f94ed0d
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-03-24 11:56:38 +0000 (Mon, 24 Mar 2014) $
+#$Revision: 107932 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/8/10/28/8102899.cif $
+#------------------------------------------------------------------------------
+data_8102899
+loop_
+_publ_author_name
+'Makongo, J. P. A.'
+'Kudla, C.'
+'Prots, Yu.'
+'Niewa, R.'
+'Burkhardt, U.'
+'Kreiner, G.'
+_publ_section_title
+;
+Crystal structure of trimagnesium monopalladium, Mg~3~Pd
+;
+_journal_issue                   3
+_journal_name_full
+'Zeitschrift f\"ur Kristallographie - New Crystal Structures'
+_journal_page_first              289
+_journal_page_last               292
+_journal_volume                  220
+_journal_year                    2005
+_chemical_name_common            'Trimagnesium palladium'
+_chemical_name_systematic        'Trimagnesium palladium'
+_computing_cell_refinement       'CrystalClear (Rigaku Corp., 2000)'
+_computing_data_collection       'CrystalClear (Rigaku Corp., 2000)'
+_computing_data_reduction        'CrystalClear (Rigaku Corp., 2000)'
+_computing_molecular_graphics    'DIAMOND, Vers. 2.0 [7]'
+_computing_structure_refinement  'SHELXL-97 [6]'
+_computing_structure_solution    'SHELXS-97 [6]'
+_diffrn_ambient_temperature      293(2)
+_diffrn_detector_area_resol_mean 5.0000
+_diffrn_measured_fraction_theta_full 0.963
+_diffrn_measured_fraction_theta_max 0.963
+_diffrn_measurement_details
+;
+scan:
+    Number of images: 1
+               Slice: 0.0000 - 3.0000
+         Image width: 3.0000
+            Exp time: 720.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 0.0000
+                 Phi: 0.0000
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 1
+               Slice: 60.0000 - 63.0000
+         Image width: 3.0000
+            Exp time: 720.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 0.0000
+                 Phi: 0.0000
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 1
+               Slice: 120.0000 - 123.0000
+         Image width: 3.0000
+            Exp time: 720.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 0.0000
+                 Phi: 0.0000
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 1
+               Slice: 50.0000 - 150.0000
+         Image width: 100.0000
+            Exp time: 3600.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 50.2790
+                 Phi: -166.4270
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 1
+               Slice: 50.0000 - 150.0000
+         Image width: 100.0000
+            Exp time: 3600.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 17.0730
+                 Phi: 74.7100
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 24
+               Slice: 40.0000 - 160.0000
+         Image width: 5.0000
+            Exp time: 2400.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 0.0000
+                 Phi: 0.0000
+                 XTD: 127.4000
+              2theta: 0.0000
+scan:
+    Number of images: 24
+               Slice: 40.0000 - 160.0000
+         Image width: 5.0000
+            Exp time: 2400.0000
+       Rotation axis: omega
+               Omega: 0.0000
+                 Chi: 45.0000
+                 Phi: 90.0000
+                 XTD: 127.4000
+              2theta: 0.0000
+
+;
+_diffrn_measurement_device
+;
+RAXIS conversion
+;
+_diffrn_measurement_device_details
+;
+Eulerian 3-circle
+;
+_diffrn_measurement_method       dtprofit.ref
+_diffrn_orient_matrix_type       d*Trek
+_diffrn_orient_matrix_UB_11      -0.1329
+_diffrn_orient_matrix_UB_12      0.0559
+_diffrn_orient_matrix_UB_13      -0.0084
+_diffrn_orient_matrix_UB_21      -0.0267
+_diffrn_orient_matrix_UB_22      0.1313
+_diffrn_orient_matrix_UB_23      0.0539
+_diffrn_orient_matrix_UB_31      0.0270
+_diffrn_orient_matrix_UB_32      0.0485
+_diffrn_orient_matrix_UB_33      -0.1048
+_diffrn_radiation_detector       RX
+_diffrn_radiation_monochromator  'Graphite Monochromator'
+_diffrn_radiation_source         'Sealed Tube'
+_diffrn_radiation_type           'Mo K\a'
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0324
+_diffrn_reflns_av_sigmaI/netI    0.0186
+_diffrn_reflns_limit_h_max       10
+_diffrn_reflns_limit_h_min       -11
+_diffrn_reflns_limit_k_max       12
+_diffrn_reflns_limit_k_min       -12
+_diffrn_reflns_limit_l_max       13
+_diffrn_reflns_limit_l_min       -12
+_diffrn_reflns_number            6212
+_diffrn_reflns_reduction_process 'Lp corrections applied'
+_diffrn_reflns_theta_full        35.38
+_diffrn_reflns_theta_max         35.38
+_diffrn_reflns_theta_min         2.94
+_diffrn_source_current           40.0000
+_diffrn_source_power             2.0800
+_diffrn_source_voltage           52.0000
+_exptl_absorpt_coefficient_mu    6.261
+_exptl_absorpt_correction_T_max  0.855
+_exptl_absorpt_correction_T_min  0.685
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'CrystalClear (Rigaku, 2000)'
+_exptl_crystal_colour            silver
+_exptl_crystal_density_diffrn    3.840
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       irregular
+_exptl_crystal_F_000             492
+_exptl_crystal_size_max          0.090
+_exptl_crystal_size_mid          0.060
+_exptl_crystal_size_min          0.025
+_refine_diff_density_max         0.597
+_refine_diff_density_min         -0.564
+_refine_diff_density_rms         0.126
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.42(7)
+_refine_ls_extinction_coef       0.0034(4)
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   1.426
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     26
+_refine_ls_number_reflns         715
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.426
+_refine_ls_R_factor_all          0.0232
+_refine_ls_R_factor_gt           0.0225
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0103P)^2^+0.1999P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0445
+_refine_ls_wR_factor_ref         0.0447
+_reflns_number_gt                707
+_reflns_number_total             715
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    409824.cff
+_[local]_cod_data_source_block   jm_1108b
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+'_exptl_absorpt_correction_type' value 'Multi-scan' changed to
+'multi-scan' according to
+'/home/saulius/struct/CIF-dictionaries/cif_core.dic' dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_enum 1555 2011-01-17 13:19:09Z saulius 
+;
+_cod_database_code               8102899
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 63 c m"
+_symmetry_space_group_name_Hall 'P 6c -2'
+_[local]_omdb_cod_original_Hall 'P 6c -2'
+_symmetry_Int_Tables_number 185
+ 
+_cell_length_a    7.98700
+_cell_length_b    7.98700
+_cell_length_c    8.42200
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/2
+3 -y,x-y,z
+4 -x,-y,z+1/2
+5 -x+y,-x,z
+6 y,-x+y,z+1/2
+7 -x+y,y,z+1/2
+8 -x,-x+y,z
+9 -y,-x,z+1/2
+10 x-y,-y,z
+11 x,x-y,z+1/2
+12 y,x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pd1 Pd 6 c 0.32839 0.00000 0.06760 1.0
+Mg1 Mg 2 a 0.00000 0.00000 0.00000 1.0
+Mg2 Mg 4 b 0.33333 0.66667 0.11260 1.0
+Mg3 Mg 6 c 0.37647 0.00000 0.39540 1.0
+Mg4 Mg 6 c 0.71800 0.00000 0.23930 1.0
+ 
+

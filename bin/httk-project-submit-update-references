@@ -1,0 +1,57 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+URL=$1
+
+if [ -z "$URL" ]; then
+    URL="http://openmaterialsdb.se/upload"
+fi
+
+echo "==== httk-project-submit-update-references"
+echo ""
+
+if [ -z "$HTTK_PROJECT_DIR" ]; then
+    echo "You are not in a subdirectory to a project."
+    echo "If this is a new project, you need to run httk-project"
+    echo "in your project directory."
+    exit 1
+fi
+
+cd "$HTTK_PROJECT_DIR"
+
+echo "Signing references file ht.project/references with project key. (this takes a moment)"
+#TAGSIGNATURE=$(cat ht.project/tags | "${HTTK_BIN_PATH}/internal/ed25519_sign" ht.project/keys/key1.priv)
+PUBSIGNATURE=$(cat ht.project/references | "${HTTK_BIN_PATH}/internal/ed25519_sign.py" ht.project/keys/key1.priv)
+
+echo ""
+echo "Ready to start submitting your updated references file for this project."
+echo "Do you want to start uploading now? [Y/N]"
+read YESNO
+if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+    echo "User cancelled. Nothing uploaded."
+    exit 0
+fi
+
+ERRORS=0
+function CHECKERRORS() {
+    if [ "$?" != "0" ]; then
+	ERRORS=$((ERRORS+1))
+    fi
+}
+
+#"${HTTK_BIN_PATH}/internal/post.py" "$URL/tags.php" "ht.project/tags" project-signature "${TAGSIGNATURE}" public-key "$(cat ht.project/keys/key1.pub)"
+
+echo "Attempting to send ht.project/references (verification of signature takes some time, please be patient)"
+
+"${HTTK_BIN_PATH}/internal/post.py" "$URL/references.php" "ht.project/references" project-signature "$PUBSIGNATURE" public-key "$(cat ht.project/keys/key1.pub)"
+echo ""
+
+if [ "$?" != "0" ]; then
+    echo "There was an error updating the references."
+else
+    echo "Updated references uploaded."
+fi
+

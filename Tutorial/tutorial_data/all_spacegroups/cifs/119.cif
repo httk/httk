@@ -1,0 +1,101 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: e64d659bf16c90565ae0518c065d7ad8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-04-28 17:31:03 +0000 (Sun, 28 Apr 2013) $
+#$Revision: 82151 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/50/90/1509091.cif $
+#------------------------------------------------------------------------------
+data_1509091
+loop_
+_publ_author_name
+'Jaulmes, S.'
+'Guittard, M.'
+'Mazurier, A.'
+_publ_section_title
+;
+ Caracterisation et etude structurale d'un nouveau tellurure double
+ d'argent et de gallium Ag0.317 Ga0.561 (vac)0.122 Te
+;
+_journal_name_full
+;
+Comptes Rendus Hebdomadaires des Seances de l'Academie des Sciences, Serie 2
+ (1984-1993)
+;
+_journal_page_first              861
+_journal_page_last               863
+_journal_volume                  299
+_journal_year                    1984
+_chemical_name_systematic        'Silver gallium telluride (0.32/0.56/1)'
+_citation_journal_id_ASTM        CRAMED
+_[local]_cod_data_source_file    silver0-1_53.cif
+_[local]_cod_data_source_block   Ag0.317Ga0.561Te1
+_[local]_cod_chemical_formula_sum_orig 'Ag0.317 Ga0.561 Te1'
+_cod_original_cell_volume        117.4746
+_cod_database_code               1509091
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I -4 m 2"
+_symmetry_space_group_name_Hall 'I -4 -2'
+_[local]_omdb_cod_original_Hall 'I -4 -2'
+_symmetry_Int_Tables_number 119
+ 
+_cell_length_a    4.43000
+_cell_length_b    4.43000
+_cell_length_c    5.98600
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,-x,-z
+4 y,x,-z
+5 -x,y,z
+6 x,-y,z
+7 y,-x,-z
+8 -y,x,-z
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y+1/2,z+1/2
+11 -y+1/2,-x+1/2,-z+1/2
+12 y+1/2,x+1/2,-z+1/2
+13 -x+1/2,y+1/2,z+1/2
+14 x+1/2,-y+1/2,z+1/2
+15 y+1/2,-x+1/2,-z+1/2
+16 -y+1/2,x+1/2,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Te1 Te 2 a 0.00000 0.00000 0.00000 1.0
+Ag1 Ag 2 d 0.00000 0.50000 0.75000 0.317
+Ga1 Ga 2 d 0.00000 0.50000 0.75000 0.561
+ 
+

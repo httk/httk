@@ -33,3 +33,15 @@ dist: preclean templates
 	tar -zcvf "httk_v$$(cat VERSION).tgz" Examples Programs Templates httk README.txt INSTALL.txt CHANGELOG.txt \
 		httk.cfg Makefile COPYING --exclude=".*" --exclude="Programs/runs/*"
 	md5sum "httk_v$$(cat VERSION).tgz" > "httk_$$(cat VERSION).md5"
+
+presentation: 
+	( cd Presentation; \
+	   make; \
+	)
+	cp Presentation/presentation.pdf httk_overview.pdf
+
+presentation_clean: 
+	( cd Presentation; \
+	   make clean; \
+	)
+	rm -f httk_overview.pdf

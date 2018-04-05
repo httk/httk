@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+if [ -n "$3" ]; then
+    rsync -az -r --files-from=- "$1" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR"/Runs/"$2" --exclude-from "$3"
+else
+    rsync -az -r --files-from=- "$1" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR"/Runs/"$2"
+fi

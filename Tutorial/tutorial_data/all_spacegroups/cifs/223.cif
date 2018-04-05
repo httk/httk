@@ -1,0 +1,128 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: caed681c2fd94bada9cf75c9440c3abe
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/24/9012465.cif $
+#------------------------------------------------------------------------------
+data_9012465
+loop_
+_publ_author_name
+'Jordan, T. H.'
+'Streib, W. E.'
+'Lipscomb, W. N.'
+_publ_section_title
+;
+ Single-crystal X-ray diffraction study of beta-fluorine
+ Locality: synthetic
+ Note: beta phase, stable between T = 45.55 K & 53.54 K
+;
+_journal_name_full               'Journal of Chemical Physics'
+_journal_page_first              760
+_journal_page_last               764
+_journal_volume                  41
+_journal_year                    1964
+_chemical_name_mineral           Fluorine
+_diffrn_ambient_temperature      45.55
+_exptl_crystal_density_diffrn    0.851
+_[local]_cod_cif_authors_sg_H-M  'P m 3 n'
+_cod_database_code               9012465
+_journal_paper_doi 10.1063/1.1725957
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42/m -3 2/n"
+_symmetry_space_group_name_Hall '-P 4n 2 3'
+_[local]_omdb_cod_original_Hall '-P 4n 2 3'
+_symmetry_Int_Tables_number 223
+ 
+_cell_length_a    6.67000
+_cell_length_b    6.67000
+_cell_length_c    6.67000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y+1/2,-x+1/2,-z+1/2
+14 -y+1/2,x+1/2,z+1/2
+15 y+1/2,-x+1/2,z+1/2
+16 y+1/2,x+1/2,-z+1/2
+17 -x+1/2,-z+1/2,-y+1/2
+18 -x+1/2,z+1/2,y+1/2
+19 x+1/2,-z+1/2,y+1/2
+20 x+1/2,z+1/2,-y+1/2
+21 -z+1/2,-y+1/2,-x+1/2
+22 -z+1/2,y+1/2,x+1/2
+23 z+1/2,-y+1/2,x+1/2
+24 z+1/2,y+1/2,-x+1/2
+25 -x,-y,-z
+26 -x,y,z
+27 x,-y,z
+28 x,y,-z
+29 -y,-z,-x
+30 -y,z,x
+31 y,-z,x
+32 y,z,-x
+33 -z,-x,-y
+34 -z,x,y
+35 z,-x,y
+36 z,x,-y
+37 y+1/2,x+1/2,z+1/2
+38 y+1/2,-x+1/2,-z+1/2
+39 -y+1/2,x+1/2,-z+1/2
+40 -y+1/2,-x+1/2,z+1/2
+41 x+1/2,z+1/2,y+1/2
+42 x+1/2,-z+1/2,-y+1/2
+43 -x+1/2,z+1/2,-y+1/2
+44 -x+1/2,-z+1/2,y+1/2
+45 z+1/2,y+1/2,x+1/2
+46 z+1/2,-y+1/2,-x+1/2
+47 -z+1/2,y+1/2,-x+1/2
+48 -z+1/2,-y+1/2,x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+F1 F 2 a 0.00000 0.00000 0.00000 1.0
+F2 F 6 c 0.25000 0.00000 0.50000 1.0
+ 
+

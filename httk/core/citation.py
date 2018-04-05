@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,17 @@
 """
 Keep track of citation information for different parts of httk, so that this info can be printed out on program exit.
 Turn on either explicitly by calling httk.config.print_citations_at_exit() from your program, or implicitly for all software
-using httk by setting 'auto_print_citations_at_exit=true' in httk.cfg
+using httk by setting 'auto_print_citations_at_exit=yes' in httk.cfg
 
 Right now this is mostly a proof of concept code, and was added in response to a concern that co-authors of the software 
 would not get credit. We should extend this to add a facility to make it easier to track and acknowledge citations
 also of the data being used.
 """
+
+# TODO: Convert to using real instances of the core.reference.Reference class instead.
+
 from httk.config import config
+from reference import Reference, Author
 
 module_citations = {}
 external_citations = {}
@@ -55,18 +59,18 @@ def print_citations():
             else:
                 authors[author] = set([citation])
 
-    credits = []
+    creditlist = []
     for author in authors:
-        credits.append(author+" ("+(", ".join(authors[author]))+")")
+        creditlist.append(author+" ("+(", ".join(authors[author]))+")")
 
     print ""
     print "===================================================="
     print "This program uses the high-throughput toolkit (httk)"
-    print "  (c) 2012-2013",", ".join(credits)
+    print "  (c) 2012-2015",", ".join(creditlist)
     if external_citations != {}:
         print "From within httk the following software was also used:"
     
-        credits = []
+        creditlist = []
         for software in external_citations:
             print "  * "+software+" by "+", ".join(external_citations[software])
     print "===================================================="
@@ -90,5 +94,9 @@ try:
         print_citations_at_exit()
 except Exception:
     pass
+
+httk_author_rickard_armiento = Author.create("Armiento","Rickard")
+httk_reference_main = Reference.create(ref="The high-throughput toolkit (httk) (2012-2015)",authors=[httk_author_rickard_armiento])
+
 
 

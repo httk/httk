@@ -1,0 +1,93 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 0349d43d6ce2731d8afc57447228ae6b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/50/77/1507759.cif $
+#------------------------------------------------------------------------------
+data_1507759
+loop_
+_publ_author_name
+'Bizot, D'
+'Chassaing, J'
+'Pannetier, J'
+'Leblanc, M'
+'Le Bail, A'
+'Ferey, G'
+_publ_section_title
+;
+ Fluorocomplexes of niobium IV - Part V* the magnetic structure of MnNbF6
+;
+_journal_name_full
+;
+Solid State Communications
+;
+_journal_page_first              71
+_journal_page_last               74
+_journal_volume                  58
+_journal_year                    1986
+_diffrn_ambient_temperature      4.2
+_diffrn_radiation_source         neutron
+_diffrn_radiation_wavelength     1.909
+_[local]_cod_data_source_file    MnNbF6.cif
+_[local]_cod_data_source_block   MnNbF6
+_[local]_cod_cif_authors_sg_H-M  'R -3'
+_cod_database_code               1507759
+_journal_paper_doi 10.1016/0038-1098(86)90890-2
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -3"
+_symmetry_space_group_name_Hall '-P 3'
+_[local]_omdb_cod_original_Hall '-P 3'
+_symmetry_Int_Tables_number 147
+ 
+_cell_length_a    5.38500
+_cell_length_b    5.38500
+_cell_length_c    14.39900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 -x,-y,-z
+5 y,-x+y,-z
+6 x-y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Mn1 Mn 1 b 0.00000 0.00000 0.50000 1.0
+Nb1 Nb 1 a 0.00000 0.00000 0.00000 1.0
+F1 F 6 g 0.26180 0.32010 0.08090 1.0
+ 
+

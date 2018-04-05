@@ -1,0 +1,101 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 00fcf20c8689873dc91f7733ce1d9a99
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/09/1510973.cif $
+#------------------------------------------------------------------------------
+data_1510973
+loop_
+_publ_author_name
+'Horvath, C.'
+'Hiebl, K.'
+'Rogl, P.'
+_publ_section_title
+;
+ The crystal structure of Ce Ru2 B2 and isotypic compounds M(Ru, Os)2 B2.
+ M= La, Pr, Nd, Sm, Gd, and Th
+;
+_journal_name_full               'Journal of Solid State Chemistry'
+_journal_page_first              70
+_journal_page_last               77
+_journal_volume                  67
+_journal_year                    1987
+_chemical_name_systematic        'Ce Ru2 B2'
+_citation_journal_id_ASTM        JSSCBI
+_[local]_cod_data_source_file    boron_56.cif
+_[local]_cod_data_source_block   B2Ce1Ru2
+_[local]_cod_chemical_formula_sum_orig 'B2 Ce1 Ru2'
+_cod_original_cell_volume        589.0106
+_cod_database_code               1510973
+_journal_paper_doi 10.1016/0022-4596(87)90340-9
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "F 2 2 2"
+_symmetry_space_group_name_Hall 'F 2 2'
+_[local]_omdb_cod_original_Hall 'F 2 2'
+_symmetry_Int_Tables_number 22
+ 
+_cell_length_a    10.02630
+_cell_length_b    6.48610
+_cell_length_c    9.05730
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 x,y+1/2,z+1/2
+6 x,-y+1/2,-z+1/2
+7 -x,y+1/2,-z+1/2
+8 -x,-y+1/2,z+1/2
+9 x+1/2,y,z+1/2
+10 x+1/2,-y,-z+1/2
+11 -x+1/2,y,-z+1/2
+12 -x+1/2,-y,z+1/2
+13 x+1/2,y+1/2,z
+14 x+1/2,-y+1/2,-z
+15 -x+1/2,y+1/2,-z
+16 -x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ce1 Ce 4 a 0.00000 0.00000 0.00000 1.0
+Ce2 Ce 4 d 0.25000 0.25000 0.75000 1.0
+B1 B 8 g 0.00000 0.00000 0.68660 1.0
+B2 B 8 h 0.25000 0.25000 0.42810 1.0
+Ru1 Ru 8 e 0.36270 0.00000 0.00000 1.0
+Ru2 Ru 8 j 0.38560 0.25000 0.25000 1.0
+ 
+

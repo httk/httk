@@ -1,0 +1,129 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 4947abf31fd8190e38abe8e64ca1f332
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/10/1001073.cif $
+#------------------------------------------------------------------------------
+data_1001073
+_chemical_name_systematic          'Pentaneodymium 16-oxotrimolybdate'
+_[local]_cod_cif_authors_sg_H-M  'P n -3 n Z'
+loop_
+_publ_author_name
+  'Hubert, P H'
+  'Michel, P'
+  'Thozet, A'
+_journal_name_full
+;
+Comptes Rendus Hebdomadaires des Seances de l'Academie des Sciences,
+Serie C, Sciences Chimiques (1966-)
+;
+_journal_coden_ASTM                CHDCAQ
+_journal_volume                    276
+_journal_year                      1973
+_journal_page_first                1779
+_journal_page_last                 1781
+_exptl_crystal_density_meas        6.28(5)
+_refine_ls_R_factor_all            0.15
+_cod_database_code 1001073
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4/n -3 2/n (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4a 2bc 3'
+_[local]_omdb_cod_original_Hall '-P 4a 2bc 3'
+_symmetry_Int_Tables_number 222
+ 
+_cell_length_a    10.99000
+_cell_length_b    10.99000
+_cell_length_c    10.99000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z+1/2
+3 -x+1/2,y,-z+1/2
+4 -x+1/2,-y+1/2,z
+5 y,z,x
+6 y,-z+1/2,-x+1/2
+7 -y+1/2,z,-x+1/2
+8 -y+1/2,-z+1/2,x
+9 z,x,y
+10 z,-x+1/2,-y+1/2
+11 -z+1/2,x,-y+1/2
+12 -z+1/2,-x+1/2,y
+13 -y+1/2,-x+1/2,-z+1/2
+14 -y+1/2,x,z
+15 y,-x+1/2,z
+16 y,x,-z+1/2
+17 -x+1/2,-z+1/2,-y+1/2
+18 -x+1/2,z,y
+19 x,-z+1/2,y
+20 x,z,-y+1/2
+21 -z+1/2,-y+1/2,-x+1/2
+22 -z+1/2,y,x
+23 z,-y+1/2,x
+24 z,y,-x+1/2
+25 -x,-y,-z
+26 -x,y+1/2,z+1/2
+27 x+1/2,-y,z+1/2
+28 x+1/2,y+1/2,-z
+29 -y,-z,-x
+30 -y,z+1/2,x+1/2
+31 y+1/2,-z,x+1/2
+32 y+1/2,z+1/2,-x
+33 -z,-x,-y
+34 -z,x+1/2,y+1/2
+35 z+1/2,-x,y+1/2
+36 z+1/2,x+1/2,-y
+37 y+1/2,x+1/2,z+1/2
+38 y+1/2,-x,-z
+39 -y,x+1/2,-z
+40 -y,-x,z+1/2
+41 x+1/2,z+1/2,y+1/2
+42 x+1/2,-z,-y
+43 -x,z+1/2,-y
+44 -x,-z,y+1/2
+45 z+1/2,y+1/2,x+1/2
+46 z+1/2,-y,-x
+47 -z,y+1/2,-x
+48 -z,-y,x+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Nd1 Nd 8 c 0.00000 0.00000 0.00000 1.0
+Nd2 Nd 12 e 0.52000 0.25000 0.25000 1.0
+Mo1 Mo 12 d 0.00000 0.75000 0.25000 1.0
+O1 O 16 f 0.62800 0.62800 0.62800 1.0
+O2 O 48 i 0.83000 0.57000 0.37000 1.0
+ 
+

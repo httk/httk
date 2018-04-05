@@ -1,0 +1,103 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: af243c5de7b08c037cb5d6684bc356c4
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/11/9011197.cif $
+#------------------------------------------------------------------------------
+data_9011197
+loop_
+_publ_author_name
+'Shoemaker, C. B.'
+'Shoemaker, D. P.'
+'Hopkins, T. E.'
+'Yindepit, S.'
+_publ_section_title
+;
+ Refinement of the structure of beta-manganese and of related phase in the
+ Mn-Ni-Si system
+ Locality: synthetic
+;
+_journal_name_full               'Acta Crystallographica, Section B'
+_journal_page_first              3573
+_journal_page_last               3576
+_journal_volume                  34
+_journal_year                    1978
+_chemical_name_mineral           Manganese-beta
+_exptl_crystal_density_diffrn    7.245
+_cod_database_code               9011197
+_journal_paper_doi 10.1107/S0567740878011620
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 41 3 2"
+_symmetry_space_group_name_Hall 'P 4bd 2ab 3'
+_[local]_omdb_cod_original_Hall 'P 4bd 2ab 3'
+_symmetry_Int_Tables_number 213
+ 
+_cell_length_a    6.31500
+_cell_length_b    6.31500
+_cell_length_c    6.31500
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x,y+1/2,-z+1/2
+4 -x+1/2,-y,z+1/2
+5 y,z,x
+6 y+1/2,-z+1/2,-x
+7 -y,z+1/2,-x+1/2
+8 -y+1/2,-z,x+1/2
+9 z,x,y
+10 z+1/2,-x+1/2,-y
+11 -z,x+1/2,-y+1/2
+12 -z+1/2,-x,y+1/2
+13 -y+3/4,-x+3/4,-z+3/4
+14 -y+1/4,x+3/4,z+1/4
+15 y+1/4,-x+1/4,z+3/4
+16 y+3/4,x+1/4,-z+1/4
+17 -x+3/4,-z+3/4,-y+3/4
+18 -x+1/4,z+3/4,y+1/4
+19 x+1/4,-z+1/4,y+3/4
+20 x+3/4,z+1/4,-y+1/4
+21 -z+3/4,-y+3/4,-x+3/4
+22 -z+1/4,y+3/4,x+1/4
+23 z+1/4,-y+1/4,x+3/4
+24 z+3/4,y+1/4,-x+1/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Mn1 Mn 8 c 0.06361 0.06361 0.06361 1.0
+Mn2 Mn 12 d 0.12500 0.20224 0.45224 1.0
+ 
+

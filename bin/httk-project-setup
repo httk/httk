@@ -1,0 +1,106 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+if [ -n "$2" ]; then
+    cd "$2"
+fi
+
+if [ -z "$1" ]; then
+    NAME=""
+else
+    NAME="$1"
+fi
+
+echo "==== httk-project"
+
+if [ -e ht.project ]; then
+    echo "This is already a httk project directory for project: ${HTTK_PROJECT_NAME}."
+    echo "Nothing done."
+    exit 0
+else
+    if [ -n "$HTTK_PROJECT_DIR" ]; then
+	echo "Warning: this directory is already a subdirectory"
+	echo "of a project. You can still make this a (sub)project"
+	echo ""
+	if [ -n "$1" -a "$1" != "-f" ]; then
+	    echo "Please start script with '-f' as first argument."
+	    echo
+	    exit 1
+	fi
+    fi
+
+    if [ -e ht.tmp.project ]; then
+	echo "This directory already have a temporary directory from an"
+	echo "earlier failed attempt at creating this project, ht.tmp.project."
+	echo "Please remove this and start httk-project-setup again."
+	exit 1
+    fi
+    mkdir ht.tmp.project
+
+    echo "Directory: $(pwd -P)"
+    NAMESUGGEST="$(basename $(pwd))"
+    if [ -z "$NAME" ]; then
+	echo "Do you want to make this directory into a project directory? [Y/N]"
+	read YESNO
+	echo ""
+	if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+	    echo "User cancelled. Nothing done."
+	    exit 0
+	fi
+	echo "What do you want to name this project? [$NAMESUGGEST]"
+	read NAME	    
+	if [ -z "$NAME" ]; then
+	    NAME="$NAMESUGGEST"
+	fi	
+	echo ""
+    fi
+
+    echo "IMPORTANT: cryptographic keys to identify this project are now created"
+    echo "in the directory ht.project/keys"
+    echo "If you upload this project to a public database using our tools"
+    echo "(httk-project-submit) the project private key will not be included."
+    echo "However, anyone with access to the private key: ht.project/keys/key1.priv"
+    echo "can identify themselves to the database as 'owning' this project."
+    echo "So make sure the file system read permission is is set accordingly"
+    echo "for this file!"
+    echo
+    echo "(Creating keys, this takes some time...)"
+    mkdir -p ht.tmp.project/keys
+    ${HTTK_BIN_PATH}/internal/ed25519_genkeys.py ht.tmp.project/keys/key1.pub ht.tmp.project/keys/key1.priv
+    echo ""
+
+    cat > ht.tmp.project/config <<EOF
+[main]
+project_name=$NAME
+excludes=[POSCAR],[POSCAR\.*],[.*~]
+EOF
+
+    echo "A common setup is that you also include the public key that"
+    echo "specifically identifies you, personally, as an owner of this project."
+    echo "Do you want to do this? [Y/N]"
+    read YESNO
+    if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+	echo "Ok, not copying your own public key."
+    else
+	cp "$HTTK_USER_HOME/keys/key1.pub" ht.tmp.project/keys/owner.pub
+    fi
+    echo ""
+    echo "If you want to mark this project as owned by more users"
+    echo "then copy their public keys from their respective"
+    echo "  ~/.httk/keys/key1.pub"
+    echo "Into separate files as ht.project/keys/*.pub"
+    echo ""
+
+    touch ht.tmp.project/tags
+    touch ht.tmp.project/references
+
+    mv ht.tmp.project ht.project
+    echo
+    echo "Directory made into a project directory."
+    echo "Please edit ht.project/config to configure main project settings."
+    echo "(See httk help for info on other files under ht.project/)"
+
+fi

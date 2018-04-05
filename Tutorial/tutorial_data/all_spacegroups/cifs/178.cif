@@ -1,0 +1,172 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 5ecef38376e66ccf3d24fc88d2487d01
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-03-13 09:14:47 +0000 (Thu, 13 Mar 2014) $
+#$Revision: 105776 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/12/01/4120134.cif $
+#------------------------------------------------------------------------------
+data_4120134
+loop_
+_publ_author_name
+'Saskia Stegmaier'
+'Sung-Jin Kim'
+'Alexander Henze'
+'Thomas F. F\"assler'
+_publ_contact_author_address
+;Department Chemie
+Technische Universit\"at M\"unchen
+Lichtenbergstr. 4
+85747 Garching
+Germany
+;
+_publ_contact_author_email       thomas.faessler@lrz.tu-muenchen.de
+_publ_contact_author_fax         '+49 89 28913186'
+_publ_contact_author_name        'Prof. Dr. Thomas F. F\"assler'
+_publ_contact_author_phone       '+49 89 28913134'
+_publ_section_title
+;
+ Tetrahedral Framework Structures: Polymorphic Phase Transition with
+ Reorientation of Hexagonal Helical Channels in the Zintl Compound
+ Na~2~ZnSn~5~ and its Relation to Na~5~Zn~2+<i>x</i>~Sn~10-<i>x</i>~
+;
+_journal_name_full               'Journal of the American Chemical Society'
+_journal_page_first              10654
+_journal_page_last               10663
+_journal_paper_doi               10.1021/ja401043b
+_journal_volume                  135
+_journal_year                    2013
+_computing_cell_refinement
+;
+WinXPOW (Version 2.08), STOE & Cie GmbH, Darmstadt, 2003.
+FullProf Suite, Rodriguez-Carvajal, J.
+FullProf.2k (Version 4.80), Rodriguez-Carvajal, J., 2010.
+WinPLOTR, T. Roisnel; Rodriguez-Carvajal, J., 2010.
+;
+_computing_data_collection       'Bruker APEX2'
+_computing_data_reduction        'Bruker SAINT A'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      110
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'Bruker APEX-II CCD'
+_diffrn_measurement_method       '\f and \w scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_probe          x-ray
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0320
+_diffrn_reflns_av_sigmaI/netI    0.0136
+_diffrn_reflns_limit_h_max       9
+_diffrn_reflns_limit_h_min       -9
+_diffrn_reflns_limit_k_max       7
+_diffrn_reflns_limit_k_min       -8
+_diffrn_reflns_limit_l_max       8
+_diffrn_reflns_limit_l_min       -8
+_diffrn_reflns_number            2321
+_diffrn_reflns_theta_full        30.42
+_diffrn_reflns_theta_max         30.42
+_diffrn_reflns_theta_min         3.65
+_diffrn_source                   'rotating anode'
+_diffrn_source_type              'BRUKER NONIUS FR591'
+_exptl_absorpt_coefficient_mu    16.301
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details
+'Bruker 2007, APEX2, SADABS and SAINT, Bruker AXSInc., Madison, Wisconsin (USA)'
+_exptl_crystal_colour            silvery
+_exptl_crystal_density_diffrn    5.207
+_exptl_crystal_description       block-shaped
+_exptl_crystal_F_000             302
+_refine_diff_density_max         0.858
+_refine_diff_density_min         -0.528
+_refine_diff_density_rms         0.155
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.2(5)
+_refine_ls_extinction_coef       0.015(2)
+_refine_ls_extinction_expression Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^
+_refine_ls_extinction_method     SHELXL
+_refine_ls_goodness_of_fit_ref   1.336
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     14
+_refine_ls_number_reflns         230
+_refine_ls_number_restraints     2
+_refine_ls_restrained_S_all      1.330
+_refine_ls_R_factor_all          0.0157
+_refine_ls_R_factor_gt           0.0157
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0105P)^2^+0.6932P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0379
+_refine_ls_wR_factor_ref         0.0379
+_reflns_number_gt                230
+_reflns_number_total             230
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ja401043b_si_002.cif
+_[local]_cod_data_source_block   hP-Na2ZnSn5
+_cod_database_code               4120134
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 61 2 2"
+_symmetry_space_group_name_Hall 'P 61 2 (0 0 -1)'
+_[local]_omdb_cod_original_Hall 'P 61 2 (0 0 -1)'
+_symmetry_Int_Tables_number 178
+ 
+_cell_length_a    6.45100
+_cell_length_b    6.45100
+_cell_length_c    6.23700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x-y,x,z+1/6
+3 -y,x-y,z+1/3
+4 -x,-y,z+1/2
+5 -x+y,-x,z+2/3
+6 y,-x+y,z+5/6
+7 x-y,-y,-z
+8 x,x-y,-z+1/6
+9 y,x,-z+1/3
+10 -x+y,y,-z+1/2
+11 -x,-x+y,-z+2/3
+12 -y,-x,-z+5/6
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Zn1 Zn 6 b 0.23569 0.47138 0.25000 0.1667
+Sn1 Sn 6 b 0.23569 0.47138 0.25000 0.8333
+Na1 Na 6 b 0.89750 0.79500 0.25000 0.3333
+ 
+

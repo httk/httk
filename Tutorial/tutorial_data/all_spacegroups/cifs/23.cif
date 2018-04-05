@@ -1,0 +1,90 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 59e0f2a6fd5a90d0dc04da61a4e0482f
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-02 19:51:15 +0000 (Thu, 02 May 2013) $
+#$Revision: 84690 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/20/94/7209475.cif $
+#------------------------------------------------------------------------------
+data_7209475
+loop_
+_publ_author_name
+'Schaefer, H.'
+'Weiss, A.'
+_publ_section_title
+;
+ Zur Kenntnis von Bortetrathiophosphat B P S4
+;
+_journal_name_full
+;
+Zeitschrift fuer Naturforschung, Teil B. Anorganische Chemie, Organische
+ Chemie (2,1947-32,1977)
+;
+_journal_page_first              81
+_journal_page_last               82
+_journal_volume                  18
+_journal_year                    1963
+_chemical_name_systematic        'B (P S4)'
+_citation_journal_id_ASTM        ZENBAX
+_[local]_cod_data_source_file    boron0-1_423.cif
+_[local]_cod_data_source_block   B1P1S4
+_[local]_cod_chemical_formula_sum_orig 'B1 P1 S4'
+_cod_database_code               7209475
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 2 2 2"
+_symmetry_space_group_name_Hall 'I 2 2'
+_[local]_omdb_cod_original_Hall 'I 2 2'
+_symmetry_Int_Tables_number 23
+ 
+_cell_length_a    9.04000
+_cell_length_b    5.25000
+_cell_length_c    5.60000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 x+1/2,y+1/2,z+1/2
+6 x+1/2,-y+1/2,-z+1/2
+7 -x+1/2,y+1/2,-z+1/2
+8 -x+1/2,-y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+S1 S 8 k 0.61500 0.79000 0.30000 1.0
+B1 B 2 d 0.00000 0.50000 0.00000 1.0
+P1 P 2 a 0.00000 0.00000 0.00000 1.0
+ 
+

@@ -1,0 +1,95 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 6a0e575ad398f2cdf20a6310a3d0e46c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/03/1010313.cif $
+#------------------------------------------------------------------------------
+data_1010313
+_chemical_name_systematic          'Bismuth oxide'
+_publ_section_title                'X-Ray Studies on Bismuth Trioxide'
+loop_
+_publ_author_name                  'Sillen, L G'
+_journal_name_full                 'Arkiv foer Kemi, Mineralogi och Geologi, A'
+_journal_coden_ASTM                ARKGAJ
+_journal_volume                    12
+_journal_year                      1938
+_journal_page_first                1
+_journal_page_last                 15
+_journal_issue                     18
+_cod_database_code 1010313
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 2 3"
+_symmetry_space_group_name_Hall 'I 2 2 3'
+_[local]_omdb_cod_original_Hall 'I 2 2 3'
+_symmetry_Int_Tables_number 197
+ 
+_cell_length_a    10.08000
+_cell_length_b    10.08000
+_cell_length_c    10.08000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 x+1/2,y+1/2,z+1/2
+14 x+1/2,-y+1/2,-z+1/2
+15 -x+1/2,y+1/2,-z+1/2
+16 -x+1/2,-y+1/2,z+1/2
+17 y+1/2,z+1/2,x+1/2
+18 y+1/2,-z+1/2,-x+1/2
+19 -y+1/2,z+1/2,-x+1/2
+20 -y+1/2,-z+1/2,x+1/2
+21 z+1/2,x+1/2,y+1/2
+22 z+1/2,-x+1/2,-y+1/2
+23 -z+1/2,x+1/2,-y+1/2
+24 -z+1/2,-x+1/2,y+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Bi1 Bi 24 f 0.68000 0.48000 0.18000 1.0
+O1 O 24 f 0.58000 0.29000 0.14000 1.0
+O2 O 12 d 0.81000 0.00000 0.00000 1.0
+ 
+

@@ -1,0 +1,85 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 89890767c67d4fd2c02b41e3586b262a
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/18/9001818.cif $
+#------------------------------------------------------------------------------
+data_9001818
+loop_
+_publ_author_name
+'Cellai, D.'
+'Bonazzi, P.'
+'Carpenter, M. A.'
+_publ_section_title
+;Natural kalsilite, KAlSiO4, with P31c symmetry: Crystal structure and
+ twinning
+;
+_journal_name_full               'American Mineralogist'
+_journal_page_first              276
+_journal_page_last               279
+_journal_volume                  82
+_journal_year                    1997
+_chemical_name_mineral           Kalsilite
+_exptl_crystal_density_diffrn    2.620
+_[local]_cod_chemical_formula_sum_orig 'K Al Si O4'
+_cod_database_code               9001818
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 3 1 c"
+_symmetry_space_group_name_Hall 'P 3 -2c'
+_[local]_omdb_cod_original_Hall 'P 3 -2c'
+_symmetry_Int_Tables_number 159
+ 
+_cell_length_a    5.15700
+_cell_length_b    5.15700
+_cell_length_c    8.70600
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 -x,-x+y,z+1/2
+5 x-y,-y,z+1/2
+6 y,x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+K1 K 2 a 0.00000 0.00000 0.25000 1.0
+Al1 Al 2 b 0.33333 0.66667 0.05940 1.0
+Si1 Si 2 b 0.33333 0.66667 0.44160 1.0
+O1 O 2 b 0.33333 0.66667 0.26000 1.0
+O2 O 6 c 0.61600 0.01100 0.00000 1.0
+ 
+

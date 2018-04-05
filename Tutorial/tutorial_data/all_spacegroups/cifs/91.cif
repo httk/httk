@@ -1,0 +1,88 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: d578786555675440ffdb63abcd9e9cc3
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/02/9010293.cif $
+#------------------------------------------------------------------------------
+data_9010293
+loop_
+_publ_author_name
+'Palin, E. J.'
+'Harrison, R. J.'
+_publ_section_title
+;
+ A Monte Carlo investigation of the thermodynamics of cation ordering in
+ 2-3 spinels
+ Note: theoretical atom sites using GULP
+;
+_journal_name_full               'American Mineralogist'
+_journal_page_first              1334
+_journal_page_last               1345
+_journal_volume                  92
+_journal_year                    2007
+_exptl_crystal_density_diffrn    4.752
+_[local]_cod_chemical_formula_sum_orig 'Mg Fe2 O4'
+_cod_database_code               9010293
+_journal_paper_doi 10.2138/am.2007.2485
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 41 2 2"
+_symmetry_space_group_name_Hall 'P 4w 2c'
+_[local]_omdb_cod_original_Hall 'P 4w 2c'
+_symmetry_Int_Tables_number 91
+ 
+_cell_length_a    5.83090
+_cell_length_b    5.83090
+_cell_length_c    8.22180
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z+1/2
+3 -x,y,-z
+4 -x,-y,z+1/2
+5 -y,-x,-z+1/4
+6 -y,x,z+1/4
+7 y,-x,z+3/4
+8 y,x,-z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Mg1 Mg 4 b 0.50000 0.25756 0.00000 1.0
+Fe1 Fe 4 a 0.00000 0.25750 0.00000 1.0
+Fe2 Fe 4 c 0.25317 0.25317 0.37500 1.0
+O1 O 8 d 0.25971 -0.03298 0.50693 1.0
+O2 O 8 d 0.73983 0.47624 0.02034 1.0
+ 
+

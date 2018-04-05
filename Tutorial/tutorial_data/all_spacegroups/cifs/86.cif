@@ -1,0 +1,90 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 230bfedf23e6b13deb8ef237f13dceb6
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-02 21:46:11 +0000 (Thu, 02 May 2013) $
+#$Revision: 85267 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/17/1511752.cif $
+#------------------------------------------------------------------------------
+data_1511752
+loop_
+_publ_author_name
+'Rogl, P.'
+_publ_section_title
+;
+ Ternary metal borides ((La, Ce, Pr, Nd, Sm)) Os4 B4 and ((Y, La, Ce, Pr,
+ Nd, Sm, Gd, Tb)) Ir4 B4 with NdCo4B4 -type structure
+;
+_journal_name_full
+;
+Monatshefte fuer Chemie und verwandte Teile anderer Wissenschaften (109,1978-)
+;
+_journal_page_first              235
+_journal_page_last               243
+_journal_volume                  110
+_journal_year                    1979
+_chemical_name_systematic        'Nd Ir4 B4'
+_citation_journal_id_ASTM        MOCMB7
+_[local]_cod_data_source_file    boron4-x_88.cif
+_[local]_cod_data_source_block   B4Ir4Nd1
+_[local]_cod_chemical_formula_sum_orig 'B4 Ir4 Nd1'
+_cod_original_cell_volume        230.5057
+_cod_database_code               1511752
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42/n (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 4bc'
+_[local]_omdb_cod_original_Hall '-P 4bc'
+_symmetry_Int_Tables_number 86
+ 
+_cell_length_a    7.61600
+_cell_length_b    7.61600
+_cell_length_c    3.97400
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x+1/2,-y+1/2,z
+3 -y,x+1/2,z+1/2
+4 y+1/2,-x,z+1/2
+5 -x,-y,-z
+6 x+1/2,y+1/2,-z
+7 y,-x+1/2,-z+1/2
+8 -y+1/2,x,-z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ir1 Ir 8 g 0.59800 0.13800 0.64400 1.0
+B1 B 8 g 0.53300 0.41000 0.63700 1.0
+Nd1 Nd 2 a 0.25000 0.25000 0.25000 1.0
+ 
+

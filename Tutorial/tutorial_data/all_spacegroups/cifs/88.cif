@@ -1,0 +1,160 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 428780aca42a43fcd5506a19b2f06ff8
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-02-10 13:57:29 +0000 (Mon, 10 Feb 2014) $
+#$Revision: 101065 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/33/51/4335158.cif $
+#------------------------------------------------------------------------------
+data_4335158
+loop_
+_publ_author_name
+'Maria V. Ivanova'
+'Tobias K\"ochner'
+'H\'el\`ene P. A. Mercier'
+'Gary J. Schrobilgen'
+_publ_section_title
+;
+ Synthesis and Lewis Acid Properties of (ReO3F)\\infty and the X-ray
+ Crystal Structures of (HF)2ReO3F.HF and
+ [N(CH3)4]2-[{ReO3(\m-F)}3(\m3-O)].CH3CN
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              6806
+_journal_page_last               6819
+_journal_paper_doi               10.1021/ic302221y
+_journal_volume                  52
+_journal_year                    2013
+_computing_cell_refinement       'Bruker SMART'
+_computing_data_collection       'Bruker SMART'
+_computing_data_reduction        'Bruker SMART'
+_computing_molecular_graphics    'SHELXTL V6.10 2001  Bruker-AXS'
+_computing_publication_material  'SHELXTL V6.10 2001  Bruker-AXS'
+_computing_structure_refinement  'SHELXTL V6.10 2001 Bruker-AXS'
+_computing_structure_solution    'SHELXTL V6.10 2001  Bruker-AXS'
+_diffrn_ambient_temperature      100(2)
+_diffrn_measured_fraction_theta_full 0.952
+_diffrn_measured_fraction_theta_max 0.952
+_diffrn_measurement_device_type  'CCD area detector'
+_diffrn_measurement_method       'phi and omega scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0360
+_diffrn_reflns_av_sigmaI/netI    0.0207
+_diffrn_reflns_limit_h_max       9
+_diffrn_reflns_limit_h_min       -8
+_diffrn_reflns_limit_k_max       9
+_diffrn_reflns_limit_k_min       -8
+_diffrn_reflns_limit_l_max       19
+_diffrn_reflns_limit_l_min       -16
+_diffrn_reflns_number            4237
+_diffrn_reflns_theta_full        33.87
+_diffrn_reflns_theta_max         33.87
+_diffrn_reflns_theta_min         7.43
+_exptl_absorpt_coefficient_mu    1.023
+_exptl_absorpt_correction_T_max  1
+_exptl_absorpt_correction_T_min  0.822
+_exptl_absorpt_correction_type   multi-scan
+_exptl_absorpt_process_details   'SADABS V2.10'
+_exptl_crystal_colour            colorless
+_exptl_crystal_density_diffrn    1.742
+_exptl_crystal_description       plates
+_exptl_crystal_F_000             256
+_exptl_crystal_size_max          0.17
+_exptl_crystal_size_mid          0.16
+_exptl_crystal_size_min          0.04
+_refine_diff_density_max         0.714
+_refine_diff_density_min         -0.194
+_refine_diff_density_rms         0.084
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.220
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     14
+_refine_ls_number_reflns         494
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.220
+_refine_ls_R_factor_all          0.0381
+_refine_ls_R_factor_gt           0.0298
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0451P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0795
+_refine_ls_wR_factor_ref         0.0838
+_reflns_number_gt                411
+_reflns_number_total             494
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ic302221y_si_002_3.cif
+_[local]_cod_data_source_block   KF.4HF
+_[local]_cod_cif_authors_sg_H-M  'I 41/a'
+_cod_database_code               4335158
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 41/a (origin choice 2)"
+_symmetry_space_group_name_Hall '-I 4ad'
+_[local]_omdb_cod_original_Hall '-I 4ad'
+_symmetry_Int_Tables_number 88
+ 
+_cell_length_a    6.28700
+_cell_length_b    6.28700
+_cell_length_c    12.93700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y+1/2,z
+3 -y+3/4,x+1/4,z+1/4
+4 y+1/4,-x+1/4,z+1/4
+5 -x,-y,-z
+6 x,y+1/2,-z
+7 y+1/4,-x+3/4,-z+3/4
+8 -y+3/4,x+3/4,-z+3/4
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y,z+1/2
+11 -y+1/4,x+3/4,z+3/4
+12 y+3/4,-x+3/4,z+3/4
+13 -x+1/2,-y+1/2,-z+1/2
+14 x+1/2,y,-z+1/2
+15 y+3/4,-x+1/4,-z+1/4
+16 -y+1/4,x+1/4,-z+1/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+K1 K 4 b 0.00000 0.25000 0.62500 1.0
+F1 F 4 a 0.00000 0.25000 0.12500 1.0
+F2 F 16 f 0.73168 0.05601 0.02622 1.0
+ 
+

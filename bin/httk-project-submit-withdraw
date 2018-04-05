@@ -1,0 +1,76 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
+. "${HTTK_BIN_PATH}/internal/setup.sh"
+
+URL="$1"
+
+if [ -z "$URL" ]; then
+    URL="http://openmaterialsdb.se/upload"
+fi
+
+echo "==== httk-project-submit-widthdraw"
+echo ""
+
+if [ -z "$HTTK_PROJECT_DIR" ]; then
+    echo "You are not in a subdirectory to a project."
+    echo "If this is a new project, you need to run httk-project"
+    echo "in your project directory."
+    exit 1
+fi
+
+cd "$HTTK_PROJECT_DIR"
+
+if [ "$URL" == "http://openmaterialsdb.se/upload" ]; then
+    echo "*******************************************************************"
+    echo "********************** WARNING! WARNING! **************************"
+    echo "*******************************************************************"
+    echo ""
+    echo "You are about to WITHDRAW your contribution of data for this project:"
+    echo "==================================================================="
+    echo "Project name: $HTTK_PROJECT_NAME"
+    echo "Project dir: $HTTK_PROJECT_DIR"
+    echo "==================================================================="
+    echo
+    echo "Please note that widthdraw requests are handled semi-manually"
+    echo "and you cannot expect immediate withdrawal of the data from the web."
+    echo ""
+    echo "DO YOU WANT TO WITHDRAW THIS DATA? [Y/N]"
+    read YESNO
+    if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+	echo "User cancelled. Nothing done."
+	exit 0
+    fi
+    echo ""
+fi
+
+echo "Signing withdrawal request with project key. (this takes a moment)"
+SIGNATURE=$(echo "withdraw $(cat ht.project/keys/key1.pub)" | "${HTTK_BIN_PATH}/internal/ed25519_sign.py" ht.project/keys/key1.priv)
+
+echo ""
+echo "Ready to start submitting your withdrawal request."
+echo "Do you want to send it now? [Y/N]"
+read YESNO
+if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
+    echo "User cancelled. Nothing uploaded."
+    exit 0
+fi
+
+ERRORS=0
+function CHECKERRORS() {
+    if [ "$?" != "0" ]; then
+	ERRORS=$((ERRORS+1))
+    fi
+}
+
+echo "Attempting to send withdrawal request (verification of signature takes some time, please be patient)"
+
+"${HTTK_BIN_PATH}/internal/get.py" "$URL/withdraw.php" project-signature "$SIGNATURE" public-key "$(cat ht.project/keys/key1.pub)"
+echo ""
+
+if [ "$?" != "0" ]; then
+    echo "There was an error sending the withdrawal request."
+else
+    echo "Withdrawal request successfully sent."
+fi

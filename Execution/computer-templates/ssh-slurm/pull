@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+rsync -az -r --delete --files-from=- "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR"/Runs/"$1" "$2"

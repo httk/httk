@@ -1,0 +1,103 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: f7a869702c916f7e404cf0b5fbe257e6
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/26/9012613.cif $
+#------------------------------------------------------------------------------
+data_9012613
+loop_
+_publ_author_name
+'Kimoto, K.'
+'Nishida, I.'
+_publ_section_title
+;
+ An electron diffraction study on the crystal structure of
+ a new modification of chromium
+ Locality: synthetic
+;
+_journal_name_full               'Journal of the Physical Society of Japan'
+_journal_page_first              744
+_journal_page_last               756
+_journal_volume                  22
+_journal_year                    1967
+_chemical_name_mineral           Chromium
+_exptl_crystal_density_diffrn    7.152
+_[local]_cod_cif_authors_sg_H-M  'P m 3'
+_cod_database_code               9012613
+_journal_paper_doi 10.1143/JPSJ.22.744
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 2/m -3"
+_symmetry_space_group_name_Hall '-P 2 2 3'
+_[local]_omdb_cod_original_Hall '-P 2 2 3'
+_symmetry_Int_Tables_number 200
+ 
+_cell_length_a    4.58800
+_cell_length_b    4.58800
+_cell_length_c    4.58800
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -x,-y,-z
+14 -x,y,z
+15 x,-y,z
+16 x,y,-z
+17 -y,-z,-x
+18 -y,z,x
+19 y,-z,x
+20 y,z,-x
+21 -z,-x,-y
+22 -z,x,y
+23 z,-x,y
+24 z,x,-y
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cr1 Cr 1 a 0.00000 0.00000 0.00000 1.0
+Cr2 Cr 1 b 0.50000 0.50000 0.50000 1.0
+Cr3 Cr 24 l 0.24800 0.04000 0.51000 0.25
+ 
+

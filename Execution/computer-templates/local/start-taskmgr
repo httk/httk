@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+mkdir -p "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/ht.taskmgrstats"
+cd "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/ht.taskmgrstats"
+
+export VASP_PSEUDOLIB="${VASP_PSEUDO_PATH/#\~/\$HOME}"
+export HTTK_BASE_DIR="${LOCAL_HTTK_DIR/#\~/$HOME}"
+export HTTK_DIR="$HTTK_BASE_DIR/httk"
+export VASP_EXECUTE="$VASP_COMMAND"
+
+( exec nohup "$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT" > taskmgr_$$.out 2>&1 ) &

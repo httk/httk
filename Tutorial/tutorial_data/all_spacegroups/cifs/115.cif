@@ -1,0 +1,89 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 3f58b4226d056f87909752bf2bdd4eb9
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/03/1010318.cif $
+#------------------------------------------------------------------------------
+data_1010318
+_chemical_name_systematic          'Copper iron sulfide'
+_publ_section_title
+;
+Die Atomanordnung des Kupferkieses und die Struktur der
+Beruehrungsflaechen gesetzmaessig verwachsener
+Kristalle
+;
+loop_
+_publ_author_name
+  'Gross, R'
+  'Gross, N'
+_journal_name_full
+;
+Neues Jahrbuch fuer Mineralogie, Geologie und Palaeontologie. Beilage (-
+1925)
+;
+_journal_coden_ASTM                NJMBLA
+_journal_volume                    48
+_journal_year                      1923
+_journal_page_first                113
+_journal_page_last                 135
+_cod_database_code 1010318
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -4 m 2"
+_symmetry_space_group_name_Hall 'P -4 -2'
+_[local]_omdb_cod_original_Hall 'P -4 2'
+_symmetry_Int_Tables_number 115
+ 
+_cell_length_a    3.72645
+_cell_length_b    3.72645
+_cell_length_c    5.19400
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,-x,-z
+4 y,x,-z
+5 -x,y,z
+6 x,-y,z
+7 y,-x,-z
+8 -y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cu1 Cu 1 a 0.00000 0.00000 0.00000 1.0
+Fe1 Fe 1 c 0.50000 0.50000 0.50000 1.0
+S1 S 2 g 0.00000 0.50000 0.19000 1.0
+ 
+

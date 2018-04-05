@@ -1,0 +1,96 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 80a0b26ed68bba669373eea1832f78f5
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/84/9008418.cif $
+#------------------------------------------------------------------------------
+data_9008418
+loop_
+_publ_author_name
+'Stahl, K.'
+'Legros, J. P.'
+'Galy, J.'
+_publ_section_title
+;
+ The crystal structure of SeO2 at 139 and 286 K
+ Note: T = 286 K
+ Locality: synthetic
+;
+_journal_name_full               'Zeitschrift fur Kristallographie'
+_journal_page_first              99
+_journal_page_last               107
+_journal_volume                  202
+_journal_year                    1992
+_chemical_name_mineral           Downeyite
+_diffrn_ambient_temperature      286
+_exptl_crystal_density_diffrn    4.165
+_[local]_cod_chemical_formula_sum_orig 'Se O2'
+_cod_database_code               9008418
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 42/m 21/b 2/c"
+_symmetry_space_group_name_Hall '-P 4c 2ab'
+_[local]_omdb_cod_original_Hall '-P 4c 2ab'
+_symmetry_Int_Tables_number 135
+ 
+_cell_length_a    8.36220
+_cell_length_b    8.36220
+_cell_length_c    5.06120
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x+1/2,y+1/2,-z
+4 -x,-y,z
+5 -y+1/2,-x+1/2,-z+1/2
+6 -y,x,z+1/2
+7 y,-x,z+1/2
+8 y+1/2,x+1/2,-z+1/2
+9 -x,-y,-z
+10 -x+1/2,y+1/2,z
+11 x+1/2,-y+1/2,z
+12 x,y,-z
+13 y+1/2,x+1/2,z+1/2
+14 y,-x,-z+1/2
+15 -y,x,-z+1/2
+16 -y+1/2,-x+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Se1 Se 8 h 0.78981 0.86626 0.00000 1.0
+O1 O 8 g 0.13802 0.63802 0.25000 1.0
+O2 O 8 h 0.82493 0.05710 0.00000 1.0
+ 
+

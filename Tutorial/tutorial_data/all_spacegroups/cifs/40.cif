@@ -1,0 +1,116 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: cf196f04a61528ad2678952c7287e51e
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-06-15 06:44:23 +0000 (Fri, 15 Jun 2012) $
+#$Revision: 60499 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/3/00/00/3000000.cif $
+#------------------------------------------------------------------------------
+data_3000000
+loop_
+_publ_author_name
+'Armel Le Bail'
+'Salim Ouhenia'
+'Daniel Chateigner'
+_publ_section_title
+;
+ Microtwinning hypothesis for a more ordered vaterite model
+;
+_journal_name_full               'Powder Diffraction'
+_journal_page_first              16
+_journal_volume                  26
+_journal_year                    2011
+_computing_structure_refinement  FULLPROF
+_computing_structure_solution    ESPOIR
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_type           X-ray
+_diffrn_source                   'X-ray tube'
+_diffrn_source_target            Cu
+_pd_meas_2theta_range_inc        0.016711
+_pd_meas_2theta_range_max        120.00000
+_pd_meas_2theta_range_min        15.00000
+_pd_meas_number_of_points        6284
+_pd_proc_2theta_range_inc        0.016711
+_pd_proc_2theta_range_max        120.0309
+_pd_proc_2theta_range_min        15.0309
+_pd_proc_wavelength              1.540560
+_refine_ls_number_parameters     64
+_refine_ls_number_reflns         291
+_refine_ls_number_restraints     6
+_refine_ls_R_I_factor            5.2218
+_journal_article_reference       'DOI: 10.1154/1.3552994'
+_[local]_cod_data_source_file    vat-5.cif
+_[local]_cod_data_source_block   vaterite
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Orthorhombic' changed to
+'orthorhombic' according to the built-in table from CIF Core
+dictionary named 'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1715 2011-07-08 13:25:40Z adriana 
+
+ Releasing structure 3000000 into public domain as published material.
+;
+_cod_database_code               3000000
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "A m a 2"
+_symmetry_space_group_name_Hall 'A 2 -2a'
+_[local]_omdb_cod_original_Hall 'A 2 -2a'
+_symmetry_Int_Tables_number 40
+ 
+_cell_length_a    8.47210
+_cell_length_b    7.15750
+_cell_length_c    4.12650
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 x+1/2,-y,z
+4 -x+1/2,y,z
+5 x,y+1/2,z+1/2
+6 -x,-y+1/2,z+1/2
+7 x+1/2,-y+1/2,z+1/2
+8 -x+1/2,y+1/2,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ca1 Ca 4 a 0.00000 0.00000 0.50000 1.0
+C1 C 4 b 0.25000 0.14000 0.04800 1.0
+O1 O 4 b 0.25000 0.04320 0.30880 1.0
+O2 O 8 c 0.87950 0.32890 0.43640 1.0
+ 
+

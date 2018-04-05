@@ -1,6 +1,6 @@
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2013 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -196,7 +196,7 @@ class IoAdapterStringList(object):
         if isinstance(other,IoAdapterStringList):
             return other
         if isinstance(other,IoAdapterString):
-            return IoAdapterStringList(other.split('\n'))
+            return IoAdapterStringList(other.string.split('\n'))
         if isinstance(other,IoAdapterFileReader):
             stringlist = other.file.readlines()
             return IoAdapterStringList(stringlist,name=other.name)
@@ -230,17 +230,23 @@ class IoAdapterFilename(object):
         if isinstance(other,IoAdapterFilename):
             return other
         if isinstance(other,IoAdapterFileReader):
-            tempfile = tempfile.NamedTemporaryFile(mode='w', bufsize=-1, delete=False)
-            name = tempfile.name
-            tempfile.write(other.file.read())
-            tempfile.close()
+            tmpfile = tempfile.NamedTemporaryFile(mode='w', bufsize=-1, delete=False)
+            name = tmpfile.name
+            tmpfile.write(other.file.read())
+            tmpfile.close()
             other.close()
             return IoAdapterFilename(name,name=other.name,deletefilename=name)
         if isinstance(other,IoAdapterString):
-            tempfile = tempfile.NamedTemporaryFile(mode='w', bufsize=-1, delete=False)
-            name = tempfile.name
-            tempfile.write(other.string)
-            tempfile.close()
+            tmpfile = tempfile.NamedTemporaryFile(mode='w', bufsize=-1, delete=False)
+            name = tmpfile.name
+            tmpfile.write(other.string)
+            tmpfile.close()
+            return IoAdapterFilename(name,name=other.name,deletefilename=name)
+        if isinstance(other,IoAdapterStringList):
+            tmpfile = tempfile.NamedTemporaryFile(mode='w', bufsize=-1, delete=False)
+            name = tmpfile.name
+            tmpfile.write("\n".join(other.stringlist))
+            tmpfile.close()
             return IoAdapterFilename(name,name=other.name,deletefilename=name)
         return cls.use(universal_opener(other))
 
@@ -248,12 +254,69 @@ class IoAdapterFilename(object):
         new = IoAdapterFileReader.use(self)
         return new.__iter__()
 
+def zdecompressor(f,mode,*args):
+    """
+    Read a classic unix compress .Z type file.
+    """
+    # Note: there is no python library for reading .Z files. zlib is not it.
+    # We have to call out to gunzip, which the user hopefully has...
+    import subprocess
+
+    if not os.path.exists(f):
+        raise IOError("zlibdecompressor: File not found found:"+str(f))
+
+    #print "Opening: "+f
+    
+    if mode != 'r' and mode != 'rb':
+        raise Exception("Cannot write inside zlib compressed files.")
+
+    p = subprocess.Popen(["gunzip","-c", f], stdout = subprocess.PIPE)
+    result = p.communicate()
+    if p.returncode != 0:
+        raise Exception('zdecompressor needed to call out to gunzip binary, which failed with error:'+str(result[1]))
+    return StringIO.StringIO(result[0])
+    
 
 def cleveropen(filename,mode,*args):
     basename_no_ext,ext = os.path.splitext(filename)
-    if ext.lower()=='bz2':
+    if ext.lower()=='.bz2':
         return bz2.BZ2File(filename, mode,*args)
-    elif ext.lower()=='gz':
+    elif ext.lower()=='.gz':
+        return gzip.GzipFile(filename, mode, *args)
+    elif ext.lower()=='.z':
         return gzip.GzipFile(filename, mode, *args)
     else:
-        return open(filename, mode, *args)
+        try:
+            return open(filename, mode, *args)
+        except IOError:
+            pass
+        try:
+            return bz2.BZ2File(filename+".bz2", mode,*args)
+        except IOError:
+            pass
+        try:
+            return bz2.BZ2File(filename+".BZ2", mode,*args)
+        except IOError:
+            pass
+        try:
+            return gzip.GzipFile(filename+".gz", mode,*args)
+        except IOError:
+            pass
+        try:
+            return gzip.GzipFile(filename+".GZ", mode,*args)
+        except IOError:
+            pass
+        try:
+            return zdecompressor(filename+".z", mode,*args)
+        except IOError:
+            pass
+        try:
+            return zdecompressor(filename+".Z", mode,*args)
+        except IOError:
+            pass
+        if not os.path.exists(filename):
+            raise Exception("IOAdapters.cleveropen: file not found: "+str(filename))
+        else:
+            raise Exception("IOAdapters.cleveropen: Do not know how to open:"+str(filename))
+
+

@@ -1,0 +1,4 @@
+# This collection of structure files were collected from 
+# the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.

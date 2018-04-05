@@ -1,0 +1,81 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 8d60bbf27f03b1460a490f0eb6fb3ba3
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/41/9004196.cif $
+#------------------------------------------------------------------------------
+data_9004196
+loop_
+_publ_author_name
+'Grice, J. D.'
+_publ_section_title
+;
+ The crystal structure of magnolite, Hg2TeO3
+ Locality: Mount Lion Mine, Colorado, USA
+;
+_journal_name_full               'The Canadian Mineralogist'
+_journal_page_first              133
+_journal_page_last               136
+_journal_volume                  27
+_journal_year                    1989
+_chemical_name_mineral           Magnolite
+_exptl_crystal_density_diffrn    8.109
+_[local]_cod_chemical_formula_sum_orig 'Hg2 Te O3'
+_cod_database_code               9004196
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P m a 2"
+_symmetry_space_group_name_Hall 'P 2 -2a'
+_[local]_omdb_cod_original_Hall 'P 2 -2b'
+_symmetry_Int_Tables_number 28
+ 
+_cell_length_a    10.57600
+_cell_length_b    5.95800
+_cell_length_c    3.74900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -x+1/2,y,z
+4 x+1/2,-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Hg1 Hg 4 d 0.05280 0.80930 0.00000 1.0
+Te1 Te 2 c 0.25000 0.44520 0.49910 1.0
+O1 O 2 c 0.25000 0.73400 0.43800 1.0
+O2 O 4 d 0.63000 0.49900 0.87800 1.0
+ 
+

@@ -9,12 +9,9 @@
 allow_system_libs=yes
 auto_print_citations_at_exit=yes
 [paths]
-cif2cell=
 gulp=
-prototypeid=
-spglib=
 pyspglib=
 platon=
 ase=
-aflow=
 isotropy=
+jmol=

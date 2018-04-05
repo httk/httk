@@ -1,0 +1,85 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: ac18e28edd1143cb0dff2fafadfe4d85
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/83/1008318.cif $
+#------------------------------------------------------------------------------
+data_1008318
+_chemical_name_systematic          'Gadolinium sulfide iodide'
+_publ_section_title
+;
+Zur Hochdruckpolymorphie der Seltenerdsulfidiodide Ln S I
+;
+loop_
+_publ_author_name
+  'Beck, H P'
+  'Strobel, C'
+_journal_name_full
+;
+Zeitschrift fuer Anorganische und Allgemeine Chemie
+;
+_journal_coden_ASTM                ZAACAB
+_journal_volume                    535
+_journal_year                      1986
+_journal_page_first                229
+_journal_page_last                 239
+_cod_database_code 1008318
+_journal_paper_doi 10.1002/zaac.19865350427
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -6"
+_symmetry_space_group_name_Hall 'P -6'
+_[local]_omdb_cod_original_Hall 'P -6'
+_symmetry_Int_Tables_number 174
+ 
+_cell_length_a    10.73700
+_cell_length_b    10.73700
+_cell_length_c    4.17900
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 -x+y,-x,-z
+5 x,y,-z
+6 -y,x-y,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Gd1 Gd 3 k 0.81400 0.17900 0.50000 1.0
+S1 S 3 k 0.18400 0.36800 0.50000 1.0
+I1 I 3 j 0.51700 0.49800 0.00000 1.0
+ 
+

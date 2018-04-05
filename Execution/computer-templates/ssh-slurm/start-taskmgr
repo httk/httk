@@ -1,0 +1,38 @@
+#!/bin/bash
+
+DIRNAME=$(dirname "$0")
+SCRIPT_PATH=$(cd "$DIRNAME"; pwd -P)
+. "$SCRIPT_PATH/config"
+
+(cat - <<EOF
+#!/bin/bash
+#SBATCH -A $SLURM_PROJECT
+#SBATCH -p $SLURM_QUEUE
+#SBATCH -N $SLURM_NODES
+#SBATCH -t $SLURM_TIMEOUT
+
+VASP_PSEUDO_PATH="$VASP_PSEUDO_PATH"
+REMOTE_HTTK_DIR="$REMOTE_HTTK_DIR"
+
+export VASP_PSEUDOLIB=\${VASP_PSEUDO_PATH/#\~/\$HOME}
+export HTTK_BASE_DIR=\${REMOTE_HTTK_DIR/#\~/\$HOME}
+export HTTK_DIR=\$HTTK_BASE_DIR/httk
+export VASP_EXECUTE="$VASP_COMMAND"
+
+DATE=\$(date +"%Y-%m-%d_%H.%M.%S")
+INITIAL=\$(pwd -P)
+HOSTNAME=\$(hostname)
+
+echo "RUN STARTS: \$DATE in dir \$INITIAL on node: \$HOSTNAME"
+
+source "\$HTTK_DIR/setup.shell"
+
+echo "MPIRUN BINARY"
+which mpirun
+
+"\$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT"
+
+ENDDATE=\$(date +"%Y-%m-%d_%H.%M.%S")
+echo "RUN ENDS: \$ENDDATE" 
+EOF
+) | ssh "$USERNAME"@"$REMOTE_HOST" "cd \"${REMOTE_HTTK_DIR/#\~\//}/Runs/ht.taskmgrstats\";sbatch"

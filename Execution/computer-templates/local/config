@@ -1,0 +1,4 @@
+LOCAL_HTTK_DIR="~/Httk-runs"
+VASP_COMMAND="mpirun /path/to/your/vasp"
+VASP_PSEUDO_PATH="/path/to/pseudopotential/library"
+TASKMGR_JOB_TIMEOUT="3600"

@@ -1,0 +1,193 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 5519550e84e5c19e5eaf5228a979a62b
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-12-29 11:49:26 +0000 (Sun, 29 Dec 2013) $
+#$Revision: 91935 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/31/61/4316145.cif $
+#------------------------------------------------------------------------------
+data_4316145
+loop_
+_publ_author_name
+'Abdul Malik Puthan Peedikakkal'
+'Charlene Shi Yun Peh'
+'Lip Lin Koh'
+'Jagadese J. Vittal'
+_publ_contact_author
+; 
+     Dr. Jagadese J. Vittal
+     Department of Chemistry
+     National University of Singapore
+     3 Science Drive 3
+     SINGAPORE 117543 
+;
+_publ_contact_author_email       chmjjv@nus.edu.sg
+_publ_contact_author_fax         '(65) 6779 1691'
+_publ_contact_author_phone       '(65) 6516 2677'
+_publ_section_title
+;
+ Metal-Organic Frameworks Containing a Tetrapyridylcyclobutane Ligand
+ Derived from Isomerization Reaction
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              6775
+_journal_page_last               6777
+_journal_volume                  49
+_journal_year                    2010
+_computing_cell_refinement       'Bruker SMART'
+_computing_data_collection       'Bruker SMART'
+_computing_data_reduction        'Bruker SAINT'
+_computing_molecular_graphics    'Bruker SHELXTL'
+_computing_publication_material  'Bruker SHELXTL'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      223(2)
+_diffrn_measured_fraction_theta_full 1.000
+_diffrn_measured_fraction_theta_max 1.000
+_diffrn_measurement_device_type  'CCD area detector'
+_diffrn_measurement_method       'phi and omega scans'
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0247
+_diffrn_reflns_av_sigmaI/netI    0.0168
+_diffrn_reflns_limit_h_max       10
+_diffrn_reflns_limit_h_min       -10
+_diffrn_reflns_limit_k_max       10
+_diffrn_reflns_limit_k_min       -9
+_diffrn_reflns_limit_l_max       16
+_diffrn_reflns_limit_l_min       -20
+_diffrn_reflns_number            6917
+_diffrn_reflns_theta_full        25.99
+_diffrn_reflns_theta_max         25.99
+_diffrn_reflns_theta_min         2.42
+_exptl_absorpt_coefficient_mu    0.785
+_exptl_absorpt_correction_T_max  0.6355
+_exptl_absorpt_correction_T_min  0.5746
+_exptl_absorpt_correction_type   empirical
+_exptl_absorpt_process_details   'SADABS (Sheldrick, 2005)'
+_exptl_crystal_colour            ORANGE
+_exptl_crystal_density_diffrn    1.547
+_exptl_crystal_density_meas      'not measured'
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       BLOCK
+_exptl_crystal_F_000             574
+_exptl_crystal_size_max          0.80
+_exptl_crystal_size_mid          0.70
+_exptl_crystal_size_min          0.65
+_refine_diff_density_max         0.156
+_refine_diff_density_min         -0.311
+_refine_diff_density_rms         0.055
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.36(2)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.160
+_refine_ls_hydrogen_treatment    mixed
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     95
+_refine_ls_number_reflns         1179
+_refine_ls_number_restraints     3
+_refine_ls_restrained_S_all      1.160
+_refine_ls_R_factor_all          0.0226
+_refine_ls_R_factor_gt           0.0224
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0357P)^2^+0.2338P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0604
+_refine_ls_wR_factor_ref         0.0606
+_reflns_number_gt                1169
+_reflns_number_total             1179
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ic100853h_si_002_1.cif
+_[local]_cod_data_source_block   compound_7
+_cod_depositor_comments
+;
+The following automatic conversions were performed:
+
+'_symmetry_cell_setting' value 'Tetragonal' changed to 'tetragonal'
+according to the built-in table from CIF Core dictionary named
+'cif_core.dic' version 2.4.1 from 2010-06-29.
+
+Automatic conversion script
+Id: cif_fix_values 1646 2011-03-28 12:23:43Z adriana 
+;
+_cod_database_code               4316145
+_journal_paper_doi 10.1021/ic100853h
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -4 c 2"
+_symmetry_space_group_name_Hall 'P -4 -2c'
+_[local]_omdb_cod_original_Hall 'P -4 -2c'
+_symmetry_Int_Tables_number 116
+ 
+_cell_length_a    8.38370
+_cell_length_b    8.38370
+_cell_length_c    16.84730
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,-x,-z+1/2
+4 y,x,-z+1/2
+5 -x,y,z+1/2
+6 x,-y,z+1/2
+7 y,-x,-z
+8 -y,x,-z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Co1 Co 2 b 0.50000 0.50000 0.25000 1.0
+N1 N 8 j 0.37952 0.63759 0.84177 1.0
+C1 C 8 j 0.10296 -0.08071 0.00590 1.0
+C2 C 8 j 0.20823 0.82600 -0.04904 1.0
+C3 C 8 j 0.22100 0.66019 -0.04041 1.0
+C4 C 8 j 0.28900 0.89302 0.88706 1.0
+C5 C 8 j 0.30550 0.57270 -0.09570 1.0
+C6 C 8 j 0.37220 0.79670 0.83473 1.0
+H1 H 8 j -0.02600 0.74100 0.79100 1.0
+H2 H 8 j 0.13210 0.89650 0.06170 1.0
+H3 H 8 j 0.17220 0.60880 0.00280 1.0
+H4 H 8 j 0.28720 0.00410 0.87940 1.0
+H5 H 8 j 0.31140 0.46150 -0.08900 1.0
+H6 H 8 j 0.42630 0.84520 0.79220 1.0
+H7 H 8 j 0.85800 0.66900 0.80500 1.0
+F1 F 4 f 0.66746 0.66746 0.75000 1.0
+O1 O 8 j -0.05500 0.67760 0.81856 1.0
+O2 O 2 a 0.00000 0.00000 0.25000 1.0
+H8 H 8 j -0.00800 -0.08400 0.73200 0.5
+ 
+

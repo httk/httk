@@ -1,0 +1,103 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 66b69d7922118b27d863741d3171a74c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-02-28 12:14:52 +0000 (Tue, 28 Feb 2012) $
+#$Revision: 35911 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/5/90/00/5900019.cif $
+#------------------------------------------------------------------------------
+data_5900019
+_journal_name_full               'Z. Krist.'
+_journal_page_first              367
+_journal_volume                  99
+_journal_year                    1938
+_chemical_name_systematic        'Antimony diiodopropane'
+_[local]_cod_data_source_file    020_antimony_diiodopropane.cif
+_[local]_cod_data_source_block   antimony_diiodopropane
+loop_
+_citation_id
+_citation_coordinate_linkage
+_citation_title
+_citation_book_title
+_citation_country
+_citation_page_first
+_citation_page_last
+_citation_year
+_citation_book_publisher
+_[local]_cod_citation_special_details
+1 yes ? 'Organicheskaja Kristallokhimija' USSR ? ? 1955
+'Izdatel'stvo Akademii Nauk SSSR'
+;
+
+Coordinates are presented as published in this book, Kitajgorodskij's
+"Organicheskaja Kristallokhimija", keyed in manually.
+
+Saulius Gra\<zulis
+;
+loop_
+_citation_author_citation_id
+_citation_author_name
+1 'A. I. Kitajgorodskij'
+_cod_database_code 5900019
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -6 2 c"
+_symmetry_space_group_name_Hall 'P -6c -2c'
+_[local]_omdb_cod_original_Hall 'P -6c -2c'
+_symmetry_Int_Tables_number 190
+ 
+_cell_length_a    7.53000
+_cell_length_b    7.53000
+_cell_length_c    9.59000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 x-y,-y,-z
+5 y,x,-z
+6 -x,-x+y,-z
+7 -x+y,-x,-z+1/2
+8 x,y,-z+1/2
+9 -y,x-y,-z+1/2
+10 -x,-x+y,z+1/2
+11 x-y,-y,z+1/2
+12 y,x,z+1/2
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sb1 Sb 6 h 0.66600 0.33300 0.25000 1.0
+I1 I 12 i 0.33300 0.66700 0.45000 1.0
+C1 C 6 h 0.36100 0.28000 0.25000 1.0
+ 
+

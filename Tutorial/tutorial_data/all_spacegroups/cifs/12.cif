@@ -1,0 +1,87 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 149e493bdbb972f99863fffc5dc4f2c2
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-10-30 10:36:23 +0000 (Wed, 30 Oct 2013) $
+#$Revision: 89466 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/25/1512527.cif $
+#------------------------------------------------------------------------------
+data_1512527
+loop_
+_publ_author_name
+'Lejaeghere, K.'
+'Van Speybroeck, V.'
+'Van Oost, G.'
+'Cottenier, S.'
+_publ_section_title
+;
+ Error Estimates for Solid-State Density-Functional Theory Predictions: An
+ Overview by Means of the Ground-State Elemental Crystals
+;
+_journal_issue                   1
+_journal_name_full
+'Critical Reviews in Solid State and Materials Sciences'
+_journal_page_first              1
+_journal_paper_doi               10.1080/10408436.2013.772503
+_journal_volume                  39
+_journal_year                    2014
+_[local]_cod_data_source_file    O.cif
+_[local]_cod_data_source_block   VESTA_phase_1
+_[local]_cod_cif_authors_sg_H-M  'B 2/m'
+_cod_database_code               1512527
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "C 1 2/m 1"
+_symmetry_space_group_name_Hall '-C 2y'
+_[local]_omdb_cod_original_Hall '-B 2'
+_symmetry_Int_Tables_number 12
+ 
+_cell_length_a    4.27163
+_cell_length_b    4.27682
+_cell_length_c    4.57148
+_cell_angle_alpha 90.00000
+_cell_angle_beta  113.27876
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,y,-z
+3 -x,-y,-z
+4 x,-y,z
+5 x+1/2,y+1/2,z
+6 -x+1/2,y+1/2,-z
+7 -x+1/2,-y+1/2,-z
+8 x+1/2,-y+1/2,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+O1 O 4 i 0.06218 0.00000 0.14667 1.0
+ 
+

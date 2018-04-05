@@ -1,0 +1,182 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 1ab6368e0bd4e9a75bdf7b123857696a
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 04:06:18 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120112 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/7/20/62/7206207.cif $
+#------------------------------------------------------------------------------
+data_7206207
+loop_
+_publ_author_name
+'Olejniczak, Anna'
+'Katrusiak, Andrzej'
+_publ_section_title
+;
+ Structure--property relations in chloroacetonitriles
+;
+_journal_issue                   16
+_journal_name_full               CrystEngComm
+_journal_page_first              5212
+_journal_volume                  13
+_journal_year                    2011
+_chemical_melting_point          357
+_chemical_name_common            trichloroacetonitrile
+_computing_cell_refinement       'CrysAlis (Oxford Diffraction, 2002)'
+_computing_data_collection       'CrysAlis (Oxford Diffraction, 2002)'
+_computing_data_reduction        'CrysAlis (Oxford Diffraction, 2002)'
+_computing_molecular_graphics
+;X-Seed (Barbour, 2001)
+and POV-Ray (Persistence of Vision, 2004)
+;
+_computing_publication_material  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1997)'
+_diffrn_ambient_environment      'diamond-anvil cell'
+_diffrn_ambient_pressure         900000
+_diffrn_ambient_temperature      296(2)
+_diffrn_detector_area_resol_mean 16.4
+_diffrn_measured_fraction_theta_full 0.645
+_diffrn_measured_fraction_theta_max 0.645
+_diffrn_measurement_device_type  'Kuma KM4CCD \k geometry'
+_diffrn_measurement_method
+;HP omega scans - for more details see:
+A. Budzianowski, A. Katrusiak in High-Pressure Crystallography
+(Eds.: A. Katrusiak, P. F. McMillan),
+Dordrecht: Kluwer Acad. Publ., 2004 pp.157-168
+;
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.1219
+_diffrn_reflns_av_sigmaI/netI    0.0418
+_diffrn_reflns_limit_h_max       7
+_diffrn_reflns_limit_h_min       -7
+_diffrn_reflns_limit_k_max       20
+_diffrn_reflns_limit_k_min       -20
+_diffrn_reflns_limit_l_max       10
+_diffrn_reflns_limit_l_min       -10
+_diffrn_reflns_number            5562
+_diffrn_reflns_theta_full        29.29
+_diffrn_reflns_theta_max         29.29
+_diffrn_reflns_theta_min         2.67
+_exptl_absorpt_coefficient_mu    1.759
+_exptl_absorpt_correction_T_max  0.64
+_exptl_absorpt_correction_T_min  0.30
+_exptl_absorpt_correction_type   integration
+_exptl_absorpt_process_details
+;
+Katrusiak, A. (2003). REDSHABS - Program for correcting
+reflections intensities for DAC absorption, gasket shadowing
+and sample crystal absorption. Adam Mickiewicz University, Pozna\'n.
+Katrusiak, A. (2004). Z. Kristallogr. 219, 461-467
+;
+_exptl_crystal_colour            colourless
+_exptl_crystal_density_diffrn    2.031
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       plate
+_exptl_crystal_F_000             1120
+_exptl_crystal_size_max          0.40
+_exptl_crystal_size_mid          0.40
+_exptl_crystal_size_min          0.25
+_refine_diff_density_max         0.538
+_refine_diff_density_min         -0.527
+_refine_diff_density_rms         0.126
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.7(4)
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.125
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     55
+_refine_ls_number_reflns         822
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.124
+_refine_ls_R_factor_all          0.0707
+_refine_ls_R_factor_gt           0.0636
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0915P)^2^+9.5586P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1613
+_refine_ls_wR_factor_ref         0.1724
+_reflns_number_gt                729
+_reflns_number_total             822
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    c1ce05144j.txt
+_[local]_cod_data_source_block   TCAN
+_[local]_cod_cif_authors_sg_H-M  'I 4(1)cd'
+_cod_original_cell_volume        1889.0(5)
+_cod_database_code               7206207
+_journal_paper_doi 10.1039/c1ce05144j
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 41 c d"
+_symmetry_space_group_name_Hall 'I 4bw -2c'
+_[local]_omdb_cod_original_Hall 'I 4bw -2c'
+_symmetry_Int_Tables_number 110
+ 
+_cell_length_a    15.25100
+_cell_length_b    15.25100
+_cell_length_c    8.12190
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x+1/2,z+1/4
+4 y,-x+1/2,z+1/4
+5 -x,y,z+1/2
+6 x,-y,z+1/2
+7 y+1/2,x,z+1/4
+8 -y+1/2,-x,z+1/4
+9 x+1/2,y+1/2,z+1/2
+10 -x+1/2,-y+1/2,z+1/2
+11 -y+1/2,x,z+3/4
+12 y+1/2,-x,z+3/4
+13 -x+1/2,y+1/2,z
+14 x+1/2,-y+1/2,z
+15 y,x+1/2,z+3/4
+16 -y,-x+1/2,z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Cl1 Cl 16 b 0.48411 0.64742 0.19840 1.0
+Cl2 Cl 16 b 0.62449 0.54287 0.06170 1.0
+Cl3 Cl 16 b 0.65665 0.65240 0.34470 1.0
+N1 N 16 b 0.13790 0.27280 0.46560 1.0
+C1 C 16 b 0.59880 0.64390 0.15830 1.0
+C2 C 16 b 0.62050 0.71600 0.05040 1.0
+ 
+

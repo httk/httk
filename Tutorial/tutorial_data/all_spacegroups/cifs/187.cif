@@ -1,0 +1,91 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: b33ab7f9c3ecdae688f3713133189670
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-02 20:05:02 +0000 (Thu, 02 May 2013) $
+#$Revision: 84776 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/13/1511364.cif $
+#------------------------------------------------------------------------------
+data_1511364
+loop_
+_publ_author_name
+'Nowotny, H.'
+'Benesovsky, F.'
+'Rogl, P.'
+_publ_section_title
+;
+ Ein Beitrag zur Strukturchemie der Iridiumboride
+;
+_journal_name_full               'Monatshefte fuer Chemie (-108,1977)'
+_journal_page_first              678
+_journal_page_last               686
+_journal_volume                  102
+_journal_year                    1971
+_chemical_name_systematic        'Ir B0.9'
+_citation_journal_id_ASTM        MOCHAP
+_[local]_cod_data_source_file    boron0-1_50.cif
+_[local]_cod_data_source_block   B0.9Ir1
+_[local]_cod_chemical_formula_sum_orig 'B0.9 Ir1'
+_cod_original_cell_volume        19.37306
+_cod_database_code               1511364
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P -6 m 2"
+_symmetry_space_group_name_Hall 'P -6 2'
+_[local]_omdb_cod_original_Hall 'P -6 2'
+_symmetry_Int_Tables_number 187
+ 
+_cell_length_a    2.81500
+_cell_length_b    2.81500
+_cell_length_c    2.82300
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 x,x-y,-z
+5 -x+y,y,-z
+6 -y,-x,-z
+7 -x+y,-x,-z
+8 x,y,-z
+9 -y,x-y,-z
+10 -x+y,y,z
+11 -y,-x,z
+12 x,x-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+B1 B 1 d 0.33333 0.66667 0.50000 0.9
+Ir1 Ir 1 a 0.00000 0.00000 0.00000 1.0
+ 
+

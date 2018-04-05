@@ -1,0 +1,120 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: bbdbdb7a039aa8cb84fd650591b13cd2
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-11 14:35:18 +0000 (Fri, 11 Jul 2014) $
+#$Revision: 120071 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/51/15/1511513.cif $
+#------------------------------------------------------------------------------
+data_1511513
+loop_
+_publ_author_name
+'Horng, H.E.'
+'Bevolo, A.J.'
+'Richardson, J.W.jr.'
+'Hamaker, H.C.'
+'Shelton, R.N.'
+'Jacobson, R.A.'
+'Bader, S.D.'
+_publ_section_title
+;
+ Charge transfer and transition-metal cluster: Boron bonding in the bct
+ superconducting Y (Rh1-x Rux)4 B4 system
+;
+_journal_name_full
+'Physical Review, Serie 3. B - Condensed Matter (18,1978-)'
+_journal_page_first              6703
+_journal_page_last               6712
+_journal_volume                  27
+_journal_year                    1983
+_chemical_name_systematic        'Ru4 Y B4'
+_citation_journal_id_ASTM        PRBMDO
+_[local]_cod_data_source_file    boron4-x_143.cif
+_[local]_cod_data_source_block   B4Ru4Y1
+_[local]_cod_cif_authors_sg_Hall '-I 4bd 2c (x+1/2,y+1/4,z-3/8)'
+_[local]_cod_chemical_formula_sum_orig 'B4 Ru4 Y1'
+_cod_original_cell_volume        832.0906
+_cod_database_code               1511513
+_journal_paper_doi 10.1103/PhysRevB.27.6703
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "I 41/a 2/c 2/d (origin choice 2)"
+_symmetry_space_group_name_Hall '-I 4bd 2c'
+_[local]_omdb_cod_original_Hall 'I 4bw 2aw -1bw'
+_symmetry_Int_Tables_number 142
+ 
+_cell_length_a    7.44800
+_cell_length_b    7.44800
+_cell_length_c    15.00000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z
+3 -x+1/2,y,-z
+4 -x,-y+1/2,z
+5 -y+1/4,-x+1/4,-z+1/4
+6 -y+1/4,x+3/4,z+1/4
+7 y+3/4,-x+3/4,z+1/4
+8 y+3/4,x+1/4,-z+1/4
+9 -x,-y,-z
+10 -x,y,z+1/2
+11 x,-y+1/2,z+1/2
+12 x,y+1/2,-z
+13 y+1/4,x+1/4,z+1/4
+14 y+3/4,-x+1/4,-z+3/4
+15 -y+1/4,x+1/4,-z+3/4
+16 -y+3/4,-x+1/4,z+1/4
+17 x+1/2,y+1/2,z+1/2
+18 x,-y,-z+1/2
+19 -x,y+1/2,-z+1/2
+20 -x+1/2,-y,z+1/2
+21 -y+3/4,-x+3/4,-z+3/4
+22 -y+3/4,x+1/4,z+3/4
+23 y+1/4,-x+1/4,z+3/4
+24 y+1/4,x+3/4,-z+3/4
+25 -x+1/2,-y+1/2,-z+1/2
+26 -x+1/2,y+1/2,z
+27 x+1/2,-y,z
+28 x+1/2,y,-z+1/2
+29 y+3/4,x+3/4,z+3/4
+30 y+1/4,-x+3/4,-z+1/4
+31 -y+3/4,x+3/4,-z+1/4
+32 -y+1/4,-x+3/4,z+3/4
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Y1 Y 8 b 0.00000 0.25000 0.12500 1.0
+B1 B 32 g 0.35500 0.58400 0.29300 1.0
+Ru1 Ru 32 g 0.14830 0.36540 0.31310 1.0
+ 
+

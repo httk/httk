@@ -1,0 +1,79 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 5f6ed306b89d928f4bc17a052ba4a44c
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2013-05-05 14:21:46 +0000 (Sun, 05 May 2013) $
+#$Revision: 85285 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/12/9001248.cif $
+#------------------------------------------------------------------------------
+data_9001248
+loop_
+_publ_author_name
+'Bayliss, P.'
+_publ_section_title
+;Crystal chemistry and crystallography of some minerals within the pyrite
+ group
+;
+_journal_name_full               'American Mineralogist'
+_journal_page_first              1168
+_journal_page_last               1176
+_journal_volume                  74
+_journal_year                    1989
+_chemical_name_mineral           Tolovkite
+_exptl_crystal_density_diffrn    10.509
+_[local]_cod_chemical_formula_sum_orig 'Ir Sb S'
+_cod_database_code               9001248
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P c a 21"
+_symmetry_space_group_name_Hall 'P 2c -2ac'
+_[local]_omdb_cod_original_Hall 'P 2c -2ac'
+_symmetry_Int_Tables_number 29
+ 
+_cell_length_a    6.02500
+_cell_length_b    6.02500
+_cell_length_c    6.02500
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z+1/2
+3 -x+1/2,y,z+1/2
+4 x+1/2,-y,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ir1 Ir 4 a -0.00670 0.26120 0.00220 1.0
+Sb1 Sb 4 a 0.37760 0.62760 0.37760 1.0
+S1 S 4 a 0.62240 0.87240 0.62240 1.0
+ 
+

@@ -1,0 +1,103 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: d85bdc32d260372d1f9d0a50c29ad821
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/28/9012832.cif $
+#------------------------------------------------------------------------------
+data_9012832
+loop_
+_publ_author_name
+'Morgenstern-Badarau I'
+'Michel, A.'
+_publ_section_title
+;
+ Sur l'existence d'un oxyhydroxyde double de fer(III) et d'etain(IV)
+ Locality: synthetic
+;
+_journal_name_full               'Journal of Inorganic and Nuclear Chemistry'
+_journal_page_first              1400
+_journal_page_last               1402
+_journal_volume                  38
+_journal_year                    1976
+_chemical_name_mineral           Jeanbandyite
+_exptl_crystal_density_diffrn    3.850
+_[local]_cod_cif_authors_sg_H-M  'P n 3'
+_[local]_cod_chemical_formula_sum_orig 'Sn Fe O6'
+_cod_database_code               9012832
+_journal_paper_doi 10.1016/0022-1902(76)80168-6
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 2/n -3 (origin choice 2)"
+_symmetry_space_group_name_Hall '-P 2ab 2bc 3'
+_[local]_omdb_cod_original_Hall '-P 2ab 2bc 3'
+_symmetry_Int_Tables_number 201
+ 
+_cell_length_a    7.75700
+_cell_length_b    7.75700
+_cell_length_c    7.75700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y+1/2,-z+1/2
+3 -x+1/2,y,-z+1/2
+4 -x+1/2,-y+1/2,z
+5 y,z,x
+6 y,-z+1/2,-x+1/2
+7 -y+1/2,z,-x+1/2
+8 -y+1/2,-z+1/2,x
+9 z,x,y
+10 z,-x+1/2,-y+1/2
+11 -z+1/2,x,-y+1/2
+12 -z+1/2,-x+1/2,y
+13 -x,-y,-z
+14 -x,y+1/2,z+1/2
+15 x+1/2,-y,z+1/2
+16 x+1/2,y+1/2,-z
+17 -y,-z,-x
+18 -y,z+1/2,x+1/2
+19 y+1/2,-z,x+1/2
+20 y+1/2,z+1/2,-x
+21 -z,-x,-y
+22 -z,x+1/2,y+1/2
+23 z+1/2,-x,y+1/2
+24 z+1/2,x+1/2,-y
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Sn1 Sn 4 c 0.50000 0.50000 0.50000 1.0
+Fe1 Fe 4 b 0.00000 0.00000 0.00000 1.0
+O1 O 24 h -0.06800 0.06800 0.25100 1.0
+ 
+

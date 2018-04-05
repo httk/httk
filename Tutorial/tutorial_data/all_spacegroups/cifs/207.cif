@@ -1,0 +1,105 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 5a0d46a101fb7e9b8a63031416974c7f
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2014-07-12 08:06:43 +0000 (Sat, 12 Jul 2014) $
+#$Revision: 120115 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/10/9011053.cif $
+#------------------------------------------------------------------------------
+data_9011053
+loop_
+_publ_author_name
+'Geller, S.'
+_publ_section_title
+;
+ The crystal structure of Pd17Se15
+ Locality: synthetic
+ Sample: P432 refinement
+;
+_journal_name_full               'Acta Crystallographica'
+_journal_page_first              713
+_journal_page_last               721
+_journal_volume                  15
+_journal_year                    1962
+_chemical_name_mineral           Palladseite
+_exptl_crystal_density_diffrn    8.333
+_cod_database_code               9011053
+_journal_paper_doi 10.1107/S0365110X62001929
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4 3 2"
+_symmetry_space_group_name_Hall 'P 4 2 3'
+_[local]_omdb_cod_original_Hall 'P 4 2 3'
+_symmetry_Int_Tables_number 207
+ 
+_cell_length_a    10.60600
+_cell_length_b    10.60600
+_cell_length_c    10.60600
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x,-y,-z
+3 -x,y,-z
+4 -x,-y,z
+5 y,z,x
+6 y,-z,-x
+7 -y,z,-x
+8 -y,-z,x
+9 z,x,y
+10 z,-x,-y
+11 -z,x,-y
+12 -z,-x,y
+13 -y,-x,-z
+14 -y,x,z
+15 y,-x,z
+16 y,x,-z
+17 -x,-z,-y
+18 -x,z,y
+19 x,-z,y
+20 x,z,-y
+21 -z,-y,-x
+22 -z,y,x
+23 z,-y,x
+24 z,y,-x
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Pd1 Pd 6 e 0.23780 0.00000 0.00000 1.0
+Pd2 Pd 24 k 0.34610 0.35800 0.15020 1.0
+Pd3 Pd 3 d 0.50000 0.00000 0.00000 1.0
+Pd4 Pd 1 b 0.50000 0.50000 0.50000 1.0
+Se1 Se 12 i 0.00000 0.22990 0.22990 1.0
+Se2 Se 6 f 0.25780 0.50000 0.50000 1.0
+Se3 Se 12 j 0.50000 0.16810 0.16810 1.0
+ 
+

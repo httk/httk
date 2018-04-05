@@ -1,0 +1,172 @@
+# CIF file
+# This is a cif file prepared for use with the openmaterialsdb.se
+#
+# The cif file was imported from the Crystallography Open Database (COD)
+# http://www.crystallography.net/
+# based on data placed in the public domain by the contributors.
+#
+# The original file in cod had 
+#COD-MD5: 4ea4b85196d1f2aeac1e1dfa59b37656
+#
+# It was then processed with the FINDSYM tool by
+# Harold T. Stokes, Branton J. Campbell, Dorian M. Hatch
+# Brigham Young University, Provo, Utah, USA
+# which was used to update the structure information.
+#
+# The original header in COD and relevant COD data follows:
+#------------------------------------------------------------------------------
+#$Date: 2012-12-20 08:28:23 +0000 (Thu, 20 Dec 2012) $
+#$Revision: 69566 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/11/58/4115838.cif $
+#------------------------------------------------------------------------------
+data_4115838
+loop_
+_publ_author_name
+'Alexey I. Baranov'
+'Lars A. Kloo'
+'Andrei V. Olenev'
+'Boris A. Popovkin'
+'Anatolii I. Romanenko'
+'Andrei V. Shevelkov'
+_publ_contact_author
+;
+        Boris A. Popovkin
+        Inorganic Synthesis Laboratory
+        Moscow State University
+        Leninskie Gory
+        119899 Moscow
+        Russia
+;
+_publ_contact_author_email       popovkin@inorg.chem.msu.ru
+_publ_contact_author_fax         '7 095 939-0171'
+_publ_contact_author_phone       '7 095 939-3339'
+_publ_section_title
+;
+ Unique Metallic Wires in a Novel Quasi-1D Compound. Synthesis, Crystal
+ and Electronic Structure, and Properties of Ni8Bi8SI
+;
+_journal_name_full               'Journal of the American Chemical Society'
+_journal_page_first              12375
+_journal_page_last               12379
+_journal_volume                  123
+_journal_year                    2001
+_chemical_melting_point          596
+_chemical_name_common            'nickel bismuth iodide'
+_chemical_name_systematic        'nickel bismuth sulphoiodide'
+_computing_cell_refinement       'CAD4 (Nonius)'
+_computing_data_collection       'CAD4 (Nonius)'
+_computing_data_reduction        'SDP (Nonius)'
+_computing_molecular_graphics    'SHELXL-97 (Sheldrick, 1997)'
+_computing_publication_material  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_measured_fraction_theta_full 0.996
+_diffrn_measured_fraction_theta_max 0.996
+_diffrn_measurement_device_type  'Nonius Cad4F'
+_diffrn_measurement_method       \w--2\q
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.1249
+_diffrn_reflns_av_sigmaI/netI    0.1193
+_diffrn_reflns_limit_h_max       12
+_diffrn_reflns_limit_h_min       0
+_diffrn_reflns_limit_k_max       0
+_diffrn_reflns_limit_k_min       -12
+_diffrn_reflns_limit_l_max       5
+_diffrn_reflns_limit_l_min       0
+_diffrn_reflns_number            608
+_diffrn_reflns_theta_full        28.00
+_diffrn_reflns_theta_max         28.00
+_diffrn_reflns_theta_min         2.08
+_diffrn_standards_decay_%        0
+_diffrn_standards_interval_time  120
+_diffrn_standards_number         1
+_exptl_absorpt_coefficient_mu    98.573
+_exptl_absorpt_correction_T_max  0.9964
+_exptl_absorpt_correction_T_min  0.6593
+_exptl_absorpt_correction_type   psi-scans
+_exptl_crystal_colour            black
+_exptl_crystal_density_diffrn    9.528
+_exptl_crystal_description       needle
+_exptl_crystal_F_000             957
+_exptl_crystal_size_max          0.08
+_exptl_crystal_size_mid          0.015
+_exptl_crystal_size_min          0.015
+_refine_diff_density_max         4.688
+_refine_diff_density_min         -5.455
+_refine_diff_density_rms         1.226
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0.09(13)
+_refine_ls_extinction_coef       none
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.018
+_refine_ls_hydrogen_treatment    mixed
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     43
+_refine_ls_number_reflns         549
+_refine_ls_number_restraints     1
+_refine_ls_restrained_S_all      1.017
+_refine_ls_R_factor_all          0.1097
+_refine_ls_R_factor_gt           0.0671
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.1030P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.1594
+_refine_ls_wR_factor_ref         0.1780
+_reflns_number_gt                395
+_reflns_number_total             549
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ja0167001_s1.cif
+_[local]_cod_data_source_block   dic146
+_[local]_cod_chemical_formula_sum_orig 'Bi8 Ni8 S, I'
+_cod_database_code               4115838
+
+#
+# Data extracted using the FINDSYM utility follows
+#
+ 
+_audit_creation_method FINDSYM
+ 
+_symmetry_space_group_name_H-M "P 4"
+_symmetry_space_group_name_Hall 'P 4'
+_[local]_omdb_cod_original_Hall 'P 4'
+_symmetry_Int_Tables_number 75
+ 
+_cell_length_a    9.77400
+_cell_length_b    9.77400
+_cell_length_c    4.19700
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+ 
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -x,-y,z
+3 -y,x,z
+4 y,-x,z
+ 
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Bi1 Bi 4 d 0.66036 0.17369 0.02980 1.0
+Bi2 Bi 4 d 0.87618 0.35895 0.52830 1.0
+Ni1 Ni 4 d -0.06290 0.19350 0.04000 1.0
+Ni2 Ni 4 d 0.08880 0.18290 0.52400 1.0
+I1 I 1 b 0.50000 0.50000 0.56300 1.0
+S1 S 1 a 0.00000 0.00000 0.79000 1.0
+ 
+
