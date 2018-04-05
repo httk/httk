@@ -6,6 +6,7 @@
 **/*~
 # Httk specific ignores
 httk.cfg
+httk.old
 External
 Docs/_static/generated/**
 Docs/_build/**
