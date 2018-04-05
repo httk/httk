@@ -114,7 +114,7 @@ function VASP_NBANDSLINE {
     fi
 
     local NPAR=$(VASP_GET_TAG NPAR)
-    if [ -z "$NPAR" ]; then
+    if [ -n "$NPAR" ]; then
 	MISMATCH=$(( NBANDS % NPAR))
 	if [ $MISMATCH -ne 0 ]; then
 	    NBANDS=$((NBANDS+$MISMATCH))
@@ -129,7 +129,7 @@ function VASP_NBANDSLINE {
 	fi
     fi
 
-    if [ -z "$NPAR" ]; then
+    if [ -n "$NPAR" ]; then
 	MISMATCH=$(( NBANDS % NPAR))
 	if [ $MISMATCH -ne 0 ]; then
 	    NBANDS=$((NBANDS+$MISMATCH))
@@ -450,8 +450,7 @@ function VASP_PREPARE_INCAR {
     fi
 
     local NPAR=$(VASP_GET_TAG NPAR)
-
-    if [ -z "$NPAR" ]; then
+    if [ -z "$NPAR" -a -n "$HT_NBR_NODES" ]; then
 	NPAR=$(HT_FCALC "int(sqrt($HT_NBR_NODES))")
 	if [ "$NPAR" -le 1 ]; then
 	    NPAR=1
@@ -531,6 +530,17 @@ function VASP_PREPARE_INCAR {
 	VASP_SET_TAG SYMPREC 1e-6
     fi
 
+    local ICHARG=$(VASP_GET_TAG ICHARG)
+    if [ -n "$ICHARG" ]; then
+	if [ "$ICHARG" -eq 1 ]; then
+	    if [ ! -e "CHGCAR" -o -s "CHGCAR" ]; then
+		VASP_SET_TAG ICHARG 2
+	    elif grep "^CHGCAR_INCOMPLETE" ht.controlled.msgs; then
+		VASP_SET_TAG ICHARG 2
+	    fi
+	fi
+    fi
+    
     local NEDOS=$(VASP_GET_TAG NEDOS)
     if [ -z "$NEDOS" ]; then
 	if grep "^BUMP_NEDOS$" ht.remedy.* >/dev/null 2>&1; then
@@ -575,6 +585,8 @@ function VASP_STDOUT_CHECKER {
     /WARNING: Sub-Space-Matrix is not hermitian in DAV/ && subherm_count>5 { next }
     /hit a member that was already found in another star/ && star_count>5 { next }
     /^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$/ && simple_number>=100 { next }
+
+    /WARNING: chargedensity file is incomplete/ {print "CHGCAR_INCOMPLETE" >> msgfile; exit 2}
 
     {print $0; system("");}
 
@@ -649,9 +661,6 @@ function VASP_STDOUT_CHECKER {
 function VASP_OSZICAR_CHECKER {
     local MSGFILE="$1"
     local EXITPID="$2"
-
-    #trap "echo WHAAAT USR1" USR1
-    #trap "echo WHAAAT TERM" TERM
 
     # First grab needed parameters from the OUTCAR
     OUTCARPARAMS=$(HT_TASK_FOLLOW_FILE OUTCAR "$EXITPID" | awk '
@@ -772,7 +781,7 @@ function VASP_INPUTS_ADJUST {
     #
     echo "========= VASP ADJUSTMENT BASED ON ========"
     echo "============ ht.controlled.msgs ==========="
-    cat ../ht.controlled.msgs
+    cat ../ht.controlled.msgs | sort | uniq
     echo "==========================================="
 
     ANYREMEDY=0
@@ -1003,7 +1012,7 @@ function VASP_INPUTS_FIX_ERROR {
 
     echo "========= VASP PROBLEM DETECTED ========"
     echo "========== ht.controlled.msgs =========="
-    cat ../ht.controlled.msgs
+    cat ../ht.controlled.msgs | sort | uniq
     echo "========================================"
 
     ANYREMEDY=0
