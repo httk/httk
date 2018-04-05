@@ -1,8 +1,15 @@
 #!/bin/bash
 # httk-vasp-relaxformenrg (relax until converged)
-# 1.0
-#
+# 1.2
 # Carefully relax a structure into its ground state.
+#
+# Version history:
+#    1.0: Initial version
+#    1.1: Fixed bug if structure started with atoms too close (infinite loop)
+#         Also added task freeze capability
+#    1.2: Better handling of bad convergence during relax2
+#
+#
 
 . "$HTTK_DIR"/Execution/tasks/ht_tasks_api.sh
 . "$HTTK_DIR"/Execution/tasks/vasp/vasptools.sh
@@ -27,6 +34,7 @@ if [ "$STEP" == "start" ]; then
     HT_TASK_ATOMIC_SECTION_START
     HT_TASK_ATOMIC_RUNLOG_HEADLINE "START INPUT"
     HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR ../POTCAR.summary
+    HT_TASK_STORE_VAR TOOCLOSESTEP 0
 
     HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
 fi
@@ -92,13 +100,20 @@ fi
 
 ####################### fix_too_close ############################
 if [ "$STEP" == "fix_too_close" ]; then
+    HT_TASK_ATOMIC_SECTION_START
 
     cp ../POSCAR POSCAR
     VASP_POSCAR_SCALE_VOLUME 1.1
 
-    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_STORE_VAR TOOCLOSESTEP $((TOOCLOSESTEP+1))
+
+    if [ "$TOOCLOSESTEP" -gt "5" ]; then
+	echo "Atoms too close seems unfixable despite cell expansion. Are the atoms on top of eachother?"
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 	
+    fi
+
     HT_TASK_ATOMIC_RUNLOG_HEADLINE "FIX TOO CLOSE NEW SCALED POSCAR"
-    HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR 
+    HT_TASK_ATOMIC_RUNLOG_APPEND ./POSCAR 
 
     HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
 fi
@@ -165,6 +180,14 @@ if [ "$STEP" == "relax1_fix_too_close" ]; then
     HT_TASK_ATOMIC_RUNLOG_HEADLINE "FIX TOO CLOSE IN RELAX1 SCALE CONTCAR"
     HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR 
     cp ../POSCAR CONTCAR.last
+
+    HT_TASK_STORE_VAR TOOCLOSESTEP $((TOOCLOSESTEP+1))
+
+    if [ "$TOOCLOSESTEP" -gt "5" ]; then
+	echo "Atoms too close seems unfixable despite cell expansion. Are the atoms on top of eachother?"
+	HT_TASK_ATOMIC_SECTION_END_BROKEN 	
+    fi
+
     HT_TASK_ATOMIC_SECTION_END_NEXT relax1
 fi
 
@@ -227,6 +250,35 @@ if [ "$STEP" == "relax2" ]; then
 	HT_TASK_ATOMIC_SECTION_END_NEXT cleanup
     fi
 
+    # We recovered from a bad convergence. In that case, just
+    # re-run another relaxation step 2
+    if [ -n "$BADCONV" -a "$RETURNCODE" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "BADCONV RECOVERED RE-RUN STEP2"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax$RELAXSTEP
+	mv ../XDATCAR XDATCAR.relax$RELAXSTEP
+	mv ../OSZICAR OSZICAR.relax$RELAXSTEP
+	mv ../vasp.out vasp.out.relax$RELAXSTEP
+
+	if [ "$RELAXSTEP" -gt 5 ]; then
+	    echo "Tried too many relaxations, structure refuses to converge, giving up."
+	    HT_TASK_BROKEN
+	fi
+	echo "Signs of bad electronic convergence, doing another relaxation run."
+
+	HT_TASK_STORE_VAR RELAXSTEP $((RELAXSTEP+1))
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+
     # relaxation step 2 unsuccessfull
     HT_TASK_ATOMIC_SECTION_START
     VASP_INPUTS_FIX_ERROR 
@@ -234,8 +286,7 @@ if [ "$STEP" == "relax2" ]; then
     if [ "$RESULT" == "2" ]; then
 	HT_TASK_ATOMIC_SECTION_END_BROKEN 
     elif [ "$RESULT" == "0" ]; then
-	# If second relaxation step fails, but can be fixed, go back to relax1
-	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
     fi
     HT_TASK_ATOMIC_SECTION_END_BROKEN 
 fi
@@ -254,3 +305,28 @@ if [ "$STEP" == "cleanup" ]; then
     HT_TASK_FINISHED
 fi
 
+####################### freeze ############################
+if [ "$STEP" == "freeze" ]; then
+
+    rm -f OSZICAR.last
+    rm -f CONTCAR.last
+    rm -f CHGCAR.last
+
+    rm -f CHG CHGCAR CONTCAR DOSCAR OSZICAR XDATCAR EIGENVAL IBZKPT vasprun.xml WAVECAR PCDAT OUTCAR
+  
+    HT_TASK_COMPRESS
+    bunzip2 ht.RUNLOG.bz2
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "TASK FROZEN"
+    HT_TASK_ATOMIC_SECTION_END_NEXT unfreeze
+fi
+
+####################### unfreeze ############################
+if [ "$STEP" == "unfreeze" ]; then
+    HT_TASK_UNCOMPRESS
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "TASK UNFROZEN"
+    HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+fi

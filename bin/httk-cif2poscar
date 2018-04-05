@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#    The high-throughput toolkit (httk)
+#    Copyright (C) 2012-2015 Rickard Armiento
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Workaround to allow this program to be run in a subdirectory of the httk directory even if the paths are not setup correctly.
+import argparse, sys, os.path
+
+try:
+    import httk
+except Exception:
+    import inspect
+    _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+    sys.path.insert(1, os.path.join(_realpath,'../..'))
+    import httk
+    
+def main():
+    parser = argparse.ArgumentParser(description="Convert cif files into POSCARs")
+    parser.add_argument('-debug', action='store_true')
+    parser.add_argument('file', metavar='run', nargs='*', help='filenames or directories to import')
+    args = parser.parse_args()    
+
+    debug = args.debug
+
+    filenames=args.file
+    
+    for filename in filenames:
+        print "==== Read infile:", filename
+        struct = httk.load(filename)
+        print struct
+        outname = os.path.splitext(os.path.basename(filename))[0]+".vasp"
+        print "==== Conversion to unitcell representation:"
+        print struct.uc
+        print "==== Write poscar", outname
+        struct.io.save(outname)
+        
+if __name__ == "__main__":
+    main()
+
+
+
+

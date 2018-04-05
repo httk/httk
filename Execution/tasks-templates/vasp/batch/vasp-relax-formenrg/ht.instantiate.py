@@ -3,4 +3,6 @@
 
 from httk.iface.vasp_if import structure_to_poscar
 
-structure_to_poscar('POSCAR',structure,fix_negative_determinant=True)         
+comment = [str(structure.get_tags()[x]) for x in structure.get_tags()]
+structure_to_poscar('POSCAR', structure,
+                    fix_negative_determinant=True, comment=comment)

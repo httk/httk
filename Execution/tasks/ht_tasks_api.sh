@@ -520,6 +520,10 @@ function HT_TASK_COMPRESS {
     fi
 }
 
+function HT_TASK_UNCOMPRESS {
+    find . -type f -name "*.bz2" -print0 | xargs -0 bunzip2
+}
+
 function HT_TASK_STORE_VAR {
     TAG="$1"
     VALUE="$2"
@@ -566,7 +570,6 @@ function HT_TASK_ATOMIC_RUNLOG_APPEND {
 
 function HT_TASK_ATOMIC_RUNLOG_HEADLINE {
     local OLDLOG="../ht.RUNLOG"
-
     (
         if [ -e ht.RUNLOG ]; then
 	    cat ht.RUNLOG
@@ -574,7 +577,7 @@ function HT_TASK_ATOMIC_RUNLOG_HEADLINE {
 	    cat ../ht.RUNLOG
 	fi
 	echo "*****************************************************"
-	echo "$@"
+	echo "$(date -R): $@"
 	echo "*****************************************************"
 	echo ""
     ) > ht.tmp.RUNLOG
@@ -608,4 +611,3 @@ function HT_FIND_NBR_NODES {
 	echo 1
     fi
 }
-

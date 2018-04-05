@@ -1,0 +1,8 @@
+LOCAL_HTTK_DIR="~/Httk-runs"
+VASP_COMMAND="mpirun /path/to/your/vasp"
+VASP_PSEUDO_PATH="/path/to/pseudopotential/library"
+SLURM_PROJECT="liu1"
+SLURM_QUEUE="green"
+SLURM_NODES="1"
+SLURM_TIMEOUT="6-23:59:59"
+TASKMGR_JOB_TIMEOUT="3600"

@@ -16,7 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
-from httk.atomistic import Structure
+from httk.atomistic import Structure, UnitcellStructure
+
 
 class StructureVisualizerPlugin(HttkPlugin):
             
@@ -26,18 +27,18 @@ class StructureVisualizerPlugin(HttkPlugin):
         self.visualizer = None
 
     def wait(self):
-        if self.visualizer != None:
+        if self.visualizer is not None:
             self.visualizer.wait()
 
     def params(self):
         return self.visualizer.params
 
-    def show(self,params={},backends=['jmol','ase'],debug=False):
+    def show(self, params={}, backends=['jmol', 'ase'], debug=False):
         for backend in backends:
             if backend == 'jmol':
                 try:
                     from jmolstructurevisualizer import JmolStructureVisualizer
-                    self.visualizer = JmolStructureVisualizer(self.struct,params)
+                    self.visualizer = JmolStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     #self.visualizer.rotate()
                     return
@@ -48,7 +49,7 @@ class StructureVisualizerPlugin(HttkPlugin):
             if backend == 'ase':
                 try:
                     from asestructurevisualizer import AseStructureVisualizer
-                    self.visualizer = AseStructureVisualizer(self.struct,params)
+                    self.visualizer = AseStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     return
                 except ImportError:
@@ -58,3 +59,4 @@ class StructureVisualizerPlugin(HttkPlugin):
         raise Exception("StructureVisualizerPlugin.show: None of the requested / available backends available, tried:"+str(backends))
 
 Structure.vis = HttkPluginWrapper(StructureVisualizerPlugin)
+UnitcellStructure.vis = HttkPluginWrapper(StructureVisualizerPlugin)

@@ -40,13 +40,25 @@ else
     VASP_PSEUDO_PATH="~/$VASP_PSEUDO_PATH"
 fi
 
-echo "Taskmanager job timeout in seconds: [$TASKMGR_JOB_TIMEOUT]"
+echo "Slurm project to submit jobs to: [$SLURM_PROJECT]"
+SLURM_PROJECT=$(readdata "$SLURM_PROJECT")
+
+echo "Slurm queue to submit jobs to [$SLURM_QUEUE]"
+SLURM_QUEUE=$(readdata "$SLURM_QUEUE")
+
+echo "Slurm job timeout [$SLURM_TIMEOUT]"
+SLURM_TIMEOUT=$(readdata "$SLURM_TIMEOUT")
+
+echo "Taskmanager timeout max time per task in seconds: [$TASKMGR_JOB_TIMEOUT]"
 TASKMGR_JOB_TIMEOUT=$(readdata "$TASKMGR_JOB_TIMEOUT")
-echo
 
 cat - > config <<EOF
 LOCAL_HTTK_DIR="$LOCAL_HTTK_DIR"
 VASP_COMMAND="$VASP_COMMAND"
 VASP_PSEUDO_PATH="$VASP_PSEUDO_PATH"
+SLURM_PROJECT="$SLURM_PROJECT"
+SLURM_QUEUE="$SLURM_QUEUE"
+SLURM_NODES="1"
+SLURM_TIMEOUT="$SLURM_TIMEOUT"
 TASKMGR_JOB_TIMEOUT="$TASKMGR_JOB_TIMEOUT"
 EOF

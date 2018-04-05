@@ -18,16 +18,19 @@
 import httk.external.ase_glue
 import ase.visualize
 
+
 class AseStructureVisualizer(object):
 
-    def __init__(self, struct):
+    def __init__(self, struct, params={}):
         self.struct = struct
+        self.params = params
          
     def show(self):
         ase_atoms = self.struct.ase.to_Atoms()
         #ase_atoms = httk.iface.ase_if.ase_atoms_to_structure(self.struct)
         ase.visualize.view(ase_atoms)
         
-
+    def wait(self):
+        pass
 
     

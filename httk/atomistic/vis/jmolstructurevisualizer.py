@@ -20,39 +20,40 @@ import time
 import httk.external.jmol
 import httk.core
 
+
 class JmolStructureVisualizer(object):
 
     def __init__(self, struct, params={}):
         self.struct = struct
         self.jmol = None
-        self.params=params
+        self.params = params
         if 'bonds' not in self.params:
-            self.params['bonds']=True
+            self.params['bonds'] = True
         if 'extbonds' not in self.params:
-            self.params['extbonds']=True
+            self.params['extbonds'] = True
         if 'extmetals' not in self.params:
-            self.params['extmetals']=False
+            self.params['extmetals'] = False
             # Set to a tuple, first value = length of metal bonds, second value = cutoff distance to unit cell.
         if 'polyhedra' not in self.params:
-            self.params['polyhedra']=True
+            self.params['polyhedra'] = True
         if 'repetitions' not in self.params:
-            self.params['repetitions']=[1,1,1]
+            self.params['repetitions'] = [1, 1, 1]
         if 'defaults' not in self.params:
-            self.params['defaults']='defaults'
+            self.params['defaults'] = 'defaults'
         if 'angle' not in self.params:
-            self.params['angle']='{0.5 1 0} 20.0'
+            self.params['angle'] = '{0.5 1 0} 20.0'
         if 'bgcolor' not in self.params:
-            self.params['bgcolor']='#F5F5F5'
+            self.params['bgcolor'] = '#F5F5F5'
         if 'unitcell' not in self.params:
-            self.params['unitcell']=None
+            self.params['unitcell'] = None
         if 'show_unitcell' not in self.params:
-            self.params['show_unitcell']=True
+            self.params['show_unitcell'] = True
         if 'extracell' not in self.params:
-            self.params['extracell']=None
+            self.params['extracell'] = None
         if 'show_supercell' not in self.params:
-            self.params['show_supercell']=False
+            self.params['show_supercell'] = False
         if 'perspective' not in self.params:
-            self.params['perspective']=True
+            self.params['perspective'] = True
 
     def set_defaults(self):
         self.jmol.send("""define ~anions (oxygen or nitrogen or fluorine or sulphur or chlorine or selenium or bromine or tellurium or iodine);
@@ -219,7 +220,7 @@ class JmolStructureVisualizer(object):
 
         if self.params['show_unitcell']:
     
-            if self.params['unitcell'] == None:
+            if self.params['unitcell'] is None:
                 if self.struct.has_rc_repr:
                     basis = self.struct.rc_basis
                 elif self.struct.has_uc_repr:
@@ -242,7 +243,13 @@ class JmolStructureVisualizer(object):
             for i in range(3):
                 unitcellstrs += ["{"+str(newbasis[i][0])+" "+str(newbasis[i][1])+" "+str(newbasis[i][2])+"}"]
             unitcellstr += ", ".join(unitcellstrs)+" ];\n"
-            unitcellstr += "unitcell {1 1 1};\n"
+            jmol_version = httk.external.jmol.jmol_version.split('.')
+            if (int(jmol_version[0]) == 14 and int(jmol_version[1]) == 0 and int(jmol_version[1]) == 13):
+                # This happened to be the jmol version I had installed when I first programmed this part,
+                # so it seemed relevant to add this bug workaround...
+                unitcellstr += "unitcell {1 1 1};\n"
+            else:
+                unitcellstr += "unitcell {0 0 0};\n"
             unitcellstr += "unitcell on;\nunitcell 0.025;\n"
     
             self.jmol.send(unitcellstr)
@@ -250,11 +257,11 @@ class JmolStructureVisualizer(object):
         if self.params['extracell']:
             basis = self.params['extracell']                       
             origin = (0*(basis[0] + 0*basis[1] + 0*basis[2]))
-            p = [origin,basis[0],basis[1],basis[2],basis[0]+basis[1],basis[0]+basis[2],basis[1]+basis[2],basis[0]+basis[1]+basis[2]]            
-            edges = ((0,1),(0,2),(0,3),(1,4),(1,5),(3,5),(3,6),(2,6),(2,4),(4,7),(6,7),(5,7))
-            for i,edge in enumerate(edges,start=1):
+            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]            
+            edges = ((0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (3, 5), (3, 6), (2, 6), (2, 4), (4, 7), (6, 7), (5, 7))
+            for i, edge in enumerate(edges, start=1):
                 line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())                 
-                self.jmol.send("draw line_ec_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06;\n"%tuple(line))
+                self.jmol.send("draw line_ec_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06;\n" % tuple(line))
 
         if self.params['show_supercell']:
             if self.struct.has_rc_repr:
@@ -262,11 +269,11 @@ class JmolStructureVisualizer(object):
             elif self.struct.has_uc_repr:
                 basis = self.struct.uc_basis
             origin = (0*(basis[0] + 0*basis[1] + 0*basis[2]))
-            p = [origin,basis[0],basis[1],basis[2],basis[0]+basis[1],basis[0]+basis[2],basis[1]+basis[2],basis[0]+basis[1]+basis[2]]            
-            edges = ((0,1),(0,2),(0,3),(1,4),(1,5),(3,5),(3,6),(2,6),(2,4),(4,7),(6,7),(5,7))
-            for i,edge in enumerate(edges,start=1):
+            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]            
+            edges = ((0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (3, 5), (3, 6), (2, 6), (2, 4), (4, 7), (6, 7), (5, 7))
+            for i, edge in enumerate(edges, start=1):
                 line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())                 
-                self.jmol.send("draw line_sc_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06 COLOR blue;\n"%tuple(line))
+                self.jmol.send("draw line_sc_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06 COLOR blue;\n" % tuple(line))
                             
         #axis off;
 
@@ -278,67 +285,66 @@ class JmolStructureVisualizer(object):
         #self.jmol.send("rotate AXISANGLE {0.5 1 0} 20.0;\n")
         self.jmol.send("zoom 0;\n")
 
-
-    def extbonds(self,on):
-        if self.jmol != None:
+    def extbonds(self, on):
+        if self.jmol is not None:
             self._extbonds = on
             self.initialize()
 
-    def polyhedra(self,on):
-        if self.jmol != None:
+    def polyhedra(self, on):
+        if self.jmol is not None:
             self._polyhedra = on
             self.initialize()
 
-    def bonds(self,on):
-        if self.jmol != None:
+    def bonds(self, on):
+        if self.jmol is not None:
             self._bonds = on
             self.initialize()
 
-    def repeat(self,repetitions):
-        if self.jmol != None:
+    def repeat(self, repetitions):
+        if self.jmol is not None:
             self._repetitios = repetitions
             self.initialize()
 
     def initialize(self):
-        if self.jmol != None:
+        if self.jmol is not None:
             bgcolorstr = self.params['bgcolor']
             self.jmol.send("zap;\n")
             self.jmol.send("background '"+bgcolorstr+"';\n")
             #self.jmol.send("background '"+bgcolorstr+"';\n")
 
     def refresh(self):
-        if self.jmol != None:
+        if self.jmol is not None:
             self.initialize()
-            httk.external.jmol.structure_to_jmol(self.jmol.stdin,self.struct, copies=[4,4,4],repeat=self.params['repetitions'])
-            if self.params['defaults']=='publish':
+            httk.external.jmol.structure_to_jmol(self.jmol.stdin, self.struct, copies=[4, 4, 4], repeat=self.params['repetitions'])
+            if self.params['defaults'] == 'publish':
                 self.defaults_publish() 
             else:
                 self.defaults_publish() 
 
-    def save_and_quit(self,filename,resx=3200,resy=2500):
+    def save_and_quit(self, filename, resx=3200, resy=2500):
         self.jmol.send('write image '+str(resx)+' '+str(resy)+' "'+filename+'";exitJmol;\n')
         self.jmol.wait_finish()
         self.jmol = None
                  
-    def show(self,repeat=None):
-        if self.jmol == None:
+    def show(self, repeat=None):
+        if self.jmol is None:
             self.jmol = httk.external.jmol.start()
         self.refresh()
 
     def stop(self):
-        if self.jmol != None:
+        if self.jmol is not None:
             self.jmol.stop()
             self.jmol = None
 
     def wait(self):
-        if self.jmol != None:
+        if self.jmol is not None:
             self.jmol.wait_finish()
 
-    def rotate(self,angle):
+    def rotate(self, angle):
         self.jmol.send("rotate x "+str(angle[0])+"; rotate z "+str(angle[1])+"; rotate y "+str(angle[2])+";\n")
 
-    def spin(self,on=True):
-        if self.jmol != None:
+    def spin(self, on=True):
+        if self.jmol is not None:
             if on:
                 self.jmol.send("spin on;\n")
             else:

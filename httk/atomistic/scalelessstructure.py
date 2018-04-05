@@ -162,15 +162,15 @@ class ScalelessStructure(HttkObject):
         if isinstance(uc_sites,Sites):
             uc_sites = UnitcellSites.use(uc_sites)
         else:
-            if uc_reduced_coordgroups == None and \
-                    uc_reduced_coords == None and \
-                    uc_occupancies != None:
+            if uc_reduced_coordgroups is None and \
+                    uc_reduced_coords is None and \
+                    uc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-                if uc_reduced_occupationscoords != None:
+                if uc_reduced_occupationscoords is not None:
                     assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
             
-            if uc_reduced_coordgroups != None or \
-                    uc_reduced_coords != None:
+            if uc_reduced_coordgroups is not None or \
+                    uc_reduced_coords is not None:
 
 #                 if isinstance(uc_cellshape,CellShape):
 #                     uc_cellshapeobj = uc_cellshape
@@ -201,15 +201,15 @@ class ScalelessStructure(HttkObject):
         if isinstance(rc_sites,Sites):
             rc_sites = RepresentativeSites.use(rc_sites)
         else:
-            if rc_reduced_coordgroups == None and \
-                    rc_reduced_coords == None and \
-                    rc_occupancies != None:
+            if rc_reduced_coordgroups is None and \
+                    rc_reduced_coords is None and \
+                    rc_occupancies is not None:
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-                if rc_reduced_occupationscoords != None:     
+                if rc_reduced_occupationscoords is not None:     
                     assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)
 
-            if rc_reduced_coordgroups != None or \
-                    rc_reduced_coords != None:
+            if rc_reduced_coordgroups is not None or \
+                    rc_reduced_coords is not None:
                 
 #                 if isinstance(rc_cellshape,CellShape):
 #                     rc_cellshapeobj = rc_cellshape
@@ -234,16 +234,16 @@ class ScalelessStructure(HttkObject):
             else:
                 rc_sites = None
             
-        if rc_sites == None and uc_sites == None:
+        if rc_sites is None and uc_sites is None:
             raise Exception("Structure.create: neither representative, nor primcell, sites specification valid.")
 
-        if assignments != None:
+        if assignments is not None:
             if isinstance(assignments,Assignments):
                 assignments = assignments
             else:
                 assignments = Assignments.create(assignments=assignments)
 
-        if uc_sites == None and hall_symbol == None:
+        if uc_sites is None and hall_symbol is None:
             raise Exception("Structure.create: cannot create structure from only representative sites with no spacegroup information. Error was:"+str(spacegroup_exception))
 
         new = cls(assignments, rc_sites, uc_sites)
@@ -259,13 +259,13 @@ class ScalelessStructure(HttkObject):
 
     @httk_typed_property(UnitcellSites)
     def uc_sites(self):
-        if self._uc_sites == None:
+        if self._uc_sites is None:
             self._uc_sites, cell = coordgroups_reduced_rc_to_unitcellsites(self.rc_sites.reduced_coordgroups, self.rc_sites.cellshape.basis, self.hall_symbol)
         return self._uc_sites
             
     @property
     def rc_sites(self):
-        if self._rc_sites == None:
+        if self._rc_sites is None:
             newstructure = structure_reduced_uc_to_representative(self)
             self._rc_sites = newstructure.rc_sites
         return self._rc_sites
@@ -295,7 +295,7 @@ class ScalelessStructure(HttkObject):
         Returns True if the structure already contains the representative coordinates + spacegroup, and thus can be queried for this data
         without launching an expensive symmetry finder operation. 
         """
-        return self._rc_sites != None 
+        return self._rc_sites is not None 
            
     @property
     def has_uc_repr(self):
@@ -303,7 +303,7 @@ class ScalelessStructure(HttkObject):
         Returns True if the structure contains the primcell coordinate representation, and thus can be queried for this data
         without launching a somewhat expensive cell filling operation. 
         """
-        return self._uc_sites != None
+        return self._uc_sites is not None
 
     @property
     def uc_reduced_coordgroups(self):
@@ -443,7 +443,7 @@ class ScalelessStructure(HttkObject):
 
     @httk_typed_property(str)
     def element_wyckoff_sequence(self):        
-        if self.rc_sites.wyckoff_symbols == None:
+        if self.rc_sites.wyckoff_symbols is None:
             return None        
         symbols=[]
         for a in self.assignments:
@@ -549,7 +549,7 @@ class ScalelessStructure(HttkObject):
             x(self)            
 
     def add_tag(self,tag,val):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         new = SlStructureTag(self,tag,val)
         self._tags[tag]=new
@@ -567,22 +567,22 @@ class ScalelessStructure(HttkObject):
                 self.add_tag(tag,tagdata)
 
     def get_tags(self):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
     def get_tag(self,tag):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
 
     def get_refs(self):
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         return self._refs
 
     def add_ref(self,ref):        
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         if isinstance(ref,SlStructureRef):
             refobj = ref.reference
@@ -597,12 +597,12 @@ class ScalelessStructure(HttkObject):
             self.add_ref(ref)
             
     def get_rc_cells(self):
-        if self._rc_cells == None:
+        if self._rc_cells is None:
             self._fill_codependent_data()
         return self._rc_cells
 
     def add_rc_cell(self,cell):        
-        if self._rc_cells == None:
+        if self._rc_cells is None:
             self._fill_codependent_data()
         if isinstance(cell,SlStructureCell):
             cell = cell.cell

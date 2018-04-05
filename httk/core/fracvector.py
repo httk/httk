@@ -974,7 +974,7 @@ class FracVector(object):
                 result = B._map_over_noms(lambda x:op(A.nom, x))            
         elif len(Bdim) == 0:
             # [Matrix or Vector] op scalar
-            result = A._map_over_noms(lambda x:op(B.nom, x))
+            result = A._map_over_noms(lambda x:op(x, B.nom))
         else:
             # Matrix op Matrix
             result = A._map_over_noms(lambda x, y: op(x, y), B)

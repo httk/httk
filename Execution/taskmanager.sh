@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2014 Rickard Armiento
+#    Copyright (C) 2012-2015 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,6 @@
 #
 #############################################################################
 #############################################################################
-#
-#  TODO: How to enforce an overall priority order?
 #
 #  Usage: taskmanager.sh [type of taskmanager] [resource file]
 #
@@ -49,14 +47,6 @@
 #
 #   Statuses of rejected tasks:
 #
-#   ht.task.*.timeout : a run that was killed by the set timeout, needs investigation, 
-#                       or maybe just longer runtime.
-#   ht.task.*.dead    : task has been declared dead, not to be run again
-#   ht.task.*.overrun : task has been restarted too many times
-#   ht.task.*.underrun: task finished too quickly
-#   ht.task.*.unknown : task in unknwon status, needs manual supervision
-#   ht.task.*.broken  : task is in a broken state, usually because of user error
-#
 #   if you need to have subdirectories in your task directories that you do not want
 #   the taskmanager to mess with at all, name them ht.ignore.(something)
 #
@@ -71,6 +61,7 @@ export HT_TASKMGR_TIMEOUT="$HT_TASKMGR_TIMEOUT"
 export HT_TASKMGR_WRAP="$HT_TASKMGR_WRAP"
 export HT_TASKMGR_SET="$HT_TASKMGR_SET"
 export HT_TASKMGR_ROOTDIR="$HT_TASKMGR_ROOTDIR"
+export HT_TASKMGR_ATTEMPTS="$HT_TASKMGR_ATTEMPTS"
 BZIPLOG=1
 
 # Command line argument handling
@@ -105,6 +96,11 @@ while [ -n "$1" ]; do
 	    shift 1
 	    shift 1
             ;;
+        -a|--attempts)
+            HT_TASKMGR_ATTEMPTS=$2
+	    shift 1
+	    shift 1
+            ;;
         *)
 	    echo "Usage:"
 	    echo "  $0/taskmanager.sh -h : this help"
@@ -117,6 +113,10 @@ done
 
 if [ -z "$HT_TASKMGR_SET" ]; then
     HT_TASKMGR_SET="any"
+fi
+
+if [ -z "$HT_TASKMGR_ATTEMPTS" ]; then
+    HT_TASKMGR_ATTEMPTS="10"
 fi
 
 if [ -z "$HT_TASKMGR_TIMEOUT" ]; then
@@ -411,10 +411,17 @@ function adopt {
 	return 2
     fi
 
-    if [ "$RESTARTS" -gt "10" ]; then
+    if [ "$RESTARTS" -gt "$HT_TASKMGR_ATTEMPTS" ]; then
 	logmsg 1 "Too many restarts, putting this job in a broken state."
 	echo "Too many restarts!" >> "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running/ht.reason"
-	mv "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped" 
+	mv "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped" 	
+	if [ -e "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped/ht.run.current" ]; then
+	    (
+		cd "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped/ht.run.current"
+		rm -f ht.nextstep
+		../ht_steps freeze
+            )
+	fi
 	return 2
     fi
 
@@ -630,6 +637,13 @@ function start_run {
 	    OUTDIR="$DIR"
 	fi
 	mv "$TASK" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.broken"
+	if [ -e "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.broken/ht.run.current" ]; then
+	    (
+		cd "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.broken/ht.run.current"
+		rm -f ht.nextstep
+		../ht_steps freeze
+            )
+	fi
     elif [ "$RESULT" == "99" ]; then
 	# Timeout
 	logmsg 1 "The run timed out, so, mark it as such."
@@ -641,6 +655,14 @@ function start_run {
 	    OUTDIR="$DIR"
 	fi
 	mv "$TASK" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.timeout"
+	if [ -e "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.timeout/ht.run.current" ]; then
+	    (
+		cd "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.unclaimed.${PRIO}.timeout/ht.run.current"
+		rm -f ht.nextstep
+		../ht_steps freeze
+            )
+	fi
+
     else
 	# Stopped
 	logmsg 1 "The run returned a non-defined error code ($RESULT), this usually means something unexpected has happened in the runscript. We set the job in a stopped state."

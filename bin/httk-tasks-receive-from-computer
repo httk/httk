@@ -6,14 +6,21 @@ HTTK_BIN_PATH="$(cd "$DIRNAME"; pwd -P)"
 
 PROJECT="$HTTK_PROJECT_NAME"
 
-PIPE="$1"
+PIPE="${1%:*}"
 PIPEPATH1="$HTTK_PROJECT_DIR/ht.project/computers/$PIPE/"
 PIPEPATH2="$HTTK_USER_HOME/computers/$PIPE/"
+
+QUEUE="${1#*:}"
+if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
+    QUEUE="default"
+fi
+
+ASSIGNMENT="${PIPE}--${QUEUE}"
 shift 1
 
 if [ -d "$PIPEPATH1" ]; then
     PIPEPATH=$PIPEPATH1
-elif [-d "$PIPEPATH2" ]; then
+elif [ -d "$PIPEPATH2" ]; then
     PIPEPATH=$PIPEPATH2
 else
     echo "Unknown computer: $PIPE"
@@ -28,35 +35,45 @@ cd "$HTTK_PROJECT_DIR"
 
 echo "==== Fetching information about tasks to pull"
 if [ "$1" != "" ]; then
-    (for DIR in "$@"; do
-	find "$HTTK_REL_DIR/$DIR" -name "ht.task.$PIPE.*" 
-	done) > ht.project/ht.tmp.all
+    COUNT=$( (for DIR in "$@"; do
+	find "$HTTK_REL_DIR/$DIR" -name "ht.task.$ASSIGNMENT.*" 
+	done) | tee ht.project/ht.tmp.all | wc -l)
 else
-    find "$HTTK_REL_DIR/" -name "ht.task.$PIPE.*" > ht.project/ht.tmp.all
+    COUNT=$(find "$HTTK_REL_DIR/" -name "ht.task.$ASSIGNMENT.*" | tee ht.project/ht.tmp.all | wc -l)
+fi
+echo "Found $COUNT tasks to investigate."
+if [ "${COUNT// }" == "0" ];then
+    echo "Nothing more to do."
+    exit 0
 fi
 
 echo "==== Collecting data on finished tasks from computer"
-cat ht.project/ht.tmp.all | "$PIPEPATH/command" "
+COUNT=$(cat ht.project/ht.tmp.all | "$PIPEPATH/command" "$QUEUE" "
         mkdir -p \"ht.finished/$PROJECT/\"; 
         cd \"ht.finished/$PROJECT\"; 
         while read LINE; do
 	  ID=\"\$(echo \"\$LINE\" | awk -F/ '{split(\$NF,a,\".\"); print a[4]}')\"
 	  DIR=\"\$(dirname \"\$LINE\")\"
-	  LOCAL=\"\$(ls -d \"\$DIR/ht.task.$PIPE.\$ID\".* 2>/dev/null)\"
+	  LOCAL=\"\$(ls -d \"\$DIR/ht.task.$ASSIGNMENT.\$ID\".* 2>/dev/null)\"
           #echo \"DIR: \$DIR/ht.task.$PIPE.\$ID\" >&2
           #echo \"LOCAL: \$LOCAL\" >&2
 	  if [ -n \"\$LOCAL\" ]; then
              echo \"\$LOCAL\"
 	  fi; 
         done
-        " > ht.project/ht.tmp.sources
+        " | tee ht.project/ht.tmp.sources | wc -l)
+echo "Remaining tasks to pull: $COUNT."
+if [ "${COUNT// }" == "0" ];then
+    echo "Nothing more to do."
+    exit 0
+fi
 
 echo "==== Moving local files into place"
 cat ht.project/ht.tmp.sources | (
     while read LINE; do
 	ID=$(echo "$LINE" | awk -F/ '{split($NF,a,"."); print a[4]}')
 	DIR=$(dirname "$LINE")
-	LOCAL=$(ls -d "$DIR/ht.task.$PIPE.$ID".* )
+	LOCAL=$(ls -d "$DIR/ht.task.$ASSIGNMENT.$ID".* )
 	if [ -n "$LOCAL" -a "$LOCAL" != "$LINE" ]; then
 	    mv "$LOCAL" "$LINE"
 	fi
@@ -64,7 +81,7 @@ cat ht.project/ht.tmp.sources | (
 )
 
 echo "==== Syncronizing computer to local files"
-cat ht.project/ht.tmp.sources | "$PIPEPATH/pull" "ht.finished/$PROJECT/" "./"
+cat ht.project/ht.tmp.sources | "$PIPEPATH/pull" "$QUEUE" "ht.finished/$PROJECT/" "./"
 
 if [ "$?" != "0" ]; then
     echo "Pull request exited with error."
@@ -72,7 +89,7 @@ if [ "$?" != "0" ]; then
 fi
 
 echo "==== Removing transfered tasks from remote host"
-cat ht.project/ht.tmp.sources | "$PIPEPATH/command" "
+cat ht.project/ht.tmp.sources | "$PIPEPATH/command" "$QUEUE" "
   while read LINE; do
     DIRNAME=\"\$(dirname \"\$LINE\")\"
     # Saftey code; this should ensure we don't remove completely the wrong files

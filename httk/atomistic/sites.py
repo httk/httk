@@ -47,7 +47,7 @@ class Sites(HttkObject):
         self._counts = counts
         self.hall_symbol = hall_symbol
 
-        if pbc == None:
+        if pbc is None:
             self.pbc = (True, True, True)
         else:
             self.pbc = pbc 
@@ -64,28 +64,28 @@ class Sites(HttkObject):
         if isinstance(sites,Sites):
             return cls(reduced_coords=sites.reduced_coords, counts=sites.counts, cell=sites.cell, spacegroupobj = sites.spacegroupobj, pbc=sites.pbc, refs=sites.refs, tags=sites.tags)
 
-        if reduced_coordgroups == None and reduced_coords == None:
+        if reduced_coordgroups is None and reduced_coords is None:
             raise Exception("Sites.create: no valid coordinate specifications given.")       
 
-        if reduced_coordgroups == None and counts==None and occupancies == None:
+        if reduced_coordgroups is None and counts==None and occupancies is None:
             raise Exception("Sites.create: if giving coordinates, counts or occupancies must also be given.")       
 
-        if reduced_coordgroups == None and counts==None and reduced_coords != None and occupancies != None:
+        if reduced_coordgroups is None and counts==None and reduced_coords is not None and occupancies is not None:
             reduced_coordgroups, assignments = coords_and_occupancies_to_coordgroups_and_assignments(reduced_coords, occupancies)
 
-        if spacegroup != None or hall_symbol != None or spacegroupnumber != None or setting != None:
+        if spacegroup is not None or hall_symbol is not None or spacegroupnumber is not None or setting is not None:
             spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting) 
             hall_symbol = spacegroupobj.hall_symbol
         else:
             hall_symbol = None
         
-        if reduced_coordgroups != None:
+        if reduced_coordgroups is not None:
             reduced_coordgroups = FracVector.use(reduced_coordgroups)
         
-        if reduced_coords != None:
+        if reduced_coords is not None:
             reduced_coords = FracVector.use(reduced_coords)
 
-        if periodicity != None:
+        if periodicity is not None:
             pbc = periodicity_to_pbc(periodicity)
         else:
             pbc = (True, True, True)
@@ -112,13 +112,13 @@ class Sites(HttkObject):
 
     @property
     def reduced_coordgroups(self):
-        if self._reduced_coordgroups == None:
-            #if self._cartesian_coordgroups != None:
+        if self._reduced_coordgroups is None:
+            #if self._cartesian_coordgroups is not None:
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(self._cartesian_coordgroups,self.cell.basis)
-            if self._reduced_coords != None:
+            if self._reduced_coords is not None:
                 reduced_coordgroups = coords_and_counts_to_coordgroups(self._reduced_coords,self._counts)
                 self._reduced_coordgroups = FracVector.use(reduced_coordgroups)
-            #elif self._cartesian_coords != None:
+            #elif self._cartesian_coords is not None:
             #    reduced_coordgroups = coords_and_counts_to_coordgroups(self._cartesian_coords,self._counts)
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(reduced_coordgroups,self.cell.basis)
         return self._reduced_coordgroups 
@@ -129,13 +129,13 @@ class Sites(HttkObject):
 
     @property
     def counts(self):
-        if self._counts == None:
+        if self._counts is None:
             self._coords, self._counts = coordgroups_to_coords(self.reduced_coordgroups)
         return self._counts
 
     @property
     def reduced_coords(self):
-        if self._reduced_coords == None:
+        if self._reduced_coords is None:
             self._reduced_coords, self._counts = coordgroups_to_coords(self.reduced_coordgroups)
         return self._reduced_coords
 

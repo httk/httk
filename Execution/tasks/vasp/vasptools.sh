@@ -26,6 +26,7 @@ function VASP_MAGMOMLINE {
 
 function VASP_NBANDSLINE {
     # Reimplementation of the algorithm of cif2cell. NBANDS is the max of the default in VASP spin-polarized (0.6*nelect + NIONS/2), non-spin: (nelect/2 + NIONS/2), occupied bands + 20, or 0.6*nelect + total initalized magnetic moment
+    # In addition, it must be divisible by NPAR, so we round up to that.
 
     if [ ! -e "POSCAR" -o ! -e "POTCAR" -o ! -e "INCAR" ]; then
 	echo "VASP_NBANDSLINE: VASP INPUT FILES MISSING." >&2
@@ -112,6 +113,14 @@ function VASP_NBANDSLINE {
 	ADDED=0
     fi
 
+    local NPAR=$(VASP_GET_TAG NPAR)
+    if [ -z "$NPAR" ]; then
+	MISMATCH=$(( NBANDS % NPAR))
+	if [ $MISMATCH -ne 0 ]; then
+	    NBANDS=$((NBANDS+$MISMATCH))
+	fi
+    fi
+
     if grep "^BUMP_BANDS$" ht.remedy.* >/dev/null 2>&1; then
 	if [ "$ADDED" == 1 ]; then
 	    NBANDS=$((NBANDS-1))
@@ -120,14 +129,21 @@ function VASP_NBANDSLINE {
 	fi
     fi
 
-   echo "$NBANDS"
+    if [ -z "$NPAR" ]; then
+	MISMATCH=$(( NBANDS % NPAR))
+	if [ $MISMATCH -ne 0 ]; then
+	    NBANDS=$((NBANDS+$MISMATCH))
+	fi
+    fi
+
+    echo "$NBANDS"
 }
 
 function VASP_KPOINTSLINE {
     local LVAL=$1
 
     if [ -z "$LVAL" ]; then
-	echo "Error in VASP_KPOINTSLINE: must be called with a KPOINT density. (l parameter in VASP manual on automatic KPOINT generation.)" >&2 
+	echo "Error in VASP_KPOINTSLINE: must be called with a KPOINT density. (l parameter in VASP manual on automatic KPOINT generation.)" >&2
 	return
     fi
 
@@ -156,9 +172,9 @@ function VASP_KPOINTSLINE {
     local KPTSLINE=$(awk -v "LVAL=$LVAL" -v"equalkpts=$EQUAL_KPTS" -v"bumpkpts=$BUMP_KPTS" '
          function ceiling(x){return x%1 ? int(x)+1 : x}
          function abs(x){return ((x < 0.0) ? -x : x)}
-         NR==2 {scale=$1;}; NR==3 {split($0,v1," ");} NR==4 {split($0,v2," ");} NR==5 {split($0,v3," ");} 
+         NR==2 {scale=$1;}; NR==3 {split($0,v1," ");} NR==4 {split($0,v2," ");} NR==5 {split($0,v3," ");}
          END {
-           celldet = v1[1] * v2[2] * v3[3] + v1[2] * v2[3] * v3[1] + v1[3] * v2[1] * v3[2] - v1[3] * v2[2] * v3[1] - v1[2] * v2[1] * v3[3] - v1[1] * v2[3] * v3[2]
+           celldet = v1[1] * v2[2] * v3[3] + v1[2] * v2[3] * v3[1] + v1[3] * v2[1] * v3[2] - v1[3] * v2[2] * v3[1] - v1[2] * v2[1] * v3[3] - v1[1] * v2[3] * v3[2] 
 
            cellvol = abs(celldet)
 
@@ -220,7 +236,7 @@ function VASP_PREPARE_POTCAR {
     fi
 
     if [ -z "$VASP_PSEUDOLIB" ]; then
-	echo "Error in VASP_PREPARE_POTCAR: must set \$VASP_PSEUDOLIB to path for VASP pseudopotential library." >&2 
+	echo "Error in VASP_PREPARE_POTCAR: must set \$VASP_PSEUDOLIB to path for VASP pseudopotential library." >&2
 	exit 1
     fi
 
@@ -249,8 +265,8 @@ function VASP_PREPARE_POTCAR {
 	      fi
 	    fi
 	done
-	echo "Error in VASP_PREPARE_POTCAR: could not find pseudopotential for: $SPECIES" >&2 
-	echo "VASP_PSEUDOLIB was set to: $VASP_PSEUDOLIB" >&2 
+	echo "Error in VASP_PREPARE_POTCAR: could not find pseudopotential for: $SPECIES" >&2
+	echo "VASP_PSEUDOLIB was set to: $VASP_PSEUDOLIB" >&2
 	exit 1
     done
 }
@@ -259,9 +275,9 @@ function VASP_POSCAR_SCALE_VOLUME {
     XSCALE=$1
 
     mv POSCAR ht.tmp.POSCAR
-    awk -v "XSCALE=$XSCALE" '                                                                                   
-         NR<2 || NR>2 {print $0}                                                                                
-         NR==2 {l0=$0; scale=$1; print scale*XSCALE;}                                                           
+    awk -v "XSCALE=$XSCALE" '
+         NR<2 || NR>2 {print $0}
+         NR==2 {l0=$0; scale=$1; print scale*XSCALE;}
          ' ht.tmp.POSCAR > POSCAR
     rm -f ht.tmp.POSCAR
 }
@@ -271,14 +287,14 @@ function VASP_CHECK_AND_FIX_POSCAR {
     awk '
          function ceiling(x){return x%1 ? int(x)+1 : x}
          NR<2 || NR>5 {print $0}
-         NR==2 {l0=$0; scale=$1;}; NR==3 {l1=$0;split($0,v1," ");} NR==4 {l2=$0;split($0,v2," ");} 
+         NR==2 {l0=$0; scale=$1;}; NR==3 {l1=$0;split($0,v1," ");} NR==4 {l2=$0;split($0,v2," ");}
          NR==5 {
            l3=$0
-           split($0,v3," "); 
+           split($0,v3," ");
 
            celldet = v1[1] * v2[2] * v3[3] + v1[2] * v2[3] * v3[1] + v1[3] * v2[1] * v3[2] - v1[3] * v2[2] * v3[1] - v1[2] * v2[1] * v3[3] - v1[1] * v2[3] * v3[2]
 
-           if (celldet < 0.0) { 
+           if (celldet < 0.0) {
 
               if (v1[1] != 0.0) { v1[1] = -v1[1] }
               if (v1[2] != 0.0) { v1[2] = -v1[2] }
@@ -331,7 +347,7 @@ function VASP_EXTRACT_NBR_PLANEWAVES {
     fi
 
     local NBRPW=$(awk -F' *: *' '
-      /^ *maximum number of plane-waves:/{print $2; exit} 
+      /^ *maximum number of plane-waves:/{print $2; exit}
     ' OUTCAR)
     if [ -z "$NBRPW" ]; then
 	echo "Error in VASP_EXTRACT_NBR_PLANEWAVE: Could not extract." >&2
@@ -349,7 +365,7 @@ function VASP_PREPARE_KPOINTS {
 
     if [ -z "$LVAL" ]; then
 	LVAL=20
-    fi 
+    fi
 
     local LINE=$(VASP_KPOINTSLINE "$LVAL")
 
@@ -379,7 +395,7 @@ EOF
 function VASP_PREPARE_INCAR {
     ACCURACY=$1
     EDIFFMARGIN=$2
-	
+
     if [ ! -e POSCAR ]; then
 	echo "VASP_PREPARE_INCAR: Missing POSCAR file" >&2
 	exit 1
@@ -523,23 +539,28 @@ function VASP_PREPARE_INCAR {
     fi
 }
 
+function VASP_CHECK_PATH_LENGTH {
+  if [ ${#PWD} -gt 240 ]; then
+    echo "Path is longer than 240 characters!"
+    echo "This could cause unpredictable errors."
+    HT_TASK_ATOMIC_SECTION_END_BROKEN
+  fi
+}
+
 function VASP_PREPARE_CALC {
-    VASP_CHECK_AND_FIX_POSCAR 
+    VASP_CHECK_AND_FIX_POSCAR
     VASP_PREPARE_KPOINTS
     VASP_PREPARE_INCAR
+    VASP_CHECK_PATH_LENGTH
 }
 
 function VASP_PRECLEAN {
-    rm -f WAVECAR CONTCAR PCDAT IBZKPT EIGENVAL XDATCAR OSZICAR OUTCAR DOSCAR CHG CHGCAR vasprun.xml PROCAR 
+    rm -f WAVECAR CONTCAR PCDAT IBZKPT EIGENVAL XDATCAR OSZICAR OUTCAR DOSCAR CHG CHGCAR vasprun.xml PROCAR
 }
 
 function VASP_STDOUT_CHECKER {
     local MSGFILE="$1"
     local EXITPID="$2"
-
-    #trap "echo WHY DOES STDOUT CHECKER GET TERM?" TERM 
-    #trap "echo WHY DOES STDOUT CHECKER GET INT?" INT
-    #trap "echo WHY DOES STDOUT CHECKER GET USR1?" USR1
 
     ISYM=$(VASP_GET_TAG ISYM)
     if [ -z "$ISYM" ]; then
@@ -551,14 +572,14 @@ function VASP_STDOUT_CHECKER {
 
     # TODO: Check and fix awk version issue and fflush, system
     awk -v"msgfile=$MSGFILE" -v"ISYM=$ISYM" '
-    /WARNING: Sub-Space-Matrix is not hermitian in DAV/ && subherm_count>5 { next } 
+    /WARNING: Sub-Space-Matrix is not hermitian in DAV/ && subherm_count>5 { next }
     /hit a member that was already found in another star/ && star_count>5 { next }
-    /^ *-?[0-9]+\.[0-9]+ *$/ && simple_number>=100 { next }
+    /^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$/ && simple_number>=100 { next }
 
     {print $0; system("");}
 
-    /^ *-?[0-9]+\.[0-9]+ *$/ { simple_number+=1; if (simple_number == 99) {print "SPEWS_SINGLE_LINE_VALUES" >> msgfile} }
-    /WARNING: Sub-Space-Matrix is not hermitian in DAV/ { subherm_count += 1 } 
+    /^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$/ { simple_number+=1; if (simple_number == 99) {print "SPEWS_SINGLE_LINE_VALUES" >> msgfile} }
+    /WARNING: Sub-Space-Matrix is not hermitian in DAV/ { subherm_count += 1 }
     /hit a member that was already found in another star/ { star_count += 1}
 
     /LAPACK: Routine ZPOTRF failed/ {print "ZPOTRF" >> msgfile; exit 2}
@@ -566,6 +587,8 @@ function VASP_STDOUT_CHECKER {
     /ZBRENT: can'"'"'t locate minimum, use default step/ && zbrent!=1 {print "ZBRENT" >> msgfile; zbrent=1}
 
     /ZBRENT: fatal error in bracketing/ {print "ZBRENT_BRACKETING" >> msgfile;}
+
+    /One of the lattice vectors is very long/ {print "TOOLONGLATTVEC" >> msgfile; exit 2}
 
     /Tetrahedron method fails for NKPT<4/ {print "TETKPTS" >> msgfile; exit 2}
     /Fatal error detecting k-mesh/ {print "TETKPTS" >> msgfile; exit 2}
@@ -579,17 +602,17 @@ function VASP_STDOUT_CHECKER {
 
     /Routine TETIRR needs special values/ {print "TETIRR" >> msgfile;}
 
-    /Could not get correct shifts/ {print "SHIFTS" >> msgfile;}    
+    /Could not get correct shifts/ {print "SHIFTS" >> msgfile;}
 
-    /REAL_OPTLAY: internal error/ {print "REAL_OPTLAY" >> msgfile;}    
+    /REAL_OPTLAY: internal error/ {print "REAL_OPTLAY" >> msgfile;}
 
-    /internal ERROR RSPHER/ {print "RSPHER" >> msgfile;}    
+    /internal ERROR RSPHER/ {print "RSPHER" >> msgfile;}
 
-    /WARNING: DENTET: can'"'"'t reach specified precision/ {print "DENTET" >> msgfile;}    
+    /WARNING: DENTET: can'"'"'t reach specified precision/ {print "DENTET" >> msgfile;}
 
-    /unoccupied bands, you have included TOO FEW BANDS/ {print "NBANDS" >> msgfile;}    
+    /unoccupied bands, you have included TOO FEW BANDS/ {print "NBANDS" >> msgfile;}
 
-    /ERROR: the triple product of the basis vectors/ {print "TRIPLEPRODUCT" >> msgfile;}     
+    /ERROR: the triple product of the basis vectors/ {print "TRIPLEPRODUCT" >> msgfile;}
 
     /Found some non-integer element in rotation matrix/ {print "ROTMATRIX" >> msgfile;}
 
@@ -645,8 +668,8 @@ function VASP_OSZICAR_CHECKER {
       nelm=a[1]; nsw=a[2];
     }
 
-    /^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+)/ { 
-       nstep=$2 
+    /^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+)/ {
+       nstep=$2
        lastrmsc=$7
     }
     /^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([0-9]+) +([-+0-9.Ee]+)/ {
@@ -655,29 +678,32 @@ function VASP_OSZICAR_CHECKER {
     /^ +[0-9]+ F= ([-+0-9.Ee]+) / {
        istep+=1
        energy=$5
-       # print "NSTEP:",nstep, nelm 
+       # print "NSTEP:",nstep, nelm
        # print "NSW:",istep, nsw
-       if(energy > 0) {print "POSITIVE ENERGY (E0>0)" >> msgfile; quit=1}
+       if(energy > 0) {lastep=1}
        if(lastrmsc >= 0.7) {print "BADCONV ELEC (RMSC>=0.7)" >> msgfile; lastebad=1}
        if(nstep >= nelm) {print "BADCONV ELEC (N>=NELM)" >> msgfile; lastebad=1}
        if(nsw>1 && istep >= nsw) {print "BADCONV ION (ISTEP>=NSW)" >> msgfile; lastibad=1}
 
+       if(energy < 0) {lastep=0}
        if(lastebad && lastrmsc < 0.7 && nstep < nelm) {print "RECOVERED CONV ELEC" >> msgfile; lastebad=0;}
        if(lastibad && nsw>1 && istep < nsw) {print "RECOVERED CONV ION" >> msgfile; lastibad=0;}
 
        if(quit) { exit 2 }
-    }       
+    }
     /^ *HT_TIMEOUT/ { print "OSZICAR_TIMEOUT" >> msgfile; exit 2 }
 
     END {
        if(lastebad) {print "LAST BADCONV ELEC" >> msgfile;}
        if(lastibad) {print "LAST BADCONV ION" >> msgfile;}
+       if(lastep) {print "LAST ENERGY IS POSITIVE (E>0)" >> msgfile; exit 2;}
     }
     '
+    RETURNCODE="$?"
 
     echo "OSZICAR_CHECKER END" >> "$MSGFILE"
-    
-    return "$?"
+
+    return "$RETURNCODE"
 }
 
 
@@ -690,13 +716,21 @@ function VASP_OUTCAR_CHECKER {
     echo "OUTCAR_CHECKER ACTIVE" > "$MSGFILE"
     # Now we can follow the OUTCAR
     HT_TASK_FOLLOW_FILE OUTCAR "$EXITPID" | awk -v"msgfile=$MSGFILE" '
+    /^ *total allocation   :    [0-9.]* KBytes/ {
+          if($3 > 500000) {
+            print "REALSPACEALLOCTOOLARGE" >> msgfile;
+            exit 2;
+          }
+       }
     /^ *General timing and accounting informations for this job: *$/ {
        print "FINISHED" >> msgfile;
     }
-    ' 
+    '
+    RETURNCODE="$?"
+
     echo "OUTCAR_CHECKER END" >> "$MSGFILE"
-    
-    return "$?"
+
+    return "$RETURNCODE"
 }
 
 
@@ -710,7 +744,7 @@ function VASP_RUN_CONTROLLED {
     COMMAND="$1"
     shift 1
     HT_TASK_RUN_CONTROLLED "$TIMEOUT" VASP_STDOUT_CHECKER VASP_OSZICAR_CHECKER VASP_OUTCAR_CHECKER -- "$COMMAND" "$@"
-    RETURNCODE="$?"    
+    RETURNCODE="$?"
     echo "$(date) EXIT STATUS=$RETURNCODE"
     if [ "$RETURNCODE" == "100" ]; then
 	echo "$(date): VASP APPEAR TO HAVE STOPPED DUE TO USER SIGNAL (SIGINT), PUT JOB IN BROKEN STATE."
@@ -727,14 +761,14 @@ function VASP_RUN_CONTROLLED {
 	    echo "CONVERGENCE PROBLEM IN LAST IONIC STEP."
 	    RETURNCODE=4
 	fi
-    fi    
+    fi
     mv stdout.out vasp.out
 
     return "$RETURNCODE"
 }
 
 function VASP_INPUTS_ADJUST {
-    # Assumes we are inside an atomic section    
+    # Assumes we are inside an atomic section
     #
     echo "========= VASP ADJUSTMENT BASED ON ========"
     echo "============ ht.controlled.msgs ==========="
@@ -743,7 +777,6 @@ function VASP_INPUTS_ADJUST {
 
     ANYREMEDY=0
     if grep "^KPTSCLASS*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "KPOINT CLASS WARNING DETECTED"
 	PROBLEM="kptsclass"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -755,24 +788,35 @@ function VASP_INPUTS_ADJUST {
 	echo "KPOINT CLASS PROBLEM REMEDYSTEP: $REMEDYSTEP"
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS"
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="GAMMA_KPTS"
 		;;
 	    2)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS\nGAMMA_KPTS"
 		;;
 	    3)
+		ANYREMEDY=1
 		REMEDY="EQUAL_KPTS"
 		;;
 	    4)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS\nEQUAL_KPTS"
 		;;
 	    5)
+		ANYREMEDY=1
 		REMEDY="NOSYM"
 		;;
+	    6)
+		ANYREMEDY=1
+		REMEDY="NOSYM\nEQUAL_KPTS"
+		;;
 	    *)
+		REMEDY="BUMP_KPTS\nEQUAL_KPTS"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -780,7 +824,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^DENTET*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "DENTET WARNING DETECTED"
 	PROBLEM="dentet"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -791,18 +834,23 @@ function VASP_INPUTS_ADJUST {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="GAUSSMEAR"
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS"
 		;;
 	    2)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS\nGAMMA_KPTS"
 		;;
 	    3)
+		ANYREMEDY=1
 		REMEDY="BUMP_NEDOS"
 		;;
 	    *)
+		REMEDY="BUMP_NEDOS"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -810,7 +858,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^SHIFTS*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "COULD NOT GET CORRECT SHIFTS WARNING"
 	PROBLEM="shifts"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -821,9 +868,11 @@ function VASP_INPUTS_ADJUST {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="GAMMA_KPTS"
 		;;
 	    *)
+		REMEDY="GAMMA_KPTS"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -831,7 +880,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^LREALFALSE*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "VASP ASKS TO BE RESTARTED WITH LREAL=.FALSE."
 	PROBLEM="lreal"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -842,9 +890,11 @@ function VASP_INPUTS_ADJUST {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="LREALFALSE"
 		;;
 	    *)
+		REMEDY="LREALFALSE"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -852,7 +902,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^INVROTMATRIX*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM WITH FINDING INVERESE ROTATION MATRIX WARNING"
 	PROBLEM="tetkpts"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -863,9 +912,11 @@ function VASP_INPUTS_ADJUST {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="NOSYM"
 		;;
 	    *)
+		REMEDY="NOSYM"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -873,7 +924,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^LAST BADCONV ION" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM: BAD ION RELAXATION CONVERGENCE."
 	PROBLEM="ionrelax"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -887,6 +937,7 @@ function VASP_INPUTS_ADJUST {
 		if grep "^FINISHED*" ../ht.controlled.msgs >/dev/null 2>&1; then
 		    echo "RETRYING RELAXATION STEP, STARTING FROM LAST POSITION"
 		    cp ../CONTCAR POSCAR
+		    ANYREMEDY=1
 		else
 		    # Give up!
 		    echo "RUN DID NOT FINISH, SO, NO CONTCAR TO CONTINUE FROM"
@@ -901,7 +952,6 @@ function VASP_INPUTS_ADJUST {
     fi
 
     if grep "^LAST BADCONV ELEC" ../ht.controlled.msgs >/dev/null 2>&1 || grep "^FEXCF" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM: BAD ELECTRONIC RELAXATION CONVERGENCE."
 	PROBLEM="elecrelax"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -912,21 +962,27 @@ function VASP_INPUTS_ADJUST {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="SOFTMIX"
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="SOFTMIX2"
 		;;
 	    2)
+		ANYREMEDY=1
 		REMEDY="ALGOALL"
 		;;
 	    3)
+		ANYREMEDY=1
 		REMEDY="ALGOALL2"
 		;;
 	    4)
+		ANYREMEDY=1
 		REMEDY="ALGODAMPED"
 		;;
 	    *)
+		REMEDY="ALGODAMPED"
 		echo "NO MORE IDEAS FOR $PROBLEM"
 		;;
 	esac
@@ -935,7 +991,7 @@ function VASP_INPUTS_ADJUST {
 }
 
 function VASP_INPUTS_FIX_ERROR {
-                                                 
+
     #############################################
     #                                           #
     #  Assumes we are inside an atomic section  #
@@ -944,7 +1000,7 @@ function VASP_INPUTS_FIX_ERROR {
     #  Returns 0 for all is well, continue      #
     #                                           #
     #############################################
-                                                 
+
     echo "========= VASP PROBLEM DETECTED ========"
     echo "========== ht.controlled.msgs =========="
     cat ../ht.controlled.msgs
@@ -955,7 +1011,6 @@ function VASP_INPUTS_FIX_ERROR {
     RETURNCODE=0
 
     if grep "^PRICELL*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PRICELL PROBLEM DETECTED."
 	PROBLEM="pricell"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -966,12 +1021,15 @@ function VASP_INPUTS_FIX_ERROR {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="LOWSYMPREC"
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="HIGHSYMPREC"
 		;;
 	    2)
+		ANYREMEDY=1
 		REMEDY="NOSYM"
 		;;
 	    *)
@@ -985,7 +1043,6 @@ function VASP_INPUTS_FIX_ERROR {
 
 
     if grep "^ZPOTRF*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "ZPOTRF PROBLEM DETECTED."
 	PROBLEM="zpotrf"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -997,18 +1054,23 @@ function VASP_INPUTS_FIX_ERROR {
 	echo "ZPOTRF REMEDYSTEP: $REMEDYSTEP"
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		RETURNCODE=2
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="BUMP_KPTS"
 		;;
 	    2)
+		ANYREMEDY=1
 		REMEDY="BUMP_BANDS"
 		;;
 	    3)
+		ANYREMEDY=1
 		REMEDY="GAUSSMEAR"
 		;;
 	    4)
+		ANYREMEDY=1
 		REMEDY="NOSYM"
 		;;
 	    *)
@@ -1021,7 +1083,6 @@ function VASP_INPUTS_FIX_ERROR {
     fi
 
     if grep "^TETKPTS*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM WITH TETRAHEDRON KPOINT METHOD DETECTED"
 	PROBLEM="tetkpts"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -1032,6 +1093,7 @@ function VASP_INPUTS_FIX_ERROR {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="GAUSSMEAR"
 		;;
 	    *)
@@ -1044,7 +1106,6 @@ function VASP_INPUTS_FIX_ERROR {
     fi
 
     if grep "^ZBRENT_BRACKETING*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM WITH ZBRENT BRACKETING"
 	PROBLEM="zbrentbracketing"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -1055,9 +1116,11 @@ function VASP_INPUTS_FIX_ERROR {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="EDIFF_SMALLER"
 		;;
 	    1)
+		ANYREMEDY=1
 		REMEDY="EDIFF_SMALLER_2"
 		;;
 	    *)
@@ -1070,7 +1133,6 @@ function VASP_INPUTS_FIX_ERROR {
     fi
 
     if grep "^REAL_OPTLAY*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "REAL_OPTLAY ERROR."
 	PROBLEM="lrealoptlay"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -1081,6 +1143,7 @@ function VASP_INPUTS_FIX_ERROR {
 	fi
 	case "$REMEDYSTEP" in
 	    0)
+		ANYREMEDY=1
 		REMEDY="LREALFALSE"
 		;;
 	    *)
@@ -1093,7 +1156,6 @@ function VASP_INPUTS_FIX_ERROR {
     fi
 
     if grep "^TOOCLOSE*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "PROBLEM: IONS TOO CLOSE."
 	PROBLEM="tooclose"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -1104,6 +1166,7 @@ function VASP_INPUTS_FIX_ERROR {
 	fi
 	case "$REMEDYSTEP" in
 	    *)
+		ANYREMEDY=1
 		RETURNCODE=2
 		;;
 	esac
@@ -1111,7 +1174,6 @@ function VASP_INPUTS_FIX_ERROR {
     fi
 
     if grep "^NONLR_ALLOC*" ../ht.controlled.msgs >/dev/null 2>&1; then
-	ANYREMEDY=1
 	echo "NONLR_ALLOC PROBLEM; OFTEN LEADING TO VASP ALLOCATING ALL AVAILABLE MEMORY."
 	PROBLEM="nonlralloc"
 	if [ -e "../ht.remedy.$PROBLEM" ]; then
@@ -1130,10 +1192,12 @@ function VASP_INPUTS_FIX_ERROR {
 	echo -e "$REMEDYSTEP\n$REMEDY" >> "ht.remedy.$PROBLEM"
     fi
 
+    # If we didn't find anything to do, lets try this as well
     if [ "$ANYREMEDY" == "0" ]; then
 	VASP_INPUTS_ADJUST
     fi
 
+    # If we still didn't find anything to do, we need to give up
     if [ "$ANYREMEDY" == "0" ]; then
 	echo "UNKNOWN PROBLEM. GIVING UP."
 	return 3
@@ -1145,7 +1209,7 @@ function VASP_INPUTS_FIX_ERROR {
 function VASP_SET_TAG {
     TAG="$1"
     VALUE="$2"
-    (awk "!/^ *$TAG *=/{print \$0}" INCAR; echo "$TAG=$VALUE") > ht.tmp.INCAR 
+    (awk "!/^ *$TAG *=/{print \$0}" INCAR; echo "$TAG=$VALUE") > ht.tmp.INCAR
     mv ht.tmp.INCAR INCAR
 }
 
@@ -1197,7 +1261,7 @@ function VASP_RATTLE_POSCAR {
    }
 ' POSCAR > ht.tmp.POSCAR
 mv ht.tmp.POSCAR POSCAR
-} 
+}
 
 function VASP_POTCAR_SUMMARY {
     local FILE=$1

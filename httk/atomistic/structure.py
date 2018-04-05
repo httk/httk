@@ -244,35 +244,35 @@ class Structure(ScalelessStructure):
             except Exception:
                 rc_cell = None
 
-        if uc_sites == None and uc_reduced_coordgroups == None and \
-               uc_reduced_coords == None and uc_reduced_occupationscoords == None:
+        if uc_sites is None and uc_reduced_coordgroups is None and \
+               uc_reduced_coords is None and uc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if uc_cartesian_coordgroups == None and uc_cartesian_coords == None and \
-                    uc_occupancies != None and uc_cartesian_occupationscoords != None:
+            if uc_cartesian_coordgroups is None and uc_cartesian_coords is None and \
+                    uc_occupancies is not None and uc_cartesian_occupationscoords is not None:
                 assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
              
-            if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:
+            if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
                 uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 
-            if uc_cell != None: 
+            if uc_cell is not None: 
                 uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_cell)
                 args['uc_reduced_coordgroups'] = uc_reduced_coordgroups
 
-        if rc_sites == None and rc_reduced_coordgroups == None and \
-               rc_reduced_coords == None and rc_reduced_occupationscoords == None:
+        if rc_sites is None and rc_reduced_coordgroups is None and \
+               rc_reduced_coords is None and rc_reduced_occupationscoords is None:
             # Cartesian coordinate input must be handled here in structure since scalelessstructure knows nothing about cartesian coordinates...
-            if rc_cartesian_coordgroups == None and rc_cartesian_coords == None and \
-                    rc_occupancies != None and rc_cartesian_occupationscoords != None:
+            if rc_cartesian_coordgroups is None and rc_cartesian_coords is None and \
+                    rc_occupancies is not None and rc_cartesian_occupationscoords is not None:
                 assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)
              
-            if rc_cartesian_coords != None and rc_cartesian_coordgroups == None:
+            if rc_cartesian_coords is not None and rc_cartesian_coordgroups is None:
                 rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)
 
-            if rc_cell != None:  
+            if rc_cell is not None:  
                 rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_cell)
                 args['rc_reduced_coordgroups'] = rc_reduced_coordgroups
 
-        if slstruct == None:
+        if slstruct is None:
             slstruct = super(Structure,cls).create(**args)
 
         rc_sites=None
@@ -282,7 +282,7 @@ class Structure(ScalelessStructure):
         if slstruct.has_uc_repr:
             uc_sites = slstruct.uc_sites
         
-        if uc_cell == None and rc_cell == None:
+        if uc_cell is None and rc_cell is None:
             rc_cells = slstruct.get_rc_cells()
             if len(rc_cells>0):
                 rc_cell = rc_cells[0]
@@ -295,28 +295,28 @@ class Structure(ScalelessStructure):
 
     @httk_typed_property(UnitcellSites)
     def uc_sites(self):
-        if self._uc_sites == None:
+        if self._uc_sites is None:
             self._uc_sites, cell = coordgroups_reduced_rc_to_unitcellsites(self.rc_sites.reduced_coordgroups, self.rc_cell.basis, self.hall_symbol)
             self._uc_cell = cell
         return self._uc_sites
 
     @httk_typed_property(Cell)
     def uc_cell(self):
-        if self._uc_cell == None:
+        if self._uc_cell is None:
             # Trigger filling of cell, which should populate self._uc_cell
             self.fill_cell()
         return self._uc_cell
  
     @property
     def rc_cell(self):
-        if self._rc_cell == None:
+        if self._rc_cell is None:
             # Trigger symmetry finding, which should populate self._rc_cell
             self.find_symetry()
         return self._rc_cell
 
     @property
     def rc_sites(self):
-        if self._rc_sites == None:
+        if self._rc_sites is None:
             #sys.stderr.write("Warning: need to run symmetry finder. This may take a while.\n")
             newstructure = structure_reduced_uc_to_representative(self)
             self._rc_sites = newstructure.rc_sites
@@ -447,14 +447,14 @@ class Structure(ScalelessStructure):
         if total_seek_counts > max_atoms:
             raise Exception("Structure.build_supercell: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
     
-        #if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
+        #if max_search_cells is not None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
         #    raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
              
         ### Collect coordinate list of all sites inside the new cell
         coordgroups = self.uc_reduced_coordgroups
         extendedcoordgroups = [[] for x in range(len(coordgroups))]
 
-        if max_search_cells != None:
+        if max_search_cells is not None:
             max_search = [max_search_cells,max_search_cells,max_search_cells]
         else:
             max_search = None
@@ -508,7 +508,7 @@ class Structure(ScalelessStructure):
         maxvec = [int(reduced_corners[:,0].max())+2,int(reduced_corners[:,1].max())+2,int(reduced_corners[:,2].max())+2]
         minvec = [int(reduced_corners[:,0].min())-2,int(reduced_corners[:,1].min())-2,int(reduced_corners[:,2].min())-2]
     
-        if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
+        if max_search_cells is not None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
             raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
              
         ### Collect coordinate list of all sites inside the new cell
@@ -537,7 +537,7 @@ class Structure(ScalelessStructure):
         return self.create(uc_reduced_coordgroups=extendedcoordgroups, basis=new_cell.basis, assignments=self.assignments, cell=self.uc_cell)
 
     def build_cubic_supercell(self,tolerance=None,max_search_cells=1000):
-        if tolerance == None:
+        if tolerance is None:
             prim_cell = self.uc_cell.basis            
             inv = prim_cell.inv().simplify()
             transformation = (inv*inv.denom).simplify()
@@ -561,7 +561,7 @@ class Structure(ScalelessStructure):
                     # Already perfectly cubic, use this
                     besttrans=transformation
                     break
-                if bestlen == None or not (bestortho < ortho and bestlen < equallen):
+                if bestlen is None or not (bestortho < ortho and bestlen < equallen):
                     bestlen=equallen
                     bestortho=ortho
                     besttrans=transformation
@@ -578,7 +578,7 @@ class Structure(ScalelessStructure):
 
     def orthogonal_supercell_transformation(self,tolerance=None,max_search_cells=1000,ortho=[True,True,True]):
         # TODO: How to solve for exact orthogonal cell?
-        if tolerance == None:
+        if tolerance is None:
             prim_cell = self.uc_cell.basis         
             print "Starting cell:",prim_cell
             inv = prim_cell.inv().simplify()
@@ -623,7 +623,7 @@ class Structure(ScalelessStructure):
                 if maxval == 0:
                     besttrans=transformation
                     break
-                if bestval == None or maxval < bestval:
+                if bestval is None or maxval < bestval:
                     bestval=maxval
                     besttrans=transformation
             transformation = besttrans
@@ -648,7 +648,7 @@ class Structure(ScalelessStructure):
             x(self)            
 
     def add_tag(self,tag,val):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         new = StructureTag(self,tag,val)
         self._tags[tag]=new
@@ -666,22 +666,22 @@ class Structure(ScalelessStructure):
                 self.add_tag(tag,tagdata)
 
     def get_tags(self):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags
 
     def get_tag(self,tag):
-        if self._tags == None:
+        if self._tags is None:
             self._fill_codependent_data()
         return self._tags[tag]
 
     def get_refs(self):
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         return self._refs
 
     def add_ref(self,ref):        
-        if self._refs == None:
+        if self._refs is None:
             self._fill_codependent_data()
         if isinstance(ref,StructureRef):
             refobj = ref.reference
@@ -806,17 +806,17 @@ if __name__ == "__main__":
 #         if isinstance(uc_sites,Sites):
 #             uc_sites = UnitcellSites.use(uc_sites)
 #         else:
-#             if uc_reduced_coordgroups == None and uc_cartesian_coordgroups == None and \
-#                     uc_reduced_coords == None and uc_cartesian_coords == None and \
-#                     uc_occupancies != None:
+#             if uc_reduced_coordgroups is None and uc_cartesian_coordgroups is None and \
+#                     uc_reduced_coords is None and uc_cartesian_coords is None and \
+#                     uc_occupancies is not None:
 #                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-#                 if uc_reduced_occupationscoords != None:
+#                 if uc_reduced_occupationscoords is not None:
 #                     assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords,uc_occupancies)
-#                 elif uc_cartesian_occupationscoords != None:
+#                 elif uc_cartesian_occupationscoords is not None:
 #                     assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords,uc_occupancies)
 #             
-#             if uc_reduced_coordgroups != None or uc_cartesian_coordgroups != None or \
-#                     uc_reduced_coords != None or uc_cartesian_coords != None:
+#             if uc_reduced_coordgroups is not None or uc_cartesian_coordgroups is not None or \
+#                     uc_reduced_coords is not None or uc_cartesian_coords is not None:
 # 
 #                 if isinstance(uc_cellshape,CellShape):
 #                     uc_cellshapeobj = uc_cellshape
@@ -827,10 +827,10 @@ if __name__ == "__main__":
 #                                           alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
 #                                           lengths = uc_lengths, angles=uc_angles)
 # 
-#                 if uc_cartesian_coords != None and uc_cartesian_coordgroups == None:
+#                 if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
 #                     uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 # 
-#                 if uc_cartesian_coordgroups != None and uc_reduced_coordgroups == None:
+#                 if uc_cartesian_coordgroups is not None and uc_reduced_coordgroups is None:
 #                     uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups,uc_orig_cell)
 #                                 
 #                 uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
@@ -845,17 +845,17 @@ if __name__ == "__main__":
 #         if isinstance(rc_sites,Sites):
 #             rc_sites = RepresentativeSites.use(rc_sites)
 #         else:
-#             if rc_reduced_coordgroups == None and rc_cartesian_coordgroups == None and \
-#                     rc_reduced_coords == None and rc_cartesian_coords == None and \
-#                     rc_occupancies != None:
+#             if rc_reduced_coordgroups is None and rc_cartesian_coordgroups is None and \
+#                     rc_reduced_coords is None and rc_cartesian_coords is None and \
+#                     rc_occupancies is not None:
 #                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
-#                 if rc_reduced_occupationscoords != None:     
+#                 if rc_reduced_occupationscoords is not None:     
 #                     assignments, rc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_reduced_occupationscoords,rc_occupancies)
-#                 elif rc_cartesian_occupationscoords != None:
+#                 elif rc_cartesian_occupationscoords is not None:
 #                     assignments, rc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(rc_cartesian_occupationscoords,rc_occupancies)
 # 
-#             if rc_reduced_coordgroups != None or rc_cartesian_coordgroups != None or \
-#                     rc_reduced_coords != None or rc_cartesian_coords != None:
+#             if rc_reduced_coordgroups is not None or rc_cartesian_coordgroups is not None or \
+#                     rc_reduced_coords is not None or rc_cartesian_coords is not None:
 #                 
 #                 if isinstance(rc_cellshape,CellShape):
 #                     rc_cellshapeobj = rc_cellshape
@@ -866,10 +866,10 @@ if __name__ == "__main__":
 #                                           alpha=rc_alpha, beta=rc_beta, gamma=rc_gamma,
 #                                           lengths = rc_lengths, angles=rc_angles)
 #                                     
-#                 if rc_cartesian_coords != None and rc_cartesian_coordgroups == None:
+#                 if rc_cartesian_coords is not None and rc_cartesian_coordgroups is None:
 #                     rc_cartesian_coordgroups = coords_and_counts_to_coordgroups(rc_cartesian_coords, rc_counts)
 # 
-#                 if rc_cartesian_coordgroups != None and rc_reduced_coordgroups == None:
+#                 if rc_cartesian_coordgroups is not None and rc_reduced_coordgroups is None:
 #                     rc_reduced_coordgroups = coordgroups_cartesian_to_reduced(rc_cartesian_coordgroups,rc_orig_cell)                
 #                                 
 #                 rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
@@ -880,16 +880,16 @@ if __name__ == "__main__":
 #             else:
 #                 rc_sites = None
 #             
-#         if rc_sites == None and uc_sites == None:
+#         if rc_sites is None and uc_sites is None:
 #             raise Exception("Structure.create: neither representative, nor primcell, sites specification valid.")
 # 
-#         if assignments != None:
+#         if assignments is not None:
 #             if isinstance(assignments,Assignments):
 #                 assignments = assignments
 #             else:
 #                 assignments = Assignments.create(assignments=assignments)
 # 
-#         if uc_sites == None and hall_symbol == None:
+#         if uc_sites is None and hall_symbol is None:
 #             raise Exception("Structure.create: cannot create structure from only representative sites with no spacegroup information. Error was:"+str(spacegroup_exception))
 # 
 #         new = cls(assignments, rc_sites, uc_sites)

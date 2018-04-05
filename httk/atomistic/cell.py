@@ -88,25 +88,25 @@ class Cell(HttkObject):
         """
         if isinstance(cell,Cell):
             basis = cell.basis
-        elif cell != None:
+        elif cell is not None:
             basis = cell_to_basis(cell)
 
-        if basis != None:
+        if basis is not None:
             basis = FracVector.use(basis)
 
-        if niggli_matrix != None:
+        if niggli_matrix is not None:
             niggli_matrix = FracVector.use(niggli_matrix)
             basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=orientation))
 
-        if niggli_matrix == None and basis != None:
+        if niggli_matrix == None and basis is not None:
             niggli_matrix, orientation = basis_to_niggli(basis)
 
-        if niggli_matrix == None and lengths != None and angles != None:
+        if niggli_matrix == None and lengths is not None and angles is not None:
             niggli_matrix = lengths_angles_to_niggli(lengths,angles)
             niggli_matrix = FracVector.use(niggli_matrix)
             basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=1))
 
-        if niggli_matrix == None and not (a==None or b==None or c==None or alpha==None or beta==None or gamma==None):
+        if niggli_matrix == None and not (a is None or b is None or c is None or alpha is None or beta is None or gamma is None):
             niggli_matrix = lengths_angles_to_niggli([a,b,c],[alpha,beta,gamma])
             niggli_matrix = FracVector.use(niggli_matrix)
             basis = FracVector.use(niggli_to_basis(niggli_matrix,orientation=1))
@@ -114,19 +114,19 @@ class Cell(HttkObject):
         if niggli_matrix == None:
             raise Exception("cell.create: Not enough information to specify a cell given.")
                 
-        if scaling == None and scale != None:
+        if scaling is None and scale is not None:
             scaling = scale
 
-        if scaling != None and volume != None:
+        if scaling is not None and volume is not None:
             raise Exception("Cell.create: cannot specify both scaling and volume!")
             
-        if volume != None:
+        if volume is not None:
             scaling = vol_to_scale(basis,volume)
 
-        if scaling != None:
+        if scaling is not None:
             scaling = FracVector.use(scaling)
             niggli_matrix = (niggli_matrix*scaling*scaling).simplify()
-            if basis != None:
+            if basis is not None:
                 basis = (basis*scaling).simplify()
 
 #       Lets skip including the lattice_system for now. Why do we need this? When important, it
