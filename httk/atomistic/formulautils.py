@@ -15,14 +15,17 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-httk Io module
+from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
+from representativestructure import RepresentativeStructure
+from unitcellstructure import UnitcellStructure
 
-  General methods for reading and writing of data, conversions, etc.
 
-"""
-from httk.core import citation
-citation.add_src_citation("httk", "Rickard Armiento")
+class StructureFormulaPlugin(HttkPlugin):
+            
+    def plugin_init(self, struct):
+        self.struct = struct
 
-from load import load
-from save import save
+RepresentativeStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
+UnitcellStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
+
+

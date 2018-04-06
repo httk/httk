@@ -90,7 +90,8 @@ def out_to_struct(ioa):
         else:
             return
 
-        newcoord = FracVector.create([match.group(2), match.group(3), match.group(4)]).limit_denominator(5000000).simplify()
+        newcoord = (match.group(2), match.group(3), match.group(4))
+        #newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()
         species = match.group(1).split("/")
         occups = match.group(6).split("/")
 
@@ -122,7 +123,8 @@ def out_to_struct(ioa):
         else:
             return
 
-        newcoord = FracVector.create([match.group(2), match.group(3), match.group(4)]).limit_denominator(5000000).simplify()
+        newcoord = (match.group(2), match.group(3), match.group(4))
+        #newcoord = FracVector.create([match.group(2),match.group(3),match.group(4)]).limit_denominator(5000000).simplify()
         species = match.group(1)
         occup = {'atom': periodictable.atomic_number(species)}        
 
@@ -209,25 +211,25 @@ def out_to_struct(ioa):
                 
     out = httk.basic.micro_pyawk(ioa, [
         ['^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
-            ['^ *CIF2CELL ([0-9.]*)', None, read_version],
-            ['^ *Output for (.*\)) *$', None, read_name],
-            ['^ *Database reference code: *([0-9]+)', None, read_id],
-            ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
-            ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
-            ['^ *$', lambda results, match: results['in_coords'], coords_stop],
-            ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
-            ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
-            ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
+        ['^ *CIF2CELL ([0-9.]*)', None, read_version],
+        ['^ *Output for (.*\)) *$', None, read_name],
+        ['^ *Database reference code: *([0-9]+)', None, read_id],
+        ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
+        ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
+        ['^ *$', lambda results, match: results['in_coords'], coords_stop],
+        ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
+        ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
+        ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
         #            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
-            ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
-            ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
-            ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
-            ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
-            ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
-            ['^ *OUTPUT CELL INFORMATION *$', None, output_start],
-            ['^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
-            ['^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
-            ['CIF file exported from +(.*) *$', None, read_source]
+        ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
+        ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
+        ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
+        ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
+        ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
+        ['^ *OUTPUT CELL INFORMATION *$', None, output_start],
+        ['^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
+        ['^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
+        ['CIF file exported from +(.*) *$', None, read_source]
           
     ], debug=False, results=results)
 
@@ -241,8 +243,8 @@ def out_to_struct(ioa):
 
     rc_cell = FracVector.create(out['input_cell'])
     uc_cell = FracVector.create(out['output_cell'])
-    coords = FracVector.create(out['coords'])
-    sgcoords = FracVector.create(out['sgcoords'])
+    coords = FracVector.create(out['coords']).limit_denominator(5000000).simplify()
+    sgcoords = FracVector.create(out['sgcoords']).limit_denominator(5000000).simplify()
 
     hall_symbol = out['hall']
     sghall_symbol = out['sghall']

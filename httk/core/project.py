@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkObject, httk_typed_init
-from signature import SignatureKey
-from reference import Reference
+from .signature import SignatureKey
+from .reference import Reference
 
 
 class Project(HttkObject):
@@ -128,7 +128,7 @@ class ProjectOwner(HttkObject):
     
 class ProjectTag(HttkObject):                               
 
-    @httk_typed_init({'project': Project, 'tag': str, 'value': str}, index=['project', 'tag', 'value'], skip=['hexhash'])    
+    @httk_typed_init({'project': Project, 'tag': str, 'value': str}, index=['project', 'tag', ('tag', 'value'), ('project', 'tag', 'value')], skip=['hexhash'])    
     def __init__(self, project, tag, value):
         super(ProjectTag, self).__init__()
         self.tag = tag

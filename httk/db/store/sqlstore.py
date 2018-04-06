@@ -20,7 +20,7 @@ import sys
 from httk.core.httkobject import HttkObject
 from httk.db.filteredcollection import *
 from httk.core.basic import flatten
-from httk.core.fracvector import FracVector, FracScalar
+from httk.core import FracVector, FracScalar
 from httk.db.storable import Storable
 
 #def table_exist(db,table):
@@ -84,12 +84,13 @@ class SqlStore(object):
         columns = []
         index = []
         if 'index' in types:
-            inindex = types['index']
+            inindex = list(types['index'])
         else:
             inindex = []
 
         #print "### What is types:",types,t
         for column in tuple(types['keys']) + tuple(types['derived']):
+            #print "X",table,column,inindex
             name = column[0]
             t = column[1]
             #print "DEBUG",name,t
@@ -98,8 +99,8 @@ class SqlStore(object):
             if t in self.basics:
                 columns.append(name)
                 column_types.append(t)
-                if name in inindex:
-                    index.append(name)
+                #if name in inindex:
+                #    index.append(name)
 
             # List type means we need to establish a second table and store key values
             elif isinstance(t, list):
@@ -118,6 +119,7 @@ class SqlStore(object):
                 derivedtypes = ()
 
                 self.create_table(subtablename, {'keys': subtypes, 'index': subindex, 'derived': derivedtypes}, cursor)
+                inindex = filter(lambda x: x != name, inindex)
 
             # Tuple means array                
             elif isinstance(t, tuple):
@@ -126,12 +128,21 @@ class SqlStore(object):
 
                 if t[1] >= 1:
                     size = t[1]*t[2]
+                    newcolumns = []
                     for i in range(size):
+                        newcolumns.append(name+"_"+str(i))
                         columns.append(name+"_"+str(i))
                         if issubclass(tupletype, FracVector):
                             column_types.append(int)
                         else:   
                             column_types.append(tupletype)
+                    newinindex = []
+                    for indexitem in inindex:
+                        if indexitem == name:
+                            newinindex += newcolumns
+                        else:
+                            newinindex += [indexitem]
+                    inindex = newinindex
 
                 # Variable length numpy array, needs subtable
                 if t[1] == 0:
@@ -139,17 +150,33 @@ class SqlStore(object):
                     subtablecolumnname = name 
                     subdimension = (tupletype, 1, t[2])
                     self.create_table(subtablename, {'keys': [(table+"_sid", int), (name+"_index", int), (subtablecolumnname, subdimension)], 'index': [table+'_sid'], 'derived': ()}, cursor)
+                    inindex = filter(lambda x: x != name, inindex)
                                 
             elif issubclass(t, HttkObject):
                 columnname = name+"_"+t.types()['name']+"_sid"                
                 columns.append(columnname)
                 column_types.append(int)
-                if name in inindex:
-                    index.append(columnname)
+                #print "ININDEX",inindex
+                for i in range(len(inindex)):
+                    if isinstance(inindex[i], tuple):
+                        indexentry = list(inindex[i])
+                        for j in range(len(indexentry)):
+                            if indexentry[j] == name:
+                                indexentry[j] = columnname
+                        inindex[i] = tuple(indexentry)
+                    else:
+                        if inindex[i] == name:
+                            inindex[i] = columnname
+                #print "2 ININDEX",inindex
+                #if name in inindex:
+                #    index.append(columnname)
             else:
                 raise Exception("Dictstore.create_table: unexpected class; can only handle basic types and subclasses of Storable. Offending class:"+str(t))
 
-        self.db.create_table(table, table+"_id", columns, column_types, cursor, index=index)
+        #print "TABLE",table
+        #print "TYPES",tuple(types['keys']) + tuple(types['derived'])
+        #print "INDEX",inindex
+        self.db.create_table(table, table+"_id", columns, column_types, cursor, index=inindex)
         if mycursor:
             if not self._delay_commit:
                 self.db.commit()
@@ -193,7 +220,13 @@ class SqlStore(object):
                 #    print "DOES THIS HAPPEN?",t,val
                 #    val = int(val.limit_denominator(50000000))
                 else:
-                    val = t(val)
+                    try:
+                        val = t(val)
+                    except UnicodeEncodeError:
+                        val = unicode(val)
+                    except TypeError:
+                        print "HUH", val, t
+                        raise
                 columns.append(name)
                 columndata.append(val)
 

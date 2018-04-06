@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import shlex, StringIO, os, sys, shutil
 from string import Template
-from basic import mkdir_p
+from .basic import mkdir_p
 
 
 def apply_template(template, output, envglobals=None, envlocals=None):

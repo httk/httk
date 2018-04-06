@@ -5,7 +5,8 @@ import httk.iface.vasp_if
 
 # Must be updated to your path to poscars, OR, set to None if you have 
 # VASP_IF_POSCARPATH configured in httk.cfg
-poscarspath = None
+#poscarspath = None
+poscarspath = "/home/rar/Research/Codes/Vasp/POT_GGA_PAW_PBE"
 
 struct = Structure.io.load("example.cif")
 httk.iface.vasp_if.prepare_single_run("Run", struct, template='template', poscarspath=poscarspath, overwrite=True)            

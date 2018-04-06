@@ -174,7 +174,7 @@ function VASP_KPOINTSLINE {
          function abs(x){return ((x < 0.0) ? -x : x)}
          NR==2 {scale=$1;}; NR==3 {split($0,v1," ");} NR==4 {split($0,v2," ");} NR==5 {split($0,v3," ");}
          END {
-           celldet = v1[1] * v2[2] * v3[3] + v1[2] * v2[3] * v3[1] + v1[3] * v2[1] * v3[2] - v1[3] * v2[2] * v3[1] - v1[2] * v2[1] * v3[3] - v1[1] * v2[3] * v3[2] 
+           celldet = v1[1] * v2[2] * v3[3] + v1[2] * v2[3] * v3[1] + v1[3] * v2[1] * v3[2] - v1[3] * v2[2] * v3[1] - v1[2] * v2[1] * v3[3] - v1[1] * v2[3] * v3[2]
 
            cellvol = abs(celldet)
 

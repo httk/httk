@@ -17,10 +17,12 @@ SYMPREC=1e-4
 
 ISMEAR=-5
 
-# Recommended setup for
+# Recommended setup for 
 EDIFF=1E-3
 EDIFFG=-0.3
 NELMIN=5
 IBRION=2
 ISIF=3
-NSW=20
+NSW=10
+
+

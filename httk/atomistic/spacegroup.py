@@ -15,8 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core.httkobject import HttkObject, httk_typed_init
-from httk.core.fracvector import FracVector
+from httk.core import HttkObject, httk_typed_init
+from httk.core import FracVector
 from spacegrouputils import *
 
 
@@ -34,7 +34,7 @@ class Spacegroup(HttkObject):
         self.hall_symbol = hall_symbol
 
     @classmethod
-    def create(cls, spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=1):
+    def create(cls, spacegroup=None, hall_symbol=None, hm_symbol=None, spacegroupnumber=None, setting=None, symops=None):
         """
         Create a new spacegroup object, 
         
@@ -50,21 +50,29 @@ class Spacegroup(HttkObject):
         if isinstance(spacegroup, Spacegroup):
             return spacegroup
 
-        if spacegroup is not None:
-            hall_symbol = any_to_hall_symbol(spacegroup, setting)
+        #print "Creating spacegroup:",spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting, symops
 
-        if spacegroup is None and hall_symbol is None:
-            if spacegroupnumber is not None:
-                hall_symbol = any_to_hall_symbol(spacegroupnumber, setting)
+        hall = None
+        if hall_symbol is not None or hm_symbol is not None or spacegroupnumber is not None or setting is not None or symops is not None:
+            halls = spacegroup_filter_specific(hall_symbol, hm_symbol, spacegroupnumber, setting, symops)
+            if len(halls) == 1:
+                hall = halls[0] 
+
+        if hall is None and spacegroup is not None:
+            hall = spacegroup_parse(spacegroup)
         
-        if hall_symbol is not None:
-            return cls(hall_symbol)
-    
+        if hall is not None:
+            return cls(hall)
+        
         raise Exception("Spacegroup.create: not enough input parameters given to create a spacegroup object.")
 
     @property
-    def spacegroup_number_and_setting(self):
+    def number_and_setting(self):
         return spacegroup_get_number_and_setting(self.hall_symbol)
+
+    @property
+    def number(self):
+        return spacegroup_get_number_and_setting(self.hall_symbol)[0]
 
 
 def main():

@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httkobject import HttkObject, httk_typed_init
+from .httkobject import HttkObject, httk_typed_init
 
 
 class SignatureKey(HttkObject):

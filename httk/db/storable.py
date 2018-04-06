@@ -106,16 +106,18 @@ class Storable(object):
                             "Offending variable name: "+name)
 
     @classmethod
-    def variable(cls, searcher, name, types, outid=None):        
+    def variable(cls, searcher, name, types, outid=None, parent=None):        
         # The empty new triggers an e.g., create_table. I'm not sure it really should be here, but it is tricky to get the order correct when 
         # bootstapping new tables, and by placing this here, one can just simply make a query into the non-existent table, discover 
         # that some data is missing,  and insert it into the newly created table.
         #print searcher.variable()
+        raise Exception("Internal error.")
+
         searcher.store.new(types['name'], types)
 
         if outid is None:
             outid = name+"_"+str(len(cls._storable_tables))
-        table = TableOrColumn(searcher, types['name'], outid=outid, indirection=1, classref=cls)
+        table = TableOrColumn(searcher, types['name'], parent=parent, outid=outid, indirection=1, classref=cls)
         return table
     
     @classmethod

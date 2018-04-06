@@ -17,7 +17,7 @@
 """
 Basic help functions
 """
-
+from fractions import Fraction
 
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -63,7 +63,7 @@ def is_unary(e):
 
 
 def flatten(l):
-    try: 
+    try:
         flattened = l.flatten()
     except Exception:
         for el in l:
@@ -87,9 +87,8 @@ def parse_parexpr(string):
             start = stack.pop()
             yield (len(stack), string[start + 1: i])
 
+
 # Create and destroy temporary directories in a very safe way
-
-
 def create_tmpdir():
     return tempfile.mkdtemp(".httktmp", "httktmp.")
 
@@ -160,11 +159,11 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
             
     for line in f:
-        if debug:
+        if debug: 
             sys.stdout.write("\n" + line[:-1])
         for i in range(len(search)):
             match = search[i][0].search(line)
-            if debug and match:
+            if debug and match: 
                 sys.stdout.write(": MATCH")
             if match and (search[i][1] is None or search[i][1](results, line)):
                 if debug:
@@ -174,7 +173,7 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 search[i][2](results, match)
                 if postdebugfunc is not None:
                     postdebugfunc(results, match)
-    if debug:
+    if debug: 
         sys.stdout.write("\n")
 
     ioa.close()
@@ -207,14 +206,14 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
             base = (e,) + oe
             if perm:
                 for p in set(itertools.permutations(base)):
-                    if negative:                        
+                    if negative:
                         nonneg = [i for i in range(len(p)) if p[i] != 0]
                         for x in itertools.chain.from_iterable(itertools.combinations(nonneg, r) for r in range(len(nonneg)+1)):
                             yield [p[i] if i in x else -p[i] for i in range(len(p))]
                     else:
                         yield p
             else:
-                if negative:                        
+                if negative:
                     nonneg = [i for i in range(len(p)) if p[i] != 0]
                     for x in itertools.chain.from_iterable(itertools.combinations(nonneg, r) for r in range(len(nonneg)+1)):
                         yield [p[i] if i in x else -p[i] for i in range(len(p))]
@@ -248,10 +247,40 @@ def nested_split(s, start, stop):
     return parts
 
 
+class rewindable_iterator(object):
+
+    def __init__(self, iterator):
+        self._iter = iter(iterator)
+        self._rewind = False
+        self._cache = None
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self._rewind:
+            self._rewind = False
+        else:
+            self._cache = self._iter.next()
+        return self._cache
+
+    def rewind(self, rewindstr=None):
+        if self._rewind:
+            raise RuntimeError("Tried to backup more than one step.")
+        elif self._cache is None:
+            raise RuntimeError("Can't backup past the beginning.")
+        self._rewind = True
+        if rewindstr is not None:
+            self._cache = rewindstr
+            
+
 def main():
     print int_to_anonymous_symbol(0)
     print anonymous_symbol_to_int("A")
-    #print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+    
+    
+    # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+
 
 if __name__ == "__main__":
     main()

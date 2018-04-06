@@ -9,37 +9,35 @@ except Exception:
     sys.path.insert(1, os.path.join(_realpath, '../..'))
     import httk
 
-import httk.atomistic.vis
+import httk.atomistic.vis 
 from httk.atomistic import Structure
-### debug
-struct = Structure.io.load("POSCAR2")
 
 ### Example 1
 
 struct = Structure.io.load("POSCAR")
-
+print(struct)
 struct.vis.show({'bonds': True, 'extbonds': False, 'polyhedra': False})
 struct.vis.wait()
 
-struct.find_symetry()
+symstruct = struct.find_symmetry()
 
-struct.vis.show({'bonds': True, 'extbonds': False, 'polyhedra': False})
+symstruct.vis.show({'bonds': True, 'extbonds': False, 'polyhedra': False})
 # This below allows you to see the primitive cell
 #struct.vis.show({'bonds':True, 'extbonds':False, 'polyhedra':False, 'unitcell':struct.uc_cell.basis, 'show_supercell':True})
-struct.vis.wait()
+symstruct.vis.wait()
 
 ### Example 2
 
 struct = Structure.io.load("POSCAR2")
 
+struct.vis.show(debug=True)
+struct.vis.wait()
+
+struct = struct.pc.supercell.orthogonal(tolerance=15)
 struct.vis.show()
 struct.vis.wait()
 
-struct = struct.build_orthogonal_supercell(tolerance=15)
-struct.vis.show()
-struct.vis.wait()
-
-struct = struct.build_cubic_supercell(tolerance=15)
+struct = struct.pc.supercell.cubic(tolerance=15)
 struct.vis.show({'extbonds': False})
 struct.vis.wait()
 

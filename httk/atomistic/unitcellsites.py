@@ -15,8 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from httk.core.httkobject import HttkObject
-from httk.core.fracvector import FracVector
+from httk.core import HttkObject, FracVector
 from httk.core.basic import is_sequence
 from cell import Cell
 from spacegroup import Spacegroup
@@ -47,10 +46,18 @@ class UnitcellSites(Sites):
                                             reduced_coords=reduced_coords, 
                                             counts=counts, 
                                             hall_symbol='P 1', pbc=pbc)
-                                        
 
+    @property
+    def total_number_of_atoms(self):
+        return sum(self._counts)
+
+    def __str__(self):
+        return "<UnitcellSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+">" 
+
+                                        
 def main():
     pass
+
 
 if __name__ == "__main__":
     main()

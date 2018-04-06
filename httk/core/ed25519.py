@@ -6,9 +6,10 @@
 # Specifically, the authors state:
 # "Copyrights: The Ed25519 software is in the public domain."
 #
-# The modification made here to the code published at ed25519.cr.yp.to are not regarded 
-# by its author to be significant enough to consitute a derivative work, protected on its own,
-# and thus the same rights should hold that applies to the published files.
+# The modification made here to the code published at ed25519.cr.yp.to are not
+# regarded by its author to be significant enough to constitute a derivative
+# work, protected on its own, and thus the same rights should hold that applies
+# to files published by the original authors.
 
 import hashlib
 
@@ -45,6 +46,7 @@ def xrecover(y):
     if x % 2 != 0:
         x = q-x
     return x
+
 
 By = 4 * inv(5)
 Bx = xrecover(By)
@@ -186,6 +188,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-
 

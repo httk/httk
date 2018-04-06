@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import inspect
-from crypto import tuple_to_hexhash
-from basic import is_sequence
+from .crypto import tuple_to_hexhash
+from .basic import is_sequence
 
 
 class HttkTypedProperty(property):
@@ -192,6 +192,11 @@ class HttkObject(object):
             return self._codependent_data
         return []
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__) and self.to_tuple() == other.to_tuple():
+            return True
+        else:
+            return False
 
 class HttkPluginWrapper(object):
 

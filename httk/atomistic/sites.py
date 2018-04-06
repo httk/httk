@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from httk.core.fracvector import FracVector
+from httk.core import FracVector
 from httk.core.basic import is_sequence
 from cellshape import CellShape
 from spacegroup import Spacegroup
@@ -59,7 +59,7 @@ class Sites(HttkObject):
                reduced_coords=None, 
                counts=None, occupancies=None,
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-               periodicity=None):
+               pbc=None, periodicity=None):
         """
         Create a new sites object
         """        
@@ -87,10 +87,20 @@ class Sites(HttkObject):
         if reduced_coords is not None:
             reduced_coords = FracVector.use(reduced_coords)
 
-        if periodicity is not None:
-            pbc = periodicity_to_pbc(periodicity)
-        else:
-            pbc = (True, True, True)
+        if reduced_coords is None and reduced_coordgroups is not None:
+            reduced_coords = FracVector.chain_vecs(reduced_coordgroups)
+
+        if pbc is None:
+            if periodicity is not None:
+                pbc = periodicity_to_pbc(periodicity)
+            else:
+                pbc = (True, True, True)
+
+        if counts is None and reduced_coordgroups is not None:
+            counts = [len(x) for x in reduced_coordgroups]
+
+        if counts is None or reduced_coords is None:
+            raise Exception("Sites.create: not enough information to create sites object.")
 
         sites = cls(reduced_coordgroups=reduced_coordgroups, 
                     reduced_coords=reduced_coords, 
@@ -115,12 +125,12 @@ class Sites(HttkObject):
     @property
     def reduced_coordgroups(self):
         if self._reduced_coordgroups is None:
-            #if self._cartesian_coordgroups is not None:
+            #if self._cartesian_coordgroups != None:
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(self._cartesian_coordgroups,self.cell.basis)
             if self._reduced_coords is not None:
                 reduced_coordgroups = coords_and_counts_to_coordgroups(self._reduced_coords, self._counts)
                 self._reduced_coordgroups = FracVector.use(reduced_coordgroups)
-            #elif self._cartesian_coords is not None:
+            #elif self._cartesian_coords != None:
             #    reduced_coordgroups = coords_and_counts_to_coordgroups(self._cartesian_coords,self._counts)
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(reduced_coordgroups,self.cell.basis)
         return self._reduced_coordgroups 
@@ -164,10 +174,14 @@ class Sites(HttkObject):
                               reduced_coords=reduced_coords, 
                               counts=self.counts,  
                               hall_symbol=self.hall_symbol, pbc=self.pbc)
+
+    @property
+    def total_number_of_atoms(self):
+        raise Exception("Sites: attempt to call total_number_of_atoms on generic site, needs unitcellsites or representativesites")
+
         
     #def tidy(self):
     #    return Sites(self._unique_coordgroups, self._uc_coordgroups, self.cell, self.hall_symbol, self.periodicity, self.refs, self.tags)
-
 
 def main():
     pass

@@ -28,16 +28,16 @@ A set of tools and utilities meant to help with:
    - Search, retrieval and 'processing' of data in storage
    - Analysis (especially as a helpful interface against 3:rd party software)    
 """
-from config import httk_dir as httk_dir_imported, config
-from core import *
-from io import load, save
-import iface
+from .config import httk_dir as httk_dir_imported, config
+from .core import *
+from httk.httkio import load, save
+from . import iface
 
 citation.add_src_citation("httk", "Rickard Armiento")
 
 #: The version of httk (if you make signifcant changes to httk, please update with 
-#: a personal suffix, e.g., 1.0.7.rickard.2)
-version = '1.0.7.1' 
+#: a personal suffix, e.g., 1.0.4.rickard.2)
+version = '1.1.0alpha' 
 
 # This is to make the docstring work correctly 
 #: The path to the main httk directory

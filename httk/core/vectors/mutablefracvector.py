@@ -19,6 +19,7 @@ import fractions
 import operator
 import itertools
 from fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
+from vector import MutableVector
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
@@ -38,7 +39,7 @@ def nested_inmap_list(op, *ls):
 # Class definition
 
 
-class MutableFracVector(FracVector):
+class MutableFracVector(FracVector, MutableVector):
 
     """
     Same as FracVector, only, this version allow assignment of elements, e.g., ::
@@ -206,8 +207,8 @@ class MutableFracVector(FracVector):
             
         A = self.noms
         self.noms = [[m * (A[1][1] * A[2][2] - A[1][2] * A[2][1]), m * (A[0][2] * A[2][1] - A[0][1] * A[2][2]), m * (A[0][1] * A[1][2] - A[0][2] * A[1][1])],
-                     [m * (A[1][2] * A[2][0] - A[1][0] * A[2][2]), m * (A[0][0] * A[2][2] - A[0][2] * A[2][0]), m * (A[0][2] * A[1][0] - A[0][0] * A[1][2])],
-                     [m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])]]                    
+                    [m * (A[1][2] * A[2][0] - A[1][0] * A[2][2]), m * (A[0][0] * A[2][2] - A[0][2] * A[2][0]), m * (A[0][2] * A[1][0] - A[0][0] * A[1][2])],
+                    [m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])]]                    
             
     def set_simplify(self):
         """

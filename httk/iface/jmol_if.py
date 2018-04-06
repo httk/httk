@@ -65,7 +65,7 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
         basis = struct.rc_basis.to_floats()
         coords = struct.rc_cartesian_coords.to_floats()
         symbollist = struct.rc_occupationssymbols
-        spacegroup = struct.hall_symbol
+        spacegroup = struct.rc_sites.hall_symbol
     elif struct.has_uc_repr:
         basis = struct.uc_basis.to_floats()
         coords = struct.uc_cartesian_coords.to_floats()

@@ -14,7 +14,7 @@ except Exception:
 
 from httk.atomistic import *
 import httk.db
-import httk.io
+import httk.httkio
 import httk.iface
 import httk.atomistic.vis
 
@@ -28,6 +28,7 @@ def main():
     args = parser.parse_args()    
 
     debug = args.debug
+    #debug = True
     process_with_isotropy = True
     process_with_tidy = True
 
@@ -55,6 +56,7 @@ def main():
     print "==== Db import program started: "+today
     
     if len(args.file) == 0:
+        #files = ['/export/home/rar/Dropbox/Research/Codes/httk/httk/../Tutorial/tutorial_data/all_spacegroups/cifs/108.cif']
         #files = ['/export/home/rar/Dropbox/Research/Codes/httk/trunk/httk/../Tutorial/tutorial_data/CaTiO3/O.cif']
         files = [os.path.join(httk.httk_dir, 'Tutorial/tutorial_data')]
     else:
@@ -87,7 +89,7 @@ def main():
             print "Filename:"+filename
             # Uncomment for better control in how to load structures
             #if filename.endswith(".cif"):
-            #    struct = httk.io.cif_to_struct(filename,backends=['cif2cell_reduce'])
+            #    struct = httk.httkio.cif_to_struct(filename,backends=['cif2cell_reduce'])
             #elif filename.endswith(".vasp"):
             #    struct = httk.iface.vasp_if.poscar_to_structure(filename)
             struct = httk.load(filename).clean()
@@ -104,15 +106,19 @@ def main():
                 except Exception as e:
                     print "Isotropy failed with:"+str(e)
                     struct.add_tag("isotropy", "failed")
+                    if debug:
+                        raise
 
             if process_with_tidy:
                 try:
                     newstruct = struct.tidy()
                     newstruct.add_tag("structure_tidy", "done")
                     struct = newstruct
-                except Exception as e:  
+                except Exception as e:
                     print "Structure tidy failed with:"+str(e)
                     struct.add_tag("structure_tidy", "failed")
+                    if debug:
+                        raise
             
             store.save(struct)            
             compound = Compound.create(base_on_structure=struct)

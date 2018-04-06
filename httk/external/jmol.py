@@ -18,23 +18,17 @@
 from httk.core import citation
 citation.add_ext_citation('Jmol', "An open-source Java viewer for chemical structures in 3D. http://www.jmol.org/")
 
-import os, time, threading, subprocess, signal, sys
+import os, time, threading, subprocess, signal, sys, glob
 
 import httk
 from httk.iface.jmol_if import *
 import distutils.spawn
 from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
-from command import Command
+from command import Command, find_executable
 
-try:
-    jmol_path = config.get('paths', 'jmol')
-    jmol_dirpath, jmol_filename = os.path.split(jmol_path)
-
-except Exception:
-    jmol_path = distutils.spawn.find_executable("jmol") 
-    if jmol_path is None:
-        raise Exception("jmol_ext: No path is set for jmol in httk configuration, and no jmol executable was found.")
+jmol_path = find_executable('jmol.sh','jmol')
+jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
 jmol_version = None
 jmol_version_date = None
@@ -44,7 +38,7 @@ def check_works():
     global jmol_version, jmol_version_date
 
     if jmol_path == "" or not os.path.exists(jmol_path):
-        raise ImportError("httk.external.jmol imported without access to a jmol binary to run.")
+        raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
     
     out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
     if completed is None or completed != 0:
@@ -83,8 +77,11 @@ def _jmol_stophook(command):
 def start(cwd='./', args=['-I']):
 
     version = jmol_version.split('.')
-    if int(version[0]) < 12 or (int(version[0]) == 12 and int(version[1]) < 3):
-        raise Exception("jmol_ext.start_jmol: requires at least jmol version 12.3, your version:"+str(jmol_version))
+    if len(version) < 3:
+        version += [0] * (3 - len(version))
+    #if int(version[0]) < 12 or (int(version[0]) == 12 and int(version[1]) < 3):
+    if int(version[0]) < 13 or (int(version[0]) == 13 and int(version[1]) == 2 and int(version[2]) < 8):
+        raise Exception("jmol_ext.start_jmol: requires at least jmol version 13.2.8, your version:"+str(jmol_version))
 
     command = Command(jmol_path, args, cwd=cwd, stophook=_jmol_stophook)
     command.start()

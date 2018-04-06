@@ -23,8 +23,8 @@ from pylab import *
 class PolygonPlot(object):
     
     def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three'), sides=3, 
-                 label_offset=0.10, edge_args={'color': 'black', 'linewidth': 2}, fig_args={'figsize': (8, 8), 'facecolor': 'white', 'edgecolor': 'white'},
-                 text_args={'fontsize': 24, 'color': 'black'}):
+                 label_offset=0.10, edge_args={'color': 'black', 'linewidth': 2}, fig_args = {'figsize': (8, 8), 'facecolor': 'white', 'edgecolor': 'white'},
+                 text_args = {'fontsize': 24, 'color': 'black'}):
         """
         start_angle (90): Direction of first vertex.
         rotate_labels (False): Orient labels perpendicular to vertices.
@@ -40,9 +40,9 @@ class PolygonPlot(object):
             [
                 [
                     cos(2*_*pi/sides + start_angle*pi/180),
-                                sin(2*_*pi/sides + start_angle*pi/180)
+                    sin(2*_*pi/sides + start_angle*pi/180)
                 ] 
-                            for _ in range(sides)
+                for _ in range(sides)
             ]
         )
 
@@ -62,12 +62,12 @@ class PolygonPlot(object):
                 angle = 0
             ax.text(
                 x*(1 + label_offset),
-                    y*(1 + label_offset),
-                    l,
-                    horizontalalignment='center',
-                    verticalalignment='center',
-                    rotation=angle,
-                    **text_args
+                y*(1 + label_offset),
+                l,
+                horizontalalignment='center',
+                verticalalignment='center',
+                rotation=angle,
+                **text_args
             )
     
         # Clear normal matplotlib axes graphics.

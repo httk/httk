@@ -23,6 +23,7 @@ citation.add_ext_citation('Atomic Simulation Environment (ASE)', "S. R. Bahn, K.
 import httk.atomistic.data
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic import Cell
+from httk.atomistic.spacegrouputils import get_symops_strs, spacegroup_get_number_and_setting
 
 from httk import config
 from httk.atomistic import Structure, UnitcellSites
@@ -82,6 +83,7 @@ def structure_to_ase_atoms(struct):
 
     if struct.has_uc_repr:    
         symbollist, scaled_positions = httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions(struct)
+        scaled_positions = scaled_positions.to_floats()
         cell = struct.uc_basis.to_floats()
         symbols = []
         for s in symbollist:
@@ -110,8 +112,21 @@ def structure_to_ase_atoms(struct):
             else:
                 symbols += [s]
         
-        spacegroup, setting = struct.spacegroup_number_and_setting
-        atoms = crystal(symbols, scaled_positions, spacegroup, setting=setting, 
+        hall = struct.rc_sites.hall_symbol
+        symops = get_symops_strs(hall)
+        rot, trans = ase.lattice.spacegroup.spacegroup.parse_sitesym(symops)
+        spgnbr, setting = spacegroup_get_number_and_setting(hall)
+        spg = ase.lattice.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall, 
+                                                                     centrosymmetric=None, 
+                                                                     scaled_primitive_cell=None, 
+                                                                     reciprocal_cell=None, 
+                                                                     subtrans=None, 
+                                                                     sitesym=None, 
+                                                                     rotations=rot, 
+                                                                     translations=trans, 
+                                                                     datafile=None)
+        
+        atoms = crystal(symbols, scaled_positions, spg,  
                         cellpar=[float(struct.rc_a), float(struct.rc_b), float(struct.rc_c), 
                                  float(struct.rc_alpha), float(struct.rc_beta), float(struct.rc_gamma)])
     else:

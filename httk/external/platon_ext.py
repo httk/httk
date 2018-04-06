@@ -335,8 +335,6 @@ def cif_to_sgstructure(ioa):
 #     ioa.close()    
 #     
 #     return struct
-    
-
 # def structure_tidy(struct):    
 #     #TODO: use mktmpdir here
 #     tmpdir = tempfile.mkdtemp(suffix='httk_platon')
@@ -367,8 +365,6 @@ def cif_to_sgstructure(ioa):
 #     sgtidystruct.nonequiv.tags['platon_sg'] = sgtidystruct.hall_symbol
 #     
 #     return sgtidystruct.to_structure()
-
-
 def structure_tidy(struct):
     #TODO: use mktmpdir here
     tmpdir = tempfile.mkdtemp(prefix='ht.tmp.platon_')
@@ -404,6 +400,7 @@ def structure_tidy(struct):
     if err != "":
         print err
     elif completed is None:
+        #print "OUT:",out
         print "Platon did not run to completion."
         return None
 

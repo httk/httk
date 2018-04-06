@@ -25,8 +25,12 @@ struct = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assi
 struct.io.save("PbTiO3.cif")
 print ("PbTiO3.cif saved")
 
+symmetric_struct = struct.find_symmetry()
 
-cell = [[1.0, 0.0, 0.0],
+symmetric_struct.io.save("PbTiO3_alt.cif")
+print ("PbTiO3_alt.cif saved")
+
+basis = [[1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
         [0.0, 0.0, 1.0]]
 
@@ -42,8 +46,8 @@ assignments = ['Pb', 'Ti', 'O']
 
 spacegroup = 'P m -3 m'
 
-struct = Structure.create(rc_cell=cell, rc_reduced_coordgroups=coordgroups, assignments=assignments, rc_volume=62.79, spacegroup=spacegroup)
+struct = Structure.create(rc_basis=basis, rc_reduced_coordgroups=coordgroups, assignments=assignments, rc_volume=62.79, spacegroup=spacegroup)
 
-struct.io.save("PbTiO3_alt.cif")
-print ("PbTiO3_alt.cif saved")
+struct.io.save("PbTiO3_alt2.cif")
+print ("PbTiO3_alt2.cif saved")
 

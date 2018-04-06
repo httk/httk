@@ -25,24 +25,25 @@ from httk.core import *
 from httk.atomistic import *
 
 
-def load(ioa, ext=None):
+def save(obj, ioa, ext=None):
     """
-    A *very* generic file reader method.
+    A *very* generic file writer method.
     
     Load a file into a suitable httk object. Try to do the most sane thing possible given the input file.
     If you know what to expect from the input file, it may be safer to use a targeted method for that file type.
     """
     try:
         import httk.atomistic
-        import httk.atomistic.io
-        
-        return httk.atomistic.Structure.io.load(ioa, ext)
+        import httk.atomistic.atomisticio
+
+        if isinstance(obj, httk.atomistic.Structure):        
+            return obj.io.save(ioa, ext=ext)
     except Exception:
         raise
         pass        
-    raise Exception("httk.io.load: I do not know what to do with the file: "+str(ioa))
+    raise Exception("httk.httkio.save: I do not know how to save the object: "+str(obj))
     #info = sys.exc_info()   
-    #raise Exception("httk.io.load: I do not know what to do with the file: "+str(ioa)+"\n("+str(e)+")"),None,info[2]
+    #raise Exception("httk.httkio.load: I do not know what to do with the file: "+str(ioa)+"\n("+str(e)+")"),None,info[2]
     
 #     ioa = IoAdapterFilename.use(ioa)
 #     if ext == None:
@@ -53,7 +54,7 @@ def load(ioa, ext=None):
 #                 if filename.startswith("POSCAR"):
 #                     ext = '.vasp'
 #         except Exception:
-#             raise Exception("httk.io.load: original filename not known. Cannot open a generic file.")
+#             raise Exception("httk.httkio.load: original filename not known. Cannot open a generic file.")
 # 
 #     if ext == '.vasp':
 #         return httk.iface.vasp_if.poscar_to_structure(filename)
@@ -62,11 +63,11 @@ def load(ioa, ext=None):
 #         ioa = IoAdapterString("\n".join(filedata))
 #         for line in filedata:
 #             if line.startswith("# This is a cif file prepared for use with the openmaterialsdb.se"):
-#                 return httk.io.cif_to_struct(ioa,backends=['cif_reader_httk_preprocessed'])
+#                 return httk.httkio.cif_to_struct(ioa,backends=['cif_reader_httk_preprocessed'])
 #         else:
-#             return httk.io.cif_to_struct(ioa,backends=['cif2cell_reduce'])
+#             return httk.httkio.cif_to_struct(ioa,backends=['cif2cell_reduce'])
 #     else:
-#         raise Exception("httk.io.load: I do not know what to do with the file:"+filename)
+#         raise Exception("httk.httkio.load: I do not know what to do with the file:"+filename)
 #     
 
 

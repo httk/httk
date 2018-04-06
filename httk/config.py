@@ -16,10 +16,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Reads the file httk.cfg in the root of the httk tree
+Reads the file httk.cfg in the root of the httk tree and the user's .httk.cfg.
+If none of them is found it uses the httk.cfg.default.
 """
 
-import os.path, inspect
+import sys
+import os.path
+import inspect
 
 try:
     # Python 2
@@ -31,11 +34,26 @@ except ImportError:
 _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 
 config = configparser.ConfigParser()
-cfgpathstr = os.path.join(_realpath, '..', 'httk.cfg')
-config.read([cfgpathstr, os.path.expanduser('~/.httk.cfg')])
+config_files = []
+
+global_cfgpathstr = os.path.expanduser('~/.httk.cfg')
+if os.path.exists(global_cfgpathstr):
+    config_files.append(global_cfgpathstr)
+
+local_cfgpathstr = os.path.join(_realpath, '..', 'httk.cfg')
+if os.path.exists(local_cfgpathstr):
+    config_files.append(local_cfgpathstr)
+
+if config_files:
+    config.read(config_files)
+else:
+    sys.stderr.write("Warning: no httk.cfg found. Using httk.cfg.default settings.\n")
+    config.read(os.path.join(_realpath, '..', 'httk.cfg.default'))
+
 
 #: The path to the main httk directory
-httk_dir = os.path.join(_realpath, '..') 
+httk_dir = os.path.join(_realpath, '..')
+
 
 
 

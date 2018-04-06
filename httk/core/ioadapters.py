@@ -29,7 +29,7 @@ except ImportError:
 
 
 def universal_opener(other):
-    #if isinstance(other,file):
+    #if isinstance(other, file):
     if hasattr(other, 'read'):
         return IoAdapterFileReader(other, name=other.name)
     elif isinstance(other, StringIO.StringIO):
@@ -312,27 +312,27 @@ def cleveropen(filename, mode, *args):
             pass
         try:
             return bz2.BZ2File(filename+".bz2", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         try:
             return bz2.BZ2File(filename+".BZ2", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         try:
             return gzip.GzipFile(filename+".gz", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         try:
             return gzip.GzipFile(filename+".GZ", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         try:
             return zdecompressor(filename+".z", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         try:
             return zdecompressor(filename+".Z", mode, *args)
-        except IOError:
+        except (IOError, NameError):
             pass
         if not os.path.exists(filename):
             raise Exception("IOAdapters.cleveropen: file not found: "+str(filename))

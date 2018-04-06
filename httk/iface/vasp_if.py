@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, shutil, math, re
+import os, shutil, math
 
 import httk
 from httk import config
@@ -212,7 +212,8 @@ def poscar_to_strs(fio):
 
     coords = []
     for i in range(N):
-        strcoord = next(fi).strip().split()[:3]
+        nxt = next(fi)
+        strcoord = nxt.strip().split()[:3]
         coord = map(lambda x: x.strip(), strcoord)
         coords.append(coord)
 
@@ -240,7 +241,7 @@ def poscar_to_structure(f):
     for occupation in occupations:
         newoccupations.append(periodictable.atomic_number(occupation))
 
-    struct = Structure.create(uc_cell=frac_cell, uc_volume=volume, uc_scale=scale, uc_reduced_coords=frac_coords, uc_counts=counts, assignments=newoccupations, tags={'comment': comment}, periodicity=0)
+    struct = Structure.create(uc_basis=frac_cell, uc_volume=volume, uc_scale=scale, uc_reduced_coords=frac_coords, uc_counts=counts, assignments=newoccupations, tags={'comment': comment}, periodicity=0)
 
     return struct
 
@@ -300,17 +301,26 @@ def structure_to_comment(struct):
         return struct.formula + " " + tagstr
 
 
-def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None):    
+def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None, primitive_cell=True):    
     if comment is None:
         comment = structure_to_comment(struct)
-    basis = struct.uc_basis
-    coords = struct.uc_reduced_coords
+    if primitive_cell:
+        basis = struct.pc.uc_basis
+        coords = struct.pc.uc_reduced_coords
+        vol = struct.pc.uc_volume
+        counts = struct.pc.uc_counts
+    else:
+        basis = struct.cc.uc_basis
+        coords = struct.cc.uc_reduced_coords
+        vol = struct.cc.uc_volume
+        counts = struct.cc.uc_counts
+        
     if basis.det() < 0:
         if fix_negative_determinant:
             basis = -basis
-            coords = -coords
+            coords = (-coords).normalize()
     
-    write_poscar(f, basis.to_floats(), coords.to_floats(), True, struct.uc_counts, struct.symbols, comment, vol=float(struct.uc_volume))
+    write_poscar(f, basis.to_strings(), coords.to_strings(), True, counts, struct.symbols, comment, vol=vol.to_string())
 
 
 def calculate_kpoints(struct, dens=20):
@@ -329,134 +339,6 @@ def calculate_kpoints(struct, dens=20):
     N2 = int(math.ceil(math.sqrt(recip[1].lengthsqr())*dens+half)+0.1)
     N3 = int(math.ceil(math.sqrt(recip[2].lengthsqr())*dens+half)+0.1)
     return max(1, N1), max(1, N2), max(1, N3)
-
-
-def parse_kpoints(ioa):
-    ioa = IoAdapterFileReader.use(ioa)
-    fi = iter(ioa)
-    comment = next(fi).strip()
-    points = int(next(fi).split()[0].strip())
-    mode = next(fi).strip()[0].lower()
-    if mode != 'l':
-        raise Exception("parse_kpoints: Only line-mode supported.")
-    cart_or_rec = next(fi).strip()[0].lower()   
-    if cart_or_rec != 'r':
-        raise Exception("parse_kpoints: Only reciprocal coordinates supported.")
-    klines = []
-    finished = False
-    while not finished:
-        kline = {'from_symbol': None, 'to_symbol': None, 'from_rec': None, 'to_rec': None}
-        try:
-            fromline = next(fi).strip().split()
-            toline = next(fi).strip().split()
-            #print "FROM",fromline,"TO",toline
-        except StopIteration:
-            break
-        try:
-            blankline = next(fi).strip()
-            #print "BLANKLINE",blankline
-            #if blankline != '':
-            #    raise Exception("parse_kpoints: unexpected format.")
-        except StopIteration:
-            finished = True
-        kline['from_symbol'] = "".join(fromline[3:]).lstrip('! ')
-        kline['to_symbol'] = "".join(toline[3:]).lstrip('! ')
-        kline['from_rec'] = fromline[0:3]
-        kline['to_rec'] = toline[0:3]
-        klines += [kline]
-    ioa.close()
-    return {'klines': klines, 'comment': comment, 'points': points, 'mode': mode, 'cart_or_rec': cart_or_rec}
-
-
-def parse_doscar(ioa): 
-    ioa = IoAdapterFileReader.use(ioa)
-    fi = iter(ioa)
-    dummy = next(fi).strip()
-    dummy = next(fi).strip()
-    dummy = next(fi).strip()
-    dummy = next(fi).strip()
-    dummy = next(fi).strip()
-    header = next(fi).strip().split()        
-    count = int(header[2])
-    spins = None
-    energies = []
-    tdos = None
-    idos = None
-    for i in range(count):
-        dosline = next(fi).strip().split()
-        if spins is None:
-            if len(dosline) >= 3:
-                spins = 2
-                tdos = [[], []]
-                idos = [[], []]
-            else:
-                spins = 1
-                tdos = [[]]
-                idos = [[]]
-        energies += [dosline[0]]
-        if spins == 1:
-            tdos[0] += [dosline[1]]
-            idos[0] += [dosline[2]]
-        else:
-            tdos[0] += [dosline[1]]
-            tdos[1] += [dosline[2]]
-            idos[0] += [dosline[3]]
-            idos[1] += [dosline[4]]           
-    return {'energies': energies, 'tdos': tdos, 'idos': idos}
-            
-
-def parse_outcar(ioa, get_fermi=True, get_kpts_and_eigvals=True):
-    ioa = IoAdapterFileReader.use(ioa)
-    spin_regex = re.compile('^ *spin component *([12]) *$')
-    kline_regex = re.compile('^ *k-point *([0-9]+) *: *([0-9.]+) *([0-9.]+) *([0-9.]+) *$')
-    bandheader_regex = re.compile('^ *band No\. *band energies *occupation *$')
-    fermi_regex = re.compile('^ *E-fermi *: *([0-9.-]+) .*$')
-    energy_regex = re.compile("^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$")
-    emptyline_regex = re.compile('^ *$')
-    kpts = []
-    banddata = []
-    eigvals_present_k = []
-    in_band = False
-    fermi = None
-    spin = 0
-    for line in ioa:
-        if get_kpts_and_eigvals:
-            m = spin_regex.match(line)
-            if m is not None:
-                spin = int(m.group(1))-1
-            if spin == 0:
-                m = kline_regex.match(line)
-                if m is not None:
-                    kpts += [(m.group(2), m.group(3), m.group(4))]
-            if bandheader_regex.match(line):
-                in_band = True
-                continue
-            if in_band and emptyline_regex.match(line):
-                if len(banddata) < spin+1:
-                    banddata += [[]]
-                banddata[spin] += [eigvals_present_k]
-                eigvals_present_k = []
-                in_band = False
-            if in_band:
-                eigvals_present_k += [line.split()[1]]
-        if get_fermi:
-            m = fermi_regex.match(line)
-            if m is not None:
-                fermi = m.group(1)
-        m = energy_regex.match(line)
-        if m is not None:
-            final_energy_with_entropy = m.group(1)
-            final_energy = m.group(2)
-
-    ioa.close()
-    result = {'final_energy_with_entropy': final_energy_with_entropy, 'final_energy': final_energy}
-    if get_kpts_and_eigvals:
-        result['kpts'] = kpts
-        result['banddata'] = banddata
-    if get_fermi:
-        result['fermi'] = fermi
-
-    return result
 
 
 def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/single/static', overwrite=False):
@@ -520,266 +402,32 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
     apply_templates(template, dirpath, envglobals=data, mkdir=False)
 
 
-def eigenvalues_to_bandlines(eigenvalues, klist):
-    """
-    Returns bandlines which is an array per spin per each kline,
-    containing a list with one entry per bands of ['relative kpoint
-    distance', 'energy'] for each kpoint in that kline
-    """
-    kcount = len(eigenvalues[0])
-    bandcount = len(eigenvalues[0][0])
-    if len(eigenvalues) == 2:
-        spins = [0, 1]
-        bandlines = [[None]*len(klist), [None]*len(klist)]
-    else:
-        bandlines = [[None]*len(klist)]
-        spins = [0]
-
-    for spin in spins:
-        for i in range(len(klist)):
-            bandlines[spin][i] = [None]*bandcount
-            for j in range(bandcount):
-                bandlines[spin][i][j] = [[None, None] for _x in klist[i]['kpts']]
-   
-    for spin in spins:
-        for band in range(bandcount):
-            kcount = 0
-            startkdist = 0
-            for i in range(len(klist)):
-                kline = klist[i]
-                startk = kline['kpts'][0]
-                endk = kline['kpts'][-1]
-                kdist = 0
-                for j in range(len(kline['kpts'])):
-                    kpos = kline['kpts'][j]
-                    kstep = math.sqrt(((startk-kpos).lengthsqr()).to_float())
-                    kdist = startkdist + kstep
-                    bandlines[spin][i][band][j][0] = kdist
-                    bandlines[spin][i][band][j][1] = eigenvalues[spin][kcount][band]                    
-                    kcount += 1
-
-                # Continue next band from this relative kdist                
-                startkdist += kstep
-        
-    return FracVector.create(bandlines)
-
-
-def construct_klists(klines, points, recbasis):
-    for kline in klines:
-        start = recbasis*kline['from_rec']
-        stop = recbasis*kline['to_rec']
-        print "KLINE", kline['from_symbol'], kline['to_symbol'], start.to_floats(), stop.to_floats()
-        kpts = [None]*points
-        for step in range(points):
-            kpts[step] = (start + FracVector.create(step, (points-1))*(stop-start)).simplify()
-        kline['kpts'] = kpts
-
-
-def gapdata_eigenvalues(eigenvalues, kpts, fermi):
-
-    epsfracvec = FracVector.create(1, 1000000)
-    
-    spins = len(eigenvalues)
-    
-    spinhomo = [None]*spins
-    spinhomo_k = [None]*spins
-    spinlumo = [None]*spins
-    spinlumo_k = [None]*spins
-    homo = [None]*spins
-    lumo = [None]*spins
-    spingap = [None]*spins
-    min_of_spingaps = None
-    direct_spingap = [None]*spins
-    direct_spingap_k = [None]*spins
-    direct_gap = None
-    direct_gap_k = None
-    
-    for k in range(len(kpts)):    
-        direct_spingap_this_k = [None]*spins
-        for spin in range(spins):
-            spinhomo_direct = None
-            spinlumo_direct = None
-            for band in range(len(eigenvalues[0][0])):
-                e = eigenvalues[spin][k][band]
-                # the calculation places fermi = highest occupied, so to avoid floating point
-                # issues we need to pull the fermi level down epsilon to make sure to get *that* level
-                if e <= fermi-epsfracvec:
-                    if spinhomo[spin] is None or e > spinhomo[spin]:
-                        spinhomo[spin] = e
-                        spinhomo_k[spin] = kpts[k]
-                    if spinhomo_direct is None or e > spinhomo_direct:
-                        spinhomo_direct = e
-                else:
-                    if spinlumo[spin] is None or e < spinlumo[spin]:
-                        spinlumo[spin] = e
-                        spinlumo_k[spin] = kpts[k]
-                    if spinlumo_direct is None or e < spinlumo_direct:
-                        spinlumo_direct = e
-            direct_spingap_this_k[spin] = spinlumo_direct - spinhomo_direct
-            if direct_spingap[spin] is None or direct_spingap_this_k[spin] < direct_spingap[spin]:
-                direct_spingap[spin] = direct_spingap_this_k[spin]
-                direct_spingap_k[spin] = kpts[k]
-        direct_gap_this_k = min(direct_spingap_this_k)
-        if direct_gap is None or direct_gap > direct_gap_this_k:
-            direct_gap = direct_gap_this_k
-            direct_gap_k = kpts[k]
-
-    for spin in range(spins):
-        spingap[spin] = spinlumo[spin] - spinhomo[spin]
-
-    min_of_spingaps = min(spingap)
-
-    if spins > 1 and spinhomo[1] > spinhomo[0]:
-        homo = spinhomo[1]
-        homo_k = spinhomo_k[1]
-    else:
-        homo = spinhomo[0]
-        homo_k = spinhomo_k[0]
-        
-    if spins > 1 and spinlumo[1] < spinlumo[0]:
-        lumo = spinlumo[1]
-        lumo_k = spinlumo_k[1]
-    else:
-        lumo = spinlumo[0]
-        lumo_k = spinlumo_k[1]                    
-    gap = lumo - homo
-
-    results = {'gap': gap, 'homo': homo, 'lumo': lumo, 'homo_k': homo_k, 'lumo_k': lumo_k, 
-               'direct_gap': direct_gap, 'direct_gap_k': direct_gap_k}
-    
-    if spins > 1:
-        spinresults = {'min_of_spingaps': min_of_spingaps,
-                       'spinhomo': spinhomo, 'spinlumo': spinlumo, 'spinhomo_k': spinhomo_k, 'spinlumo_k': spinlumo_k,
-                       'spingap': spingap, 'direct_spingap': direct_spingap,
-                       'direct_spingap_k': direct_spingap_k}
-        results.update(spinresults)
-    return results
-        
-
-def gapdata_dos(energies, tdos, fermi):
-    epsfracvec = FracVector.create(1, 1000000)
-    
-    spins = len(tdos) 
-
-    spinhomo = [None]*spins
-    spinlumo = [None]*spins
-    spingap = [None]*spins
-    
-    for spin in range(spins):
-        for i in range(len(energies)):
-            if energies[i] <= fermi-epsfracvec:
-                if tdos[spin][i] > epsfracvec:
-                    spinhomo[spin] = energies[i]
-            else:
-                if spinlumo[spin] is None and tdos[spin][i] > epsfracvec:
-                    spinlumo[spin] = energies[i]
-                    break
-        spingap[spin] = spinlumo[spin]-spinhomo[spin]
-    min_of_spingaps = min(spingap)
-    homo = max(spinhomo)
-    lumo = min(spinlumo)
-    gap = lumo-homo
-    
-    results = {'gap': gap, 'homo': homo, 'lumo': lumo}
-    if spins > 1:
-        spinresults = {'spinhomo': spinhomo, 'spinlumo': spinlumo, 'spingap': spingap,
-                       'min_of_spingaps': min_of_spingaps}
-        results.update(spinresults)
-    return results        
-
-
-class PoscarReader():
-
-    def __init__(self, ioa):
-        self.ioa = IoAdapterFileReader.use(ioa)  
-        self.parse()
-        pass
-
-    def parse(self):
-        self.structure = poscar_to_structure(self.ioa)
-        self.parsed = True
-
-
-class KpointsReader():
-
-    def __init__(self, ioa):
-        self.ioa = IoAdapterFileReader.use(ioa)  
-        self.parse()
-        pass
-
-    def parse(self):
-        result = parse_kpoints(self.ioa)
-        for k in result:
-            setattr(self, k, result[k])
-        for kline in self.klines:
-            kline['from_rec'] = FracVector.create(kline['from_rec'])
-            kline['to_rec'] = FracVector.create(kline['to_rec'])
-            
-        self.parsed = True
-
-
-class DoscarReader():
-
-    def __init__(self, ioa):
-        self.ioa = IoAdapterFileReader.use(ioa)  
-        self.parse()
-
-    def parse(self):
-        result = parse_doscar(self.ioa)
-        for k in result:
-            setattr(self, k, result[k])
-        self.energies = FracVector.create(self.energies)
-        self.tdos = FracVector.create(self.tdos)
-        self.idos = FracVector.create(self.idos)
-        self.parsed = True
-    
-
 class OutcarReader():
 
-    def __init__(self, ioa, get_fermi=True, get_kpts_and_eigvals=True):
-        self.ioa = IoAdapterFileReader.use(ioa)  
-
-        self.get_fermi = get_fermi
-        self.get_kpts_and_eigvals = get_kpts_and_eigvals
-        
+    def __init__(self, ioa):
+        self.ioa = ioa
         self.parse()
         pass
 
     def parse(self):
-        result = parse_outcar(self.ioa)
-        for k in result:
-            setattr(self, k, result[k])
-        self.fermi = FracScalar.create(self.fermi)
-        self.banddata = FracVector.create(self.banddata)
-        self.kpts = FracVector.create(self.kpts)
+        results = {'final': False}
+
+        def set_final(results, match):
+            results['final'] = True
+
+        def read_energy(results, match):
+            self.final_energy_with_entropy = match.group(1)
+            self.final_energy = match.group(2)
+        results = micro_pyawk(self.ioa, [
+                              ["^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
+                              ["FREE ENERGIE", None, set_final],
+                              ], results, debug=False)
         self.parsed = True
-#    def parse(self):
-#        results = {'final':False}
-#        def set_final(results,match):
-#            results['final']=True
-#        def read_energy(results,match):
-#            self.final_energy_with_entropy=match.group(1)
-#            self.final_energy=match.group(2)
-#        results = micro_pyawk(self.ioa,[
-#             ["^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$",None,read_energy],
-#             ["FREE ENERGIE",None,set_final],
-#             ],results,debug=False)
-#        self.parsed = True
  
 
 def read_outcar(ioa):
     return OutcarReader(ioa)
-
-
-def read_poscar(ioa):
-    return PoscarReader(ioa)
     
 
-def read_doscar(ioa):
-    return DoscarReader(ioa)
-
-
-def read_kpoints(ioa):
-    return KpointsReader(ioa)
     
     

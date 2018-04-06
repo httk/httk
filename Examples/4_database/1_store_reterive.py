@@ -3,9 +3,6 @@
 import httk, httk.db
 from httk.atomistic import Structure
 
-# Note, we use a UnitcellStructure here so that no external symmetry finder is needed to derive the Wyckoff sequences,
-# with a symmetry finder, changing it to Structure is fine.
-
 backend = httk.db.backend.Sqlite('example.sqlite')
 store = httk.db.store.SqlStore(backend)
 tablesalt = httk.load('../../Tutorial/Step7/NaCl.cif')

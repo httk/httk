@@ -15,24 +15,24 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httkobject import HttkObject, httk_typed_init
-from reference import Reference
+from .httkobject import HttkObject, httk_typed_init
+from .reference import Reference
 
 
 class Code(HttkObject):
 
     """
     Object for keeping track of httk data about a computer software or script
-    """    
+    """
 
-    @httk_typed_init({'name': str, 'version': str}, index=['name', 'version'])    
+    @httk_typed_init({'name': str, 'version': str}, index=['name', 'version'])
     def __init__(self, name, version):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
-        """    
+        """
         super(Code, self).__init__()
         self.name = name
-        self.version = version        
+        self.version = version
 
         self._tags = {}
         self._refs = []
@@ -46,19 +46,19 @@ class Code(HttkObject):
     def create(cls, name, version, refs=None, tags=None):
         """
         Create a Computation object.
-        """        
+        """
         new = cls(name, version)
         if tags is not None:
             new.add_tags(tags)
         if refs is not None:
-            new.add_refs(refs)               
+            new.add_refs(refs)
         return new
 
     def _fill_codependent_data(self):
         self._tags = {}
         self._refs = []
         for x in self._codependent_callbacks:
-            x(self)            
+            x(self)
 
     def add_tag(self, tag, val):
         if self._tags is None:
@@ -93,7 +93,7 @@ class Code(HttkObject):
             self._fill_codependent_data()
         return self._refs
 
-    def add_ref(self, ref):        
+    def add_ref(self, ref):
         if self._refs is None:
             self._fill_codependent_data()
         if isinstance(ref, CodeRef):
@@ -107,11 +107,12 @@ class Code(HttkObject):
     def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
+    
+    
+class CodeTag(HttkObject):
 
-
-class CodeTag(HttkObject):                               
-
-    @httk_typed_init({'code': Code, 'tag': str, 'value': str}, index=['structure', 'tag', 'value'], skip=['hexhash'])    
+    @httk_typed_init({'code': Code, 'tag': str, 'value': str},
+                     index=['code', 'tag', ('tag', 'value'), ('structure', 'tag', 'value')], skip=['hexhash'])
     def __init__(self, structure, tag, value):
         self.tag = tag
         self.structure = structure
@@ -123,7 +124,7 @@ class CodeTag(HttkObject):
 
 class CodeRef(HttkObject):
 
-    @httk_typed_init({'code': Code, 'reference': Reference}, index=['code', 'reference'], skip=['hexhash'])        
+    @httk_typed_init({'code': Code, 'reference': Reference}, index=['code', 'reference'], skip=['hexhash'])
     def __init__(self, code, reference):
         self.code = code
         self.reference = reference
@@ -131,7 +132,7 @@ class CodeRef(HttkObject):
     def __str__(self):
         return str(self.reference)
     
-
+    
 def main():
     pass
     

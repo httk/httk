@@ -97,7 +97,7 @@ class FilteredCollection(object):
         other.filterexprs = list(self.filterexpr)
         other.columns = list(self.columns)
 
-    def variable(self, obj, outid=None):
+    def variable(self, obj, outid=None, parent=None, parentkey=None, subkey=None):
         types = obj.types()
         #types = {"name":obj.object_name, "keys":obj.object_properties, "keydict":dict(obj.object_properties), "index":obj.object_index}
         self.store.new(types['name'], types)
@@ -105,7 +105,7 @@ class FilteredCollection(object):
         if outid is None:
             outid = types['name']+"_"+str(self._storable_tables)
             self._storable_tables += 1
-        table = TableOrColumn(self, types['name'], outid=outid, indirection=1, classref=obj)
+        table = TableOrColumn(self, types['name'], parent=parent, outid=outid, key=parentkey, subkey=subkey, indirection=1, classref=obj)
         return table
 
 

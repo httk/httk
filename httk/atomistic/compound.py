@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from httk.atomistic import Structure, ScalelessStructure, StructureTag, StructureRef
+from httk.atomistic import Structure, StructureTag, StructureRef
 from httk.core.reference import Reference
 from httk.core.computation import Computation
 from httk.core import FracScalar
@@ -195,7 +195,7 @@ class Compound(HttkObject):
 
 class CompoundTag(HttkObject):                               
 
-    @httk_typed_init({'compound': Compound, 'tag': str, 'value': str}, index=['compound', 'tag', 'value'], skip=['hexhash'])    
+    @httk_typed_init({'compound': Compound, 'tag': str, 'value': str}, index=['compound', 'tag', ('tag', 'value'), ('compound', 'tag', 'value')], skip=['hexhash'])    
     def __init__(self, compound, tag, value):
         self.tag = tag
         self.compound = compound

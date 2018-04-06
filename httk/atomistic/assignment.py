@@ -15,9 +15,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
+from httk.core import HttkObject, httk_typed_init, httk_typed_property
 from data import periodictable
-from httk.core.fracvector import FracVector, FracScalar
+from httk.core import FracVector, FracScalar
 
 
 class Assignment(HttkObject):
@@ -50,13 +50,13 @@ class Assignment(HttkObject):
             if 'atom' in siteassignment:
                 atom = siteassignment['atom']
             if 'weight' in siteassignment:
-                weight = siteassignment['weight']
+                weight = FracScalar.use(siteassignment['weight'])
             if 'ratio' in siteassignment:
-                ratio = siteassignment['ratio']
+                ratio = FracScalar.use(siteassignment['ratio'])
             if 'magnetic_moment' in siteassignment:
                 magnetic_moment = siteassignment['magnetic_moment']
         elif siteassignment is not None:
-            return cls(periodictable.atomic_number(siteassignment), None, 1, [None, None, None])
+            return cls(periodictable.atomic_number(siteassignment), None, FracScalar.create(1), [None, None, None])
                 
         if atom is None:
             raise Exception("SiteAssignment needs at least an atom specification")
@@ -67,7 +67,7 @@ class Assignment(HttkObject):
             magnetic_moment = [None, None, None]
 
         if ratio is None:
-            ratio = 1
+            ratio = FracScalar.create(1)
                 
         return cls(atom, weight, ratio, magnetic_moment)
 

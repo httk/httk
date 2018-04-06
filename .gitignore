@@ -6,6 +6,7 @@
 **/*~
 # Httk specific ignores
 httk.cfg
+httk.old
 External
 Docs/_static/generated/**
 Docs/_build/**
@@ -30,4 +31,5 @@ USERS_GUIDE.txt
 VERSION
 httk_overview.pdf
 gittools
-httk.old
+httk.old*
+*.orig

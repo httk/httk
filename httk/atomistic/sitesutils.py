@@ -16,9 +16,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from httk.core.fracvector import FracVector
-from httk.core.mutablefracvector import MutableFracVector
+from httk.core import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
+import spacegrouputils
 
 
 def sort_coordgroups(coordgroups, individual_data):
@@ -206,18 +206,6 @@ def anonymous_formula(filled_counts):
     return abstract_formula
 
 
-def main():
-    cell = FracVector.create([[1, 1, 0], [1, 0, 1], [0, 1, 1]])
-    coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
-    assignments = [2, 5]
-
-    print cell, coordgroups
-    cell, coordgroups = coordswap(0, 2, cell, coordgroups)
-    print cell, coordgroups
-    
-    pass
-
-
 def coords_reduced_to_cartesian(cell, coords):
     cell = FracVector.use(cell)
     newcoords = coords*cell
@@ -273,6 +261,39 @@ def sites_tidy(sites, backends=['platon']):
                 raise
                 pass
     raise Exception("structure_tidy: None of the available backends available.")
+
+
+def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=0.001):
+    symops = spacegrouputils.get_symops(hall_symbol)
+    newcoordgroups = []
+    for coordgroup in coordgroups:
+        newcoordgroup = []
+        for symop in symops:
+            rotcoords = coordgroup*(symop[0].T())
+            for coord in rotcoords:
+                finalcoord = (coord+symop[1]).normalize()
+                if finalcoord not in newcoordgroup:
+                    for checkcoord in newcoordgroup:
+                        if (checkcoord-finalcoord).normalize_half().lengthsqr() < eps:
+                            break
+                    else:
+                        newcoordgroup += [finalcoord]
+        newcoordgroup = sorted(newcoordgroup, key=lambda x: (x[0], x[1], x[2]))
+        newcoordgroups += [newcoordgroup]
+    return newcoordgroups
+
+
+def main():
+    cell = FracVector.create([[1, 1, 0], [1, 0, 1], [0, 1, 1]])
+    coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
+    assignments = [2, 5]
+
+    print cell, coordgroups
+    cell, coordgroups = coordswap(0, 2, cell, coordgroups)
+    print cell, coordgroups
+    
+    pass
+
 
 if __name__ == "__main__":
     main()

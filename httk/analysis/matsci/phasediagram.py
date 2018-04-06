@@ -186,7 +186,6 @@ class PhaseDiagram(object):
                 lines[(i, j)] = True
         return lines.keys()
 
-        
 #         closest = self.hull['closest_points']
 #         hull_points = self.hull['hull_points']
 #         lines = {}
@@ -211,7 +210,6 @@ class PhaseDiagram(object):
 #                     done_points += [point2]
 #                     points_to_check += closest[point2]
 #         return lines.keys()
-    
     def hull_point_coords(self):
         coordsys = self.coord_system
         phases = [self.phases[x] for x in self.hull_indices]
