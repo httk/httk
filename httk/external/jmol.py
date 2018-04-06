@@ -27,7 +27,7 @@ from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from command import Command, find_executable
 
-jmol_path = find_executable('jmol.sh','jmol')
+jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
 jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
 jmol_version = None

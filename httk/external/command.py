@@ -17,6 +17,7 @@
 
 import threading, subprocess, sys, os, signal, glob, distutils.spawn
 import httk.core
+from httk.core.basic import is_sequence
 from httk import config
 from httk.config import httk_dir    
 import platform
@@ -162,7 +163,10 @@ class Command(object):
         return self.process.stdin
 
 
-def find_executable(executable, config_name):
+def find_executable(executables, config_name):
+    if not is_sequence(executables):
+        executables = [executables]
+    
     path_conf = config.get('paths', config_name)
     if path_conf != "":
         paths = glob.glob(os.path.expandvars(os.path.expanduser(path_conf)))
@@ -176,10 +180,16 @@ def find_executable(executable, config_name):
             extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == config_name]    
             extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))    
             bestversion = config_name+'-'+extvers[-1]
-            return os.path.join(path, bestversion, executable)
+            for executable in executables:
+                p = os.path.join(path, bestversion, executable)
+                if os.path.exists(p):
+                    return p
         except Exception:
+            pass
+
+        for executable in executables:        
             path = distutils.spawn.find_executable(executable) 
-            if path is None:
-                raise Exception("find_executable: executable for "+str(config_name)+" not found. No path set in httk.cfg, and no binary '"+str(executable)+"' found in subdirectories to External/, or otherwise in the system path.")
-            return path
-        
+            if path is not None:
+                return path
+
+        raise Exception("find_executable: executable for "+str(config_name)+" not found. No path set in httk.cfg, and no binary '"+str(executable)+"' found in subdirectories to External/, or otherwise in the system path.")

@@ -59,10 +59,14 @@ import ase.io
 import ase.utils.geometry
 from ase.lattice.spacegroup import crystal
 from ase.atoms import Atoms
-from ase import version
-
-ase_major_version = version.version.split('.')[0]
-ase_minor_version = version.version.split('.')[1]
+try:
+    from ase import version 
+    ase_version = version.version
+except ImportError:
+    from ase import __version__ as aseversion
+    
+ase_major_version = aseversion.split('.')[0]
+ase_minor_version = aseversion.split('.')[1]
 
 
 def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
