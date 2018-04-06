@@ -4,7 +4,7 @@
    httk main README file                                                
    =====================================================================
 .. raw:: text
-   :file: generated/header.txt
+   :file: header.tpl
 
 .. raw:: text
 

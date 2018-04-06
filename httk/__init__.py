@@ -28,23 +28,21 @@ A set of tools and utilities meant to help with:
    - Search, retrieval and 'processing' of data in storage
    - Analysis (especially as a helpful interface against 3:rd party software)    
 """
+# Get httk configuration data
 from .config import httk_dir as httk_dir_imported, config
+httk_dir = httk_dir_imported
+
+# Figure out what version of httk is running
+from .versioning import httk_version as __version__, httk_copyright_note
+
 from .core import *
 from httk.httkio import load, save
 from . import iface
 
 citation.add_src_citation("httk", "Rickard Armiento")
 
-#: The version of httk (if you make signifcant changes to httk, please update with 
-#: a personal suffix, e.g., 1.0.4.rickard.2)
-version = '1.1.0' 
-
-# This is to make the docstring work correctly 
-#: The path to the main httk directory
-httk_dir = httk_dir_imported
-
 # From this module
-__all__ = ["httk_dir", "config", "load", "save", "iface", "version"]
+__all__ = ["httk_dir", "config", "load", "save", "iface", "__version__", "httk_copyright_note"]
 
 # From core:
 __all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",

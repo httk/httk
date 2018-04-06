@@ -2,7 +2,7 @@
 *httk* Runmanager Details
 =====================================================================
 .. raw:: text
-   :file: generated/header.txt
+   :file: header.tpl
 
 The httk 'taskmanager toolset' is centered around the taskmanager.sh
 program. This program is responsible for handling a large set of

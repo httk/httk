@@ -1,4 +1,4 @@
-The High-Throughput Toolkit (httk), v$HTTKVERSION 
+The High-Throughput Toolkit (httk), v1.1.0alpha 
 Copyright (c) 2012-2015, Rickard Armiento
 
 For License information see the file COPYING.

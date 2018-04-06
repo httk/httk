@@ -2,7 +2,7 @@
 *httk* Contributors
 =====================================================================
 .. raw:: text
-   :file: generated/header.txt
+   :file: header.tpl
 
 Programming:
   - Rickard Armiento, Linköping University, Sweden (ricard [at] ifm.liu.se)

@@ -335,8 +335,8 @@ _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 sys.path.insert(1, os.path.join(_realpath,'..'))
 import httk
 
-version = httk.version[:httk.version.rfind('.')]
-release = httk.version
+version = httk.__version__[:httk.__version__.rfind('.')]
+release = httk.__version__
 
 from sphinx.ext.autodoc import ModuleLevelDocumenter, DataDocumenter
 

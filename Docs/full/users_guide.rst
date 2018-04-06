@@ -2,7 +2,7 @@
 *httk* Users' Guide
 ================================================================================
 .. raw:: text
-   :file: generated/header.txt
+   :file: header.tpl
 
 
 Introduction

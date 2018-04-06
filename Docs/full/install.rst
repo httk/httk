@@ -2,7 +2,7 @@
 *httk* Installation Instructions
 =====================================================================
 .. raw:: text
-   :file: generated/header.txt
+   :file: header.tpl
 
 Install Overview
 ----------------
