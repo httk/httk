@@ -37,7 +37,7 @@ citation.add_src_citation("httk", "Rickard Armiento")
 
 #: The version of httk (if you make signifcant changes to httk, please update with 
 #: a personal suffix, e.g., 1.0.4.rickard.2)
-version = '1.1.0alpha' 
+version = '1.1.0' 
 
 # This is to make the docstring work correctly 
 #: The path to the main httk directory
