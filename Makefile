@@ -6,7 +6,7 @@ all:	httk.cfg VERSION presentation webdocs pregendocs docs
 
 
 VERSION: 
-	python -c "import httk" >/dev/null 
+	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..')); import httk" >/dev/null 
 
 .PHONY: VERSION
 
@@ -20,7 +20,7 @@ autopep8:
 
 docs: VERSION
 	HTTK_VERSION=$$(cat VERSION); \
-	HTTK_COPYRIGHT_NOTICE=$$(python -c "import httk, sys; httk.citation.dont_print_citations_at_exit(); sys.stdout.write(httk.httk_copyright_note)"); \
+	HTTK_COPYRIGHT_NOTICE=$$(python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..')); import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write(httk.httk_copyright_note)"); \
 	for FILE in $$(cd Docs/pre-generated-templates; ls *.tpl); do \
 	  BASENAME="$$(basename "$$FILE" .tpl)"; \
 	  cat Docs/pre-generated-templates/"$$FILE" | sed 's/$${{HTTK_VERSION}}/'"$$HTTK_VERSION"'/;s/$${{HTTK_COPYRIGHT_NOTICE}}/'"$$HTTK_COPYRIGHT_NOTICE"'/' > "$$BASENAME.txt"; \
@@ -38,9 +38,11 @@ preclean:
 	rm -f httk_*.tgz
 	rm -f httk_*.md5
 
-dist: VERSION presentation preclean 
+dist: VERSION docs presentation preclean 
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
-	rm -f "httk-$$(cat VERSION).tgz"	
+	rm -f "httk-$$(cat VERSION).tgz"
+
+	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..'));import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write('version = \"' + httk.__version__+'\"\n'); sys.stdout.write('version_date = \"' + httk.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')" > httk/version_dist.py
 	( \
 		THISDIR=$$(basename "$$PWD"); \
 		cd ..; \
@@ -50,6 +52,7 @@ dist: VERSION presentation preclean
 		--exclude=".*" --transform "flags=r;s|httk.cfg.default|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
+	rm -f httk/version_dist.*
 
 presentation: 
 	( cd Presentation; \

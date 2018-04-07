@@ -26,7 +26,7 @@ would not get credit. We should extend this to add a facility to make it easier 
 also of the data being used.
 """
 from collections import OrderedDict
-from ..versioning import httk_version, httk_copyright_note
+from ..versioning import httk_version, httk_copyright_note, httk_version_date
 
 # TODO: Convert to using real instances of the core.reference.Reference class instead.
 
@@ -73,7 +73,7 @@ def print_citations():
     print ""
     print "=================================================================="
     print "This program used the high-throughput toolkit"
-    print "  httk " + httk_version + ", " + httk_copyright_note
+    print "  httk " + httk_version + " (" + httk_version_date + "), " + httk_copyright_note
     print 
     print "Credits for httk modules used in this run:"
     for module in module_citations:
