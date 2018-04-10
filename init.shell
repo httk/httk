@@ -9,11 +9,11 @@
 #  /path/to/httk -> to your PYTHONPATH variable
 #
 # For tcsh, csh, bash, zsh, ksh, simply do:
-#   source /path/to/httk/setup.shell
+#   source /path/to/httk/init.shell
 # 
 # For sh and fish respectively you need to do this instead:
-#   sh: eval `/path/to/httk/setup.shell.eval sh`
-#   fish: eval (/path/to/httk/setup.shell.eval fish)
+#   sh: eval `/path/to/httk/init.shell.eval sh`
+#   fish: eval (/path/to/httk/init.shell.eval fish)
 #
 ################################################################################
 #
@@ -40,8 +40,8 @@
 test "$?tcsh" = "0" -o "$?csh" = "0" && eval 'set COMMAND=(!!); set HERE="$COMMAND[2]"; set HEREDIR=`dirname $HERE`; set DIR=`cd "$HEREDIR"; pwd -P`; set BASH_VERSION=""; set ZSH_VERSION=""; set KSH_VERSION=""; setenv PATH "${DIR}/bin:${PATH}"; test "$?PYTHONPATH" == "1" && setenv PYTHONPATH "${DIR}/src:${PYTHONPATH}"; test "$?PYTHONPATH" == "0" && setenv PYTHONPATH "${DIR}/src"; set DONE=1'
 test "$BASH_VERSION" != "" && eval 'HERE=${BASH_SOURCE[0]}; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
 test "$ZSH_VERSION" != "" && eval 'HERE=$0; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
-test "$KSH_VERSION" != "" && eval 'X=88; f() { typeset X=93; }; f; test "$X" = "93" && HERE="${.sh.file}"; test $X == "88" && echo "httk setup.shell cannot configure the environment for the ksh88-type shell you are using. Run the following instead:" && echo "    eval \`/path/to/httk/setup.shell.eval ksh88\`" && return; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
+test "$KSH_VERSION" != "" && eval 'X=88; f() { typeset X=93; }; f; test "$X" = "93" && HERE="${.sh.file}"; test $X == "88" && echo "httk init.shell cannot configure the environment for the ksh88-type shell you are using. Run the following instead:" && echo "    eval \`/path/to/httk/init.shell.eval ksh88\`" && return; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
 # regular sh falls here; I've found no way to 
 # extract the path of a sourced script in sh :-(
-test "$DONE" != "1" && eval 'echo "httk setup.shell cannot configure the environment for the shell you are using. Run the following instead:"; echo "    eval \`/path/to/httk/setup.shell.eval [shell name]\`"'
+test "$DONE" != "1" && eval 'echo "httk init.shell cannot configure the environment for the shell you are using. Run the following instead:"; echo "    eval \`/path/to/httk/init.shell.eval [shell name]\`"'
 

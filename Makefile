@@ -25,7 +25,7 @@ clean:
 	rm -f httk_*.tgz
 	rm -f httk_*.md5
 	rm -f Docs/full/httk.*
-	rm -f Docs/full/_build
+	rm -rf Docs/full/_build
 
 dist: VERSION docs presentation clean
 	rm -f "httk-$$(cat VERSION).tgz"
