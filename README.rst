@@ -48,9 +48,9 @@ Install
 
 You are now ready to use *httk*.
      
-  *(Note: an alternative to installing *httk* with ``pip install`` is to just run it out of the
+  *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
   httk directory. In that case, append ``source ~/path/to/httk/init.shell`` to your
-  shell init files, with ``~/path/to/httk`` replaced by the path of your *httk* directory.)*
+  shell init files, with ``~/path/to/httk`` replaced by the path of your httk directory.)*
 
 Tutorial examples
 *****************
