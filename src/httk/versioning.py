@@ -44,7 +44,7 @@ except ImportError:
             httk_version = httk_version.replace('-','.dev',1)
             httk_version = httk_version.replace('-','+',1)
             if httk_version.endswith('-dirty'):
-                httk_version = httk_version.replace('-dirty','.dirty')
+                httk_version = httk_version.replace('-dirty','.d')
             
         except Exception as e:
             sys.stderr.write("Note: failed to obtain httk version from git: " + str(e) + "\n")

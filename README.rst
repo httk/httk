@@ -21,49 +21,117 @@ atomistic calculations in materials science and electronic
 structure, but aims to be extended into a library useful also
 outside those areas.
 
----------------------------
-Getting started with *httk*
----------------------------
+----------
+Quickstart
+----------
 
-Download
-========
+Install
+*******
 
-The latest download information for *httk* is found at http://httk.openmaterialsdb.se/downloads.html
+1. You need Python 2.7 and access to pip and git in your terminal
+   window. (You can get Python and pip, e.g., by installing the Python 2.7 version
+   of Anaconda, https://www.anaconda.com/download, which should give you
+   all you need on Linux, macOS and Windows. You can get git from here:
+   https://git-scm.com/ )
 
-OR
+2. Issue in your terminal window::
 
-Clone the github development repository and run make to create necessary dependent files::
+     git clone https://github.com/rartino/httk
+     cd httk
+     pip install .
 
-  > git clone https://github.com/rartino/httk
-  > make
+   If you at a later point want to upgrade your installation, just go back to
+   the *httk* directory and issue::
 
-For github source, note that many of the documents refered to below will not appear in your main httk directory until you 
-run::
+     git pull
+     pip install . --upgrade
 
-  > make docs
+  *(Note: an alternative to installing *httk* with ``pip install`` is to just run it out of the
+  httk directory. In that case, append ``source ~/path/to/httk/init.shell`` to your
+  shell init files, with ``~/path/to/httk`` replaced by the path of your *httk* directory.)*
 
-(But you can find their restructuredtext source files in the Docs/ directory in the github source tree)
+Tutorial
+********
 
-Installation
-============
+Under ``Tutorial/Step1, 2, ...`` in your *httk* directory you find a series of code snippets to run. 
+You can either just execute them there, or try them out in, e.g., a Jupyter notebook.
 
-Installation information is found in the *httk Installation
-Instructions*.
+Step 1: Load a cif file or poscar
++++++++++++++++++++++++++++++++++
 
+This is a very simple example of just loading a structure from a ``.cif`` file and writing out some information about it.
 
-User's guide
-============
+.. code:: python
+     
+  import httk
+  
+  struct = httk . load ( " example . cif " )
+  
+  print ( " Formula : " , struct . formula )
+  print ( " Volume " , float ( struct . uc_volume ) )
+  print ( " Assignments " , struct . uc_formula_symbols)
+  print ( " Counts : " , struct . uc_counts )
+  print ( " Coords " , struct.uc_reduced_coords)
 
-For information on basic usage of the *httk*, see *httk Users' Guide*.
+Running this generates the output::
 
-More tricky details on how high-throughput computational tasks are
-executed via the runmanager.sh program are presented in *httk
-Runmanager Details*. This is useful if you plan to write your own
-intricate run-scripts using *httk*.
+  ( ’ Formula : ’ , ’ BO2Tl ’)
+  ( ’ Volume ’ , 5 0 9 . 2 4 2 1 3 9 9 9 9 9 9 9 8 4 )
+  ( ’ Assignments ’ , [ ’B ’ , ’O ’ , ’ Tl ’ ])
+  ( ’ Counts : ’ , [8 , 16 , 8])
+  ( ’ Coords ’ , FracVector (((1350 , 4550 , 4250) , ... , ,10000) ) )
 
+  *(Note: the paranthesis are omitted if you use Python 3)*
+     
+Step 2: Creating structures in code
++++++++++++++++++++++++++++++++++++
 
+.. code:: python
+	  
+  from httk . atomistic import Structure
+  
+  cell = [[1.0 , 0.0 , 0.0] ,
+          [0.0 , 1.0 , 0.0] ,
+          [0.0 , 0.0 , 1.0]]
+  coordgroups = [[
+                    [0.5 , 0.5 , 0.5]
+                 ],[
+                    [0.0 , 0.0 , 0.0]
+                 ],[
+                    [0.5 , 0.0 , 0.0], [0.0 , 0.5 , 0.0], [0.0 , 0.0 , 0.5]
+                 ]]
+		 
+  assignments = [ ’ Pb ’ , ’ Ti ’ , ’O ’]
+  volume =62.79
+  struct = Structure.create(uc_cell = cell,
+               uc_reduced_coordgroups = coordgroups,
+               assignments = assignments,
+               uc_volume = volume)
+     
+     
+Examples
+********
+
+In addition to the Tutorial, there is a lot of straightforward examples of various things that can be done with httk
+in the ``Examples`` subdirectory. Check the source files for information about what the various examples does.
+
+------------------
+More info and help
+------------------
+
+Installation: For more details on installation options refer to INSTALL.txt, distributed with *httk*.
+  
+User's guide: see USERS_GUIDE.txt, distributed with *httk*.
+
+Workflows: for more details on how high-throughput computational workflows are
+executed via the runmanager.sh program, see RUNMANAGER_DETAILS.txt distributed with *httk*.
+This may be useful if you plan to design your own workflows using *httk*.
+
+Developing / contributing to *httk*: refer to DEVELOPERS_GUIDE.txt distributed with *httk*.
+
+--------------
 Reporting bugs
-**************
+--------------
 
 We track our bugs using the issue tracker at github. 
 If you find a bug, please search to see if someone else
@@ -74,15 +142,9 @@ has reported it here:
 If you cannot find it already reported, please click the 'new issue' 
 button and report the bug.
 
-
-Developing / contributing to *httk*
-***********************************
-
-Read the *httk Developers' Guide*
-
-
+---------------------------------
 Citing *httk* in scientific works
-*********************************
+---------------------------------
 
 This is presently the preferred citation to the httk framework itself:
 
@@ -94,16 +156,15 @@ should be cited. Unless configured otherwise, *httk* prints out a list
 of citations when the program ends. You should take note of those
 citations and include them in your publications if relevant.
 
-
+------------
 Contributors
-************
+------------
 
-For a more complete list of contributors and contributions, see *httk
-Contributors*.
+See AUTHORS.txt, distributed with *httk*.
 
-
+----------------
 Acknowledgements
-****************
+----------------
 
 *httk* has kindly been funded in part by:
    * The Swedish Research Council (VR) Grant No. 621-2011-4249
@@ -111,9 +172,9 @@ Acknowledgements
    * The Linnaeus Environment at Linköping on Nanoscale Functional
      Materials (LiLi-NFM) funded by the Swedish Research Council (VR).
 
-
+--------------------------
 License and redistribution
-**************************
+--------------------------
 
 The High-Throughput Toolkit uses the GNU Affero General Public
 License, which is an open source license that allows redistribution
@@ -122,11 +183,12 @@ license contains clauses that are not in the GNU Public License, and
 source code from httk thus cannot be imported into GPL licensed
 projects.)
 
-The full license text is present in *httk license*.
+The full license text is present in the file ``COPYING`` distributed
+with *httk*.
 
-
+-------
 Contact
-*******
+-------
 
 Our primary point of contact is email to: httk [at] openmaterialsdb.se
 (where [at] is replaced by @)
