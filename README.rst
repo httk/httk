@@ -46,12 +46,14 @@ Install
      git pull
      pip install . --upgrade
 
+You are now ready to use *httk*.
+     
   *(Note: an alternative to installing *httk* with ``pip install`` is to just run it out of the
   httk directory. In that case, append ``source ~/path/to/httk/init.shell`` to your
   shell init files, with ``~/path/to/httk`` replaced by the path of your *httk* directory.)*
 
-Tutorial
-********
+Tutorial examples
+*****************
 
 Under ``Tutorial/Step1, 2, ...`` in your *httk* directory you find a series of code snippets to run. 
 You can either just execute them there, or try them out in, e.g., a Jupyter notebook.
@@ -65,43 +67,45 @@ This is a very simple example of just loading a structure from a ``.cif`` file a
      
   import httk
   
-  struct = httk . load ( " example . cif " )
+  struct = httk.load("example.cif")
   
-  print ( " Formula : " , struct . formula )
-  print ( " Volume " , float ( struct . uc_volume ) )
-  print ( " Assignments " , struct . uc_formula_symbols)
-  print ( " Counts : " , struct . uc_counts )
-  print ( " Coords " , struct.uc_reduced_coords)
+  print("Formula:", struct.formula)
+  print("Volume:", float(struct.uc_volume))
+  print("Assignments:", struct.uc_formula_symbols)
+  print("Counts:", struct.uc_counts )
+  print("Coords:", struct.uc_reduced_coords)
 
 Running this generates the output::
 
-  ( ’ Formula : ’ , ’ BO2Tl ’)
-  ( ’ Volume ’ , 5 0 9 . 2 4 2 1 3 9 9 9 9 9 9 9 8 4 )
-  ( ’ Assignments ’ , [ ’B ’ , ’O ’ , ’ Tl ’ ])
-  ( ’ Counts : ’ , [8 , 16 , 8])
-  ( ’ Coords ’ , FracVector (((1350 , 4550 , 4250) , ... , ,10000) ) )
+  ('Formula:', 'BO2Tl')
+  ('Volume', 509.24213999999984)
+  ('Assignments',['B', 'O', 'Tl'])
+  ('Counts:', [8, 16, 8])
+  ('Coords', FracVector(((1350,4550,4250) , ... , ,10000)))
 
-  *(Note: the paranthesis are omitted if you use Python 3)*
+..
+  
+*(Note: the paranthesis are omitted if you use Python 3)*
      
 Step 2: Creating structures in code
 +++++++++++++++++++++++++++++++++++
 
 .. code:: python
 	  
-  from httk . atomistic import Structure
+  from httk.atomistic import Structure
   
-  cell = [[1.0 , 0.0 , 0.0] ,
-          [0.0 , 1.0 , 0.0] ,
-          [0.0 , 0.0 , 1.0]]
+  cell = [[1.0, 0.0, 0.0] ,
+          [0.0, 1.0, 0.0] ,
+          [0.0, 0.0, 1.0]]
   coordgroups = [[
-                    [0.5 , 0.5 , 0.5]
+                    [0.5, 0.5, 0.5]
                  ],[
-                    [0.0 , 0.0 , 0.0]
+                    [0.0, 0.0, 0.0]
                  ],[
-                    [0.5 , 0.0 , 0.0], [0.0 , 0.5 , 0.0], [0.0 , 0.0 , 0.5]
+                    [0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]
                  ]]
 		 
-  assignments = [ ’ Pb ’ , ’ Ti ’ , ’O ’]
+  assignments = ['Pb' ,'Ti' ,'O']
   volume =62.79
   struct = Structure.create(uc_cell = cell,
                uc_reduced_coordgroups = coordgroups,
