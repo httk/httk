@@ -1,4 +1,4 @@
-typical: httk.cfg VERSION 
+simple: httk.cfg VERSION 
 
 all:	httk.cfg VERSION presentation webdocs
 
@@ -17,20 +17,18 @@ autopep8:
 
 .PHONY: docs
 
-clean: preclean
+clean: 
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
-
-preclean: 
 	(cd Examples; make clean)
 	(cd Tutorial; make clean)
 	find . -name "*~" -print0 | xargs -0 rm -f
 	rm -f httk_*.tgz
 	rm -f httk_*.md5
+	rm -f Docs/full/httk.*
+	rm -f Docs/full/_build
 
-dist: VERSION docs presentation preclean 
-	find . -name "*.pyc" -print0 | xargs -0 rm -f
+dist: VERSION docs presentation clean
 	rm -f "httk-$$(cat VERSION).tgz"
-
 	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'src'));import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write('version = \"' + httk.__version__+'\"\n'); sys.stdout.write('version_date = \"' + httk.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')" > httk/version_dist.py
 	( \
 		THISDIR=$$(basename "$$PWD"); \
@@ -67,8 +65,3 @@ webdocs: VERSION presentation
 	cp Presentation/presentation.pdf Docs/full/_static/generated/httk_overview.pdf
 	(cd Docs/full; make html)
 
-web:
-	(cd Web; \
-	  ./sync-httk.sh; \
-	  ./sync.sh \
-	)
