@@ -32,8 +32,8 @@ cif2cell_path = find_executable('cif2cell','cif2cell')
 jmol_dirpath, jmol_filename = os.path.split(cif2cell_path)
 
 if cif2cell_path is None or cif2cell_path == "":
-    from httk.config import httk_dir    
-    path = os.path.join(httk_dir, 'External')
+    from httk.config import httk_root    
+    path = os.path.join(httk_root, 'External')
     externaldirs = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
     extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == "cif2cell"]    
     extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))    

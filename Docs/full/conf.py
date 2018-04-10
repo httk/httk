@@ -332,7 +332,7 @@ epub_exclude_files = ['search.html']
 
 import inspect, os.path
 _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-sys.path.insert(1, os.path.join(_realpath,'..'))
+sys.path.insert(1, os.path.join(_realpath,'..','src'))
 import httk
 
 version = httk.__version__[:httk.__version__.rfind('.')]

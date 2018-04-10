@@ -19,7 +19,7 @@ import threading, subprocess, sys, os, signal, glob, distutils.spawn
 import httk.core
 from httk.core.basic import is_sequence
 from httk import config
-from httk.config import httk_dir    
+from httk.config import httk_root    
 import platform
 
 if httk.core.python_major_version >= 3:
@@ -175,7 +175,7 @@ def find_executable(executables, config_name):
         return paths[0]
     else:
         try:
-            path = os.path.join(httk_dir, 'External')
+            path = os.path.join(httk_root, 'External')
             externaldirs = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
             extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == config_name]    
             extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))    

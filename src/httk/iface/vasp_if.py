@@ -397,7 +397,7 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
     data['VASP_NBANDS_NOSPIN'] = str(nbands_nospin)
 
     if template.startswith('t:'):
-        template = os.path.join(httk.httk_dir, 'Execution', 'tasks-templates', template[2:])
+        template = os.path.join(httk.httk_root, 'Execution', 'tasks-templates', template[2:])
     
     apply_templates(template, dirpath, envglobals=data, mkdir=False)
 

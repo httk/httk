@@ -1,0 +1,29 @@
+##############################################################################
+##
+## This is an example of an httk.cfg file
+##
+## To change the httk configuration, COPY this file to
+##    httk.cfg in your main httk directory (for site-wide configuration)
+## AND/OR
+##    ~/.httk.cfg in your home directory (for per-user configuration)
+##
+## And edit those files.
+##
+## (The reason httk distributes a httk.cfg.example file and not just
+## a default httk.cfg file is that this setup prevents your
+## site-wide httk.cfg to be overwritten if updating httk with git pull.)
+##
+###############################################################################
+
+[general]
+bypass_git_version_lookup=no
+allow_system_libs=yes
+auto_print_citations_at_exit=yes
+
+[paths]
+gulp=
+pyspglib=
+platon=
+ase=
+isotropy=
+jmol=

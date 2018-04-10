@@ -1,30 +1,19 @@
-typical: httk.cfg VERSION docs
+typical: httk.cfg VERSION 
 
-minimal: httk.cfg VERSION
-
-all:	httk.cfg VERSION presentation webdocs pregendocs docs
-
+all:	httk.cfg VERSION presentation webdocs
 
 VERSION: 
-	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..')); import httk" >/dev/null 
+	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'src')); import httk" >/dev/null 
 
 .PHONY: VERSION
 
 httk.cfg:
-	if [ ! -e httk.cfg ]; then cp httk.cfg.default httk.cfg; fi
+	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
-
-docs: VERSION
-	HTTK_VERSION=$$(cat VERSION); \
-	HTTK_COPYRIGHT_NOTICE=$$(python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..')); import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write(httk.httk_copyright_note)"); \
-	for FILE in $$(cd Docs/pre-generated-templates; ls *.tpl); do \
-	  BASENAME="$$(basename "$$FILE" .tpl)"; \
-	  cat Docs/pre-generated-templates/"$$FILE" | sed 's/$${{HTTK_VERSION}}/'"$$HTTK_VERSION"'/;s/$${{HTTK_COPYRIGHT_NOTICE}}/'"$$HTTK_COPYRIGHT_NOTICE"'/' > "$$BASENAME.txt"; \
-	done;
 
 .PHONY: docs
 
@@ -42,7 +31,7 @@ dist: VERSION docs presentation preclean
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
 	rm -f "httk-$$(cat VERSION).tgz"
 
-	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'..'));import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write('version = \"' + httk.__version__+'\"\n'); sys.stdout.write('version_date = \"' + httk.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')" > httk/version_dist.py
+	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'src'));import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write('version = \"' + httk.__version__+'\"\n'); sys.stdout.write('version_date = \"' + httk.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')" > httk/version_dist.py
 	( \
 		THISDIR=$$(basename "$$PWD"); \
 		cd ..; \
@@ -60,18 +49,18 @@ presentation:
 	)
 	cp Presentation/presentation.pdf httk_overview.pdf
 
-pregendocs: VERSION
-	sphinx-apidoc -F -o Docs/full httk
+docs: 
+	sphinx-apidoc -F -o Docs/full src/httk
 	(cd Docs/full; make text)
-	cp Docs/full/_build/text/developers_guide.txt Docs/pre-generated-templates/DEVELOPERS_GUIDE.tpl
-	cp Docs/full/_build/text/readme.txt Docs/pre-generated-templates/README.tpl
-	cp Docs/full/_build/text/users_guide.txt Docs/pre-generated-templates/USERS_GUIDE.tpl
-	cp Docs/full/_build/text/runmanager_details.txt Docs/pre-generated-templates/RUNMANAGER_DETAILS.tpl
-	cp Docs/full/_build/text/install.txt Docs/pre-generated-templates/INSTALL.tpl
+	cp Docs/full/_build/text/developers_guide.txt ./DEVELOPERS_GUIDE.txt
+	cp Docs/full/_build/text/overview.txt ./OVERVIEW.txt
+	cp Docs/full/_build/text/users_guide.txt ./USERS_GUIDE.txt
+	cp Docs/full/_build/text/runmanager_details.txt RUNMANAGER_DETAILS.txt
+	cp Docs/full/_build/text/install.txt ./INSTALL.txt
 
 webdocs: VERSION presentation
 	rm -f Docs/full/httk.*
-	sphinx-apidoc -F -o Docs/full httk
+	sphinx-apidoc -F -o Docs/full src/httk
 	mkdir -p Docs/full/_static/generated/httk_overview/	
 	cp Presentation/generated/*.png Docs/full/_static/generated/httk_overview/.
 	cp Presentation/generated/httk_overview.html Docs/full/generated/.

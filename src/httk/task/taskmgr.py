@@ -30,7 +30,7 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
         args = {}
 
     if template.startswith('t:'):
-        template = os.path.join(httk.httk_dir, 'Execution', 'tasks-templates', template[2:])
+        template = os.path.join(httk.httk_root, 'Execution', 'tasks-templates', template[2:])
 
     instantiate_args = args
     instantiate_to_path = template

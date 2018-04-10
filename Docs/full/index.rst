@@ -21,7 +21,7 @@ The High-Throughput Toolkit (*httk*) is a toolkit for preparing and running calc
 .. raw:: html
    :file: generated/httk_overview.html
 
-.. include:: readme.rst
+.. include:: overview.rst
 
 Full API reference
 ------------------
@@ -42,7 +42,7 @@ Full API reference
    mod_httk
    mod_httk_atomistic
    publications
-   readme
+   overview
    runmanager_details
    users_guide
    contributors   
