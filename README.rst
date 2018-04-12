@@ -39,11 +39,14 @@ Install
 
      git clone https://github.com/rartino/httk
      cd httk
-     pip install . --user
+     pip install --editable . --user
 
    ..
 
-     *(Skip ``--user`` for a system-wide install for all users).*
+     *(Skip ``--user`` for a system-wide install for all users. If you want
+     to develop the httk python library inside src, instead do
+     ``pip install --editable . --user``. This way edits you do under src/
+     will be active immedately without having to upgrade/reinstall with pip.)*
 
    If you at a later point want to upgrade your installation, just go
    back to the *httk* directory and issue::
