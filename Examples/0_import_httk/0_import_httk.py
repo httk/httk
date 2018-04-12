@@ -1,35 +1,38 @@
 #!/usr/bin/env python
-# This is an example program using the High-Throughput toolkit (httk)
-# It simply loads the httk module and print out its version.
+"""
+Simple example program using the High-Throughput toolkit (httk)
+It simply loads the httk module and print out its version.
+"""
 
 from __future__ import print_function, division
 import sys, os.path
 
-# If you have set everything up correctly, you should simply be able to do 
+# If you have set everything up correctly, you should simply be
+# to put
 #    import httk
-# But, for this to work you need to 'source' the 'setup_paths.shell' 
-# script in the httk directory.
-# (Preferably you add it to your login init files.)
-# All the httk examples and tutorial assumes this is working. 
+# in your script. All other httk examples and tutorial assumes
+# this is working. 
 #
 # If this is *not* working, you get the error message:
 #     ImportError: No module named httk
-# If you have trouble getting this to work, you can instead use the below 
-# block of code to import httk. 
-# This should fix things (but hard-codes the path you use for httk inside 
-# your programs, which is an ugly hack.)
-
+# If you have trouble getting this to work, there is the
+# possibility to instead use the below code to hard code the
+# search path to httk on your system and use that. How to do
+# so is shown below. This is an ugly hack, but sometimes
+# useful
+#
 ############## code block to import httk ####################
 import sys, os
 try:    
     import httk
 except Exception:
     # This variable must be set to the path where you downloaded
-    # and uncompressed httk:
-    PATH_TO_HTTK = "~/path/to/httk"
+    # and uncompressed httk + '/src':
+    PATH_TO_HTTK = "~/path/to/httk/src"
     sys.path.insert(1, os.path.expanduser(PATH_TO_HTTK))
     import httk
+    print("Note: had to insert the httk path manually")
 #############################################################
 
-print("httk imported. Version:", httk.version)
+print("Imported httk version: " + httk.__version__)
 
