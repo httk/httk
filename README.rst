@@ -41,7 +41,7 @@ Install
      cd httk
      pip install . --user
 
-..
+   ..
 
      *(Skip ``--user`` for a system-wide install for all users).*
 
