@@ -41,7 +41,9 @@ Install
      cd httk
      pip install . --user
 
-       *(Skip ``--user`` for a system-wide install for all users).*
+..
+
+     *(Skip ``--user`` for a system-wide install for all users).*
 
    If you at a later point want to upgrade your installation, just go
    back to the *httk* directory and issue::
