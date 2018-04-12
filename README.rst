@@ -1,9 +1,9 @@
-===============================
-httk git repository README file
-===============================
+==================================
+The High-Throughput Toolkit (httk)
+==================================
 
 |  The High-Throughput Toolkit (httk)
-|  Copyright (c) 2012-2015, Rickard Armiento
+|  Copyright (c) 2012 - 2018, Rickard Armiento, et al.
 |  For License information see the file COPYING.
 |  Contact: httk [at] openmaterialsdb.se
 
@@ -11,15 +11,16 @@ httk git repository README file
 About the High-Throughput Toolkit
 ---------------------------------
 
-The High-Throughput Toolkit (httk) is a toolkit for preparing and
-running calculations, analyzing the results, and store them in a
-global and/or in a personalized database. httk is an independent
-implementation of the database-centric high-throughput methodology
-pioneered by Ceder et al., and others.
-[see, e.g., Comp. Mat. Sci. 50, 2295 (2011)]. httk is presently targeted at
-atomistic calculations in materials science and electronic
-structure, but aims to be extended into a library useful also
-outside those areas.
+The High-Throughput Toolkit (*httk*) is a toolkit for:
+
+- Preparing and running calculations.
+- Analyzing the results.
+- Store the results and outcome in a global and/or in a personalized database.
+
+*httk* is an independent implementation of the database-centric high-throughput methodology
+pioneered by Ceder et al., and others. [see, e.g., Comp. Mat. Sci. 50, 2295 (2011)].
+*httk* is presently targeted at atomistic calculations in materials science and electronic
+structure, but aims to be extended into a library useful also outside those areas.
 
 ----------
 Quickstart
@@ -38,13 +39,15 @@ Install
 
      git clone https://github.com/rartino/httk
      cd httk
-     pip install .
+     pip install . --user
 
-   If you at a later point want to upgrade your installation, just go back to
-   the *httk* directory and issue::
+       *(Skip ``--user`` for a system-wide install for all users).*
+
+   If you at a later point want to upgrade your installation, just go
+   back to the *httk* directory and issue::
 
      git pull
-     pip install . --upgrade
+     pip install . --upgrade --user
 
 You are now ready to use *httk*.
      

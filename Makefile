@@ -1,11 +1,6 @@
-simple: httk.cfg VERSION 
+simple: httk.cfg VERSION
 
-all:	httk.cfg VERSION presentation webdocs
-
-VERSION: 
-	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'src')); import httk" >/dev/null 
-
-.PHONY: VERSION
+all:	httk.cfg VERSION httk_overview.pdf webdocs
 
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
@@ -14,8 +9,6 @@ autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
-
-.PHONY: docs
 
 clean: 
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
@@ -27,21 +20,27 @@ clean:
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
 
-dist: VERSION docs presentation clean
+VERSION:
+	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.httk_version + '\n')") > VERSION	
+
+dist: VERSION docs httk_overview.pdf clean
+
+	(cd src/httk/config; python -c "import sys, config; sys.stdout.write('version = \"' + config.httk_version + '\"\n'); sys.stdout.write('version_date = \"' + config.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + config.httk_copyright_note+'\"\n'); sys.stdout.write('root = \"../..\"\n');") > src/httk/distdata.py
+
 	rm -f "httk-$$(cat VERSION).tgz"
-	python -c "import sys, os, inspect; _realpath = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])); sys.path.insert(1, os.path.join(_realpath,'src'));import httk; httk.citation.dont_print_citations_at_exit(); sys.stdout.write('version = \"' + httk.__version__+'\"\n'); sys.stdout.write('version_date = \"' + httk.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')" > httk/version_dist.py
+
 	( \
 		THISDIR=$$(basename "$$PWD"); \
 		cd ..; \
-		tar -zcf "$$THISDIR/httk-$$(cat $$THISDIR/VERSION).tgz" "$$THISDIR/Examples" "$$THISDIR/Tutorial" "$$THISDIR/Execution" "$$THISDIR/httk" "$$THISDIR/"*.txt "$$THISDIR/LICENSE" "$$THISDIR/COPYING" "$$THISDIR/httk_overview.pdf" "$$THISDIR/bin" \
-		"$$THISDIR/httk.cfg.default" "$$THISDIR/VERSION" \
-		"$$THISDIR/httk.minimal.files" "$$THISDIR/setup.shell" "$$THISDIR/setup.shell.eval" \
-		--exclude=".*" --transform "flags=r;s|httk.cfg.default|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
+		tar -zcf "$$THISDIR/httk-$$(cat $$THISDIR/VERSION).tgz" "$$THISDIR/Examples" "$$THISDIR/Tutorial" "$$THISDIR/Execution" "$$THISDIR/src" "$$THISDIR/"*.txt "$$THISDIR/README.rst" "$$THISDIR/LICENSE" "$$THISDIR/COPYING" "$$THISDIR/httk_overview.pdf" "$$THISDIR/bin" \
+		"$$THISDIR/httk.cfg.example" "$$THISDIR/VERSION" \
+		"$$THISDIR/httk.minimal.files" "$$THISDIR/init.shell" "$$THISDIR/init.shell.eval"  "$$THISDIR/setup.py" \
+		--exclude=".*" --transform "flags=r;s|httk.cfg.example|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
-	rm -f httk/version_dist.*
+	if [ -e .git ];	then rm -f src/httk/version_dist.*; fi
 
-presentation: 
+httk_overview.pdf: Presentation/presentation.tex 
 	( cd Presentation; \
 	   make; \
 	)
@@ -56,6 +55,8 @@ docs:
 	cp Docs/full/_build/text/runmanager_details.txt RUNMANAGER_DETAILS.txt
 	cp Docs/full/_build/text/install.txt ./INSTALL.txt
 
+.PHONY: docs
+
 webdocs: VERSION presentation
 	rm -f Docs/full/httk.*
 	sphinx-apidoc -F -o Docs/full src/httk
@@ -65,3 +66,4 @@ webdocs: VERSION presentation
 	cp Presentation/presentation.pdf Docs/full/_static/generated/httk_overview.pdf
 	(cd Docs/full; make html)
 
+.PHONY: webdocs

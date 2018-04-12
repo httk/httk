@@ -28,3 +28,5 @@ httk_overview.pdf
 gittools
 httk.old*
 *.orig
+src/httk/distdata.py
+src/httk.egg-info

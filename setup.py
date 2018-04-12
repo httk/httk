@@ -1,59 +1,79 @@
 #!/usr/bin/env python
 
-import sys, os, glob
+import sys, os, glob, subprocess, datetime
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 #from setuptools.command.build import build #sigh...
 from distutils.command.build import build 
+import distutils.spawn
 from codecs import open
 from os import path
 
+# Get access to httk config and versioning info
 here = path.abspath(path.dirname(__file__))
-sys.path.insert(1, os.path.join(here,'src'))
-with open(path.join(here, 'OVERVIEW.txt'), encoding='utf-8') as f:
+sys.path.insert(1, os.path.join(here,'src/httk/config'))
+import config
+
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
    
-import httk
-httk.citation.dont_print_citations_at_exit()
-
-version = httk.__version__
-
-class PostDevelopCommand(develop):
-    """Post-installation for development mode."""
+class HttkDevelopCommand(develop):
+    description = "Development installation of httk"
     def run(self):
         develop.run(self)
-        f = open(os.path.join(self.install_lib,'httk','version_dist.py'),'w')
-        f.write('version = \"' + httk.__version__+'\"\n')
-        f.write('version_date = \"' + httk.httk_version_date+'\"\n')
-        f.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')
-        f.close()
+        # We shouldn't write any distdata here at all, keep going
+        # with whatever is happening in the present directory.
 
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
+class HttkInstallCommand(install):
+    description = "Installation of httk"
+    user_options = install.user_options + [
+        ('httkroot=', None, 'Specify the directory to use as httk root.'),
+    ]
+    def initialize_options(self):
+        install.initialize_options(self)
+        self.httkroot = None
+    def finalize_options(self):
+        install.finalize_options(self)
     def run(self):
         install.run(self)
-        f = open(os.path.join(self.install_lib,'httk','version_dist.py'),'w')
-        f.write('version = \"' + httk.__version__+'\"\n')
-        f.write('version_date = \"' + httk.httk_version_date+'\"\n')
-        f.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')
+        f = open(os.path.join(self.install_lib,'httk','distdata.py'),'w')
+        f.write('version = \"' + config.httk_version + '\"\n')
+        f.write('version_date = \"' + config.httk_version_date + '\"\n')
+        f.write('copyright_note = \"' + config.httk_copyright_note + '\"\n')
+        if self.httkroot is None:
+            f.write('root = \"' + config.httk_root + '\"\n')
+        else:
+            f.write('root = \"' + self.httkroot + '\"\n')
         f.close()
 
-class PostBuildCommand(build):
-    """Post-installation for installation mode."""
+class HttkBuildCommand(build):
+    description = "Build httk"
+    user_options = build.user_options + [
+        ('httkroot=', None, 'Specify the directory to use as httk root.'),
+    ]
+    def initialize_options(self):
+        build.initialize_options(self)
+        self.httkroot = None
+    def finalize_options(self):
+        build.finalize_options(self)
     def run(self):
         build.run(self)
-        f = open(os.path.join(self.build_purelib,'httk','version_dist.py'),'w')
-        f.write('version = \"' + httk.__version__+'\"\n')
-        f.write('version_date = \"' + httk.httk_version_date+'\"\n')
-        f.write('copyright_note = \"' + httk.httk_copyright_note+'\"\n')
+        f = open(os.path.join(self.build_purelib,'httk','distdata.py'),'w')
+        f.write('version = \"' + config.httk_version + '\"\n')
+        f.write('version_date = \"' + config.httk_version_date + '\"\n')
+        f.write('copyright_note = \"' + config.httk_copyright_note + '\"\n')
+        if self.httkroot is None:
+            f.write('root = \"' + config.httk_root + '\"\n')
+        else:
+            f.write('root = \"' + self.httkroot + '\"\n')
         f.close()
         
 setup(
      cmdclass={
-         'develop': PostDevelopCommand,
-         'install': PostInstallCommand,
-         'build': PostBuildCommand,
+         'develop': HttkDevelopCommand,
+         'install': HttkInstallCommand,
+         'build': HttkBuildCommand,
     },
     
     # This is the name of your project. The first time you publish this
@@ -75,7 +95,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=httk.__version__,  # Required
+    version=config.httk_version,  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:

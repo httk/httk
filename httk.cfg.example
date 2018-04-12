@@ -1,17 +1,10 @@
 ##############################################################################
 ##
-## This is an example of an httk.cfg file
+## This is an httk configuration file
 ##
-## To change the httk configuration, COPY this file to
-##    httk.cfg in your main httk directory (for site-wide configuration)
-## AND/OR
-##    ~/.httk.cfg in your home directory (for per-user configuration)
-##
-## And edit those files.
-##
-## (The reason httk distributes a httk.cfg.example file and not just
-## a default httk.cfg file is that this setup prevents your
-## site-wide httk.cfg to be overwritten if updating httk with git pull.)
+## To change the httk configuration, this file should either be
+## named httk.cfg in your main httk directory (for site-wide configuration)
+## AND/OR ~/.httk.cfg in your home directory (for per-user configuration)
 ##
 ###############################################################################
 

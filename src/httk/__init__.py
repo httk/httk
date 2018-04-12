@@ -29,11 +29,9 @@ A set of tools and utilities meant to help with:
    - Analysis (especially as a helpful interface against 3:rd party software)    
 """
 # Get httk configuration data
-from .config import httk_root as httk_root_imported, config
-httk_root = httk_root_imported
+from .config import config, httk_root, httk_python_root, httk_version, httk_version_date, httk_copyright_note
 
-# Figure out what version of httk is running
-from .versioning import httk_version as __version__, httk_version_date, httk_copyright_note
+__version__ = httk_version
 
 from .core import *
 from httk.httkio import load, save
@@ -42,7 +40,7 @@ from . import iface
 citation.add_src_citation("httk", "Rickard Armiento")
 
 # From this module
-__all__ = ["httk_root", "config", "load", "save", "iface", "__version__", "httk_version_date", "httk_copyright_note"]
+__all__ = ["httk_root", "httk_python_root", "config", "load", "save", "iface", "__version__", "httk_version_date", "httk_copyright_note", "httk_version"]
 
 # From core:
 __all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",

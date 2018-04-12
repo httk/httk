@@ -1,2 +1,3 @@
 graft src/httk
+include src/httk/atomistic/spacegrouputils.pkl
 global-exclude *.py[cod] __pycache__ *~
