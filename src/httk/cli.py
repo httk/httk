@@ -31,7 +31,6 @@ These are common httk commands used in various situations:
 
 start a project, configuration (see also: httk help project)
    init       Create an empty httk project or reinitialize an existing one
-   
 
 work on the current project (see also: httk help work)
    add        Add a task file or dir to the index of tasks being worked on 
