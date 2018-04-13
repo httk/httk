@@ -30,3 +30,5 @@ httk.old*
 *.orig
 src/httk/distdata.py
 src/httk.egg-info
+.pytest_cache
+.tox
