@@ -38,9 +38,9 @@ class HttkInstallCommand(install):
     def run(self):
         install.run(self)
         f = open(os.path.join(self.install_lib,'httk','distdata.py'),'w')
-        f.write('version = \"' + config.httk_version + '\"\n')
-        f.write('version_date = \"' + config.httk_version_date + '\"\n')
-        f.write('copyright_note = \"' + config.httk_copyright_note + '\"\n')
+        f.write('version = \"' + config.version + '\"\n')
+        f.write('version_date = \"' + config.version_date + '\"\n')
+        f.write('copyright_note = \"' + config.copyright_note + '\"\n')
         if self.httkroot is None:
             f.write('root = \"' + config.httk_root + '\"\n')
         else:
@@ -60,9 +60,9 @@ class HttkBuildCommand(build):
     def run(self):
         build.run(self)
         f = open(os.path.join(self.build_purelib,'httk','distdata.py'),'w')
-        f.write('version = \"' + config.httk_version + '\"\n')
-        f.write('version_date = \"' + config.httk_version_date + '\"\n')
-        f.write('copyright_note = \"' + config.httk_copyright_note + '\"\n')
+        f.write('version = \"' + config.version + '\"\n')
+        f.write('version_date = \"' + config.version_date + '\"\n')
+        f.write('copyright_note = \"' + config.copyright_note + '\"\n')
         if self.httkroot is None:
             f.write('root = \"' + config.httk_root + '\"\n')
         else:
@@ -95,7 +95,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=config.httk_version,  # Required
+    version=config.version,  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -232,7 +232,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'httk=httk.httkcommand:main',
+            'httk=httk.__main__:main',
         ],
     },
 

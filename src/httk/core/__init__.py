@@ -38,6 +38,7 @@ except Exception:
 
 import citation
 citation.add_src_citation("httk", "Rickard Armiento")
+from citation import dont_print_citations_at_exit, print_citations_at_exit
 
 from basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
 from basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
@@ -53,5 +54,5 @@ from ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAp
 from httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
 from httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
 
-
+import console
 

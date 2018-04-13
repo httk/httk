@@ -23,6 +23,4 @@ See docstring in config.py for more info.
 from .config import *
 __doc__ = config.__doc__
 
-# From this module
-__all__ = ["config", "httk_root", "httk_python_root", "httk_version", "httk_version_date", "httk_copyright_note", "__version__", "__doc__"]
 

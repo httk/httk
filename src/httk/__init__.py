@@ -28,19 +28,25 @@ A set of tools and utilities meant to help with:
    - Search, retrieval and 'processing' of data in storage
    - Analysis (especially as a helpful interface against 3:rd party software)    
 """
-# Get httk configuration data
-from .config import config, httk_root, httk_python_root, httk_version, httk_version_date, httk_copyright_note
+from httk.config import *
 
-__version__ = httk_version
+__version__ = version
 
 from .core import *
+cout = console.cout
+cerr = console.cerr
+
 from httk.httkio import load, save
-from . import iface
+import httk.iface
 
 citation.add_src_citation("httk", "Rickard Armiento")
 
 # From this module
-__all__ = ["httk_root", "httk_python_root", "config", "load", "save", "iface", "__version__", "httk_version_date", "httk_copyright_note", "httk_version"]
+__all__ = ["httk_root", "python_root", "config", "load", "save",
+           "iface", "__version__", "version_date", "copyright_note",
+           "version", "major_version", "minor_version",
+           "patch_version", "python_major_version",
+           "python_minor_version", "cout", "cerr"]
 
 # From core:
 __all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",
@@ -49,6 +55,8 @@ __all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRe
             "IoAdapterString", "IoAdapterStringList", "IoAdapterStringList", "HttkObject",
             "httk_typed_property", "httk_typed_init", "httk_typed_property_delayed", "httk_typed_init_delayed",
             "HttkPluginWrapper", "HttkPlugin", "HttkPluginPlaceholder", "Signature", "SignatureKey"]
+
+cli_modules = {'atomistic':'httk.atomistic.cli'}
 
 # Fiddling to get Sphinx document imported modules correctly
 crypto.__module__ = "httk"
