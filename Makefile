@@ -5,11 +5,16 @@ all:	httk.cfg VERSION httk_overview.pdf webdocs
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
+tox:
+	tox
+
 unittests:
 	(cd Tests; python all.py)
 
 pytest:
 	(cd Tests; py.test)
+
+.PHONY: tox unittests pytest
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
