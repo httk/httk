@@ -151,10 +151,15 @@ def determine_version_data():
 read_config()
 _version_data = determine_version_data()
 version = _version_data['httk_version']
-_version_list = version.split('.')
-major_version = int(_version_list[0])
-minor_version = int(_version_list[1])
-patch_version = '.'.join(_version_list[2:])
+if version == 'unknown':
+    major_version = '0'
+    minor_version = '0'
+    patch_version = 'unknown'
+else:
+    _version_list = version.split('.')
+    major_version = int(_version_list[0])
+    minor_version = int(_version_list[1])
+    patch_version = '.'.join(_version_list[2:])
 version_date = _version_data['httk_version_date']
 copyright_note = _version_data['httk_copyright_note']
 
