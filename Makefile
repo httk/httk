@@ -1,6 +1,6 @@
-simple: httk.cfg VERSION
+simple: httk.cfg version
 
-all:	httk.cfg VERSION httk_overview.pdf webdocs
+all:	httk.cfg version httk_overview.pdf webdocs
 
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
@@ -31,12 +31,14 @@ clean:
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
 
-VERSION:
-	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.httk_version + '\n')") > VERSION	
+version:
+	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION	
 
-dist: VERSION docs httk_overview.pdf clean
+.PHONY: version
 
-	(cd src/httk/config; python -c "import sys, config; sys.stdout.write('version = \"' + config.httk_version + '\"\n'); sys.stdout.write('version_date = \"' + config.httk_version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + config.httk_copyright_note+'\"\n'); sys.stdout.write('root = \"../..\"\n');") > src/httk/distdata.py
+dist: version docs httk_overview.pdf clean
+
+	(cd src/httk/config; python -c "import sys, config; sys.stdout.write('version = \"' + config.version + '\"\n'); sys.stdout.write('version_date = \"' + config.version_date+'\"\n'); sys.stdout.write('copyright_note = \"' + config.copyright_note+'\"\n'); sys.stdout.write('root = \"../..\"\n');") > src/httk/distdata.py
 
 	rm -f "httk-$$(cat VERSION).tgz"
 
@@ -68,7 +70,7 @@ docs:
 
 .PHONY: docs
 
-webdocs: VERSION presentation
+webdocs: version presentation
 	rm -f Docs/full/httk.*
 	sphinx-apidoc -F -o Docs/full src/httk
 	mkdir -p Docs/full/_static/generated/httk_overview/	

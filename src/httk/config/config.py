@@ -40,7 +40,8 @@ It will always remain safe to import by itself, e.g.::
 
 Or::
 
-python -c "import sys; here = path.abspath(path.dirname(__file__)); sys.path.insert(1, os.path.join(here,'src/httk/config')); import config; sys.stdout.write(config.httk_version + '\n')
+  python -c "import sys; here = path.abspath(path.dirname(__file__)); sys.path.insert(1, os.path.join(here,'src/httk/config')); import config; sys.stdout.write(config.httk_version + '\n')
+
 """
 
 _default_httk_root = '../..'

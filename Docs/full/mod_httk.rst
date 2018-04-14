@@ -14,7 +14,7 @@ Introduction
 
 Helpful constants
 -----------------
-.. autodata:: httk_dir
+.. autodata:: httk_root
    :annotation:
    :noindex:
  
