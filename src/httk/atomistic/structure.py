@@ -230,6 +230,8 @@ class Structure(HttkObject):
         uc_sites_exception = None
         spacegroup_exception = None
 
+        #print "NEW STRUCTURE",rc_angles, rc_cosangles, rc_lengths
+
         if structure is not None:
             return cls.use(structure)
 
@@ -328,11 +330,19 @@ class Structure(HttkObject):
                     rc_reduced_coords is not None:
                                                                                     
                 try:
-                    rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
-                                                          reduced_coords=rc_reduced_coords, 
-                                                          counts=rc_counts,
-                                                          hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
-                                                          multiplicities=multiplicities, occupancies=rc_occupancies)
+                    if spacegroup is None:
+                        rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
+                                                              reduced_coords=rc_reduced_coords, 
+                                                              counts=rc_counts,
+                                                              hall_symbol=hall_symbol, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
+                                                              multiplicities=multiplicities, occupancies=rc_occupancies)
+                    else:
+                        rc_sites = RepresentativeSites.create(reduced_coordgroups=rc_reduced_coordgroups, 
+                                                              reduced_coords=rc_reduced_coords, 
+                                                              counts=rc_counts,
+                                                              spacegroup=spacegroup, periodicity=periodicity, wyckoff_symbols=wyckoff_symbols,
+                                                              multiplicities=multiplicities, occupancies=rc_occupancies)
+                        
                 except Exception as e:
                     rc_sites_exception = (e, None, sys.exc_info()[2])
                     rc_sites = None

@@ -116,7 +116,7 @@ class Reference(HttkObject):
                 if editors is not None:
                     ref += ", ed. ".join([x.given_names+" "+x.last_name for x in editors])                
                 if year is not None:
-                    yearstr = +", "+str(year)
+                    yearstr = ", "+str(year)
                 else:
                     yearstr = ""
                 if book_publisher is not None:

@@ -288,15 +288,27 @@ class FracVector(Vector):
         return cls(noms, denom)
 
     @classmethod
-    def _create_func(cls, data, func, **args):
+    def _create_func(cls, data, func, find_best_rational = True, **args):
         def apply_func(arg):
             if is_string(arg):
-                val, delta = string_to_val_and_delta(arg)
-                low = val-delta
-                high = val+delta
-                lowval = func(low, **args)
-                highval = func(high, **args)
-                return best_rational_in_interval(lowval, highval)
+                if find_best_rational:
+                    val, delta = string_to_val_and_delta(arg)
+                    low = val-delta
+                    high = val+delta
+                    lowval = func(low, **args)
+                    highval = func(high, **args)
+                    return best_rational_in_interval(lowval, highval)
+                else:
+                    val, delta = string_to_val_and_delta(arg)
+                    if 'prec' in args:
+                        low = val-fractions.Fraction(args['prec'])*10
+                        high = val+fractions.Fraction(args['prec'])*10
+                    else:
+                        low = val-fractions.Fraction(1,100000000000)
+                        high = val+fractions.Fraction(1,100000000000)
+                    lowval = func(low, **args)
+                    highval = func(high, **args)
+                    return best_rational_in_interval(lowval, highval)
             else:
                 try:
                     return func(arg.to_fraction())
@@ -307,7 +319,7 @@ class FracVector(Vector):
         return cls.create(newdata)
 
     @classmethod
-    def create_cos(cls, data, degrees=False, limit=False, prec=fractions.Fraction(1, 1000000)):
+    def create_cos(cls, data, degrees=False, limit=False, find_best_rational=True, prec=fractions.Fraction(1, 1000000)):
         """
         Creating a FracVector as the cosine of the argument data. If data are composed by strings, the standard deviation of
         the numbers are taken into account, and the best possible fractional approximation to the cosines
@@ -316,7 +328,7 @@ class FracVector(Vector):
         This is not the same as FracVector.create(data).cos(), which creates the best possible fractional
         approximations of data and then takes cos on that.
         """
-        return cls._create_func(data, frac_cos, degrees=degrees, limit=limit, prec=prec)
+        return cls._create_func(data, frac_cos, find_best_rational = find_best_rational, degrees=degrees, limit=limit, prec=prec)
 
     @classmethod
     def create_sin(cls, data, degrees=False, limit=False, prec=fractions.Fraction(1, 1000000)):

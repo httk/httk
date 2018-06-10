@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import fractions
 
 from httk.core import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
@@ -263,7 +264,7 @@ def sites_tidy(sites, backends=['platon']):
     raise Exception("structure_tidy: None of the available backends available.")
 
 
-def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=0.001):
+def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
     symops = spacegrouputils.get_symops(hall_symbol)
     newcoordgroups = []
     for coordgroup in coordgroups:

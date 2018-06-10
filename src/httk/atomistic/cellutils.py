@@ -42,7 +42,7 @@ def lattice_system_from_lengths_and_cosangles(lengths, cosangles, eps=0):
     alpha90 = abs(cosangles[0]) <= eps
     beta90 = abs(cosangles[1]) <= eps
     gamma90 = abs(cosangles[2]) <= eps
-    gamma120 = (abs(cosangles[2])+half) <= eps
+    gamma120 = (cosangles[2]+half) <= eps
 
     if abeq and aceq and bceq and alpha90 and beta90 and gamma90:
         lattice_system = 'cubic'
@@ -58,6 +58,7 @@ def lattice_system_from_lengths_and_cosangles(lengths, cosangles, eps=0):
         lattice_system = 'rhombohedral'
     else:
         lattice_system = 'triclinic'
+    #print "DETECTED LATTICE SYSTEM",lengths.to_floats(),cosangles.to_floats(),eps,"=>",lattice_system
     return lattice_system
 
 
@@ -75,9 +76,9 @@ def lengths_and_cosangles_to_conventional_basis(lengths, cosangles, lattice_syst
     
     a, b, c = lengths
     cosalpha, cosbeta, cosgamma = cosangles
-    #sinalpha = vectormath.sqrt(1-cosalpha) 
-    sinbeta = vectormath.sqrt(1-cosbeta)
-    singamma = vectormath.sqrt(1-cosgamma)
+    #sinalpha = vectormath.sqrt(1-cosalpha**2) 
+    sinbeta = vectormath.sqrt(1-cosbeta**2)
+    singamma = vectormath.sqrt(1-cosgamma**2)
 
     basis = None
 
@@ -87,6 +88,9 @@ def lengths_and_cosangles_to_conventional_basis(lengths, cosangles, lattice_syst
                                    [0, 0, c]])*orientation
 
     elif lattice_system == 'hexagonal':
+        #basis = FracVector.create([[singamma*a, a*cosgamma, 0],
+        #                           [0, b, 0],
+        #                           [0, 0, c]])*orientation
         basis = FracVector.create([[a, 0, 0],
                                    [cosgamma*b, b*singamma, 0],
                                    [0, 0, c]])*orientation

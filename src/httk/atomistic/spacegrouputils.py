@@ -93,6 +93,25 @@ def symopstuple(symop, val_transform=val_to_tuple):
                 var = 2
             else:
                 val = data
+                fval = Fraction(val)
+                if fval > 1:
+                    fval -= (fval.numerator // fval.denominator)
+                    val = str(fval.numerator) + '/' + str(fval.denominator)
+                if sign == '-':
+                    if val == '3/4':
+                        val = '1/4'
+                    elif val == '1/4':
+                        val = '3/4'
+                    elif val == '1/2':
+                        pass
+                    elif val == '1/6':
+                        val = '5/6'
+                    elif val == '1':
+                        val = '0'
+                    else:
+                        raise Exception("Spacegrouputil: symopstuple: misformed data:"+str(val))
+                    sign = ''
+
         if var is not None:
             if val is None:
                 val = '1'
@@ -351,13 +370,20 @@ def spacegroup_filter_specific(hall=None, hm=None, itcnbr=None, setting=None, sy
             hallparse = "-"+hallparse[1].upper() + (hallparse[2:].lower())
         else:
             hallparse = hallparse[0].upper() + (hallparse[1:].lower())
+            
+        # Sometimes a commment, e.g., about the setting follows the hall symbol
+        # But some hall symbols should have paranthesis...
+        #if '(' in hallparse:
+        #    hallparse, _dummy1, _dummy2 = hallparse.partition('(')
+        #    hallparse = hallparse.strip()
+
         hall = get_hall(hallparse)
-        if hall in halls:
+        if hall in halls or halls is None:
             halls = [hall]
 
         # 2. Is this a non-standard hall symbol?
         hall = get_nonstandard_hall(hallparse)
-        if hall in halls:
+        if hall in halls or halls is None:
             halls = [hall]
 
     if itcnbr is not None:

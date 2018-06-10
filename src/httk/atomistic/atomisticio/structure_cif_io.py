@@ -407,6 +407,7 @@ def cifdata_to_struct(cifdata, debug=False):
         journal_volume = None
         journal_title = None
         journal_book_title = None
+        journal_year = None
         journal_issue = None
         journal_publisher = None
         journal_publisher_city = None
@@ -460,7 +461,7 @@ def cifdata_to_struct(cifdata, debug=False):
         elif 'citation_book_title' in element:
             N = len(element['citation_book_title'])
         for i in range(N):
-            if not add_all_citations and ('citation_coordinate_linkage' not in element or (element['citation_coordinate_linkage'].lower() != 'yes' and element['citation_coordinate_linkage'].lower() != 'y')):
+            if not add_all_citations and ('citation_coordinate_linkage' not in element or (element['citation_coordinate_linkage'][i].lower() != 'yes' and element['citation_coordinate_linkage'][i].lower() != 'y')):
                 continue
             journal = None
             journal_page_first = None
