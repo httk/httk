@@ -266,11 +266,14 @@ def filter_hm(hm, setting=None, halls=None):
     if halls is None:
         halls = spacegroupdata.keys()
     if setting is not None:
-        result = get_hm_setting(hm, setting)
-        if result in halls:
-            return [result]
-        else:
-            return halls
+        try:
+            result = get_hm_setting(hm.strip(), setting.strip())
+            if result in halls:
+                return [result]
+            else:
+                return halls
+        except KeyError:
+            pass
     if hm in hm_index:
         possible_halls = hm_index[hm] 
         return list(set(halls) & set(possible_halls))
@@ -411,7 +414,7 @@ def spacegroup_filter_specific(hall=None, hm=None, itcnbr=None, setting=None, sy
         if p[2].strip() == '':
             setting = None
         else:
-            setting = p[2].tolower()
+            setting = p[2].lower()
 
         # 4. HM symbol (and setting)
         halls = filter_hm(data, setting, halls=halls)
