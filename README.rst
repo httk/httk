@@ -54,6 +54,14 @@ Install
      git pull
      pip install . --upgrade --user
 
+3. To setup the paths to the httk bash scripts you also need to run
+
+     source init.shell
+
+   To make this permanent, please add this line to your shell initialization script, e.g., ~/.bashrc
+   (Note that we in the future will go over to a single 'script' endpoint, ``httk``, for which
+   the pip install step should be sufficient. However, at this point the above source command is necessary.)
+     
 You are now ready to use *httk*.
      
   *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
