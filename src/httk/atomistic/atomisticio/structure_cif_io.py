@@ -368,9 +368,17 @@ def cifdata_to_struct(cifdata, debug=False):
 
     tags = {}
     if 'chemical_name_common' in element:
-        tags['name'] = element['chemical_name_common']
+        if is_sequence(element['chemical_name_common']):
+            tags['name'] = element['chemical_name_common'][0]
+            tags['names'] = ",".join(element['chemical_name_common'])
+        else:
+            tags['name'] = element['chemical_name_common']
     elif 'chemical_name_systematic' in element:
-        tags['name'] = element['chemical_name_systematic']
+        if is_sequence(element['chemical_name_systematic']):
+            tags['name'] = element['chemical_name_systematic'][0]
+            tags['names'] = ",".join(element['chemical_name_systematic'])
+        else:
+            tags['name'] = element['chemical_name_systematic']
 
     authorlist = None
     if 'publ_author_name' in element:
