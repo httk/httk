@@ -56,7 +56,13 @@ to read about a specific subcommand or concept.
 
 def main():
     cout("httk v" + httk.version + " (" + httk.version_date + "), " + httk.copyright_note)
-
+    cout("")
+    cout("------------------------------------------------------------------------------------")
+    cout("WARNING: the httk cli tool is presently work in progress in preparation for httk v2.")
+    cout("         Many functions are not available or does not work as documented.")
+    cout("         For now, you should be using the httk-* scripts instead.")
+    cout("------------------------------------------------------------------------------------")
+    
     argv = sys.argv
     
     args = lambda: None # dict-like object using attributes
