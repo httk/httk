@@ -8,7 +8,8 @@ import httk.task
 
 # Must be updated to your path to poscars, OR, set to None if you have 
 # VASP_IF_POSCARPATH configured in httk.cfg
-poscarspath = "/opt/vasp/Pseudopotentials.raw.uncompressed/POT_GGA_PAW_PBE/"
+# OR set environmental variable VASP_PSEUDOLIB
+poscarspath = None
 
 backend = httk.db.backend.Sqlite('../tutorial_data/tutorial.sqlite')
 store = httk.db.store.SqlStore(backend)
