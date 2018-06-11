@@ -26,6 +26,8 @@ import httk
 
 try:   
     platon_path = config.get('paths', 'platon')
+    if platon_path == "":
+        raise Exception("No path set for platon")
 except Exception:
     platon_path = None
     raise Exception("httk.external.platon imported with no platon path set in httk.cfg")
