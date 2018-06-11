@@ -30,10 +30,10 @@ except ImportError:
 
 def universal_opener(other):
     #if isinstance(other, file):
-    if hasattr(other, 'read'):
-        return IoAdapterFileReader(other, name=other.name)
-    elif isinstance(other, StringIO.StringIO):
+    if isinstance(other, StringIO.StringIO):
         return IoAdapterFileReader(other)
+    elif hasattr(other, 'read'):
+        return IoAdapterFileReader(other, name=other.name)
     elif isinstance(other, str):
         return IoAdapterFilename(other, name=other)
     raise Exception("universal_opener: do not know how to open, object is:"+str(other.__class__))
