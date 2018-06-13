@@ -70,7 +70,7 @@ docs:
 
 .PHONY: docs
 
-webdocs: version presentation
+webdocs: version httk_overview.pdf
 	rm -f Docs/full/httk.*
 	sphinx-apidoc -F -o Docs/full src/httk
 	mkdir -p Docs/full/_static/generated/httk_overview/	
