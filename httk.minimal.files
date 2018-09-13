@@ -1,10 +1,8 @@
-External
 Execution
 bin
-httk
-setup.shell
-setup.shell.eval
+src
+init.shell
+init.shell.eval
 COPYING
 LICENSE
-VERSION
 httk.minimal.files
