@@ -121,7 +121,7 @@ def determine_version_data():
     if httk_version is None:
         if (not _config.getboolean('general', 'bypass_git_version_lookup')) and os.path.exists(os.path.join(httk_root,'.git')):
             try:
-                httk_version = subprocess.check_output(["git", "describe","--dirty","--always"]).strip()
+                httk_version = subprocess.check_output(["git", "describe","--dirty","--always"], cwd=python_root).strip()
                 if httk_version.endswith('-dirty'):
                     _git_commit_datetime = datetime.datetime.now()
                 else:

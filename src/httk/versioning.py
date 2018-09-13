@@ -21,6 +21,8 @@ _default_copyright_end_year = "2018"
 import sys, os, subprocess, datetime
 from .config import httk_root, config
 
+sourcedir = os.path.dirname(os.path.realpath(__file__))
+
 try:
     from .distdata import version, version_date, copyright_note
     httk_version = version
@@ -31,7 +33,7 @@ except ImportError:
     httk_version = None
     if (not config.getboolean('general', 'bypass_git_version_lookup')) and os.path.exists(os.path.join(httk_root,'.git')):
         try:
-            httk_version = subprocess.check_output(["git", "describe","--dirty","--always"]).strip()
+            httk_version = subprocess.check_output(["git", "describe","--dirty","--always"],cwd=sourcedir).strip()
             if httk_version.endswith('-dirty'):
                 _git_commit_datetime = datetime.datetime.now()
             else:
