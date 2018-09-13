@@ -37,7 +37,7 @@ except ImportError:
             if httk_version.endswith('-dirty'):
                 _git_commit_datetime = datetime.datetime.now()
             else:
-                _git_commit_datetime = datetime.datetime.fromtimestamp(int(subprocess.check_output(["git", "log","-1",'--format=%ct'])))
+                _git_commit_datetime = datetime.datetime.fromtimestamp(int(subprocess.check_output(["git", "log","-1",'--format=%ct'],cwd=sourcedir)))
             httk_version_date = "%d-%02d-%02d" % (_git_commit_datetime.year,_git_commit_datetime.month, _git_commit_datetime.day)
             httk_copyright_note = "(c) 2012 - " + str(_git_commit_datetime.year)
 
