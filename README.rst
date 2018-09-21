@@ -26,14 +26,37 @@ structure, but aims to be extended into a library useful also outside those area
 Quickstart
 ----------
 
-Install
-*******
+Httk presently consists of a python library and a few programs. If you just want access to use (rather than develop)
+the python library, and do not need the external programs, the install is very easy.
 
-1. You need Python 2.7 and access to pip and git in your terminal
+(Note: for *httk* version 2.0 we will go over to a single 'script' endpoint,
+``httk``, for which the pip install step should be sufficient to get a full install.)
+
+
+Install to access just the python library
+*****************************************
+
+1. You need Python 2.7 and access to pip in your terminal
    window. (You can get Python and pip, e.g., by installing the Python 2.7 version
    of Anaconda, https://www.anaconda.com/download, which should give you
-   all you need on Linux, macOS and Windows. You can get git from here:
-   https://git-scm.com/ )
+   all you need on Linux, macOS and Windows.)
+
+2. Issue in your terminal window::
+
+     pip install httk 
+
+   If you at a later point want to upgrade your installation, just
+   issue
+
+     pip install httk --upgrade
+
+You should now be able to simply do ``import httk`` in your python programs to use the *httk* python library.
+     
+Installation of python library + binaries + ability to develop *httk*
+*********************************************************************
+
+1. In addition to the requirements above (Python 2.7 and pip) you need git.
+   You can get git from here: https://git-scm.com/ 
 
 2. Issue in your terminal window::
 
@@ -41,41 +64,31 @@ Install
      cd httk
      pip install --editable . --user
 
-   ..
-
-     *(Skip ``--user`` for a system-wide install for all users. If you want
-     to develop the httk python library inside src, instead do
-     ``pip install --editable . --user``. This way edits you do under src/
-     will be active immedately without having to upgrade/reinstall with pip.)*
-
    If you at a later point want to upgrade your installation, just go
    back to the *httk* directory and issue::
 
      git pull
      pip install . --upgrade --user
 
-3. To setup the paths to the httk bash scripts you also need to run
+3. To setup the paths to the *httk* programs you also need to run
 
-     source init.shell
+     source /path/to/httk/init.shell
 
-   To make this permanent, please add this line to your shell initialization script, e.g., ~/.bashrc
-   (Note that we in the future will go over to a single 'script' endpoint, ``httk``, for which
-   the pip install step should be sufficient. However, at this point the above source command is necessary.)
-     
+   where ``/path/to/httk`` should be the path to where you downloaded
+   *httk* in the steps above. To make this permanent, please add this
+   line to your shell initialization script, e.g., ~/.bashrc
+
 You are now ready to use *httk*.
      
   *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
   httk directory. In that case, append ``source ~/path/to/httk/init.shell`` to your
   shell init files, with ``~/path/to/httk`` replaced by the path of your httk directory.)*
 
-Tutorial examples
-*****************
+A few simple examples
+**********************
 
-Under ``Tutorial/Step1, 2, ...`` in your *httk* directory you find a series of code snippets to run. 
-You can either just execute them there, or try them out in, e.g., a Jupyter notebook.
-
-Step 1: Load a cif file or poscar
-+++++++++++++++++++++++++++++++++
+Load a cif file or poscar
++++++++++++++++++++++++++
 
 This is a very simple example of just loading a structure from a ``.cif`` file and writing out some information about it.
 
@@ -101,10 +114,8 @@ Running this generates the output::
 
 ..
   
-*(Note: the paranthesis are omitted if you use Python 3)*
-     
-Step 2: Creating structures in code
-+++++++++++++++++++++++++++++++++++
+Create structures in code
++++++++++++++++++++++++++
 
 .. code:: python
 	  
@@ -128,9 +139,67 @@ Step 2: Creating structures in code
                assignments = assignments,
                uc_volume = volume)
      
-     
-Examples
+
+Create database file, store a structure in it, and retrive it
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+import httk, httk.db
+from httk.atomistic import Structure
+
+backend = httk.db.backend.Sqlite('example.sqlite')
+store = httk.db.store.SqlStore(backend)
+
+tablesalt = httk.load('../../Tutorial/Step7/NaCl.cif')
+store.save(tablesalt)
+
+arsenic = httk.load('../../Tutorial/Step7/As.cif')
+store.save(arsenic)
+
+# Search for anything with Na
+search = store.searcher()
+search_struct = search.variable(Structure)
+search.add(search_struct.formula_symbols.is_in('Na'))
+
+search.output(search_struct, 'structure')
+
+for match, header in list(search):
+    struct = match[0]
+    print "Found structure", struct.formula, [str(struct.get_tags()[x]) for x in struct.get_tags()]
+
+
+
+Create database file and store own data in it
++++++++++++++++++++++++++++++++++++++++++++++
+.. code:: python
+
+  #!/usr/bin/env python
+
+  import httk, httk.db
+  from httk.atomistic import Structure
+
+  class StructureIsEdible(httk.HttkObject):
+
+      @httk.httk_typed_init({'uc_structure': Structure, 'is_edible': bool})
+      def __init__(self, structure, is_edible):
+	  self.structure = structure
+	  self.is_edible = is_edible
+
+  backend = httk.db.backend.Sqlite('example.sqlite')
+  store = httk.db.store.SqlStore(backend)
+  
+  tablesalt = httk.load('NaCl.cif')
+  edible = StructureIsEdible(tablesalt, True)
+  store.save(edible)
+  
+  arsenic = httk.load('As.cif')  
+  edible = StructureIsEdible(arsenic, False)
+  store.save(edible)
+
+
+	       
+Tutorial
 ********
+Under ``Tutorial/Step1, 2, ...`` in your *httk* directory you find a series of code snippets to run to see *httk* in action. 
+You can either just execute them there, or try them out in, e.g., a Jupyter notebook.
 
 In addition to the Tutorial, there is a lot of straightforward examples of various things that can be done with httk
 in the ``Examples`` subdirectory. Check the source files for information about what the various examples does.
