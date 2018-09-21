@@ -3,6 +3,5 @@ bin
 src
 init.shell
 init.shell.eval
-COPYING
-LICENSE
+LICENSE.txt
 httk.minimal.files
