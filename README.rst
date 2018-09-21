@@ -79,12 +79,27 @@ Alternative install: python library + binaries + ability to develop *httk*
    line to your shell initialization script, e.g., ~/.bashrc
 
 You are now ready to use *httk*.
-     
-  *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
-  httk directory. In that case, skip the pip install step above and just append
-  ``source ~/path/to/httk/init.shell`` to your shell init files,
-  with ``~/path/to/httk`` replaced by the path of your httk directory.)*
 
+  Notes:
+
+  * The above instructions give you access to the latest stable release of httk.
+    To get the latest developer relase (which may or may not work), issue::
+
+	 git checkout devel
+	 pip install . --upgrade --user
+
+    in your httk directory. To switch back to the stable release, do::
+
+	 git checkout master
+	 pip install . --upgrade --user	
+  
+  * An alternative to installing with ``pip install`` is to just run httk out of the
+    httk directory. In that case, skip the pip install step above and just append
+    ``source ~/path/to/httk/init.shell`` to your shell init files,
+    with ``~/path/to/httk`` replaced by the path of your httk directory.)*
+  
+
+  
 A few simple usage examples
 ***************************
 

@@ -4,19 +4,13 @@
 .. raw:: text
    :file: header.tpl
 
-Download
---------
-
-The latest download information for httk is found at
-  http://httk.openmaterialsdb.se/downloads.html
-
 Installation
 ------------
 
-There are a few alternative ways to install *httk*. Httk presently
-consists of a python library and a few programs. If you just want
-access to use (rather than develop) the python library, and do not
-need the external programs, the install is very easy.
+There are a few alternative ways to download and install *httk*. Httk
+presently consists of a python library and a few programs. If you just
+want access to use the python library, and do not need the external
+programs, the install is very easy.
 
 Note: for *httk* version 2.0 we will go over to a single program
 ('python endpoint') ``httk``, for which the pip install step should be
@@ -72,25 +66,40 @@ Alternative 2: Install via pip for python library + binaries + ability to develo
    line to your shell initialization script, e.g., ~/.bashrc
 
 You are now ready to use *httk*.
-     
-  *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
-  httk directory. In that case, skip the pip install step above and just append
-  ``source ~/path/to/httk/init.shell`` to your shell init files,
-  with ``~/path/to/httk`` replaced by the path of your httk directory.)*
+
+  Notes:
+
+  * The above instructions give you access to the latest stable release of httk.
+    To get the latest developer relase (which may or may not work), issue::
+
+	 git checkout devel
+	 pip install . --upgrade --user
+
+    in your httk directory. To switch back to the stable release, do::
+
+	 git checkout master
+	 pip install . --upgrade --user	
+  
+  * An alternative to installing with ``pip install`` is to just run httk out of the
+    httk directory. In that case, skip the pip install step above and just append
+    ``source ~/path/to/httk/init.shell`` to your shell init files,
+    with ``~/path/to/httk`` replaced by the path of your httk directory.)*
+  
 
 Alternative 3: For experienced users: direct manual install
 ***********************************************************
 
 If you are somewhat familiar with the command line in Linux, Unix,
 MacOSX or cygwin, and don't want to mess with python, all you need to
-do is download the archive, uncompress it in a directory of your
-choosing, and configure your environment in your environment init file
-(.bashrc or .cshrc) either by inserting ``source /path/to/.../httk/init.shell``
-or by inserting instructions that adds
+do is download the archive (see:
+http://httk.openmaterialsdb.se/downloads.html ) uncompress it in a
+directory of your choosing, and configure your environment in your
+environment init file (.bashrc or .cshrc) either by inserting ``source
+/path/to/.../httk/init.shell`` or by inserting instructions that adds
 the ``httk/bin`` directory to your ``PATH`` environment variable, and
 the ``httk`` directory to your ``PYTHONPATH`` environment variable.
 
-That is all that is required. As your first test, you can try to run
+That is all that is needed. As your first test, you can try to run
 ``Examples/0_import_httk/0_import_httk.py``. (Please be aware that the
 first time you run this command it can be rather slow, since python is
 creating ``*.pyc`` files for all httk modules.)
@@ -99,14 +108,19 @@ creating ``*.pyc`` files for all httk modules.)
 Alternative 4: Step-by-step instructions for installation from source archive
 *****************************************************************************
 
+Find the latest relase download at this link: https://github.com/rartino/httk/releases/latest, and get the link to the
+``.tar.gz`` archive.
+
 Run the following in a terminal::
 
   mkdir -p ~/bin/python
   cd ~/bin/python
-  curl http://httk.openmaterialsdb.se/downloads/httk-latest.tgz
-  tar -zxf httk-latest.tgz
-  rm -f httk-latest.tgz
+  curl -L <download link> --output httk-<version>.tar.gz
+  tar -zxf httk-<version>.tar.gz
+  rm -f httk-<version>.tar.gz
 
+where you have to fill in <download link> and <version> according to the release page.
+  
 The archive extaction (tar -zxf) will have created a subdirectory
 named after the actual version of httk that you downloaded. Check this
 with the command ``ls``. Lets say you see ``httk-1.0.0``, then do the
@@ -137,19 +151,20 @@ This assumes you have followed the step-by-step installation instructions above.
 
 (look for the highest numbered httk-* directory)
 
+Then find the latest relase download at this link: https://github.com/rartino/httk/releases/latest, and get the link to the
+``.tar.gz`` archive.
+
 Then do this::
 
-  mkdir -p ~/bin/python/upgrade
-  cd ~/bin/python/upgrade
+  cd ~/bin/python
   rm -f httk-latest.tgz
-  wget http://httk.openmaterialsdb.se/downloads/httk-latest.tgz
-  tar -zxf httk-latest.tgz
+  curl -L <download link> --output httk-<version>.tar.gz  
+  tar -zxf httk-<version>.tgz
+  rm -f httk-<version>.tar.gz
+  
+If the new version is, e.g., v1.0.1)::
 
-Use 'ls' to check that the new version you downloaded and
-uncompressed is actually newer. If it is newer (lets say 1.0.1)::
-
-  cp ../httk-latest/httk.cfg httk-1.0.1/httk.cfg
-  mv httk-1.0.1 ..
+  cp httk-latest/httk.cfg httk-1.0.1/httk.cfg
   ln -f -s httk-1.0.1 ../httk-latest
 
 This concludes the upgrade.
@@ -158,14 +173,14 @@ This concludes the upgrade.
 Windows
 -------
 
-These instructions are going to be expanded in the future. For now,
+These instructions may be expanded in the future. For now,
 what you need to do is download cygwin and when aksed what software
 to install, include
 
   wget, python
 
 After cygwin is installed, start a cygwin terminal and follow the
-instructions under Linux above.
+instructions above.
 
 Optional configuration
 ----------------------
