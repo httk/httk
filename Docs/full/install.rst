@@ -4,27 +4,100 @@
 .. raw:: text
    :file: header.tpl
 
-Install Overview
-----------------
-
-If you are somewhat familiar with the command line in Linux, Unix, MacOSX
-or cygwin, you do not need the step-by-step instructions below. All you
-have to do is download the archive, uncompress it in a directory of
-your choosing, and configure your environment in your environment init file (.bashrc or .cshrc) either by inserting ``source /path/to/.../httk/setup.shell`` or by inserting instructions that adds the ``httk/bin`` directory to your ``PATH`` environment variable, and the ``httk`` directory to your ``PYTHONPATH`` environment variable.
-
-That is all that is needed. As your first test, you can try to run ``Examples/0_import_httk/0_import_httk.py``. (Please be aware that the first time you run this command it can be rather slow, since python is creating ``*.pyc`` files for all httk modules.)
-
 Download
 --------
 
 The latest download information for httk is found at
   http://httk.openmaterialsdb.se/downloads.html
 
-Linux / Unix / Mac OSX
-----------------------
+Installation
+------------
 
-Step-by-step instructions for installation
-..........................................
+There are a few alternative ways to install *httk*. Httk presently
+consists of a python library and a few programs. If you just want
+access to use (rather than develop) the python library, and do not
+need the external programs, the install is very easy.
+
+Note: for *httk* version 2.0 we will go over to a single program
+('python endpoint') ``httk``, for which the pip install step should be
+sufficient to get a full install.
+
+(There are also separate instructions below for advanced users that
+want to do a direct manual install without the Python pip installed.)
+
+
+Alternative 1: Install via pip to just access the python library
+*****************************************************************
+
+1. You need Python 2.7 and access to pip in your terminal
+   window. (You can get Python and pip, e.g., by installing the Python 2.7 version
+   of Anaconda, https://www.anaconda.com/download, which should give you
+   all you need on Linux, macOS and Windows.)
+
+2. Issue in your terminal window::
+
+     pip install httk 
+
+   If you at a later point want to upgrade your installation, just
+   issue::
+
+     pip install httk --upgrade
+
+You should now be able to simply do ``import httk`` in your python programs to use the *httk* python library.
+     
+Alternative 2: Install via pip for python library + binaries + ability to develop *httk*
+****************************************************************************************
+
+1. In addition to Python 2.7 and pip, you also need git.
+   You can get git from here: https://git-scm.com/ 
+
+2. Issue in your terminal window::
+
+     git clone https://github.com/rartino/httk
+     cd httk
+     pip install --editable . --user
+
+   If you at a later point want to upgrade your installation, just go
+   back to the *httk* directory and issue::
+
+     git pull
+     pip install . --upgrade --user
+
+3. To setup the paths to the *httk* programs you also need to run::
+
+     source /path/to/httk/init.shell
+
+   where ``/path/to/httk`` should be the path to where you downloaded
+   *httk* in the steps above. To make this permanent, please add this
+   line to your shell initialization script, e.g., ~/.bashrc
+
+You are now ready to use *httk*.
+     
+  *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
+  httk directory. In that case, skip the pip install step above and just append
+  ``source ~/path/to/httk/init.shell`` to your shell init files,
+  with ``~/path/to/httk`` replaced by the path of your httk directory.)*
+
+Alternative 3: For experienced users: direct manual install
+***********************************************************
+
+If you are somewhat familiar with the command line in Linux, Unix,
+MacOSX or cygwin, and don't want to mess with python, all you need to
+do is download the archive, uncompress it in a directory of your
+choosing, and configure your environment in your environment init file
+(.bashrc or .cshrc) either by inserting ``source /path/to/.../httk/init.shell``
+or by inserting instructions that adds
+the ``httk/bin`` directory to your ``PATH`` environment variable, and
+the ``httk`` directory to your ``PYTHONPATH`` environment variable.
+
+That is all that is required. As your first test, you can try to run
+``Examples/0_import_httk/0_import_httk.py``. (Please be aware that the
+first time you run this command it can be rather slow, since python is
+creating ``*.pyc`` files for all httk modules.)
+
+ 
+Alternative 4: Step-by-step instructions for installation from source archive
+*****************************************************************************
 
 Run the following in a terminal::
 
@@ -35,8 +108,9 @@ Run the following in a terminal::
   rm -f httk-latest.tgz
 
 The archive extaction (tar -zxf) will have created a subdirectory
-named after the actual version of httk that you downloaded. Check this with the command ``ls``. Lets say you see ``httk-1.0.0``,
-then do the following::
+named after the actual version of httk that you downloaded. Check this
+with the command ``ls``. Lets say you see ``httk-1.0.0``, then do the
+following::
 
   ln -f -s httk-1.0.0 httk-latest
   source ~/bin/python/httk-latest/setup.shell
@@ -54,8 +128,8 @@ As your first test, you can try to run::
 This program simply loads the httk library and prints out its version, if everything works. Please be aware that the first time you run this command it can be rather slow, since python is creating ``*.pyc`` files for all httk modules.
 
 
-Upgrade installation
-............................
+Upgrade manual installation
+...........................
 
 This assumes you have followed the step-by-step installation instructions above. To upgrade, first check what version you presently have with::
 

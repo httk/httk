@@ -46,16 +46,16 @@ Install to access just the python library
      pip install httk 
 
    If you at a later point want to upgrade your installation, just
-   issue
+   issue::
 
      pip install httk --upgrade
 
 You should now be able to simply do ``import httk`` in your python programs to use the *httk* python library.
      
-Installation of python library + binaries + ability to develop *httk*
-*********************************************************************
+Alternative install: python library + binaries + ability to develop *httk*
+**************************************************************************
 
-1. In addition to the requirements above (Python 2.7 and pip) you need git.
+1. In addition to Python 2.7 and pip, you also need git.
    You can get git from here: https://git-scm.com/ 
 
 2. Issue in your terminal window::
@@ -70,7 +70,7 @@ Installation of python library + binaries + ability to develop *httk*
      git pull
      pip install . --upgrade --user
 
-3. To setup the paths to the *httk* programs you also need to run
+3. To setup the paths to the *httk* programs you also need to run::
 
      source /path/to/httk/init.shell
 
@@ -81,11 +81,12 @@ Installation of python library + binaries + ability to develop *httk*
 You are now ready to use *httk*.
      
   *(Note: an alternative to installing with ``pip install`` is to just run httk out of the
-  httk directory. In that case, append ``source ~/path/to/httk/init.shell`` to your
-  shell init files, with ``~/path/to/httk`` replaced by the path of your httk directory.)*
+  httk directory. In that case, skip the pip install step above and just append
+  ``source ~/path/to/httk/init.shell`` to your shell init files,
+  with ``~/path/to/httk`` replaced by the path of your httk directory.)*
 
-A few simple examples
-**********************
+A few simple usage examples
+***************************
 
 Load a cif file or poscar
 +++++++++++++++++++++++++
@@ -142,33 +143,36 @@ Create structures in code
 
 Create database file, store a structure in it, and retrive it
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-import httk, httk.db
-from httk.atomistic import Structure
 
-backend = httk.db.backend.Sqlite('example.sqlite')
-store = httk.db.store.SqlStore(backend)
+.. code:: python
 
-tablesalt = httk.load('../../Tutorial/Step7/NaCl.cif')
-store.save(tablesalt)
+  import httk, httk.db
+  from httk.atomistic import Structure
 
-arsenic = httk.load('../../Tutorial/Step7/As.cif')
-store.save(arsenic)
+  backend = httk.db.backend.Sqlite('example.sqlite')
+  store = httk.db.store.SqlStore(backend)
 
-# Search for anything with Na
-search = store.searcher()
-search_struct = search.variable(Structure)
-search.add(search_struct.formula_symbols.is_in('Na'))
+  tablesalt = httk.load('../../Tutorial/Step7/NaCl.cif')
+  store.save(tablesalt)
 
-search.output(search_struct, 'structure')
+  arsenic = httk.load('../../Tutorial/Step7/As.cif')
+  store.save(arsenic)
 
-for match, header in list(search):
-    struct = match[0]
-    print "Found structure", struct.formula, [str(struct.get_tags()[x]) for x in struct.get_tags()]
+  # Search for anything with Na
+  search = store.searcher()
+  search_struct = search.variable(Structure)
+  search.add(search_struct.formula_symbols.is_in('Na'))
+
+  search.output(search_struct, 'structure')
+
+  for match, header in list(search):
+      struct = match[0]
+      print "Found structure", struct.formula, [str(struct.get_tags()[x]) for x in struct.get_tags()]
 
 
 
-Create database file and store own data in it
-+++++++++++++++++++++++++++++++++++++++++++++
+Create database file and store your own data in it
+++++++++++++++++++++++++++++++++++++++++++++++++++
 .. code:: python
 
   #!/usr/bin/env python
