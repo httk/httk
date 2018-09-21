@@ -51,7 +51,7 @@ dist: version docs httk_overview.pdf clean
 		--exclude=".*" --transform "flags=r;s|httk.cfg.example|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
-	if [ -e .git ];	then rm -f src/httk/version_dist.*; fi
+	if [ -e .git ];	then rm -f src/httk/distdata.py src/httk/distdata.pyc; fi
 
 httk_overview.pdf: Presentation/presentation.tex 
 	( cd Presentation; \
