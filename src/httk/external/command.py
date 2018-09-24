@@ -168,7 +168,7 @@ def find_executable(executables, config_name):
         executables = [executables]
     
     path_conf = config.get('paths', config_name)
-    if path_conf != "":
+    if path_conf is not None and path_conf != "":
         paths = glob.glob(os.path.expandvars(os.path.expanduser(path_conf)))
         if len(paths) == 0:
             raise IOError("find_executable: Configured executable in httk.cfg for "+str(config_name)+" not found in "+path_conf)

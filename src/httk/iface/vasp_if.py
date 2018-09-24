@@ -310,10 +310,14 @@ def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None,
         vol = struct.pc.uc_volume
         counts = struct.pc.uc_counts
     else:
-        basis = struct.cc.uc_basis
-        coords = struct.cc.uc_reduced_coords
-        vol = struct.cc.uc_volume
-        counts = struct.cc.uc_counts
+        #basis = struct.cc.uc_basis
+        #coords = struct.cc.uc_reduced_coords
+        #vol = struct.cc.uc_volume
+        #counts = struct.cc.uc_counts
+        basis = struct.uc_basis
+        coords = struct.uc_reduced_coords
+        vol = struct.uc_volume
+        counts = struct.uc_counts        
         
     if basis.det() < 0:
         if fix_negative_determinant:

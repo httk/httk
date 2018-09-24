@@ -24,16 +24,20 @@ from httk import config
 from command import Command
 import httk
 
+platon_path = None
+
+def ensure_has_platon():
+    if platon_path is None or platon_path == "":
+        raise Exception("httk.external.platon imported with no access to platon binary")
+
 try:   
     platon_path = config.get('paths', 'platon')
-    if platon_path == "":
-        raise Exception("No path set for platon")
 except Exception:
-    platon_path = None
-    raise Exception("httk.external.platon imported with no platon path set in httk.cfg")
-
+    pass
 
 def platon(cwd, args, timeout=60):
+    ensure_has_platon()
+
     #p = subprocess.Popen([platon_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #out, err = p.communicate()

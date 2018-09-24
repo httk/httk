@@ -27,8 +27,12 @@ Getting started with *httk*
 Download
 ........
 
-The latest download information for *httk* is found at
-  http://httk.openmaterialsdb.se/downloads.html
+The *httk* is freely available under an open source license, `the GNU Affero General Public License <http://www.gnu.org/licenses/agpl>`_. 
+
+The latest release of httk is |release|. 
+
+Download the latest release at github here:
+  https://github.com/rartino/httk/releases/latest
 
   
 Installation
@@ -55,7 +59,7 @@ We track our bugs using the issue tracker at github.
 If you find a bug, please search to see if someone else
 has reported it here:
 
-  https://github.com/rartino/httk/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen
+  https://github.com/rartino/httk/issues
 
 If you cannot find it already reported, please click the 'new issue' 
 button and report the bug.

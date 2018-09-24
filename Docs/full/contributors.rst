@@ -9,7 +9,7 @@ Programming:
 
   - Christopher Tholander, Linköping University, Sweden.
 
-*httk* presently relies on the external program cif2cell by Torbjörn Björkman (Aalto University, Finland) for reading and turning cif files into structures.
+Some parts of *httk* related to reading structues are heavily inspired by corresponding code in cif2cell by Torbjörn Björkman (Aalto University, Finland).
 
 Database and API design:
   - Rickard Armiento

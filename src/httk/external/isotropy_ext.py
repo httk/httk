@@ -31,16 +31,20 @@ import httk.iface
 from httk.atomistic.atomisticio.structure_cif_io import cif_to_struct
 from httk.atomistic.data.periodictable import atomic_symbol, atomic_number
 
+isotropy_path = None
+
+def ensure_has_isotropy():
+    if isotropy_path is None or isotropy_path == "":
+        raise ImportError("httk.external.isotropy_ext imported with no access to isotropy binary")
+
 try:   
     isotropy_path = config.get('paths', 'isotropy')
-    if isotropy_path == "":
-        raise Exception
 except Exception:
-    isotropy_path = None
-    raise ImportError("httk.external.isotropy_ext imported with no isotropy path set in httk.cfg")
-
+    pass
 
 def isotropy(cwd, args, inputstr, timeout=30):
+    ensure_has_isotropy()
+    
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #print "COMMAND CIF2CELL"

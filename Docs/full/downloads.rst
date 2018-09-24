@@ -5,8 +5,8 @@ The *httk* is freely available under an open source license, `the GNU Affero Gen
 
 The latest release of httk is |release|. 
 
-You can download it here:
-     http://httk.openmaterialsdb.se/downloads/httk-latest.tgz
+Download the latest release at github here:
+  https://github.com/rartino/httk/releases/latest
 
 
 

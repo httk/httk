@@ -27,41 +27,50 @@ from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from command import Command, find_executable
 
-jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
-jmol_dirpath, jmol_filename = os.path.split(jmol_path)
-
+jmol_path = None
 jmol_version = None
 jmol_version_date = None
 
+def ensure_has_cif2cell():
+    if jmol_path is None or jmol_path == "" or not os.path.exists(jmol_path):
+        raise ImportError("httk.external.jmol imported with no access to jmol binary")
 
-def check_works():
-    global jmol_version, jmol_version_date
+try:    
+    jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
+    jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
-    if jmol_path == "" or not os.path.exists(jmol_path):
-        raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
+    def check_works():
+        global jmol_version, jmol_version_date
+
+        if jmol_path == "" or not os.path.exists(jmol_path):
+            raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
+
+        out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
+        if completed is None or completed != 0:
+            raise Exception("jmol_ext: Could not execute jmol. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
+
+        def get_version(results, match):
+            results['version'] = match.group(1)
+            results['version_date'] = match.group(2)
+
+        results = micro_pyawk(os.path.join(httk.IoAdapterString(out)), [
+            ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
+        ], debug=False)
+
+        if not 'version' in results:
+            raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))        
+
+        jmol_version = results['version']
+        jmol_version_date = results['version_date']
+        
+    check_works()
+except Exception:
+    pass
+
     
-    out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
-    if completed is None or completed != 0:
-        raise Exception("jmol_ext: Could not execute jmol. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
-
-    def get_version(results, match):
-        results['version'] = match.group(1)
-        results['version_date'] = match.group(2)
-
-    results = micro_pyawk(os.path.join(httk.IoAdapterString(out)), [
-        ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
-    ], debug=False)
-
-    if not 'version' in results:
-        raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))        
-
-    jmol_version = results['version']
-    jmol_version_date = results['version_date']
-
-check_works()
-
 
 def run(cwd, args, timeout=None):
+    ensure_has_cif2cell()
     #print "COMMAND JMOL"
     out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
     #print "COMMMDN JMOL END"
@@ -75,6 +84,7 @@ def _jmol_stophook(command):
 
 
 def start(cwd='./', args=['-I']):
+    ensure_has_cif2cell()
 
     version = jmol_version.split('.')
     if len(version) < 3:

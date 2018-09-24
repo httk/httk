@@ -220,11 +220,13 @@ def read_cif(ioa, pragmatic=True, use_types=False):
 
     The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where
     the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means 
-    to read the cif file precisely according to the spec. For example, in a multiline text field:
+    to read the cif file precisely according to the spec. For example, in a multiline text field::
+
         ;
         some text
         ;
-    Means the string '\nsome text'. For this specific case pragmatic=True removes the leading newline. 
+
+    Means the string '\\nsome text'. For this specific case pragmatic=True removes the leading newline. 
 
     set use_types to True to convert things that look like floats and integers to those respective types
     """
@@ -425,30 +427,34 @@ def _cif_write_data_block(f, data_block, max_line_length, use_types):
 def write_cif(ioa, data, header=None, max_line_length=80, use_types=False):
     """
     Generic cif writer, given a filename / ioadapter 
-
+    
     data = the cif data to write as an (ordered) dictionary of tag_name:value
     
     header = the header (comment) segment
-
+    
     max_line_length = the maximum number of characters allowed on each line. This should not be set < 80
     (there is no point, and the length calculating algorithm breaks down at some small line length)
-
+    
     use_types = 
-        if True: always quote values that are of string type. Numeric values are put in the file unquoted (as they should)
-        if False (default): also strings that look like cif numbers are put in the file unquoted
+    
+       if True: always quote values that are of string type. Numeric values are put in the file unquoted (as they should)
+       if False (default): also strings that look like cif numbers are put in the file unquoted
     
     For loops, value is another dictionary with format column_name:value
-
+    
     The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where
     the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means 
-    to read the cif file precisely according to the spec. For example, in a multiline text field:
-        ;
-        some text
-        ;
-    Means the string '\nsome text'. For this specific case pragmatic=True removes the leading newline. 
+    to read the cif file precisely according to the spec. For example, in a multiline text field::
+    
+      ;
+      some text
+      ;
 
+    Means the string '\\nsome text'. For this specific case pragmatic=True removes the leading newline.
+    
     set use_types to True to convert things that look like floats and integers to those respective types
 
+    
     """
 
     ioa = IoAdapterFileWriter.use(ioa)

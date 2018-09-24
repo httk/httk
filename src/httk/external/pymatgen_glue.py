@@ -37,27 +37,32 @@ try:
 except Exception:
     pymatgen_path = None
 
-if pymatgen_path == "False":
-    raise Exception("httk.external.pymatgen_glue: module pymatgen_glue imported, but pymatgen is disabled in configuration file.")
+pymatgen_major_version = None
+pymatgen_minor_version = None
+    
+def ensure_pymatgen_is_imported():
+    if pymatgen_path == "False":
+        raise Exception("httk.external.pymatgen_glue: module pymatgen_glue imported, but pymatgen is disabled in configuration file.")
+    if pymatgen_major_version is None:
+        raise ImportError("httk.external.pymatgen_glue imported without access to the pymatgen python library.")
+    
+if pymatgen_path != "False":
+    if pymatgen_path is not None:    
+        submodule_import_external(os.path.join(pymatgen_path), 'pymatgen')
+    else:
+        try:
+            external = config.get('general', 'allow_system_libs')
+        except Exception:
+            external = 'yes'
 
-if pymatgen_path is not None:    
-    submodule_import_external(os.path.join(pymatgen_path), 'pymatgen')
-else:
     try:
-        external = config.get('general', 'allow_system_libs')
-    except Exception:
-        external = 'yes'
-    #if external == 'yes':
-    #    import pymatgen
-    #else:
-    #    raise ImportError("httk.external.pymatgen_glue: module pymatgen_glue imported, but no pymatgen configured, and package pymatgen not found in the environment.")
+        import pymatgen
 
-try:
-    import pymatgen
-except ImportError:
-    raise ImportError("httk.external.pymatgen_glue imported without access to the pymatgen python library.")
-
-from httk.iface.ase_if import *
+        pymatgen_major_version = pymatgen.__version__.split('.')[0]
+        pymatgen_minor_version = pymatgen.__version__.split('.')[1]
+        
+    except ImportError:
+        pass
 
 mp_key = ""
 

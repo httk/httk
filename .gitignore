@@ -8,10 +8,10 @@
 httk.cfg
 httk.old
 External
-Docs/_static/generated/**
-Docs/_build/**
-Docs/generated/**
-Docs/httk.*
+Docs/full/_static/generated/**
+Docs/full/_build/**
+Docs/full/generated/**
+Docs/full/httk.*
 Presentation/generated/**
 Presentation/presentation.pdf
 Presentation/presentation.aux

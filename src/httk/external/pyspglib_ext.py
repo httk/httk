@@ -39,28 +39,44 @@ try:
 except Exception:
     spglib_path = None
 
-if pyspglib_path is not None and spglib_path is not None:
-    # Import spglib from pyspglib, with some magic to enable use of pyspglib.Atoms for the pyspglib ASE atoms emulation class
-    pyspglib = submodule_import_external(os.path.join(pyspglib_path, 'lib', 'python'), 'pyspglib')
-    from pyspglib import spglib
-    atoms = submodule_import_external(os.path.join(spglib_path, 'python', 'ase', 'test'), 'atoms')
-    spglib.Atoms = atoms.Atoms
-    del atoms  # Lets not pollute the namespace
-else:
-    try:
-        external = config.get('general', 'allow_system_libs')
-    except Exception:
-        external = 'yes'
-    if external == 'yes':
-        # Note: this type of import will miss the spglib 'fake' atom object which is a problem. Probably should
-        # not use this type of import
-        from pyspglib import spglib
-        sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
-    else:
-        raise Exception("httk.external.ase imported, but could not access ase.")
+pyspg_major_verion = None
+pyspg_minor_verion = None
     
+def ensure_pyspg_is_imported():
+    if pyspglib_path == "False" and spglib_path == "False":
+        raise Exception("httk.external.ase_glue: module ase_glue imported, but ase is disabled in configuration file.")
+    if pyspg_major_version is None:
+        raise Exception("httk.external.pyspglib_ext imported, but could not access pyspg.")
+
+try:    
+    if pyspglib_path is not None and spglib_path is not None:
+        # Import spglib from pyspglib, with some magic to enable use of pyspglib.Atoms for the pyspglib ASE atoms emulation class
+        pyspglib = submodule_import_external(os.path.join(pyspglib_path, 'lib', 'python'), 'pyspglib')
+        from pyspglib import spglib
+        atoms = submodule_import_external(os.path.join(spglib_path, 'python', 'ase', 'test'), 'atoms')
+        spglib.Atoms = atoms.Atoms
+        del atoms  # Lets not pollute the namespace
+        pyspg_major_version = spglib.__version__.split('.')[0]
+        pyspg_minor_version = spglib.__version__.split('.')[1]     
+    else:
+        try:
+            external = config.get('general', 'allow_system_libs')
+        except Exception:
+            external = 'yes'
+        if external == 'yes':
+            # Note: this type of import will miss the spglib 'fake' atom object which is a problem. Probably should
+            # not use this type of import
+            from pyspglib import spglib
+            sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
+            pyspg_major_version = spglib.__version__.split('.')[0]
+            pyspg_minor_version = spglib.__version__.split('.')[1]     
+        else:
+            pass
+except Exception:
+    pass
     
 def structure_to_spglib_atoms(struct):
+    ensure_pyspg_is_imported()
 
     symbols = []
     for i in range(len(struct.coordgroups)):
@@ -82,6 +98,8 @@ def structure_to_spglib_atoms(struct):
 
 
 def analysis(struct, symprec=1e-5):
+    ensure_pyspg_is_imported()
+
     atoms = structure_to_spglib_atoms(struct)
     val = spglib.get_spacegroup(atoms)
     print "Spacegroup is:", val 
@@ -90,6 +108,8 @@ def analysis(struct, symprec=1e-5):
 
 
 def primitive(struct, symprec=1e-5):
+    ensure_pyspg_is_imported()
+    
     atoms = structure_to_spglib_atoms(struct)
     prim = spglib.refine_cell(atoms, symprec=symprec)
     sg = spglib.get_spacegroup(atoms)

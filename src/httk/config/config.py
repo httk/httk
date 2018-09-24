@@ -18,29 +18,31 @@
 """
 Read and setup httk configuration and versioning data. 
 
-httk_python_root is derived as the directory config.py is in + '..'
+httk_python_root is derived as the directory config.py is in + ..
 
-config is a configparser.config object where
-  - All assignments in a distdata.py file in httk_python_root are read into the section [general]
-  - Read httk.cfg in httk_python_root
-  - Using the latest definition of [general]/httk_root, read httk.cfg in that directory
-  - Read ~/.httk/config
+config is a configparser.config object where:
+
+- All assignments in a distdata.py file in httk_python_root are read into the section [general]
+- Read httk.cfg in httk_python_root
+- Using the latest definition of [general]/httk_root, read httk.cfg in that directory
+- Read ~/.httk/config
 
 In this config object, the section [general] is looked up for 'httk_root', which is exported as httk_root. If not present, 'root' is looked up in 
 the section 'distdata'. If that is not present, the default of httk_python_root + ../.. is used.
 
-if the file distdata.py in httk_python_root exists, the config object section [distdata] is looked up for version, version_date, and copyright_note, 
+If the file distdata.py in httk_python_root exists, the config object section [distdata] is looked up for version, version_date, and copyright_note, 
 which are exported as httk_version, httk_version_date, httk_copyright_note. If this file does not exist, they identifiers are instead derived using the 'git' command. 
 If that does not work, they are set to 'unknown', except for httk_copyright_note, which is set to a sensible default.
 
 This python file has no dependencies except for the standard library (neither within httk or outside).
 It will always remain safe to import by itself, e.g.::
 
-  (cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.httk_version + '\n')")
+  (cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.httk_version + '\\n')")
 
 Or::
 
-  python -c "import sys; here = path.abspath(path.dirname(__file__)); sys.path.insert(1, os.path.join(here,'src/httk/config')); import config; sys.stdout.write(config.httk_version + '\n')
+  python -c "import sys; here = path.abspath(path.dirname(__file__)); sys.path.insert(1, os.path.join(here,'src/httk/config')); import config; sys.stdout.write(config.httk_version + '\\n')"
+
 
 """
 
