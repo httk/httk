@@ -233,16 +233,16 @@ class HttkPluginPlaceholder(object):
         
     def __getattr__(self, static, objtype=None):        
         if self.plugininfo is None:
-            raise Exception("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using an appropriate python import.")
+            raise AttributeError("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using an appropriate python import.")
         else:
-            raise Exception("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using: "+self.plugininfo)
+            raise AttributeError("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using: "+self.plugininfo)
 
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
         if self.plugininfo is None:
-            raise Exception("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using an appropriate python import.")
+            raise AttributeError("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using an appropriate python import.")
         else:
-            raise Exception("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using: "+self.plugininfo)
+            raise AttributeError("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using: "+self.plugininfo)
 
             
