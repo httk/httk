@@ -72,7 +72,7 @@ docs:
 
 webdocs: version httk_overview.pdf
 	rm -f Docs/full/httk.*
-	sphinx-apidoc -F -o Docs/full src/httk
+	#sphinx-apidoc -F -o Docs/full src/httk 
 	mkdir -p Docs/full/_static/generated/httk_overview/	
 	cp Presentation/generated/*.png Docs/full/_static/generated/httk_overview/.
 	cp Presentation/generated/httk_overview.html Docs/full/generated/.
