@@ -312,6 +312,7 @@ def frac_tan(x, degrees=False, prec=default_accuracy, limit=True):
 
 def frac_asin(x, degrees=False, prec=default_accuracy, limit=True):
     """Return the arc sine (measured in radians) of Decimal x."""
+    iteracc = 1/(prec*100)
     if abs(x) > 1:
         raise ValueError("Domain error: asin accepts -1 <= x <= 1")
     
@@ -340,6 +341,9 @@ def frac_asin(x, degrees=False, prec=default_accuracy, limit=True):
         gamma *= i - one_half
         coeff = gamma / ((2 * i + 1) * fact)
         s += coeff * num
+        # The sizes of these numbers need to be kept under control during iteration
+        num = num.limit_denominator(iteracc)
+        s = s.limit_denominator(iteracc)
     if degrees:
         s = s*180/frac_pi(prec=prec, limit=limit)
     if limit:
@@ -347,6 +351,7 @@ def frac_asin(x, degrees=False, prec=default_accuracy, limit=True):
     return s
 
 
+# Alternative implementation
 # def frac_asin(x, degrees=False, prec=default_accuracy, limit=True):
 #     """Return the arcsine of x in radians."""
 #     if abs(x) > 1:
@@ -393,6 +398,8 @@ def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
         gamma *= i - half
         coeff = gamma / ((2 * i + 1) * fact)
         s -= coeff * num
+        # The sizes of these numbers need to be kept under control during iteration
+        num = num.limit_denominator(iteracc)
         s = s.limit_denominator(iteracc)
     if degrees:
         s = s*180/frac_pi(prec=prec, limit=limit)
@@ -400,30 +407,37 @@ def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
         s = s.limit_denominator(1/prec)
     return s
 
-# This is way faster, I wonder if there's a downside?
-# def acos(x, context=None):
+
+# Alternative implementation
+#def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
 #     """Return the arccosine of x in radians."""
 #     if abs(x) > 1:
 #         raise ValueError("Domain error: acos accepts -1 <= x <= 1")
-# 
-#     if context is None:
-#         context = getcontext()
-#     
+#
+#     PI = frac_pi(prec=prec, limit=False)
+#
 #     if x == 1:
-#         return D(0, context=context)
+#         return fractions.Fraction(0)
 #     else:
-#         PI = pi(context=context)
 #         if x == -1:
 #             return PI
 #         elif x == 0:
 #             return PI / 2
-#     
-#     return PI / 2 - atan2(x, sqrt(1 - x ** 2, context=context), context=context)
-
+#
+#     s = PI / 2 - frac_atan2(x, frac_sqrt(1 - x ** 2, prec=prec, limit=limit), prec=prec, limit=limit)
+#
+#     if degrees:
+#         s = s*180/PI
+#     if limit:
+#         s = s.limit_denominator(1/prec)
+#
+#     return s    
 
 def frac_atan(x, degrees=False, prec=default_accuracy, limit=True):
     """Return the arctangent of x in radians."""
+    iteracc = 1/(prec*100)
     
+    c = None
     if x == 0:
         return fractions.Fraction(0)
     elif abs(x) > 1:
@@ -444,6 +458,9 @@ def frac_atan(x, degrees=False, prec=default_accuracy, limit=True):
         coeff *= i / (i + 1)
         num *= y
         s += coeff * num
+        # The sizes of these numbers need to be kept under control during iteration
+        num = num.limit_denominator(iteracc)
+        s = s.limit_denominator(iteracc)        
     if c:
         s = c - s
     if degrees:

@@ -165,10 +165,10 @@ Create database file, store a structure in it, and retrive it
   backend = httk.db.backend.Sqlite('example.sqlite')
   store = httk.db.store.SqlStore(backend)
 
-  tablesalt = httk.load('../../Tutorial/Step7/NaCl.cif')
+  tablesalt = httk.load('NaCl.cif')
   store.save(tablesalt)
 
-  arsenic = httk.load('../../Tutorial/Step7/As.cif')
+  arsenic = httk.load('As.cif')
   store.save(arsenic)
 
   # Search for anything with Na
@@ -195,7 +195,7 @@ Create database file and store your own data in it
 
   class StructureIsEdible(httk.HttkObject):
 
-      @httk.httk_typed_init({'uc_structure': Structure, 'is_edible': bool})
+      @httk.httk_typed_init({'structure': Structure, 'is_edible': bool})
       def __init__(self, structure, is_edible):
 	  self.structure = structure
 	  self.is_edible = is_edible
