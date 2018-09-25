@@ -105,28 +105,28 @@ first time you run this command it can be rather slow, since python is
 creating ``*.pyc`` files for all httk modules.)
 
  
-Alternative 4: Step-by-step instructions for installation from source archive
-*****************************************************************************
+Alternative 4: Step-by-step instructions for installation from archive
+**********************************************************************
 
 Find the latest relase download at this link: https://github.com/rartino/httk/releases/latest, and get the link to the
-``.tar.gz`` archive.
+``httk-<version>.tgz`` archive.
 
 Run the following in a terminal::
 
   mkdir -p ~/bin/python
   cd ~/bin/python
-  curl -L <download link> --output httk-<version>.tar.gz
-  tar -zxf httk-<version>.tar.gz
-  rm -f httk-<version>.tar.gz
+  curl -L <download link> --output httk-<version>.tgz
+  tar -zxf httk-<version>.tgz
+  rm -f httk-<version>.tgz
 
 where you have to fill in <download link> and <version> according to the release page.
   
 The archive extaction (tar -zxf) will have created a subdirectory
 named after the actual version of httk that you downloaded. Check this
-with the command ``ls``. Lets say you see ``httk-1.0.0``, then do the
+with the command ``ls``. Lets say you see ``httk-1.1.2``, then do the
 following::
 
-  ln -f -s httk-1.0.0 httk-latest
+  ln -f -s httk-1.1.2 httk-latest
   source ~/bin/python/httk-latest/setup.shell
 
 If you add the very last line to your ``.bashrc`` and/or ``.cshrc``, httk will work in all new terminals you open. (Or alternatively, just add
@@ -162,12 +162,19 @@ Then do this::
   tar -zxf httk-<version>.tgz
   rm -f httk-<version>.tar.gz
   
-If the new version is, e.g., v1.0.1)::
+If the new version is, e.g., v1.1.3)::
 
-  cp httk-latest/httk.cfg httk-1.0.1/httk.cfg
-  ln -f -s httk-1.0.1 ../httk-latest
+  cp httk-latest/httk.cfg httk-1.1.3/httk.cfg
+  ln -f -s httk-1.1.3 ../httk-latest
 
 This concludes the upgrade.
+
+Download Source code
+--------------------
+
+The source code of *httk* is available at github: https://github.com/rartino/httk
+
+An archive of the source code of the latest version can be downloaded here: https://github.com/rartino/httk/releases/latest
 
 
 Windows
