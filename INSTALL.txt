@@ -19,7 +19,7 @@ want access to use the python library, and do not need the external
 programs, the install is very easy.
 
 Note: for *httk* version 2.0 we will go over to a single program
-('python endpoint') "httk", for which the pip install step should be
+(‘python endpoint’) "httk", for which the pip install step should be
 sufficient to get a full install.
 
 (There are also separate instructions below for advanced users that
@@ -100,7 +100,7 @@ Alternative 3: For experienced users: direct manual install
 -----------------------------------------------------------
 
 If you are somewhat familiar with the command line in Linux, Unix,
-MacOSX or cygwin, and don't want to mess with python, all you need to
+MacOSX or cygwin, and don’t want to mess with python, all you need to
 do is download the archive (see:
 http://httk.openmaterialsdb.se/downloads.html ) uncompress it in a
 directory of your choosing, and configure your environment in your
@@ -216,9 +216,9 @@ libraries, you want the path setting to point at the directory you
 would include in "PYTHONPATH", i.e., a directory that typically
 contains a subdirectory with the name of the package.
 
-Note: if you don't have certain software, don't worry, just leave the
+Note: if you don’t have certain software, don’t worry, just leave the
 line blank. If you have some libraries installed in the system (e.g.
-'import ase' works), then you can also leave the lines blank. If you
+‘import ase’ works), then you can also leave the lines blank. If you
 want to make sure *not* to use system libraries, set
 allow_system_libs=no (this is useful if you are forced to work on a
 machine with too old versions installed in the system)

@@ -63,7 +63,6 @@ docs:
 	sphinx-apidoc -F -o Docs/full src/httk
 	(cd Docs/full; make text)
 	cp Docs/full/_build/text/developers_guide.txt ./DEVELOPERS_GUIDE.txt
-	cp Docs/full/_build/text/overview.txt ./OVERVIEW.txt
 	cp Docs/full/_build/text/users_guide.txt ./USERS_GUIDE.txt
 	cp Docs/full/_build/text/runmanager_details.txt RUNMANAGER_DETAILS.txt
 	cp Docs/full/_build/text/install.txt ./INSTALL.txt

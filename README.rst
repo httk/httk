@@ -7,7 +7,6 @@ The High-Throughput Toolkit (httk)
 |  For License information see the file COPYING.
 |  Contact: httk [at] openmaterialsdb.se
 
----------------------------------
 About the High-Throughput Toolkit
 ---------------------------------
 
@@ -22,7 +21,6 @@ pioneered by Ceder et al., and others. [see, e.g., Comp. Mat. Sci. 50, 2295 (201
 *httk* is presently targeted at atomistic calculations in materials science and electronic
 structure, but aims to be extended into a library useful also outside those areas.
 
-----------
 Quickstart
 ----------
 
@@ -223,21 +221,7 @@ You can either just execute them there, or try them out in, e.g., a Jupyter note
 In addition to the Tutorial, there is a lot of straightforward examples of various things that can be done with httk
 in the ``Examples`` subdirectory. Check the source files for information about what the various examples does.
 
-------------------
-More info and help
-------------------
 
-Installation: For more details on installation options refer to INSTALL.txt, distributed with *httk*.
-  
-User's guide: see USERS_GUIDE.txt, distributed with *httk*.
-
-Workflows: for more details on how high-throughput computational workflows are
-executed via the runmanager.sh program, see RUNMANAGER_DETAILS.txt distributed with *httk*.
-This may be useful if you plan to design your own workflows using *httk*.
-
-Developing / contributing to *httk*: refer to DEVELOPERS_GUIDE.txt distributed with *httk*.
-
---------------
 Reporting bugs
 --------------
 
@@ -250,7 +234,6 @@ has reported it here:
 If you cannot find it already reported, please click the 'new issue' 
 button and report the bug.
 
----------------------------------
 Citing *httk* in scientific works
 ---------------------------------
 
@@ -264,13 +247,24 @@ should be cited. Unless configured otherwise, *httk* prints out a list
 of citations when the program ends. You should take note of those
 citations and include them in your publications if relevant.
 
-------------
+More info and help
+------------------
+
+Installation: For more details on installation options refer to INSTALL.txt, distributed with *httk*.
+  
+User's guide: see USERS_GUIDE.txt, distributed with *httk*.
+
+Workflows: for more details on how high-throughput computational workflows are
+executed via the runmanager.sh program, see RUNMANAGER_DETAILS.txt distributed with *httk*.
+This may be useful if you plan to design your own workflows using *httk*.
+
+Developing / contributing to *httk*: refer to DEVELOPERS_GUIDE.txt distributed with *httk*.
+
 Contributors
 ------------
 
 See AUTHORS.txt, distributed with *httk*.
 
-----------------
 Acknowledgements
 ----------------
 
@@ -280,7 +274,6 @@ Acknowledgements
    * The Linnaeus Environment at Linköping on Nanoscale Functional
      Materials (LiLi-NFM) funded by the Swedish Research Council (VR).
 
---------------------------
 License and redistribution
 --------------------------
 
@@ -294,7 +287,6 @@ projects.)
 The full license text is present in the file ``COPYING`` distributed
 with *httk*.
 
--------
 Contact
 -------
 
