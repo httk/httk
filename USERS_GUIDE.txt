@@ -1,4 +1,4 @@
-*httk* Users’ Guide
+*httk* Users' Guide
 *******************
 
 The High-Throughput Toolkit (httk)
@@ -15,7 +15,7 @@ Introduction
 
 The High-Throughput Toolkit (httk) is a toolkit for preparing and
 running calculations, analyzing the results, and store them in a
-global and/or in a personalized database. The word ‘high-throughput’
+global and/or in a personalized database. The word 'high-throughput'
 refers to the practice of executing a vast number of computational
 tasks on a supercomputer cluster, in which case proper automatization
 of all steps is critically important. Httk is presently targeted at
@@ -51,7 +51,7 @@ avoid wild imports (*from X import **) you can of course instead do:
 not imported automatically by import.httk)
 
 To avoid dependences on libraries that you may not have installed,
-httk implements somewhat unusual ‘plugin’-type extensions to its core
+httk implements somewhat unusual 'plugin'-type extensions to its core
 classes. For example, you can enable visualization of atomic
 structures, which requires jmol to be installed, by the following:
 
@@ -64,7 +64,7 @@ called, e.g., as:
 
    mystructure.vis.show()
 
-(Note: if you forget to do ‘import httk.atomistic.vis’, httk informs
+(Note: if you forget to do 'import httk.atomistic.vis', httk informs
 you about the need to add this import.)
 
 
@@ -88,7 +88,7 @@ Interfacing with python libraries
 
 A common need is to use functionality provided by other python
 libraries outside the standard libraries.  Httk tries to help with
-this. It provides ‘glue’ modules that lets you import exactly the
+this. It provides 'glue' modules that lets you import exactly the
 version you want.
 
 To use the ase python library (Atomic Simulation Environment) together
@@ -97,9 +97,9 @@ with httk, you typically want to do:
    import httk.external.ase_glue
    import ase
 
-The first line imports the httk ‘glue’ module. It includes helper
+The first line imports the httk 'glue' module. It includes helper
 functionality that makes httk and ase work together.  But, it also
-sets up your python environment so that at the next line ‘import ase’
+sets up your python environment so that at the next line 'import ase'
 actually imports the version of ase that you have configured httk to
 use. This can, for example, be a specific version in your home
 directory (which can help avoid an older version provided system-wide
@@ -127,7 +127,7 @@ to import them and the relevant software is missing.
 Interface packages
 ------------------
 
-httk also provides ‘light’ versions of its interface to other software
+httk also provides 'light' versions of its interface to other software
 under httk.iface.*. These packages DO NOT require the corresponding
 software to be installed. This usually includes things such as writing
 correctly formatted files, etc.
@@ -143,14 +143,14 @@ useful to take note of.
 Creating new httk objects
 -------------------------
 
-The python default constructor (the ‘__init__’ constructor) that is
+The python default constructor (the '__init__' constructor) that is
 called when simply doing:
 
    struct = Structure(arg1, arg2, ...)
 
 should almost *never* be used with httk objects, for several reasons.
 Perhaps the most important is that it is going to change between
-version of httk (for more explanation, see the developers’ guide).
+version of httk (for more explanation, see the developers' guide).
 
 Instead, almost all httk objects provide a classmethod named
 **.create* for this purpose instead. I.e.,
@@ -162,8 +162,8 @@ A note about object mutation
 ----------------------------
 
 Most httk objects assume they stay unaltered after creation (unless
-clearly spelled out, e.g., ‘MutableFracVector’). Hence, methods
-‘altering’ an object normally return a *new copy* of the object with
+clearly spelled out, e.g., 'MutableFracVector'). Hence, methods
+'altering' an object normally return a *new copy* of the object with
 the alterations made. This comes with a number of benefits:
 
    * They can be used as keys in dictionaries
@@ -184,12 +184,12 @@ of significance. Right now, this more or less only applies to the
 existence of a MutableFracVector vs the regular FracVector.
 
 
-Object conversion with the ‘use’ method
+Object conversion with the 'use' method
 ---------------------------------------
 
 Almost all httk classes contains a **.use()* method for helping with
 object type conversion. Lets say that you get a Structure object
-‘structure’ which represents structure data fetched out of the
+'structure' which represents structure data fetched out of the
 database, but you want to have a UnitcellStructure instead, simply do
 this:
 
@@ -201,9 +201,9 @@ I/O in httk
 
 All I/O in the httk library uses our own framework of IOAdapters
 classes. This is usually not something you need to worry about; any
-routine that takes as a parameter an “IOAdapter” ‘ioa’ will accept a
+routine that takes as a parameter an "IOAdapter" 'ioa' will accept a
 filename or any form of python streaming object in its place.  (You
-may want to check the IOAdapter chapter of the developers’ guide to
+may want to check the IOAdapter chapter of the developers' guide to
 see how this is done in practice, as the IOAdapters may be helpful
 also in your own routines.)
 
@@ -219,16 +219,16 @@ something you should need to worry about, you can still script your
 runs in python, or any other language you prefer.
 
 
-Setting up a computational ‘project’
+Setting up a computational 'project'
 ------------------------------------
 
-You should first setup a ‘top’ working directory for your project. Use
-‘cd’ to go to this directory and then run:
+You should first setup a 'top' working directory for your project. Use
+'cd' to go to this directory and then run:
 
    httk-project-setup project_name
 
 
-Configuring ‘computers’
+Configuring 'computers'
 -----------------------
 
 Supercomputer clusters, as well as other computers that you are going
@@ -240,7 +240,7 @@ After you have configured the computer you also need to run:
 
    httk-computer-install
 
-to copy necessary httk files to this computer and “prepare it” for
+to copy necessary httk files to this computer and "prepare it" for
 executing runs.
 
 
@@ -272,7 +272,7 @@ them back with:
 
    httk-tasks-receive-from-computer <computer name>
 
-This concludes what you need for ‘simple’ use of the task system.
+This concludes what you need for 'simple' use of the task system.
 However, for advanced use, you will need to better understand
 precisely how the taskmanager.sh process operates. This information is
 present in a separate text: RUNMANAGER_DETAILS.txt.
