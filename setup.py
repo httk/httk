@@ -15,6 +15,13 @@ here = path.abspath(path.dirname(__file__))
 sys.path.insert(1, os.path.join(here,'src/httk/config'))
 import config
 
+buildpath = path.join(here, 'BUILD')
+if os.path.exists(buildpath):
+    with open(buildpath, encoding='utf-8') as f:
+        buildtag = '.'+f.read()
+else:
+    buildtag = ''
+
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
    
@@ -95,7 +102,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=config.version,  # Required
+    version=config.version + buildtag,  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
