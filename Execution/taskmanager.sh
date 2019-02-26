@@ -700,7 +700,7 @@ function find_next_task {
 
     ( 
 	find . "ht.waitstart/$PRIORITY" \( \( -name "ht.tmp.*" -o -name "ht.task.*.finished" -o -name "ht.task.*.broken" -o -name "ht.task.*.stopped" -o -name "ht.task.*.running" -o -name "ht.task.*.waitstep" -o -name "ht.task.*waitstart" -o -name "ht.waitstart" \) -prune -o -true \) -a \( \( -mmin +15 -name "ht.task.*.running" \) -o \( -name "ht.task.*.waitsubtasks" \) -o \( -name "ht.task.*.waitstep" \) -o \( -name "ht.task.*.waitstart" \) \) -print 
-    ) | (
+    ) | sort | (
        RETURN=3; 
        while read TASK; do
 
