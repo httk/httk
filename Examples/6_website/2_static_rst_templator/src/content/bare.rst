@@ -3,7 +3,7 @@
 :Version: 1
 :Author: Rickard Armiento
 :Layout: default
-:Base_Layout: layout_bare
+:Base_template: bare
 	 
 Bare
 ====

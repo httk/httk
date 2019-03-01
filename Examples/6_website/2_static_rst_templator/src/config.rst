@@ -1,0 +1,6 @@
+:menuitems-list:
+   - index
+   - contact
+   - bare
+     
+
