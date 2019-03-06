@@ -137,7 +137,7 @@ class Compound(HttkObject):
                 tagdata = tag
             if isinstance(tagdata, CompoundTag):
                 self.add_tag(tagdata.tag, tagdata.value)
-            if isinstance(tagdata, StructureTag):
+            elif isinstance(tagdata, StructureTag):
                 self.add_tag(tagdata.tag, tagdata.value)
             else:
                 self.add_tag(tag, tagdata)
