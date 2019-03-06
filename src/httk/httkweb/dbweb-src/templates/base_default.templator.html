@@ -1,0 +1,184 @@
+$def with (content)
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>$content.title</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="$baseurl/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="$baseurl/jumbotron.css" rel="stylesheet">
+
+  </head>
+<style>
+  .dropdown .dropdown-menu .dropdown-item:active, .dropdown .dropdown-menu .dropdown-item:hover{background-color: white; color: black;}
+  .dropdown .dropdown-menu .dropdown-item {background-color: white; color: grey;}
+
+  .align-right {
+  float: right;
+  margin: 2em;
+  }
+
+  h1, h2, h3 { 
+    padding-top: 1em;
+  }
+
+  .publist a {
+    font-style: italic;    
+  }
+  
+</style>
+  <body>
+
+    <nav class="navbar navbar-custom navbar-expand-md navbar-static-top border-bottom border-3 border-darkgrey">
+      <div class="btn-group">
+	<button type="button" class="btn btn-info" style="padding:0; line-height: 0; border: 0; margin: 0;"><a href="$baseurl" style="padding:0; line-height: 0; border: 0; margin: 0;"><img src="$baseurl/img/rickard_armiento_banner.png" alt="Rickard Armiento" /></a></button>
+	<button type="button" class="btn btn-primary dropdown-toggle btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	  <span class="caret"></span>
+	  <span class="sr-only"></span>
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+	  <a class="dropdown-item" href="http://openmaterialsdb.se">Open Materials Database</a>
+	  <a class="dropdown-item" href="https://liu.se/en/organisation/liu/ifm/teofy">Theoretical Physics, LiU</a>
+	</div>
+      </div>
+      <button class="navbar-toggler navbar-light" type="button" data-toggle="collapse" data-target="#header_tabs" aria-controls="header_tabs" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="header_tabs">
+	<ul class="navbar-nav nav ml-auto" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#about">About me</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#publications">Publications</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#cv">BIO / CV</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="$baseurl" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a>
+            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
+              <a class="dropdown-item" data-toggle="tab" href="#otherworks">Other works</a>
+              <a class="dropdown-item" data-toggle="tab" href="#media">In media</a>
+              <a class="dropdown-item" data-toggle="tab" href="#meetings">Meetings</a>
+              <a class="dropdown-item" data-toggle="tab" href="#calendar">My Calendar</a>
+              <a class="dropdown-item" data-toggle="tab" href="#teaching">Teaching</a>
+              <a class="dropdown-item" data-toggle="tab" href="#projects">Diploma and Project Works</a>      
+            </ul>
+          </li>
+	</ul>
+      </div>
+    </nav>
+<body>
+<div class="container">
+<main role="main">
+$:content
+</main>
+</div>    
+    <hr>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                  <ul class="list-inline text-center">
+                    $for f in email.split():
+                      <li>
+                        <a href="mailto:$f">
+                          <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-envelope-o fa-stack-1x fa-inverse"></i>
+                          </span>
+                        </a>
+                      </li>
+                    $for f in social.split():
+                    <li>
+                      <a href="$f.url">
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-$f.title fa-stack-1x fa-inverse"></i>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                  <p class="copyright text-muted">$copyright</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="$baseurl/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="$baseurl/assets/js/vendor/popper.min.js"></script>
+    <script src="$baseurl/dist/js/bootstrap.min.js"></script>
+
+<script>
+  //$$( function() {
+  //  $$( "#tabs" ).tabs();
+  //} )
+
+  $$(document).ready(function() {
+
+  
+    var hash = document.location.hash;
+    var prefix = "tab_";
+    if (hash) {
+      $$('a[data-toggle="tab"][href="'+hash.replace(prefix,"")+'"]').tab('show');
+    } 
+
+    // Change hash for page-reload
+    $$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      window.location.hash = e.target.hash.replace("#", "#" + prefix);
+    });
+  
+    //$$('#tabs').tabs();
+
+  //              $$("#content_tabs").tabs({
+  //                      activate: function(event, ui) {
+  //                              window.location.href =     ui.newPanel.selector;
+  //                      }
+  //              });
+  
+    //var activeTab = $$('[href=' + location.hash + ']');
+    //activeTab && activeTab.tab('show');
+
+    //TODO: Figure out how to not get the page to offset down to e.g. id="materials" when click on tab
+    //$$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    //  e.target // newly activated tab
+    //  e.relatedTarget // previous active tab
+    //  window.location.hash =  e.target.hash;
+    //})
+  });
+</script>
+<!-- Begin of Chaport Live Chat code -->
+<script type="text/javascript">
+(function(w,d,v2){
+w.chaport = { app_id : '5b859b5127349b2d0fc02d8e' };
+
+v2=w.chaport;v2._q=[];v2._l={};v2.q=function(){v2._q.push(arguments)};v2.on=function(e,fn){if(!v2._l[e])v2._l[e]=[];v2._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.com/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document);
+</script>
+<!-- End of Chaport Live Chat code -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-126697486-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-126697486-1');
+</script>
+</body>
+</html>
+

@@ -21,22 +21,31 @@ import os
 from collections import namedtuple
 
 class TemplateEngineTemplator(object):
-    def __init__(self, template_dir, template, base_template, data):
+    def __init__(self, template_dir, template, base_template = None):
         try:
             from web.template import render
         except ImportError:
-            raise Exception("Missing docutils python modules.")
+            raise Exception("Missing web.py module.")
         self.render = render
         self.template_dir = template_dir
         self.template = os.path.splitext(template)[0]
         self.base_template = base_template #+".templator.html"
-        self.data = dict(data)
-        self.dependency_filenames = [os.path.join(self.template_dir,base_template+".templator.html"),
-                                     os.path.join(self.template_dir,template)]
+        self.dependency_filenames = [os.path.join(self.template_dir,template)]    
+        if base_template != None:
+            self.dependency_filenames += [os.path.join(self.template_dir,base_template+".templator.html")]            
     
-    def apply(self, content, *subcontent):
-        templator = self.render(self.template_dir,base=self.base_template,globals=self.data)
-        output = unicode(getattr(templator,self.template)(content,*subcontent))
+    def apply(self, content = None, data = None, *subcontent):
+        if data == None:
+            data = {}
+        else:
+            self.data = dict(data)
+        if self.base_template != None:
+            templator = self.render(self.template_dir,base=self.base_template,globals=data)
+            output = unicode(getattr(templator,self.template)(content,*subcontent))
+        else:
+            templator = self.render(self.template_dir,globals=data)
+            output = unicode(getattr(templator,self.template)(content,*subcontent))
+            
         return output
         
     def get_dependency_filenames(self):

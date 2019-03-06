@@ -22,11 +22,12 @@ from templateengine_httk import TemplateEngineHttk
 from templateengine_templator import TemplateEngineTemplator
 from render_httk import RenderHttk
 from render_rst import RenderRst
+from functionhandler_httk import FunctionHandlerHttk
 
 import generate
 import render
 
-def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, allow_urls_without_ext = True, debug=True, config = None):
+def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, allow_urls_without_ext = True, debug=True, config = None, global_data = None):
 
     if baseurl == None:
         if port == 80:
@@ -34,14 +35,18 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
         else:
             baseurl="http://localhost:"+str(port)+"/"
 
-    global_data = {'baseurl':baseurl}
-
+    given_global_data = global_data
+    global_data = {}
+        
     if renderers == None:
         renderers = {'httkweb': RenderHttk, 'rst': RenderRst}
 
     if template_engines == None:
         template_engines = {'httkweb.html': TemplateEngineHttk, 'templator.html': TemplateEngineTemplator}
-       
+
+    if function_handlers == None:
+        function_handlers = {'py': FunctionHandlerHttk}
+      
     # Read global config
     if isinstance(config,dict):
         global_data.update(config)
@@ -58,15 +63,29 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
             else:
                 print "Could not find site configuration at "+str(srcdir)+"/"+str(config)+".(something)"
 
-    urls_without_ext = 'urls_without_ext' in global_data and global_data['urls_without_ext'] in ['yes', 'true', 'y']     
-    webgenerator = generate.WebGenerator(global_data, srcdir, renderers, template_engines, urls_without_ext=urls_without_ext, allow_urls_without_ext=allow_urls_without_ext)
+    if given_global_data is not None:
+        global_data.update(given_global_data)
+
+    urls_without_ext = 'urls_without_ext' in global_data and global_data['urls_without_ext'] in ['yes', 'true', 'y', True]     
+
+    global_data['_baseurl'] = baseurl
+    global_data['_basefunctionurl'] = baseurl
+    if urls_without_ext:
+        global_data['_functionext'] = ''
+    else:
+        global_data['_functionext'] = '.html'
+    global_data['_render_mode'] = 'serve'    
+    
+    webgenerator = generate.WebGenerator(global_data, srcdir, renderers, template_engines, function_handlers, urls_without_ext=urls_without_ext, allow_urls_without_ext=allow_urls_without_ext)
     
     class Httk_http_handler(BaseHTTPRequestHandler):
         _webgenerator = webgenerator
         
         def do_GET(self):
             parsed_path = urlparse.urlparse(self.path)
+                        
             relpath = parsed_path.path
+            query = dict(urlparse.parse_qsl(parsed_path.query))
 
             if relpath[0] == '/':
                 relpath = relpath[1:]
@@ -93,7 +112,7 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
                 ]
 
             try:
-                output = self._webgenerator.retrieve(relpath)
+                output = self._webgenerator.retrieve(relpath,query)
                 self.send_response(200)
                 self.send_header('Content-type',output['mimetype'])
                 self.end_headers()
@@ -120,6 +139,7 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
                 self.send_response(500)
                 self.send_header('Content-type','text/html')
                 self.end_headers()
+                print "== EXCEPTION OCCURED WHILE SERVING:",parsed_path
                 if debug:
                     self.wfile.write(cgitb.html(sys.exc_info()))
                     raise

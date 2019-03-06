@@ -313,9 +313,9 @@ class RenderHttk(object):
                 fifo = []
                 continue
 
-        print "== RESULT"
-        pprint.pprint(content)
-        print "=="
+        #print "== RESULT"
+        #pprint.pprint(content)
+        #print "=="
         return content
         
     def split_content(self,source):
