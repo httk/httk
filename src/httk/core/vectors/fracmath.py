@@ -128,7 +128,7 @@ def integer_sqrt(n):
 
 
 # sqrt from Python decimal
-def frac_sqrt(x, prec=default_accuracy, limit=True):        
+def frac_sqrt_old(x, prec=default_accuracy, limit=True):        
     iterprec = int(100/prec)
 
     # Check if there is an exact solution, in that case, make sure to return it
@@ -156,34 +156,101 @@ def frac_sqrt(x, prec=default_accuracy, limit=True):
         s = s.limit_denominator(1/prec)
     return s
 
+def frac_sqrt(x, prec=default_accuracy, limit=True):        
+    # Check if there is an exact solution, in that case, make sure to return it
+    sqrtnom = integer_sqrt(x.numerator)
+    sqrtdenom = integer_sqrt(x.denominator)
+    s = fractions.Fraction(sqrtnom, sqrtdenom)
+    if s*s == x:
+        return s
+    
+    # This actually accelerates convergence for 'large' numbers
+    if x > 2:
+        s = fractions.Fraction(integer_sqrt(x))
+    #This does not, if s is initialized to int_sqrt(num)/int_sqrt(denum)
+    #else:
+    #    s = (x+1)/2 
+
+    denom = int(100/prec)
+    sn = (s.numerator * denom) // s.denominator    
+    xn = (x.numerator * denom) // x.denominator    
+
+    while True:
+        lastsn = sn
+        sn = (sn*sn + xn*denom) // (2*sn)
+        if abs(sn-lastsn) < prec*denom:
+            break
+        
+    s = fractions.Fraction(sn,denom)
+        
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s
+
+
 
 #pi, exp, cos, sin adapted from python documentation examples:
 #https://docs.python.org/2/library/decimal.html
 def frac_cos(x, prec=default_accuracy, limit=True, degrees=False):        
-    iterprec = int(100/prec)
     if degrees:
         x *= frac_pi(prec=prec, limit=True)/180
     if abs(x) > 4:
         twopi = 2*frac_pi(prec=prec, limit=True)
         fac = (x/twopi).__trunc__()
         x -= fac*twopi
-    #x.limit_denominator(iterprec)
-    i, s, fact, num, sign = 0, 1, 1, 1, 1
+
+    denom = int(100/prec)
+    x2 = x**2
+    x2n = (x2.numerator * denom) // x2.denominator
+    i, sn, fact, numn, sign = 0, denom, 1, denom, 1
     while True:
-        lasts = s
         i += 2
         fact *= i * (i-1)
-        num *= x * x
+        numn = (numn * x2n) // denom
         sign *= -1
-        s += num / fact * sign
-        if abs(s-lasts) < prec:
+        deltan = numn * sign
+        deltad = fact
+        sn = (sn*deltad + deltan) // deltad
+
+        if abs(deltan) < prec*denom*deltad:
             break
+        
+    s = fractions.Fraction(sn,denom)
+        
     if limit:
         s = s.limit_denominator(1/prec)
     return s
 
 
 def frac_sin(x, prec=default_accuracy, limit=True, degrees=False):    
+    if degrees:
+        x *= frac_pi(prec=prec)/180
+    if abs(x) > 4:
+        twopi = 2*frac_pi(prec=prec)
+        fac = (x/twopi).__trunc__()
+        x -= fac*twopi
+        
+    denom = int(100/prec)
+    denom2 = denom**2
+    xn = (x.numerator * denom) // x.denominator    
+    xn2 = xn**2   
+    i, deltan, deltad, sn, fact, numn, sign = 1, denom, 1, xn, 1, xn, 1
+    while abs(deltan) > prec*deltad*denom:
+        i += 2
+        fact *= i * (i-1)
+        numn = (numn * xn2) // denom2
+        sign *= -1
+        deltan = numn * sign
+        deltad = fact
+        sn = (sn*deltad + deltan) // deltad
+        
+    s = fractions.Fraction(sn,denom)        
+        
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s
+
+def frac_sin_old(x, prec=default_accuracy, limit=True, degrees=False):    
     if degrees:
         x *= frac_pi(prec=prec)/180
     if abs(x) > 4:
@@ -203,7 +270,7 @@ def frac_sin(x, prec=default_accuracy, limit=True, degrees=False):
     return s
 
 
-def frac_exp(x, prec=default_accuracy, limit=True):
+def frac_exp_old(x, prec=default_accuracy, limit=True):
     """Return e raised to the power of x.  
     """
     i, lasts, s, fact, num = 0, 0, 1, 1, 1
@@ -217,8 +284,31 @@ def frac_exp(x, prec=default_accuracy, limit=True):
         s = s.limit_denominator(1/prec)
     return s
 
+def frac_exp(x, prec=default_accuracy, limit=True):
+    """Return e raised to the power of x.  
+    """
+    denom = int(100/prec)
+    xn = (x.numerator * denom) // x.denominator    
+    
+    deltan, deltad = denom, 1
+    i, sn, fact, numn = 0, denom, 1, denom
+    while abs(deltan) > prec*deltad*denom:
+        i += 1
+        fact *= i
+        numn = (numn * xn) // denom
+        deltan = numn 
+        deltad = fact
+        sn = (sn*deltad + deltan) // deltad
+        
+    s = fractions.Fraction(sn,denom)
+        
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s
 
-def frac_pi(prec=default_accuracy, limit=True):
+
+
+def frac_pi_old(prec=default_accuracy, limit=True):
     """Compute Pi to the precision prec.
     """
     if prec >= fractions.Fraction(1, 10000000000000):
@@ -236,6 +326,28 @@ def frac_pi(prec=default_accuracy, limit=True):
         s = s.limit_denominator(1/prec)
     return s 
 
+def frac_pi(prec=default_accuracy, limit=True):
+    """Compute Pi to the precision prec.
+    """
+    if prec >= fractions.Fraction(1, 10000000000000):
+        return fractions.Fraction(1812775448643948950904740389629316518445900010127,577024346734625462205756697620397878260206571339)
+
+    denom = int(100/prec)        
+    deltan, deltad, tn, sn, n, na, d, da = denom, 1, 3*denom, 3*denom, 1, 0, 0, 24
+    
+    while abs(deltan) > prec*deltad*denom:
+        n, na = n+na, na+8
+        d, da = d+da, da+32
+        deltan = tn*n
+        deltad = d
+        tn = (tn * n) // d        
+        sn = (sn*deltad + deltan) // deltad
+
+    s = fractions.Fraction(sn,denom)
+        
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s 
 
 #The below functions have been adapted from Brian Beck and Christopher Hesse's dmath v0.9.1
 #All modifications done are copyright (c) Rickard Armiento and licensed 
@@ -267,7 +379,7 @@ def frac_pi(prec=default_accuracy, limit=True):
 import math
 
 
-def frac_log(x, base=None, prec=default_accuracy, limit=True):
+def frac_log_old(x, base=None, prec=default_accuracy, limit=True):
     """Return the logarithm of x to the given base.
     
     If the base not specified, return the natural logarithm (base e) of x.
@@ -292,6 +404,75 @@ def frac_log(x, base=None, prec=default_accuracy, limit=True):
         lasts = s
         s -= 1 - x / frac_exp(s)
     s /= log_base
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s
+
+
+def frac_log(x, base=None, prec=default_accuracy, limit=True):
+    """Return the logarithm of x to the given base.
+    
+    If the base not specified, return the natural logarithm (base e) of x.
+    
+    TODO: Fix: this fails for moderately large arguments.
+    """
+    if x < 0:
+        raise ValueError("frac_log: logarithm of negative number.")
+    elif base == 1:
+        raise ValueError("frac_log: logarithm of base 1 not valid.")
+    elif x == base:
+        return fractions.Fraction(1)
+    elif x == 0:
+        raise ValueError("frac_log: logarithm of zero.")
+        
+    if base is None:
+        log_base = 1
+    else:
+        log_base = frac_log(base, prec=prec, limit=limit)
+
+    if x > 1:
+        inv = True
+        x = 1/x
+    else:
+        inv = False
+
+    # Tests give that we need more accuracy margin for this one
+    prec = prec/1000
+    denom = int(100/prec)
+    xn = (x.numerator * denom) // x.denominator    
+
+    deltan, deltad = denom, 1
+    sn = denom
+
+    def frac_inner_exp(xn):
+        deltan, deltad = denom, 1
+        i, sn, fact, numn = 0, denom, 1, denom
+        while abs(deltan) > prec*deltad*denom:
+            i += 1
+            fact *= i
+            numn = (numn * xn) // denom
+            deltan = numn 
+            deltad = fact
+            sn = (sn*deltad + deltan) // deltad
+        return sn
+    
+    while True:
+        en = frac_inner_exp(sn)
+        deltan = (en - xn)*denom
+        deltad = en
+        sn = (sn*deltad - deltan) // deltad
+        if (abs(deltan) < abs(prec*deltad*denom)):
+            break
+        
+    #print float(fractions.Fraction(sn,denom)),math.log(x)
+    #exit(0)
+        
+    if inv:
+        s = fractions.Fraction(-sn,denom)
+    else:
+        s = fractions.Fraction(sn,denom)
+    s /= log_base
+    
     if limit:
         s = s.limit_denominator(1/prec)
     return s
@@ -375,7 +556,7 @@ def frac_asin(x, degrees=False, prec=default_accuracy, limit=True):
 #    return atan2(x, D.sqrt(1 - x ** 2), frac = frac, limit=limit)
 
 
-def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
+def frac_acos_old(x, degrees=False, prec=default_accuracy, limit=True):
     """Return the arc cosine (measured in radians) of Decimal x."""
     iteracc = 1/(prec*100)
     if abs(x) > 1:
@@ -405,35 +586,74 @@ def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
         s = s*180/frac_pi(prec=prec, limit=limit)
     if limit:
         s = s.limit_denominator(1/prec)
+            
+    return s
+
+def frac_acos_alt(x, degrees=False, prec=default_accuracy, limit=True):
+    """Return the arc cosine (measured in radians) of Decimal x."""
+    if abs(x) > 1:
+        raise ValueError("Domain error: acos accepts -1 <= x <= 1")
+    
+    if x == -1:
+        return frac_pi(prec=prec, limit=limit)
+    elif x == 0:
+        return frac_pi(prec=prec, limit=limit) / 2
+    elif x == 1:
+        return fractions.Fraction(0)
+
+    denom = int(100/(prec))
+        
+    denom2 = denom*denom
+    s = frac_pi(prec=prec, limit=False) / 2 - x
+    sn = (s.numerator * denom) // s.denominator
+    xn = (x.numerator * denom) // x.denominator
+    xn2 = xn * xn
+            
+    i, gamman, fact, numn, deltan = 0, denom, 1, xn, denom
+    
+    while abs(deltan) > prec*denom:
+        i += 1
+        fact *= 2*i
+        numn = (numn * xn2)//denom2
+        gamman = 2*i*gamman - gamman
+        deltan = (gamman*numn) // ((2 * i + 1) * (fact*denom))
+        sn -= deltan
+        
+    s = fractions.Fraction(sn,denom)
+        
+    if degrees:
+        s = s*180/frac_pi(prec=prec, limit=limit)
+    if limit:
+        s = s.limit_denominator(1/prec)
+    
     return s
 
 
-# Alternative implementation
-#def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
-#     """Return the arccosine of x in radians."""
-#     if abs(x) > 1:
-#         raise ValueError("Domain error: acos accepts -1 <= x <= 1")
-#
-#     PI = frac_pi(prec=prec, limit=False)
-#
-#     if x == 1:
-#         return fractions.Fraction(0)
-#     else:
-#         if x == -1:
-#             return PI
-#         elif x == 0:
-#             return PI / 2
-#
-#     s = PI / 2 - frac_atan2(x, frac_sqrt(1 - x ** 2, prec=prec, limit=limit), prec=prec, limit=limit)
-#
-#     if degrees:
-#         s = s*180/PI
-#     if limit:
-#         s = s.limit_denominator(1/prec)
-#
-#     return s    
 
-def frac_atan(x, degrees=False, prec=default_accuracy, limit=True):
+# Alternative implementation
+def frac_acos(x, degrees=False, prec=default_accuracy, limit=True):
+    """Return the arccosine of x in radians."""
+    if abs(x) > 1:
+        raise ValueError("Domain error: acos accepts -1 <= x <= 1")
+    PI = frac_pi(prec=prec, limit=False)
+
+    if x == 1:
+        return fractions.Fraction(0)
+    else:
+        if x == -1:
+            return PI
+        elif x == 0:
+            return PI / 2
+
+    s = PI / 2 - frac_atan2(x, frac_sqrt(1 - x ** 2, prec=prec, limit=limit), prec=prec, limit=limit)
+
+    if degrees:
+        s = s*180/PI
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s    
+
+def frac_atan_old(x, degrees=False, prec=default_accuracy, limit=True):
     """Return the arctangent of x in radians."""
     iteracc = 1/(prec*100)
     
@@ -468,6 +688,55 @@ def frac_atan(x, degrees=False, prec=default_accuracy, limit=True):
     if limit:
         s = s.limit_denominator(1/prec)
     return s
+
+
+def frac_atan(x, degrees=False, prec=default_accuracy, limit=True):
+    """Return the arctangent of x in radians."""
+    
+    c = None
+    if x == 0:
+        return fractions.Fraction(0)
+    elif abs(x) > 1:
+        PI = frac_pi(prec=prec, limit=False)
+        if x < 0:
+            c = -PI / 2
+        else:
+            c = PI / 2
+        x = 1 / x
+
+    denom = int(100/prec)
+    
+    x_squared = x**2
+    y = x_squared / (1 + x_squared)    
+    yn = (y.numerator * denom) // y.denominator
+    s = y / x
+    sn = (s.numerator * denom) // s.denominator
+
+    i = 0
+    lasts = 0
+    coeffn = 1
+    coeffd = 1
+    numn = sn
+    deltan = denom
+
+    while abs(deltan) > prec*denom:
+        i += 2
+        coeffn = coeffn * i
+        coeffd = coeffd*(i + 1)
+        numn = (numn * yn) // denom 
+        deltan = (coeffn * numn)//coeffd
+        sn = sn + deltan
+        
+    s = fractions.Fraction(sn,denom)    
+        
+    if c:
+        s = c - s
+    if degrees:
+        s = s*180/frac_pi(prec=prec, limit=limit)
+    if limit:
+        s = s.limit_denominator(1/prec)
+    return s
+
 
 
 def frac_atan2(y, x, degrees=False, prec=default_accuracy, limit=True):
@@ -639,48 +908,71 @@ def frac_atan2(y, x, degrees=False, prec=default_accuracy, limit=True):
 # 
 #     return _tetrate(x,y)
 
-def run_alot(func,name,mathfun,fsmall, fmid, flarge):
+def run_alot(func,name,mathfun,fsmall, fmid, flarge,interval_within_one=False, positive=False, skip_worst=False):
     import time, random
 
     start_time = time.time()
     for i in range(1, 1000):
         func(fsmall)
     end_time = time.time()
-    print(name+" small: %s     (%s, %s)" % (end_time - start_time, float(func(fsmall)), mathfun(float(fsmall))))
+    print(name+" small: %s     (%s, %s) :: %s, %s" % (end_time - start_time, float(func(fsmall)), mathfun(float(fsmall)),(float(func(fsmall))-mathfun(float(fsmall)))/mathfun(float(fsmall)),float(default_accuracy)))
 
     start_time = time.time()
     for i in range(1, 1000):
         func(fmid)
     end_time = time.time()
-    print(name+" mid:   %s     (%s, %s)" % (end_time - start_time, float(func(fmid)), mathfun(float(fmid))))
+    print(name+" mid:   %s     (%s, %s) :: %s, %s" % (end_time - start_time, float(func(fmid)), mathfun(float(fmid)),(float(func(fmid))-mathfun(float(fmid)))/mathfun(float(fmid)),float(default_accuracy)))
 
     start_time = time.time()
     for i in range(1, 1000):
         func(flarge)
     end_time = time.time()
-    print(name+" large: %s     (%s, %s)" % (end_time - start_time, float(func(flarge)), mathfun(float(flarge))))
+    print(name+" large: %s     (%s, %s) :: %s, %s" % (end_time - start_time, float(func(flarge)), mathfun(float(flarge)),(float(func(flarge))-mathfun(float(flarge)))/mathfun(float(flarge)),float(default_accuracy)))
 
-    worst = None
-    worstevaldelta = None
-    for i in range(1, 1000):
-        frand = fractions.Fraction(random.randint(-10000000000000, 10000000000000), random.randint(1, 10000000000000))
-        is_time = time.time()
-        func(frand)
-        delta = time.time() - is_time
-        if worst is None or delta > worst:
-            worst = delta
-            worstval = frand
-        if worstevaldelta is None or abs(float(func(frand)) - mathfun(float(frand))) > worstevaldelta:
-            worstevaldelta = abs(float(func(frand))- mathfun(float(frand)))
-            worsteval = frand
-    print(name+" worst time: %s     %s   (%s, %s)" % (worst, worstval, float(func(worstval)), mathfun(float(worstval))))
-    print(name+" worst val:  %s     %s   (%s, %s)" % (worstevaldelta, worsteval, float(func(worstval)), mathfun(float(worstval))))
-    print worst
+    if not skip_worst:
+        worst = None
+        worstevaldelta = None
+        for i in range(1,1000):
+            if interval_within_one:
+                #frand = fractions.Fraction(random.randint(-100000000000, 100000000000), 10000000000000)
+                frand = fractions.Fraction(i, 1000)
+            elif positive:
+                frand = fractions.Fraction(random.randint(0, 10000000000000), random.randint(1, 10000000000000))
+            else:
+                frand = fractions.Fraction(random.randint(-10000000000000, 10000000000000), random.randint(1, 10000000000000))
+            is_time = time.time()
+            func(frand)
+            delta = time.time() - is_time
+            if worst is None or delta > worst:
+                worst = delta
+                worstval = frand
+            if worstevaldelta is None or abs(float(func(frand)) - mathfun(float(frand))) > worstevaldelta:
+                worstevaldelta = abs(float(func(frand))- mathfun(float(frand)))
+                worsteval = frand
+        print(name+" worst time: %s     %s   (%s, %s)" % (worst, worstval, float(func(worstval)), mathfun(float(worstval))))
+        print(name+" worst val:  %s     %s   (%s, %s)" % (worstevaldelta, worsteval, float(func(worstval)), mathfun(float(worstval))))
+        print worst
 
 def main():
-    import math, time
+    import math, time, decimal
+
+    decimal.getcontext().prec = 1000
     
+    pistr = "3.141592653589793238462643383279502884197169399375105820974944592307816406286"+\
+    "208998628034825342117067982148086513282306647093844609550582231725359408128481"+\
+    "117450284102701938521105559644622948954930381964428810975665933446128475648233"+\
+    "786783165271201909145648566923460348610454326648213393607260249141273724587006"+\
+    "606315588174881520920962829254091715364367892590360011330530548820466521384146"+\
+    "951941511609433057270365759591953092186117381932611793105118548074462379962749"+\
+    "567351885752724891227938183011949129833673362440656643086021394946395224737190"+\
+    "702179860943702770539217176293176752384674818467669405132000568127145263560827"+\
+    "785771342757789609173637178721468440901224953430146549585371050792279689258923"+\
+    "542019956112129021960864034418159813629774771309960518707211349999998372978049"+\
+    "951059731732816096318595024459455346908302642522308253344685035261931188171010"+\
+    "003137838752886587533208381420617177669147303598253490428755468731159562863882"  
     #print any_to_fraction("0.3333")
+
+    pi = decimal.Decimal(pistr)
     
     #exit(0)
     #f = fractions.Fraction('99999999992')
@@ -698,10 +990,35 @@ def main():
     #print "DELTA", delta
     #exit(0)
 
-    run_alot(frac_sqrt,"sqrt", math.sqrt,fsmall,fmid,flarge)
-    #run_alot(frac_cos,"cos", math.cos,fsmall,fmid,flarge)
-    #run_alot(frac_sin,"sin", math.sin,fsmall,fmid,flarge)
-    #run_alot(frac_acos,"acos", math.acos,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001))
+    start_time = time.time()
+    for i in range(1, 1000):        
+        frac_pi()
+    end_time = time.time()
+    print("pi small: %s     (%s, %s) :: %s, %s" % (end_time - start_time, float(frac_pi()),math.pi,(float(frac_pi())-math.pi)/math.pi,default_accuracy))
+
+    for iprec in range(10, 100):
+        start_time = time.time()
+        prec = fractions.Fraction(1,10**iprec)
+        val = frac_pi(prec=prec)
+        end_time = time.time()
+        dec = val.numerator / decimal.Decimal(val.denominator)
+        print(end_time-start_time, float((dec-pi)/pi), float(prec), dec)
+    
+    #frac_pi(prec=fractions.Fraction(1,10000))
+
+    #run_alot(frac_exp_old,"exp_old", math.exp,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001),interval_within_one=True)
+    #run_alot(frac_log_old,"log_old", math.log,fsmall,fmid,flarge,positive=True)
+    #run_alot(frac_log_old,"log_old", math.log,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001),skip_worst=True)
+    run_alot(frac_log,"log", math.log,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001),skip_worst=True)
+    run_alot(frac_log,"log", math.log,fsmall,fmid,fmid,positive=True)
+    run_alot(frac_exp,"exp", math.exp,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001),interval_within_one=True)
+    run_alot(frac_sqrt,"sqrt", math.sqrt,fsmall,fmid,flarge,positive=True)
+    run_alot(frac_cos,"cos", math.cos,fsmall,fmid,flarge)
+    run_alot(frac_sin,"sin", math.sin,fsmall,fmid,flarge)
+    run_alot(frac_acos,"acos", math.acos,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(1000,1001),interval_within_one=True)
+    #run_alot(frac_acos,"acos1", math.acos,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(100,1001))
+    #run_alot(frac_acos,"acos", math.acos,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(100,101))
+    #run_alot(frac_acos,"acos", math.acos,fractions.Fraction(1,100),fractions.Fraction(1,2),fractions.Fraction(100,150))
 
 if __name__ == "__main__":
     main()
