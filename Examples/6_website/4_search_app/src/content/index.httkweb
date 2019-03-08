@@ -1,0 +1,10 @@
+---
+Title: Search
+Date: 2018-08-16
+Version: 1
+Author: Rickard Armiento
+Template: search_page
+search_result-function: search:q,!compound:search_result
+material_details-function: details:compound:material_details
+base_template_app: base_app
+---

@@ -2,8 +2,7 @@
 
 import os, shutil, sys
 
-import httk 
-from httk.httkweb import render_website
+from httk.httkweb import publish
 
 if not os.path.exists("public"):
     os.mkdir("public")
@@ -16,7 +15,7 @@ for filename in os.listdir("public"):
         else:
             os.unlink(f)
 
-render_website("src","public",'http://127.0.0.1/')
+publish("src","public",'http://127.0.0.1/')
 
 sys.stdout.write("*****\nNow open public/index.html in your web browser.\n*****\n")
 

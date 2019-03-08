@@ -2,6 +2,7 @@
 
 import os, shutil, sys
 
+import httk 
 from httk.httkweb import publish
 
 if not os.path.exists("public"):

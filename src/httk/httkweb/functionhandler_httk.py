@@ -17,20 +17,27 @@
 import sys, os
 
 from importlib import import_module
+from helpers import UnquotedStr
 
 class FunctionHandlerHttk(object):
-    def __init__(self, function_dir, function, args, instanced_template_engine, global_data):
+    def __init__(self, function_dir, function_filename, arg_names, global_data, instanced_template_engine = None):
         self.global_data = global_data
         self.function_dir = function_dir
-        self.function = os.path.splitext(function)[0]
-        self.args = args
+        self.arg_names = arg_names
+        self.function_name = function_filename.split(os.extsep)[0]
         self.instanced_template_engine = instanced_template_engine
-        self.filename = os.path.join(function_dir, function)
-        self.dependency_filenames = [self.filename] + instanced_template_engine.get_dependency_filenames()
-        sys.path.append(function_dir)
-        self.imported_module = import_module(function)
+        self.filename = os.path.join(function_dir, function_filename)
+        self.dependency_filenames = [self.filename]
         
-    def execute(self, args):
+        if instanced_template_engine is not None:
+            self.dependency_filenames += instanced_template_engine.get_dependency_filenames()
+         
+        sys.path.append(function_dir)
+        self.imported_module = import_module(self.function_name)
+        
+    def execute(self, args = None):
+        if args is None:
+            args = {}
         callargs = dict(args)
         callargs['global_data'] = self.global_data
         return self.imported_module.execute(**callargs)
@@ -39,7 +46,7 @@ class FunctionHandlerHttk(object):
         output = self.execute(args)
         joint = dict(data)
         joint['result']=output
-        return self.instanced_template_engine.apply(data=joint)
+        return UnquotedStr(self.instanced_template_engine.apply(data=joint))
 
     def get_dependency_filenames(self):
         return self.dependency_filenames

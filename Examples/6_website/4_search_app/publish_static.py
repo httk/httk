@@ -15,7 +15,7 @@ for filename in os.listdir("public"):
         else:
             os.unlink(f)
 
-publish("src","public",'http://127.0.0.1/')
+publish("src","public",'./')
 
 sys.stdout.write("*****\nNow open public/index.html in your web browser.\n*****\n")
 

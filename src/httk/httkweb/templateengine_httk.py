@@ -19,12 +19,20 @@
 #   https://makina-corpus.com/blog/metier/2016/the-worlds-simplest-python-template-engine
 #   https://github.com/ebrehault/superformatter
 
-import string, os, codecs
+import string, os, codecs, cgi
+
+from helpers import UnquotedStr
 
 class HttkTemplateFormatter(string.Formatter):
 
-    def format_field(self, value, spec):
-        if spec.startswith('repeat:'):
+    def format_field(self, value, spec, quote=None):
+        if spec == 'unquoted' or spec.startswith('unquoted:'):
+            output = self.format_field(value, spec[len('unquoted:'):],quote=False)
+            return output
+        elif spec == 'quote' or spec.startswith('quote:'):
+            output = self.format_field(value, spec[len('quote:'):],quote=True)
+            return output
+        elif spec.startswith('repeat:'):
             template = spec.partition(':')[-1]
             if type(value) is dict:
                 value = value.items()
@@ -44,10 +52,34 @@ class HttkTemplateFormatter(string.Formatter):
                 return (value and split[1]) or split[2]
             else:
                 return (value and split[1]) or ''
+        elif spec.startswith('if-set:'):
+            split = spec.split(':')                           
+            if value is not None:
+                return split[1]
+            elif len(split)>2:
+                return split[2]
+            else:
+                return ''    
         elif value==None: 
             return ""
         else:
-            return super(HttkTemplateFormatter, self).format_field(value, spec)
+            output = super(HttkTemplateFormatter, self).format_field(value, spec)
+            if quote is None:
+                try:
+                    if isinstance(value,UnquotedStr):
+                        quote = False
+                    else:
+                        quote = True
+                except TypeError:
+                    quote = True
+            if quote:
+                output = cgi.escape(output,quote=True)
+                output = output.replace(":", "&#58;") 
+                output = output.replace("'", "&apos;") 
+            #if type(value) != unicode and type(value) != str:
+            #    return output + "("+str(type(value))+":"+str(quote)+":"+str(e)+")"
+            #else:
+            return output
 
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
@@ -59,18 +91,17 @@ class HttkTemplateFormatter(string.Formatter):
         return val 
 
 class TemplateEngineHttk(object):
-    def __init__(self, template_dir, template, base_template = None):
+    def __init__(self, template_dir, template_filename, base_template_filename = None):
         self.template_dir = template_dir
-        self.template = template
-        self.dependency_filenames = [os.path.join(self.template_dir,self.template)]
-        if base_template != None:
-            if base_template.endswith("httkweb.html"):
-                self.base_template = base_template
-            else:
-                self.base_template = base_template+".httkweb.html"                            
-            self.dependency_filenames += [os.path.join(self.template_dir,self.base_template)]
+        self.template_filename = template_filename
+        self.filename = os.path.join(template_dir, template_filename)
+        
+        self.dependency_filenames = [self.filename]
+        if base_template_filename is not None:
+            self.base_filename = os.path.join(self.template_dir,base_template_filename)
+            self.dependency_filenames += [self.base_filename]            
         else:
-            self.base_template = None
+            self.base_filename = None
 
         self.httk_tf = HttkTemplateFormatter()
         
@@ -82,7 +113,7 @@ class TemplateEngineHttk(object):
             data = dict(data)
         self.httk_tf.data = data
         
-        with codecs.open(os.path.join(self.template_dir,self.template),encoding='utf-8') as f:
+        with codecs.open(self.filename,encoding='utf-8') as f:
             template = f.read()
 
         data['content'] = content        
@@ -90,11 +121,11 @@ class TemplateEngineHttk(object):
 
         output = self.httk_tf.format(template,**data)
         
-        if self.base_template != None:
-            with codecs.open(os.path.join(self.template_dir,self.base_template),encoding='utf-8') as f:
+        if self.base_filename is not None:
+            with codecs.open(self.base_filename,encoding='utf-8') as f:
                 base_template = f.read()
                 
-                data['content'] = output
+                data['content'] = UnquotedStr(output)
                 del data['subcontent']
                 
                 output = self.httk_tf.format(base_template,**data)

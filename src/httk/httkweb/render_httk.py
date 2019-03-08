@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re, StringIO, cgi, pprint, unicodedata
+import re, StringIO, cgi, pprint, unicodedata, codecs, os
 import ConfigParser
 
 class RenderHttk(object):
@@ -30,10 +30,25 @@ class RenderHttk(object):
     bullet_item_markers = ['- ', '* ', '+ ']
     option_list_characters = ['-','/']
     
-    def __init__(self, global_data, data):
+    def __init__(self, render_dir, render_filename, global_data):
+        
+        self.render_dir = render_dir
+        self.render_filename = render_filename
+        self.filename = os.path.join(render_dir, render_filename)
+        
+        with codecs.open(self.filename, 'r', encoding='utf-8') as f:
+            source = f.read()
+    
         self.global_data = global_data
-        self.data = data
-        self.split_content(data)
+
+        if render_dir != '':
+            owd = os.getcwd()
+            os.chdir(render_dir)
+        try:
+            self.split_content(source)
+        finally:
+            if render_dir != '':
+                os.chdir(owd)
 
     def make_id(self, s):
         s = unicodedata.normalize('NFKD', s).encode('ascii','ignore')
