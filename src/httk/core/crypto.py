@@ -259,12 +259,12 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
             else:
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir, 'ht.config')):
                     if force or (not os.path.exists(os.path.join(fulldir, 'ht.manifest.bz2'))):
-                        submanifestfile = bz2.BZ2File(os.path.join(fulldir, 'ht.tmp.manifest.bz2'), 'w')
-                        print "Generating manifest:", os.path.join(fulldir, 'ht.manifest.bz2')
-                        manifest_dir(fulldir, submanifestfile, os.path.join(fulldir, 'ht.config'), keydir, sk, pk)
+                        submanifestfile = bz2.BZ2File(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), 'w')
+                        print "Generating manifest:", os.path.join(basedir, fulldir, 'ht.manifest.bz2')
+                        manifest_dir(os.path.join(basedir, fulldir), submanifestfile, os.path.join(basedir, fulldir, 'ht.config'), keydir, sk, pk)
                         submanifestfile.close()
-                        os.rename(os.path.join(fulldir, 'ht.tmp.manifest.bz2'), os.path.join(fulldir, 'ht.manifest.bz2'))
-                    hh = sha256file(os.path.join(fulldir, 'ht.manifest.bz2'))
+                        os.rename(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
+                    hh = sha256file(os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
                     manifestfile.write(hh+" "+fulldir+"/\n")
                     message += hh+" "+fulldir+"/\n"
                     if debug:

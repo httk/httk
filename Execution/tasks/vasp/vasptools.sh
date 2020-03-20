@@ -619,6 +619,7 @@ function VASP_STDOUT_CHECKER {
     /REAL_OPTLAY: internal error/ {print "REAL_OPTLAY" >> msgfile;}
 
     /internal ERROR RSPHER/ {print "RSPHER" >> msgfile;}
+    /RSPHER: internal ERROR:/ {print "RSPHER" >> msgfile; exit 2}
 
     /WARNING: DENTET: can'"'"'t reach specified precision/ {print "DENTET" >> msgfile;}
 

@@ -30,7 +30,7 @@ class Computation(HttkObject):
     @httk_typed_init({'computation_date': str, 'description': str, 'code': Code, 
                       'manifest_hash': str, 'signatures': [Signature], 'keys': [SignatureKey], 'relpath': str,
                       'project_counter': int},
-                     index=['computation_date', 'added_date', 'description', 'code', 'manifest_hexhash',
+                     index=['computation_date', 'added_date', 'description', 'code', 'manifest_hash',
                             'signatures', 'keys', 'project_counter'])
     def __init__(self, computation_date, description, code, 
                  manifest_hash, signatures, keys, relpath, project_counter, added_date=None):

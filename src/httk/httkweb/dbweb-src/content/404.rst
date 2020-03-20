@@ -1,0 +1,7 @@
+:Title: 404 Error
+:Date: 2001-08-16
+:Version: 1
+:Author: Rickard Armiento
+:Layout: index
+
+This page was not found, 404

@@ -1,0 +1,34 @@
+---
+Title: Front page
+Date: 2018-08-16
+Version: 1
+Author: Rickard Armiento
+Template: default
+
+Address: Example Street 123
+          Sweden
+Contact: example@example.com
+organization: httk
+field name: This is a generic bibliographic field.
+field name 2:
+    Generic bibliographic fields may contain multiple body elements.
+
+    Like this.
+---
+
+This is the front page
+======================
+
+You can write with *emphasis*, **strong emphasis**, and as `interpreted text`.
+
+This is an anchor link: `You can do subtitles`_
+
+You escape, e.g., \* and \`` with \\
+
+
+You can do subtitles
+--------------------
+Welcome to this page.
+
+You can do external hyperlinks, like `Python <http://www.python.org/>`_.
+

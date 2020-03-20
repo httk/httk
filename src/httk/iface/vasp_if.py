@@ -150,7 +150,7 @@ def copy_template(dirtemplate, dirname, templatename):
     shutil.copytree(dirtemplate, template, True)
 
 
-def poscar_to_strs(fio):
+def poscar_to_strs(fio, included_decimals=''):
     """
     Parses a file on VASPs POSCAR format. Returns 
       (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
@@ -211,17 +211,25 @@ def poscar_to_strs(fio):
         coords_reduced = False
 
     coords = []
-    for i in range(N):
-        nxt = next(fi)
-        strcoord = nxt.strip().split()[:3]
-        coord = map(lambda x: x.strip(), strcoord)
-        coords.append(coord)
+    if included_decimals == '':
+        for i in range(N):
+            nxt = next(fi)
+            strcoord = nxt.strip().split()[:3]
+            coord = map(lambda x: x.strip(), strcoord)
+            coords.append(coord)
+    else:
+        for i in range(N):
+            nxt = next(fi)
+            strcoord = nxt.strip().split()[:3]
+            tempcoord = map(lambda x: x.strip(), strcoord)
+            coord = map(lambda x: x[0:2+included_decimals], tempcoord)
+            coords.append(coord)
 
     return (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
 
 
-def poscar_to_structure(f):
-    cell, scale, volume, coords, coords_reduced, counts, occupations, comment = poscar_to_strs(f)
+def poscar_to_structure(f, included_decimals=''):
+    cell, scale, volume, coords, coords_reduced, counts, occupations, comment = poscar_to_strs(f, included_decimals)
 
     frac_cell = FracVector.create(cell, simplify=True)
     counts = [int(x) for x in counts]

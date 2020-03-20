@@ -495,6 +495,8 @@ function HT_TASK_FOLLOW_FILE {
           } 
           if(!$noexitpid && !kill 0, $exitpid) { $finished = 1 };
           #print { STDERR } "CHECK:",$filename,"\n";
+	  #select()->flush();
+	  $|=1;
 	  seek($filevar, $curpos, 0);
         }
         # Make sure we have seen the last part

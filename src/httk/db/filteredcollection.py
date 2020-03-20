@@ -648,6 +648,11 @@ class Expression(object):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
         return BinaryBooleanOp(self._context, "IN", self, args)
 
+    def like(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "LIKE", self, args)
+
     def __and__(self, other):
         if not self._exprtype in ('bool', 'unknown'):
             raise Exception("Syntax error: and with expression of wrong type.")
@@ -724,6 +729,10 @@ class BinaryBooleanOp(Expression):
             l = fc_eval(self._args[0], data)
             r = fc_eval(self._args[1], data)
             return (l and (not r)) or ((not l) and r)
+        elif self._operator == 'IN':
+            raise Exception("Not supported yet")
+        elif self._operator == 'LIKE':
+            raise Exception("Not supported yet")
         else:
             raise Exception("Syntax Error")
 
@@ -732,6 +741,8 @@ class BinaryBooleanOp(Expression):
             return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
         elif self._operator in ('IN'):
             return "("+fc_sql(self._args[0]) + " IN (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"            
+        elif self._operator in ('LIKE'):
+            return "("+fc_sql(self._args[0]) + " LIKE (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"            
         else:
             raise Exception("Syntax Error generating SQL for operator: " + self._operator)
 

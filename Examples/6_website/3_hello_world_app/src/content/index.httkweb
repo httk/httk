@@ -1,0 +1,13 @@
+---
+Title: Search
+Date: 2018-08-16
+Version: 1
+Author: Rickard Armiento
+hello_world-function: hello_world::hello_world_result
+---
+
+============================================
+This example runs a function that greets you
+============================================
+
+The output is shown below.
