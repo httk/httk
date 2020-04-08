@@ -246,6 +246,9 @@ function VASP_PREPARE_POTCAR {
     local SPECIESLIST=$(awk -v "line=$POSCARSPECIESLINE" 'NR==line { for(i=1;i<=NF;i++) { printf("%s ",$i) } }' "$POSCAR")
     for SPECIES in $SPECIESLIST; do
 	for PRIORITY in "_3" "_2" "_d" "_pv" "_sv" "" "_h" "_s"; do
+            if [ "${SPECIES}${PRIORITY}" == "Ru_pv" ]; then
+              PRIORITY="_sv" # Ru_pv has probelm converging in the ground state
+            fi
 	    if [ -d "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}" ]; then
 	      if [ -e "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" ]; then
 		  cat "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" >> "$POTCAR"
