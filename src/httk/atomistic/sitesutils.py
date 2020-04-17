@@ -265,6 +265,7 @@ def sites_tidy(sites, backends=['platon']):
 
 
 def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
+    # TODO: This routine is quite slow and can certainly be speed up.
     symops = spacegrouputils.get_symops(hall_symbol)
     newcoordgroups = []
     for coordgroup in coordgroups:

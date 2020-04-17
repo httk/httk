@@ -356,7 +356,7 @@ def cifdata_to_struct(cifdata, debug=False):
             ratio = element['atom_site_occupancy'][atom]
         else:
             ratio = 1
-        symbol = element['atom_site_label'][atom].rstrip('1234567890')
+        symbol = str(re.match('[A-Z][a-z]?',element['atom_site_label'][atom]).group(0))
         
         occup = {'atom': periodictable.atomic_number(symbol), 'ratio': FracVector.create(ratio), }
         coord = [element['atom_site_fract_x'][atom], element['atom_site_fract_y'][atom], element['atom_site_fract_z'][atom]]

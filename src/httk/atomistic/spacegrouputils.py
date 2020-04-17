@@ -179,7 +179,15 @@ settings = [['b1', 'monoclinic unique axis b, cell choice 1, abc'],
             ['1', 'tetragonal or cubic origin choice 1'],
             ['2', 'tetragonal or cubic origin choice 2'],
             ['h', 'trigonal using hexagonal axes'],
-            ['r', 'trigonal using rhombohedral axes']]
+            ['r', 'trigonal using rhombohedral axes'],
+            ['a', 'unique axis a'],
+            ['b', 'unique axis b'],
+            ['c', 'unique axis c'],
+            ['1', 'origin choice 1'],
+            ['2', 'origin choice 2'],
+            ['h', 'hexagonal axes'],
+            ['r', 'rhombohedral axes'],
+            ]
 
 
 def symopsmatrix(symop):
@@ -223,7 +231,8 @@ def get_nonstandard_hall(nonstd_hall):
 
 def get_itcnbr_setting(itcnbr, setting):
     try:
-        itcnbr = int(itcnbr)
+        # Just try the conversion to see if it is a number
+        int(itcnbr)
     except Exception:
         return None
     for hall in spacegroupdata:
@@ -243,7 +252,7 @@ def get_hm_setting(hm, setting):
 def filter_itcnbr_setting(itcnbr, setting=None, halls=None):
     try:
         itcnbr = str(int(itcnbr))
-    except Exception:
+    except Exception:        
         return []
     if halls is None:
         halls = spacegroupdata.keys()
@@ -336,7 +345,10 @@ def spacegroup_filter(parse):
     if p[2].strip() == '':
         setting = None
     else:
-        setting = p[2].tolower()
+        setting = p[2].lower()
+        for s in settings:
+            if setting == s[1]:
+                setting = s[0]
 
     if setting is None:
         for s in settings:
