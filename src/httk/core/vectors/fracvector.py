@@ -372,17 +372,18 @@ class FracVector(Vector):
         """
         if self._dim is None:
             dimchk = self.noms
-            self._dim = ()
+            self._dim = []
             while True:
                 try:
                     d = len(dimchk)
                 except TypeError:
                     break
                 if d > 0:
-                    self._dim += (d,)
+                    self._dim += [d,]
                     dimchk = dimchk[0]
                 else:
                     break
+            self._dim = tuple(self._dim)
         return self._dim
 
     @property
