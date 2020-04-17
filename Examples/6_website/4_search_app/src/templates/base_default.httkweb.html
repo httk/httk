@@ -27,8 +27,8 @@
 				<span class="caret"></span> <span class="sr-only"></span>
 			</button>
 			<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-				{other_websites_names:repeat-index: 
-				<a class="dropdown-item" href="{{getitem:call:{{{{other_websites_urls}}}}:{{index}}}}">{{getitem:call:{{{{other_websites_names}}}}:{{index}}}}</a>
+				{other_websites_names:repeat:: 
+				<a class="dropdown-item" href="{{other_websites_urls:getitem:{{index}}}}">{{item}}</a>
 				}
 			</div>
 		</div>
@@ -41,7 +41,7 @@
 
 		<div class="collapse navbar-collapse">
 			<ul class="navbar-nav nav ml-auto">
-				{menuitems:repeat:
+				{menuitems:repeat::
 				<li class="nav-item"><a class="nav-link"
 					href="{page.relbaseurl}/{{pages:call:{{item}}:relurl}}">{{pages:call:{{item}}:title}}</a>
 				</li> }

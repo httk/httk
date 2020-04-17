@@ -32,18 +32,18 @@ def setup_template_helpers(global_data):
             if val:
                 return val
     
-    def getitem(a,i):
+    #def getitem(a,i):
         #try:
         #    return global_data[a][i]
         #except TypeError:
         #    return global_data[a][int(i)]
-        try:
-            return a[i]
-        except TypeError:
-            return a[int(i)]
+    #    try:
+    #        return a[i]
+    #    except TypeError:
+    #        return a[int(i)]
         
     global_data['first_value'] = first_value
-    global_data['getitem'] = getitem
+    # global_data['getitem'] = getitem
     
     
 def identify(topdir, relative_url, ext_to_class_mapper, allow_urls_without_ext=True):

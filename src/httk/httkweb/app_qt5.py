@@ -30,14 +30,25 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
         from PyQt5.QtWebEngineCore import QWebEngineUrlSchemeHandler, QWebEngineUrlRequestInterceptor
         from PyQt5.QtWebChannel import QWebChannel
     except ImportError as e:
-        raise Exception("This UI of this app cannot run without a version of PyQt5 with QtWebEngine. Error message on import was: "+str(e))
+        try:
+            from PySide2 import QtCore, QtWidgets
+
+            #QtCore.Signal = QtCore.pyqtSignal
+            #QtCore.Slot = QtCore.pyqtSlot
+
+            from PySide2.QtCore import QUrl, QObject
+            from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
+            from PySide2.QtWebEngineCore import QWebEngineUrlSchemeHandler, QWebEngineUrlRequestInterceptor
+            from PySide2.QtWebChannel import QWebChannel
+        except ImportError as e:
+            raise Exception("This UI of this app cannot run without a version of PyQt5 with QtWebEngine. Error message on import was: "+str(e))
 
     class WebEnginePage(QWebEnginePage):
         def javaScriptConsoleMessage(self, level, msg, line, source):
             print 'Console (%s): %s line %d: %s' % (level, source, line, msg)
     
     class Backend(QObject):
-        @pyqtSlot(str,result=str)
+        @QtCore.pyqtSlot(str,result=str)
         def test(self,msg):
             pass
             #print 'call received:'+msg

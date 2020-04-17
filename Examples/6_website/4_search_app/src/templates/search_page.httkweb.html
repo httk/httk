@@ -3,7 +3,7 @@
     <span style="display: inline-block; text-align:left; width:50%">
       <h3 style="background-color: lightgrey; padding: 0em; margin: 0em;">Search for Materials</h3>
       (Can enter names and symbols)<br/>
-      <input type="text" id="q" style='width:90%' name="q" value="{query[q]:if-set:{query[q]}:Aluminium}"/><br/>
+      <input type="text" id="q" style='width:90%' name="q" value="{query[q]:if-set::{query[q]}}{query[q]:if-unset::Aluminium}"/><br/>
       <div style="height:0.3em"></div>
       <input type="submit" name="submit" value="submit"/><br/>
     </span>
