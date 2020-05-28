@@ -27,7 +27,7 @@ from httk.atomistic import Structure, Spacegroup
 
 def cif_to_struct(ioa, backends=['internal', 'cif2cell', 'ase', 'platon']):
     for backend in backends:
-        #print "CIF TO STRUCT BACKEND",backend
+        #print("CIF TO STRUCT BACKEND",backend)
         if backend == 'internal':
             try:
                 cifdata, cifheader = httk.httkio.read_cif(ioa)
@@ -285,12 +285,12 @@ def cif_reader_httk_preprocessed(ioa):
     only_rc_struct._rc_cell = newstruct._rc_cell
     # Make sure the hexhash is recomputed
     only_rc_struct.rc_sites._hexhash = None
-    #print "CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
-    #print "CHECK THIS:", newstruct.cellobj.to_tuple(), only_rc_struct.cellobj.to_tuple()
+    #print("CHECK THIS:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash)
+    #print("CHECK THIS:", newstruct.cellobj.to_tuple(), only_rc_struct.cellobj.to_tuple())
     if newstruct.rc_sites.hexhash != only_rc_struct.rc_sites.hexhash:
-        #print "Cell mismatch:",cell_mismatch
-        print "Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash
-        #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
+        #print("Cell mismatch:",cell_mismatch)
+        print("Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash)
+        #print("Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple())
         raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
     return newstruct
 
@@ -364,7 +364,7 @@ def cifdata_to_struct(cifdata, debug=False):
         rc_occupancies += [occup]
         rc_reduced_occupationscoords += [coord]
 
-    #print "X",rc_lengths,rc_angles,rc_reduced_occupationscoords,rc_occupancies,spacegroup,setting,wyckoff_symbols,multiplicities
+    #print("X",rc_lengths,rc_angles,rc_reduced_occupationscoords,rc_occupancies,spacegroup,setting,wyckoff_symbols,multiplicities)
 
     tags = {}
     if 'chemical_name_common' in element:

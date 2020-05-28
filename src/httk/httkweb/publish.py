@@ -55,8 +55,8 @@ def publish(srcdir,outdir,baseurl,renderers = None, template_engines = None, fun
             
             output = webgenerator.retrieve(full_rel_url,all_functions=True)
             if(len(output['functions'])>0):
-                print "WARNING: "+full_rel_url+" has dynamic functions: " + (", ".join([x['name'] for x in output['functions']]))
-                print "These must be translated into cgi scripts, which is not yet automated."
+                print("WARNING: "+full_rel_url+" has dynamic functions: " + (", ".join([x['name'] for x in output['functions']])))
+                print("These must be translated into cgi scripts, which is not yet automated.")
             
             f_in = output['content']
             with codecs.open(os.path.join(outdir,full_rel_output_filename),'w',encoding='utf-8') as f_out:

@@ -1412,114 +1412,114 @@ def main():
     fv1 = FracVector.create(data2,100)
     fv2 = FracVector.create(data1)
 
-    print fv1
+    print(fv1)
     
-    print fv2
+    print(fv2)
     
-    print "===",any_to_fraction('8.04'),any_to_fraction('3.72'),any_to_fraction('7.38')
+    print("===",any_to_fraction('8.04'),any_to_fraction('3.72'),any_to_fraction('7.38'))
     data3 = [[fractions.Fraction(185,23), 0, 0], [0, fractions.Fraction(67,18), 0], [0, 0, fractions.Fraction(59,8)]]
-    print FracVector.create(data3)
+    print(FracVector.create(data3))
     
     exit(0)
     
-    print "PI=",float(frac_pi(prec=fractions.Fraction(1,100000000000))),math.pi
+    print("PI=",float(frac_pi(prec=fractions.Fraction(1,100000000000))),math.pi)
     
-    print FracVector.create('120').cos(limit=False, degrees=True)
-    print FracVector.create_cos('120',limit=False, degrees=True)
+    print(FracVector.create('120').cos(limit=False, degrees=True))
+    print(FracVector.create_cos('120',limit=False, degrees=True))
     exit(0)
     
-    print "==== Simple things:"
+    print("==== Simple things:")
     a = FracVector.create([[2, 7, 5], [3, 5, 4], [4, 6, 7]])
-    print a
-    print "Max value,", a.max(), "at position:", a.argmax(), "all pos:", a.nargmax()
-    print "Min value,", a.min(), "at position:", a.argmin(), "all pos:", a.nargmin()
-    print
+    print(a)
+    print("Max value,", a.max(), "at position:", a.argmax(), "all pos:", a.nargmax())
+    print("Min value,", a.min(), "at position:", a.argmin(), "all pos:", a.nargmin())
+    print()
     b = FracVector([1, 2, 3, 4])
     # NOTE: cannot do b + [5] to append, because that is interpreted as vector addition
-    print b.get_append(5)
-    print b.argmax()
-    print tuple_index((5,))
-    print
+    print(b.get_append(5))
+    print(b.argmax())
+    print(tuple_index((5,)))
+    print()
     
-    print list(get_continued_fraction(10, 1333))
+    print(list(get_continued_fraction(10, 1333)))
 
     data = 0.33333
 
-    print best_rational_in_interval(data-0.000005, data+0.000005)    
+    print(best_rational_in_interval(data-0.000005, data+0.000005)    )
 
     data = 0.12312
 
-    print best_rational_in_interval(data-0.000005, data+0.000005), 41.0/333
+    print(best_rational_in_interval(data-0.000005, data+0.000005), 41.0/333)
 
     
-    print FracVector.create(["0.33342(10)"])    
-    print FracVector.create(["0.33352(10)"])    
-    print FracVector.create(["0.33342(10)","0.33352(10)"])    
-    print "==="
-    print FracVector.create('0.5').cos()
+    print(FracVector.create(["0.33342(10)"])    )
+    print(FracVector.create(["0.33352(10)"])    )
+    print(FracVector.create(["0.33342(10)","0.33352(10)"])    )
+    print("===")
+    print(FracVector.create('0.5').cos())
     exit(0)
     print(a)
     print(a.T())
     print(a.inv())
-    print a.to_floats()
-    print a.zeros((5, 7))
-    print a.eye((5, 5))
-    print a.eye((5, 7))
+    print(a.to_floats())
+    print(a.zeros((5, 7)))
+    print(a.eye((5, 5)))
+    print(a.eye((5, 7)))
     # TODO: Is this right? Need to think about identity tensors of order > 2
-    print a.eye((3, 3, 3))
-    print
-    print "==== Numpy conversion:"
+    print(a.eye((3, 3, 3)))
+    print()
+    print("==== Numpy conversion:")
     try:
         import numpy
         x = numpy.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
         a = FracVector.create(x)
-        print "Original numpy array:", x
-        print "FracVector:", a
-        print "FracVector as floats:", a.to_floats()
+        print("Original numpy array:", x)
+        print("FracVector:", a)
+        print("FracVector as floats:", a.to_floats())
     except ImportError:
-        print "(Could not import numpy, numpy tests skipped)"
+        print("(Could not import numpy, numpy tests skipped)")
 
-    print
-    print "==== Exact cell transformation example:"
+    print()
+    print("==== Exact cell transformation example:")
     prim_cell = FracVector.create([[2, 3, 5], [3, 5, 4], [4, 6, 7]], 10)
-    print "Primitive cell:", prim_cell
+    print("Primitive cell:", prim_cell)
     
     inv = prim_cell.inv().simplify()
     transformation = (inv*inv.denom).simplify()
 
-    print "Integer-only transformation matrix that diagonalize the primitive cell:", transformation
+    print("Integer-only transformation matrix that diagonalize the primitive cell:", transformation)
 
-    print "How does this transformation matrix act on the original basis vectors?:"
+    print("How does this transformation matrix act on the original basis vectors?:")
     result = transformation*prim_cell
 
-    print result
-    print "I.e., this transformation matrix gives a perfectly cubic cell in cartesian coordinates of dimensions 3x3x3 Ang^3"
+    print(result)
+    print("I.e., this transformation matrix gives a perfectly cubic cell in cartesian coordinates of dimensions 3x3x3 Ang^3")
 
-    print
-    print "==== Approximate cell transformation example:"
+    print()
+    print("==== Approximate cell transformation example:")
     prim_cell = FracVector.create([[23243253, 32352322, 52343423], [32433242, 52324332, 42343242], [42342342, 62433453, 72432343]], 100000000)
-    print "Primitive cell:", prim_cell
-    print "Primitive cell in float representation:", prim_cell.to_floats()
+    print("Primitive cell:", prim_cell)
+    print("Primitive cell in float representation:", prim_cell.to_floats())
     
     inv = prim_cell.inv().simplify()
     transformation = (inv*inv.denom).simplify()
 
-    print "Integer-only transformation matrix that diagonalize the primitive cell:", transformation
+    print("Integer-only transformation matrix that diagonalize the primitive cell:", transformation)
 
-    print "How does this transformation matrix act on the original basis vectors?:"
+    print("How does this transformation matrix act on the original basis vectors?:")
     result = transformation*prim_cell
 
-    print result.to_floats()
-    print "I.e., enormous unit cell... Try approximation instead:"
+    print(result.to_floats())
+    print("I.e., enormous unit cell... Try approximation instead:")
     
     approxinv = prim_cell.inv().set_denominator(10).simplify()
     transformation = (approxinv*approxinv.denom).simplify()
-    print "Integer-only transformation matrix that approximately diagonalize the primitive cell:", transformation
+    print("Integer-only transformation matrix that approximately diagonalize the primitive cell:", transformation)
 
-    print "How does this transformation matrix act on the original basis vectors?:"
+    print("How does this transformation matrix act on the original basis vectors?:")
     result = transformation*prim_cell
-    print result.to_floats()
-    print "I.e., a MOSTLY cubic cell of ~ 10x10x10 Ang^3 comes out."
+    print(result.to_floats())
+    print("I.e., a MOSTLY cubic cell of ~ 10x10x10 Ang^3 comes out.")
     
 
 if __name__ == "__main__":

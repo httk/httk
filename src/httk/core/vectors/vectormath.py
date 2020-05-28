@@ -20,8 +20,8 @@ import sys, math
 
 def ceil(x, **args):
     """
-    Return the ceiling of x, the smallest integer value greater than or equal to x. 
-    
+    Return the ceiling of x, the smallest integer value greater than or equal to x.
+
     (For vectors applied to each element.)
     """
     try:
@@ -32,7 +32,7 @@ def ceil(x, **args):
 
 def copysign(x, y, **args):
     """
-    Return x with the sign of y. 
+    Return x with the sign of y.
     If an element of y is zero, abs of the corresponding element in x is returned.
 
     (For vectors applied to each element.)
@@ -47,8 +47,8 @@ def copysign(x, y, **args):
 
 def sign(x, **args):
     """
-    Return the sign of x, equivalent to copysign(1,x). 
-    
+    Return the sign of x, equivalent to copysign(1,x).
+
     (For vectors applied to each element.)
     """
     return copysign(1, x)
@@ -56,8 +56,8 @@ def sign(x, **args):
 
 def fabs(x, **args):
     """
-    Return the absolute value of x. 
-    
+    Return the absolute value of x.
+
     (For vectors applied to each element.)
     """
     return abs(x)
@@ -65,8 +65,8 @@ def fabs(x, **args):
 
 def factorial(x, **args):
     """
-    Return x factorial. Raises ValueError if (any element of) x is negative. 
-    
+    Return x factorial. Raises ValueError if (any element of) x is negative.
+
     (For vectors applied to each element.)
     """
     try:
@@ -77,8 +77,8 @@ def factorial(x, **args):
 
 def floor(x, **args):
     """
-    Return the floor of x, the largest integer value less than or equal to x. 
-    
+    Return the floor of x, the largest integer value less than or equal to x.
+
     (For vectors applied to each element.)
     """
     try:
@@ -96,10 +96,10 @@ def fmod(x, y, **args):
 
 def frexp(x, **args):
     """
-    Return the mantissa and exponent of x as the pair (m, e). 
-    m is a float and e is an integer such that x == m * 2**e exactly. 
-    If x is zero, returns (0.0, 0), otherwise 0.5 <= abs(m) < 1. 
-    
+    Return the mantissa and exponent of x as the pair (m, e).
+    m is a float and e is an integer such that x == m * 2**e exactly.
+    If x is zero, returns (0.0, 0), otherwise 0.5 <= abs(m) < 1.
+
     (For vectors applied to each element and returns tuples nested in lists.)
     """
     try:
@@ -118,7 +118,7 @@ def fsum(iterable, **args):
 def isinf(x, **args):
     """
     Check if the float x is positive or negative infinity.
-    
+
     (For vectors applied to each element and returns True/False as nested lists.)
     """
     try:
@@ -130,7 +130,7 @@ def isinf(x, **args):
 def isanyinf(x, **args):
     """
     Check if the float x is positive or negative infinity.
-    
+
     (For vectors returns True/False if any element is inf)
     """
     try:
@@ -141,7 +141,7 @@ def isanyinf(x, **args):
 
 def isnan(x, **args):
     """
-    Check if the float x is a NaN (not a number). 
+    Check if the float x is a NaN (not a number).
 
     (For vectors applied to each element and returns True/False as nested lists.)
     """
@@ -153,7 +153,7 @@ def isnan(x, **args):
 
 def isanynan(x, **args):
     """
-    Check if the float x is a NaN (not a number). 
+    Check if the float x is a NaN (not a number).
 
     (For vectors returns True/False if any element is NaN)
     """
@@ -166,7 +166,7 @@ def isanynan(x, **args):
 def ldexp(x, **args):
     """
     Return x * (2**i). This is essentially the inverse of function frexp().
-    
+
     (For vectors applied to each element.)
     """
     try:
@@ -190,7 +190,7 @@ def modf(x, **args):
 def trunc(x, **args):
     """
     Returns the integer part of x.
-    
+
     (For vectors applied to each element.)
     """
     try:
@@ -223,8 +223,8 @@ def log(x, base=None, **args):
     """
     With one argument, return the natural logarithm of x (to base e).
 
-    With two arguments, return the logarithm of x to the given base, calculated as log(x)/log(base).    
-    
+    With two arguments, return the logarithm of x to the given base, calculated as log(x)/log(base).
+
     (For vectors applied to each element.)
     """
     try:
@@ -260,7 +260,7 @@ def log10(x, **args):
 def pow(x, y, **args):
     """
     Return x raised to the power y. Equivalent with x**y
-    
+
     (For vectors applied to each element.)
     """
     return x**y
@@ -366,7 +366,7 @@ def sin(x, **args):
 
 def tan(x, **args):
     """
-    Return the tangent of x radians.    
+    Return the tangent of x radians.
 
     (For vectors applied to each element.)
     """
@@ -382,17 +382,17 @@ def degrees(x, **args):
 
     (For vectors applied to each element.)
     """
-    
+
     try:
         return x*180/x.pi(**args)
     except AttributeError:
         return (x*180.0)/math.pi
-    
-    
+
+
 def radians(x, **args):
     """
     Convert angle x from degrees to radians.
-    
+
     (For vectors applied to each element.)
     """
     try:
@@ -477,7 +477,7 @@ def erf(x, **args):
     """
     Return the error function at x.
 
-    (For vectors applied to each element.)    
+    (For vectors applied to each element.)
     """
     try:
         return x.erf(**args)
@@ -543,25 +543,25 @@ def e(x, **args):
 
 def main():
     from fracvector import FracVector
-    
+
     test = FracVector.create([3,5,7],14)
-    
-    print cos(4.223)
-    
-    print cos(test)
-    print cos(test).to_floats()
+
+    print(cos(4.223))
+
+    print(cos(test))
+    print(cos(test).to_floats())
 
     test = FracVector.create('120')
 
-    print test, cos(test, degrees=True, limit=False).to_floats()
-    
-    print "----"
-    
-    print FracVector.create('120').cos(degrees=True).simplify()
-    print FracVector.create_cos('120')
-    
+    print(test, cos(test, degrees=True, limit=False).to_floats())
+
+    print("----")
+
+    print(FracVector.create('120').cos(degrees=True).simplify())
+    print(FracVector.create_cos('120'))
+
 
 if __name__ == "__main__":
     main()
 
-    
+

@@ -57,9 +57,9 @@ def cif2cell(cwd, args, timeout=30):
     #raise Exception("Debug: cif2cell call!")
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
-    #print "COMMAND CIF2CELL",args
+    #print("COMMAND CIF2CELL",args)
     out, err, completed = Command(cif2cell_path, args, cwd=cwd).run(timeout)
-    #print "COMMAND CIF2CELL END",out
+    #print("COMMAND CIF2CELL END",out)
     return out, err, completed
     #out, err = p.communicate()
     #return out, err
@@ -81,7 +81,7 @@ def cif_to_structure_reduce(f):
     ioa = httk.IoAdapterFilename.use(f)
     out, err, completed = cif2cell("./", [ioa.filename])
     if err != "":
-        print err
+        print(err)
     if completed != 0:
         return None
     struct = httk.iface.cif2cell_if.out_to_struct(httk.IoAdapterString(out))
@@ -93,7 +93,7 @@ def cif_to_structure_noreduce(f):
     #out, err, completed = cif2cell("./",["--no-reduce",ioa.filename])
     out, err, completed = cif2cell("./", ["--no-reduce", ioa.filename])
     if err != "":
-        print err
+        print(err)
     if completed != 0:
         return None
     struct = httk.iface.cif2cell_if.out_to_struct(httk.IoAdapterString(out))

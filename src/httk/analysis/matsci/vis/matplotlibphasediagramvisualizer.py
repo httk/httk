@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -25,32 +25,32 @@ class MatplotlibPhaseDiagramVisualizer(object):
 
     def __init__(self, phasediagram):
         self.phasediagram = phasediagram
-         
+
     def show(self, showunstable=True, labelunstable=False, avoid_overlap=True):
-        print "Warning: graphical phase diagrams currently does not fill in *all* dividing lines."
-        
+        print("Warning: graphical phase diagrams currently does not fill in *all* dividing lines.")
+
         pd = self.phasediagram
         pp = PolygonPlot(labels=pd.coord_system, sides=len(pd.coord_system), label_offset=0.15)
-                
+
         coords, ids = pd.hull_point_coords()
-        coords = FracVector.use(coords).to_floats()        
+        coords = FracVector.use(coords).to_floats()
 
         coords2, ids2 = pd.interior_point_coords()
-        coords2 = FracVector.use(coords2).to_floats()                
+        coords2 = FracVector.use(coords2).to_floats()
         newdata2 = pp.translate_coords(coords2)
 
         allcoords, allids = pd.coords()
-        allcoords = FracVector.use(allcoords).to_floats()                
+        allcoords = FracVector.use(allcoords).to_floats()
         alldata = pp.translate_coords(allcoords)
 
         if showunstable and len(newdata2) > 0:
             pp.ax.scatter(newdata2[:, 0], newdata2[:, 1], s=50, color='purple', marker='o', facecolor='none')
-        
+
         newdata = pp.translate_coords(coords)
-        
+
         pp.ax.scatter(newdata[:, 0], newdata[:, 1], s=100, marker='o')
 
-        labelpos = []        
+        labelpos = []
         for i, txt in enumerate(ids):
             labelpos += [[newdata[i, 0], newdata[i, 1], newdata[i, 0]+0.04, newdata[i, 1]+0.01, txt, {'color': 'blue'}]]
 
@@ -70,8 +70,8 @@ class MatplotlibPhaseDiagramVisualizer(object):
                     pos1 = labelpos[i]
                     if sqrt((pos1[0]-pos1[2])**2 + (pos1[1]-pos1[3])**2) < 0.02:
                         labelpos[i] = [pos1[0], pos1[1], pos1[2]+xoffset*(random.choice([+1, -1])), pos1[3]+yoffset*(random.choice([+1, -1]))]+pos1[4:]
-                        overlap = True      
-                        #print "OVERLAP1",i            
+                        overlap = True
+                        #print("OVERLAP1",i)
                     for j in range(i+1, len(labelpos)):
                         if (i == j):
                             continue
@@ -81,11 +81,11 @@ class MatplotlibPhaseDiagramVisualizer(object):
                             labelpos[i] = [pos1[0], pos1[1], pos1[2]+xoffset*(random.choice([+1, -1])), pos1[3]+yoffset*(random.choice([+1, -1]))]+pos1[4:]
                             #labelpos[j] = [pos2[0],pos2[1],pos2[2]+xoffset*(random.choice([+1, -1])),pos2[3]+yoffset*(random.choice([+1, -1]))]+pos2[4:]
                             overlap = True
-                            #print "OVERLAP2",i,j,abs(sqrt(pos1[2]**2 + pos1[3]**2) - sqrt(pos2[2]**2 + pos2[3]**2))      
-                            print pos1
-                            print pos2
+                            #print("OVERLAP2",i,j,abs(sqrt(pos1[2]**2 + pos1[3]**2) - sqrt(pos2[2]**2 + pos2[3]**2)))
+                            print(pos1)
+                            print(pos2)
 
-                #print maxiters, labelpos
+                #print(maxiters, labelpos)
                 maxiters -= 1
 
         for i, pos in enumerate(labelpos):
@@ -103,7 +103,7 @@ class MatplotlibPhaseDiagramVisualizer(object):
         for line in lines:
             arrowplot(pp.ax, [alldata[line[0]][0], alldata[line[1]][0]], [alldata[line[0]][1], alldata[line[1]][1]], c='purple')
             #pp.ax.plot([alldata[line[0]][0],alldata[line[1]][0]],[alldata[line[0]][1],alldata[line[1]][1]],'-',color='purple')
-        
+
 #         lines = pd.hull_to_interior_competing_phase_lines()
 #         for line in lines:
 #             arrowplot(pp.ax,[alldata[line[0]][0],alldata[line[1]][0]],[alldata[line[0]][1],alldata[line[1]][1]],c='blue')
@@ -112,15 +112,15 @@ class MatplotlibPhaseDiagramVisualizer(object):
 #         lines = pd.hull_competing_phase_lines()
 #         for line in lines:
 #             #print "LINE",line[0],"->",line[1]
-#             #arrowplot(pp.ax,[newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],c='black')            
+#             #arrowplot(pp.ax,[newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],c='black')
 #             pp.ax.plot([newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],'k-')
 
         lines = pd.phase_lines
         for line in lines:
-            #print "LINE",line[0],"->",line[1]
-            #arrowplot(pp.ax,[newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],c='black')            
+            #print("LINE",line[0],"->",line[1])
+            #arrowplot(pp.ax,[newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],c='black')
             pp.ax.plot([newdata[line[0]][0], newdata[line[1]][0]], [newdata[line[0]][1], newdata[line[1]][1]], 'k-')
 
         show()
 
-__all__ = ['MatplotlibPhaseDiagramVisualizer']        
+__all__ = ['MatplotlibPhaseDiagramVisualizer']

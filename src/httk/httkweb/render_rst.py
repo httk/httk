@@ -68,7 +68,7 @@ class RenderRst(object):
             doctree = self.publish_doctree(self.source)
             docdom = doctree.asdom()
     
-            #print "DOCTREE",doctree
+            #print("DOCTREE",doctree)
     
             # Todo: instead traverse the content of the docinfo node,
             # add tags in there to the dict + handle field_name + field_body section.

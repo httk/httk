@@ -82,7 +82,7 @@ def apply_template(template, output, envglobals=None, envlocals=None):
                 try:
                     exec(command, envglobals, envlocals) 
                 except:
-                    print "Failed to execute:"+command
+                    print("Failed to execute:"+command)
                     raise 
                 result_step2 += sys.stdout.getvalue()
                 if result_step2.endswith('\n'):
@@ -100,7 +100,7 @@ def apply_template(template, output, envglobals=None, envlocals=None):
                 try:
                     result_step2 += str(eval(command, envglobals, envlocals)) 
                 except:
-                    print "Failed to eval:"+command
+                    print("Failed to eval:"+command)
                     raise 
                 continue
             command += token            
@@ -135,7 +135,7 @@ def apply_templates(inputpath, outpath, template_suffixes="template", envglobals
 
     # Loop over all files in the directory tree and run all templates that are found
     #main_path = os.getcwd()    
-    #print "Looping over",inputpath
+    #print("Looping over",inputpath)
     
     for root, dirs, files in os.walk(inputpath):
         for filename in files:
@@ -153,9 +153,9 @@ def apply_templates(inputpath, outpath, template_suffixes="template", envglobals
                     #os.chdir(path)
                     apply_template(os.path.join(root, filename), os.path.join(outpath, rp, newname), envglobals=envglobals, envlocals=envlocals)      
                     shutil.copymode(os.path.join(root, filename), os.path.join(outpath, rp, newname))
-                    #print "Instanceiate",os.path.join(root,filename),os.path.join(outpath,rp,newname)
+                    #print("Instanceiate",os.path.join(root,filename),os.path.join(outpath,rp,newname))
                 else:
-                    #print "Copy",shutil.copyfile(os.path.join(root,filename),os.path.join(outpath,rp,filename)) 
+                    #print("Copy",shutil.copyfile(os.path.join(root,filename),os.path.join(outpath,rp,filename)) )
                     shutil.copy(os.path.join(root, filename), os.path.join(outpath, rp, filename)) 
 
     #os.chdir(main_path)

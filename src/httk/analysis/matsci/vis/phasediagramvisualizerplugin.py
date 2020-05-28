@@ -21,7 +21,7 @@ from httk.core.httkobject import HttkPlugin
 class PhaseDiagramVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, phasediagram):
-        print "PhaseDiagramVisualizerPlugin called"
+        print("PhaseDiagramVisualizerPlugin called")
         self.phasediagram = phasediagram
         self.visualizer = None
 

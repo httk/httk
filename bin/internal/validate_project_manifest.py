@@ -207,10 +207,10 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                 message+=compare
                 hh = hexhash(truefilename)
                 if compare != hh + " " + filename + "\n":
-                    print "FAILURE1:",compare+"|"+ hh + " " + filename + "\n"
+                    print("FAILURE1:",compare+"|"+ hh + " " + filename + "\n")
                     return False
                 if debug:
-                    print "Checked:",hh+" "+filename+" "
+                    print("Checked:",hh+" "+filename+" ")
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root,d)
@@ -219,7 +219,7 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                     break
             else:
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir,'ht.config')):
-                    print "Validating task manifest in:",fulldir
+                    print("Validating task manifest in:",fulldir)
                     result = check_manifest_dir(fulldir,os.path.join(fulldir,'ht.manifest.bz2'),os.path.join(fulldir,'ht.config'))
                     if not result:
                         return False
@@ -227,28 +227,28 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                     message+=compare
                     hh = hexhash(os.path.join(fulldir,'ht.manifest.bz2'))
                     if compare != hh + " " + fulldir + "/\n":
-                        print "FAILURE2:",compare,"|"+ hh + " " + fulldir + "/\n"
+                        print("FAILURE2:",compare,"|"+ hh + " " + fulldir + "/\n")
                         return False
                     if debug:
-                        print "Checked:",hh+" "+fulldir+"/ "
+                        print("Checked:",hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
     compare = manifestfile.readline()
     if compare != "\n":
-        print "FAILURE3:",compare,"|","(should be empty)"
+        print("FAILURE3:",compare,"|","(should be empty)")
         return False
 
     b64signature = manifestfile.readline()
-    #print "===="+message+"===="
+    #print("===="+message+"====")
 
     pk = base64.b64decode(b64pubkey)
     signature = base64.b64decode(b64signature)
 
     result = checkvalid(signature,message,pk)
     if not result:
-        print "FAILURE: Signature does not verify."
+        print("FAILURE: Signature does not verify.")
         return False
 
     manifestfile.close()
@@ -257,8 +257,8 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
 basedir = sys.argv[1]
 result = check_manifest_dir(basedir,'ht.project/manifest.bz2', 'ht.project',debug=False)
 if result:
-    print "Manifest check sucessful."
+    print("Manifest check sucessful.")
     exit(42)
 else:
-    print "Manifest check FAILED."
+    print("Manifest check FAILED.")
     exit(13)

@@ -69,7 +69,7 @@ for i in range(argcount+2,len(sys.argv),2):
     fields += [(sys.argv[i], sys.argv[i+1])]
 
 #stream = form_wrapper(path, 'rb', 'file', path, fields)
-#print stream.read(10000000)
+#print(stream.read(10000000))
 stream = form_wrapper(path, 'rb', 'file', path, fields, prepend_progress)
 
 # Build the request
@@ -82,6 +82,6 @@ result = urllib2.urlopen(request).read()
 if result=="OK":
     exit(0)
 else:
-    print "===="+result+"===="
+    print("===="+result+"====")
     exit(1)
 

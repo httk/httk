@@ -119,10 +119,10 @@ def hull_z(points, zs):
     
     zvalues = len(zs)
     coeffs = len(points[0])
-    #print "zvalues",zvalues
-    #print "coeffs",coeffs
+    #print("zvalues",zvalues)
+    #print("coeffs",coeffs)
     for i in range(zvalues):
-        #print "SEND IN",[zs[j] for j in range(zvalues) if j != i]
+        #print("SEND IN",[zs[j] for j in range(zvalues) if j != i])
         a = FracVector.create([zs[j] for j in range(zvalues) if j != i])
         b = [None]*coeffs
         c = [None]*coeffs
@@ -133,17 +133,17 @@ def hull_z(points, zs):
             c[j] = points[i][j]
 
 #         if i == 0:
-#             print "A",a.to_floats()
-#             print "B",[x.to_floats() for x in b]
-#             print "C",c
+#             print("A",a.to_floats())
+#             print("B",[x.to_floats() for x in b])
+#             print("C",c)
 
         solution = simplex_le_solver(a, b, c)        
         val = solution[0]
 
 #         if i == 0:
-#             print "VAL",val
-#             print "SOL",solution[1]
-#             print "MAPPED SOL",[(solution[1][i],includepoints[i]) for i in range(len(solution[1]))]
+#             print("VAL",val)
+#             print("SOL",solution[1])
+#             print("MAPPED SOL",[(solution[1][i],includepoints[i]) for i in range(len(solution[1]))])
 #         
         closest = solution[1]
         thisclosestpoints = []
@@ -153,7 +153,7 @@ def hull_z(points, zs):
             if sol != 0:
                 thisclosestpoints += [includepoints[j]]
                 thisclosestweights += [sol]
-                #print "I AM",i,"I disolve into:",includepoints[j],"*",float(sol),"(",j,")"
+                #print("I AM",i,"I disolve into:",includepoints[j],"*",float(sol),"(",j,")")
 
         closest_points += [thisclosestpoints]
         closest_weights += [thisclosestweights]
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     b = FracVector.create([[2, 1], [2, 3], [3, 1]])
     c = FracVector.create([18, 42, 24])
 
-    print simplex_le_solver(a, b, c)
+    print(simplex_le_solver(a, b, c))
 
     exit(0)
 

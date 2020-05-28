@@ -42,11 +42,11 @@ def show(struct):
     
     f = httk.IoAdapterFilename(os.path.join(tmpdir, "atoms.gin"))
     httk.iface.gulp_if.structure_to_gulp(f, struct)
-    #print "Running gulp"
+    #print("Running gulp")
     out, err, completed = gulp(tmpdir, ["atoms"], timeout=30)
     if not completed:
         raise Exception("Gulp broke:"+tmpdir)
-    #print "Gulp finished",completed
+    #print("Gulp finished",completed)
     if completed:
         def get_energy(results, match):
             results['energy'] = float(match.group(1))
@@ -58,7 +58,7 @@ def show(struct):
         results = {}
         
     if 'energy' in results:    
-        #print "HERE:",results['energy']/struct.N
+        #print("HERE:",results['energy']/struct.N)
         #exit(0)
         httk.utils.destroy_tmpdir(tmpdir)
         return results['energy']/struct.N

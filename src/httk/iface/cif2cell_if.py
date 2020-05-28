@@ -100,14 +100,14 @@ def out_to_struct(ioa):
     
             if newcoord in results[seenstr]:
                 idx = results[seenstr][newcoord]
-                #print "OLD",results[occstr],idx
+                #print("OLD",results[occstr],idx)
                 results[occstr][idx].append(occup)
             else:
                 results[seenstr][newcoord] = results[idxstr]
                 results[coordstr].append(newcoord)
                 results[occstr].append([occup])
                 results[idxstr] += 1
-                #print "NEW",results[occstr],results[idxstr]
+                #print("NEW",results[occstr],results[idxstr])
                           
     def read_coords(results, match):
         if results['in_input']:
@@ -130,14 +130,14 @@ def out_to_struct(ioa):
 
         if newcoord in results[seenstr]:
             idx = results[seenstr][newcoord]
-            #print "XOLD",results[occstr],idx
+            #print("XOLD",results[occstr],idx)
             results[occstr][idx].append(occup)
         else:
             results[seenstr][newcoord] = results[idxstr]
             results[coordstr].append(newcoord)
             results[occstr].append([occup])
             results[idxstr] += 1
-            #print "XNEW",results[occstr],results['idx']
+            #print("XNEW",results[occstr],results['idx'])
 
         #if results['in_input']:
         #    results['sgcoords'].append(newcoord)
@@ -293,7 +293,7 @@ def out_to_struct(ioa):
 
     # A bit of santiy check to trigger on possible bugs from cif2cell
     if len(struct.uc_sites.counts) != len(struct.rc_sites.counts):
-        print struct.uc_sites.counts, struct.rc_sites.counts
+        print(struct.uc_sites.counts, struct.rc_sites.counts)
         raise Exception("cif2cell_if.out_to_struct: non-sensible parsing of cif2cell output.")
 
     #if 'volume' in out:
@@ -304,10 +304,10 @@ def out_to_struct(ioa):
 
     #struct = httk.Structure.create(cell,occupancies=out['occupancies'],coords=coords,volume=vol,tags=tags,hall_symbol=hall_symbol, refs=refs)
     #struct._sgstructure = httk.SgStructure.create(a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma, occupancies=out['sgoccupancies'], coords=sgcoords, hall_symbol=sghall_symbol)
-    #print "HERE WE ARE:",out['sgoccupancies'],sgcoords,sghall_symbol
-    #print "HERE WE ARE:",out['occupancies'],coords
+    #print("HERE WE ARE:",out['sgoccupancies'],sgcoords,sghall_symbol)
+    #print("HERE WE ARE:",out['occupancies'],coords)
     #struct = httk.Structure.create(cell, volume=vol, unique_occupations=out['sgoccupancies'], uc_occupations=out['occupancies'], unique_reduced_occupationscoords=sgcoords, uc_reduced_occupationscoords=coords, spacegroup=sghall_symbol, tags=tags, refs=refs, periodicity=0)
-    #print "HERE",sgcoords, coords
+    #print("HERE",sgcoords, coords)
     #counts = [len(x) for x in out['occupancies']]
     #p1structure = httk.Structure.create(cell,occupancies=out['occupancies'],coords=coords,volume=vol,tags=tags, refs=refs, periodicity=0)
     #struct.set_p1structure(p1structure)

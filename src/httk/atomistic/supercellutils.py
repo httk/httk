@@ -27,7 +27,7 @@ from cell import Cell
 
 def build_supercell_old(structure, transformation, max_search_cells=1000):
     ### New basis matrix, note: works in units of old_cell.scale to avoid floating point errors
-    #print "BUILD SUPERCELL",structure.uc_sites.cell.basis.to_floats(), repetitions
+    #print("BUILD SUPERCELL",structure.uc_sites.cell.basis.to_floats(), repetitions)
 
     transformation = FracVector.use(transformation).simplify()
     if transformation.denom != 1:
@@ -69,17 +69,17 @@ def build_supercell_old(structure, transformation, max_search_cells=1000):
     new_counts = [len(x) for x in extendedcoordgroups]
     for i in range(len(structure.uc_counts)):
         if volume_ratio*structure.uc_counts[i] != new_counts[i]:
-            print "Volume ratio:", float(volume_ratio), volume_ratio
-            print "Extended coord groups:", FracVector.create(extendedcoordgroups).to_floats()
-            print "Old counts:", structure.uc_counts, structure.assignments.symbols
-            print "New counts:", new_counts, structure.assignments.symbols
+            print("Volume ratio:", float(volume_ratio), volume_ratio)
+            print("Extended coord groups:", FracVector.create(extendedcoordgroups).to_floats())
+            print("Old counts:", structure.uc_counts, structure.assignments.symbols)
+            print("New counts:", new_counts, structure.assignments.symbols)
             #raise Exception("Structure.build_supercell safety check failure. Volume changed by factor "+str(float(volume_ratio))+", but atoms in group "+str(i)+" changed by "+str(float(new_counts[i])/float(structure.uc_counts[i])))
     
     return structure.create(uc_reduced_coordgroups=extendedcoordgroups, basis=new_cell.basis, assignments=structure.assignments, cell=structure.uc_cell)
 
 def build_cubic_supercell(structure, tolerance=None, max_search_cells=1000):
     transformation = cubic_supercell_transformation(structure=structure, tolerance=tolerance)
-    #print "Running transformation with:",transformation     
+    #print("Running transformation with:",transformation)
     return structure.transform(transformation, max_search_cells=max_search_cells)
 
 def cubic_supercell_transformation(structure, tolerance=None, max_search_cells=1000):
@@ -133,7 +133,7 @@ def cubic_supercell_transformation(structure, tolerance=None, max_search_cells=1
 
 def build_orthogonal_supercell(structure, tolerance=None, max_search_cells=1000, ortho=[True, True, True]):
     transformation = orthogonal_supercell_transformation(structure, tolerance, ortho)
-    #print "Running transformation with:",transformation     
+    #print("Running transformation with:",transformation)
     return structure.transform(transformation, max_search_cells=max_search_cells)
 
 
@@ -141,7 +141,7 @@ def orthogonal_supercell_transformation(structure, tolerance=None, ortho=[True, 
     # TODO: How to solve for exact orthogonal cell?
     if tolerance is None:
         prim_cell = structure.uc_cell.basis         
-        print "Starting cell:", prim_cell
+        print("Starting cell:", prim_cell)
         inv = prim_cell.inv().simplify()
         if ortho[0]:
             row0 = (inv[0]/max(inv[0])).simplify()

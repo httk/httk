@@ -114,7 +114,7 @@ def any_to_fraction(arg, min_accuracy=fractions.Fraction(1, 10000)):
         try:
             return fractions.Fraction(arg)
         except Exception:
-            print "any_to_fraction tried to convert this argument and failed:", arg
+            print("any_to_fraction tried to convert this argument and failed:", arg)
             raise
 
 
@@ -151,7 +151,7 @@ def frac_sqrt_old(x, prec=default_accuracy, limit=True):
         if abs(s-lasts) <= prec:
             break
         s = s.limit_denominator(iterprec)
-        #print s
+        #print(s)
     if limit:
         s = s.limit_denominator(1/prec)
     return s
@@ -464,7 +464,7 @@ def frac_log(x, base=None, prec=default_accuracy, limit=True):
         if (abs(deltan) < abs(prec*deltad*denom)):
             break
         
-    #print float(fractions.Fraction(sn,denom)),math.log(x)
+    #print(float(fractions.Fraction(sn,denom)),math.log(x))
     #exit(0)
         
     if inv:
@@ -951,7 +951,7 @@ def run_alot(func,name,mathfun,fsmall, fmid, flarge,interval_within_one=False, p
                 worsteval = frand
         print(name+" worst time: %s     %s   (%s, %s)" % (worst, worstval, float(func(worstval)), mathfun(float(worstval))))
         print(name+" worst val:  %s     %s   (%s, %s)" % (worstevaldelta, worsteval, float(func(worstval)), mathfun(float(worstval))))
-        print worst
+        print(worst)
 
 def main():
     import math, time, decimal
@@ -970,24 +970,24 @@ def main():
     "542019956112129021960864034418159813629774771309960518707211349999998372978049"+\
     "951059731732816096318595024459455346908302642522308253344685035261931188171010"+\
     "003137838752886587533208381420617177669147303598253490428755468731159562863882"  
-    #print any_to_fraction("0.3333")
+    #print(any_to_fraction("0.3333"))
 
     pi = decimal.Decimal(pistr)
     
     #exit(0)
     #f = fractions.Fraction('99999999992')
-    #print float(frac_sqrt(f)), math.sqrt(99999999992)
-    #print float(frac_cos(f)), math.cos(f)
+    #print(float(frac_sqrt(f)), math.sqrt(99999999992))
+    #print(float(frac_cos(f)), math.cos(f))
     fsmall = fractions.Fraction(2, 37)
     fmid = fractions.Fraction(17999999, 200000)
     flarge = fractions.Fraction(17999999, 3)
 
     #ftest = fractions.Fraction(-7065909030689,67554620683)
     #is_time = time.time()
-    #print float(frac_cos(ftest)), math.cos(float(ftest))
-    ##print frac_pi()
+    #print(float(frac_cos(ftest)), math.cos(float(ftest)))
+    ##print(frac_pi())
     #delta = time.time() - is_time
-    #print "DELTA", delta
+    #print("DELTA", delta)
     #exit(0)
 
     start_time = time.time()

@@ -83,7 +83,7 @@ def structure_to_spglib_atoms(struct):
         name = httk.htdata.periodictable.atomic_symbol(struct.assignments[i])
         symbols += [name]*struct.counts[i]
 
-    print "SYMBOLS", symbols, struct.N
+    print("SYMBOLS", symbols, struct.N)
 
     cell = struct.cell.to_floats()
 
@@ -102,9 +102,9 @@ def analysis(struct, symprec=1e-5):
 
     atoms = structure_to_spglib_atoms(struct)
     val = spglib.get_spacegroup(atoms)
-    print "Spacegroup is:", val 
+    print("Spacegroup is:", val)
     val = spglib.refine_cell(atoms, symprec=symprec)
-    print "Primitive", val
+    print("Primitive", val)
 
 
 def primitive(struct, symprec=1e-5):

@@ -573,7 +573,7 @@ def lexer(source, tokens, literals, ignore, comment_markers=[], verbosity=0, log
                 break
         else:
             for t in token_regexes:
-                #print "THIS SHOULD MATCH",t,token_regexes[t].match(stack) is None,stack
+                #print("THIS SHOULD MATCH",t,token_regexes[t].match(stack) is None,stack)
                 if token_regexes[t].match(stack) is not None:
                     seen_token, seen_token_pos = t, pos
                     last_good_pos, last_good_pos_next = pos, None

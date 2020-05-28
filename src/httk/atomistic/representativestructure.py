@@ -159,7 +159,7 @@ class RepresentativeStructure(HttkObject):
                                                           multiplicities=multiplicities, occupancies=rc_occupancies)
                 except Exception as e:
                     raise
-                    #print "Ex",e
+                    #print("Ex",e)
                     rc_sites = None
             else:
                 rc_sites = None
@@ -274,7 +274,7 @@ class RepresentativeStructure(HttkObject):
 
 
 def main():
-    print "Test"
+    print("Test")
         
 if __name__ == "__main__":
     main()

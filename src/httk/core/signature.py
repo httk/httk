@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,53 +21,53 @@ from .httkobject import HttkObject, httk_typed_init
 class SignatureKey(HttkObject):
 
     """
-    """    
+    """
 
-    @httk_typed_init({'keydata': str, 'description': str})    
+    @httk_typed_init({'keydata': str, 'description': str})
     def __init__(self, keydata, description):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
-        """    
+        """
         self.keydata = keydata
-        self.description = description        
-        
+        self.description = description
+
     @classmethod
     def create(cls, keydata, description):
         """
         Create a Computation object.
-        """        
+        """
         return cls(keydata, description)
-    
+
 
 class Signature(HttkObject):
 
     """
-    """    
-    @httk_typed_init({'signature_data': str, 'key': SignatureKey})    
+    """
+    @httk_typed_init({'signature_data': str, 'key': SignatureKey})
     def __init__(self, signature_data, key):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
-        """    
+        """
         self.signature_data = signature_data
         self.key = key
-        
+
     @classmethod
     def create(cls, signature_data, key):
         """
         Create a Computation object.
-        """        
+        """
         return cls(signature_data, key)
-    
+
 
 def main():
     import httk.db
-    
+
     backend = httk.db.backend.Sqlite('database.sqlite')
     store = httk.db.store.SqlStore(backend)
-    #codeobj = httk.db.register_code(store, 'db_import_2','1.0',['httk'])        
-    #print "==== Name of this code:",codeobj.name
+    #codeobj = httk.db.register_code(store, 'db_import_2','1.0',['httk'])
+    #print("==== Name of this code:",codeobj.name)
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

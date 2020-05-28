@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -24,10 +24,10 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
     Read and yield all tasks from the project in path
     """
 
-    keydir = os.path.join(projectpath, 'ht.project', 'keys')    
+    keydir = os.path.join(projectpath, 'ht.project', 'keys')
     pk = None
     sk = None
-    
+
     for root, dirs, files in os.walk(inpath, topdown=True):
         walkdirs = list(dirs)
         for dir in walkdirs:
@@ -59,7 +59,7 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                         if configparser.has_option('main', 'description'):
                             description = configparser.get('main', 'description')
                         else:
-                            description = default_description  
+                            description = default_description
                     else:
                         description = default_description
                     if not os.path.exists(os.path.join(dirpath, 'ht.manifest.bz2')) or force_remake_manifests:
@@ -72,12 +72,12 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                         os.rename(os.path.join(dirpath, 'ht.tmp.manifest.bz2'), os.path.join(dirpath, 'ht.manifest.bz2'))
 
                     (manifest_hash, signatures, project_key, keys) = read_manifest(os.path.join(dirpath, 'ht.manifest.bz2'), verify_signature=False)
-                    
+
                     #(input_manifest, input_hexhash) = check_or_generate_manifest_for_dir(code.name,code.version, path, excluderuns, None, False)
                     # Relpath is this tasks path relative to the *project* path.
                     relpath = os.path.relpath(root, projectpath)
-                    computation = Computation.create(computation_date=dates[-1], added_date=now, description=description, 
-                                                     code=code, manifest_hash=manifest_hash, 
+                    computation = Computation.create(computation_date=dates[-1], added_date=now, description=description,
+                                                     code=code, manifest_hash=manifest_hash,
                                                      signatures=signatures, keys=keys, relpath=relpath, project_counter=project_counter)
 
                     yield rundir, computation
@@ -86,7 +86,7 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
 def submit_reader(projectpath, default_description=None, excludes=None, project=None, project_counter=0):
     """
     Read and yield all tasks from the project in path
-    
+
     For 'submitted' projects that already have manifests and should not be altered in any way.
     """
     for root, dirs, files in os.walk(projectpath, topdown=True):
@@ -122,13 +122,13 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
                         if configparser.has_option('main', 'description'):
                             description = configparser.get('main', 'description')
                         else:
-                            description = default_description  
+                            description = default_description
                     else:
-                        description = default_description                        
+                        description = default_description
                     (manifest_hash, signatures, project_key, keys) = read_manifest(filepath, verify_signature=False)
                     relpath = os.path.relpath(root, projectpath)
-                    computation = Computation.create(computation_date=dates[-1], added_date=now, description=description, 
-                                                     code=code, manifest_hash=manifest_hash, 
+                    computation = Computation.create(computation_date=dates[-1], added_date=now, description=description,
+                                                     code=code, manifest_hash=manifest_hash,
                                                      signatures=signatures, keys=keys, relpath=relpath, project_counter=project_counter)
                     if project is not None:
                         computation.add_project(project)
@@ -142,8 +142,8 @@ def read_manifest(ioa, verify_signature=True):
     lines = ioa.file.readlines()
     ioa.close()
 
-    message = "".join(lines[:-2]) 
-    s = hashlib.sha256(message) 
+    message = "".join(lines[:-2])
+    s = hashlib.sha256(message)
     hexhash = s.hexdigest()
 
     keys = []
@@ -161,9 +161,9 @@ def read_manifest(ioa, verify_signature=True):
     signature = Signature.create(b64sigstr, projectkey)
     signatures = [signature]
     if verify_signature:
-        #print "Verifying manifest"
+        #print("Verifying manifest")
         if not verify_crytpo_signature(b64sigstr, message, b64projkey):
             raise Exception("Project manifest did not verify.")
-        #print "Manifest verified ok"
-   
-    return (hexhash, signatures, projectkey, keys) 
+        #print("Manifest verified ok")
+
+    return (hexhash, signatures, projectkey, keys)

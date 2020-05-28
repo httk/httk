@@ -96,7 +96,7 @@ def create_tmpdir():
 def destroy_tmpdir(tmpdir):
     tmpdirname = os.path.dirname(tmpdir)
     segment = os.path.basename(tmpdir)[len("httktmp."):-len(".httktmp")]
-    #print "DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp")
+    #print("DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp"))
     shutil.rmtree(os.path.join(tmpdirname, "httktmp."+segment+".httktmp"))
 
 
@@ -275,8 +275,8 @@ class rewindable_iterator(object):
             
 
 def main():
-    print int_to_anonymous_symbol(0)
-    print anonymous_symbol_to_int("A")
+    print(int_to_anonymous_symbol(0))
+    print(anonymous_symbol_to_int("A"))
     
     
     # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))

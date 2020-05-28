@@ -69,8 +69,8 @@ class SiteAssignment(HttkObject):
             ratiosum += a.ratio
 
         if ratiosum > 1:
-            print "Ratiosum:", ratiosum
-            print "Assignmnets:", assignments
+            print("Ratiosum:", ratiosum)
+            print("Assignmnets:", assignments)
             raise Exception("siteassignment.create: sum of ratios for one site larger than 1, broken structure.")
         
         return cls(newassignments)

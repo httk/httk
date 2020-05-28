@@ -312,12 +312,12 @@ def filter_symops(symops, halls=None):
         if symop_hall in halls:
             return [symop_hall]
 
-    #print "FAILED?", halls, symops_hash, spacegroupdata[halls[0]]['symops_hash']
-    #print "************"
-    #print sorted([(x,symopstuple(x)) for x in symops])
-    #print "************"
-    #print sorted([(x,symopstuple(x)) for x in spacegroupdata[halls[0]]['symops_mtrx']])
-    #print "************"
+    #print("FAILED?", halls, symops_hash, spacegroupdata[halls[0]]['symops_hash'])
+    #print("************")
+    #print(sorted([(x,symopstuple(x)) for x in symops]))
+    #print("************")
+    #print(sorted([(x,symopstuple(x)) for x in spacegroupdata[halls[0]]['symops_mtrx']]))
+    #print("************")
 
     return []
 
@@ -619,10 +619,10 @@ def trivial_symmetry_reduce(coordgroups):
 
 
 def main():
-    print allspacegroupdata['symops']
+    print(allspacegroupdata['symops'])
 
     #result = spacegroup_filter('134')
-    #print result
+    #print(result)
 
     pass
 

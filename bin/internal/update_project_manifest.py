@@ -219,7 +219,7 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                 manifestfile.write(hh+" "+filename+"\n")
                 message+=hh+" "+filename+"\n"
                 if debug:
-                    print "Adding:",hh+" "+filename
+                    print("Adding:",hh+" "+filename)
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root,d)
@@ -230,7 +230,7 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir,'ht.config')):
                     if force or (not os.path.exists(os.path.join(fulldir,'ht.manifest.bz2'))):
                         submanifestfile = bz2.BZ2File(os.path.join(fulldir,'ht.tmp.manifest.bz2'),'w')
-                        print "Generating manifest:",os.path.join(fulldir,'ht.manifest.bz2')
+                        print("Generating manifest:",os.path.join(fulldir,'ht.manifest.bz2'))
                         manifest_dir(fulldir,submanifestfile,os.path.join(fulldir,'ht.config'),keydir,sk,pk)
                         submanifestfile.close()
                         os.rename(os.path.join(fulldir,'ht.tmp.manifest.bz2'),os.path.join(fulldir,'ht.manifest.bz2'))
@@ -238,12 +238,12 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                     manifestfile.write(hh+" "+fulldir+"/\n")
                     message+=hh+" "+fulldir+"/\n"
                     if debug:
-                        print "Adding:",hh+" "+fulldir+"/ "
+                        print("Adding:",hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
-    #print "===="+message+"===="
+    #print("===="+message+"====")
     
     sig = signature(message,sk,pk)
     b64sig = base64.b64encode(sig)
@@ -265,7 +265,7 @@ if sys.argv[argcount] == '--':
 basedir = sys.argv[argcount]
 keydir=os.path.join(basedir,'ht.project','keys')
 if (not force) and os.path.exists(os.path.join('ht.project','manifest.bz2')):
-    print "Manifest already exist. Nothing to do. (use -f to force regeneration)"
+    print("Manifest already exist. Nothing to do. (use -f to force regeneration)")
     exit(0)
 
 f = open(os.path.join(keydir,'key1.priv'),"r")

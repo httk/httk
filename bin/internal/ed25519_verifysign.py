@@ -150,7 +150,7 @@ public_key = base64.b64decode(b64public_key)
 
 signature=base64.b64decode(b64signature)
 if checkvalid(signature,message,public_key):
-    print "TRUE"
+    print("TRUE")
 else:
-    print "FALSE"
+    print("FALSE")
 

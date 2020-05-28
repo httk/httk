@@ -58,7 +58,7 @@ def lattice_system_from_lengths_and_cosangles(lengths, cosangles, eps=0):
         lattice_system = 'rhombohedral'
     else:
         lattice_system = 'triclinic'
-    #print "DETECTED LATTICE SYSTEM",lengths.to_floats(),cosangles.to_floats(),eps,"=>",lattice_system
+    #print("DETECTED LATTICE SYSTEM",lengths.to_floats(),cosangles.to_floats(),eps,"=>",lattice_system)
     return lattice_system
 
 
@@ -148,19 +148,19 @@ def get_primitive_to_conventional_basis_transform(basis, eps=1e-4):
     invrebase = rebase.inv().simplify()
     #invrebase = FracVector.create([invrebase[0]*lengths[0], invrebase[1]*lengths[1], invrebase[2]*lengths[2]]).simplify()
 
-    #print "BASIS",basis
-    #print "BASIS",basis.to_floats()
-    #print "INVREBASE:", invrebase.to_floats()
-    #print "TRANSFORMED", (basis*invrebase).to_floats()
+    #print("BASIS",basis)
+    #print("BASIS",basis.to_floats())
+    #print("INVREBASE:", invrebase.to_floats())
+    #print("TRANSFORMED", (basis*invrebase).to_floats())
 
     for rows in invrebase:
         for val in rows:
             if val != 0 and val != 1 and val != -1:
             #if val != half and val != -half and val != 0 and val != 1 and val != -1:
                 # This is not a primitive cell that can easily be turned into a cubic conventional cell
-                #print "HUH",val
+                #print("HUH",val)
                 return unit
-    #print "INVREBASE:", invrebase
+    #print("INVREBASE:", invrebase)
     return invrebase 
 
 #     # lattice_sybmol == 'P' and (crystal_system == 'cubic' or crystal_system == 'orthorhombic' or crystal_system == 'tetragonal') => unit

@@ -108,13 +108,13 @@ def readstruct(ioa, struct, importers=None):
     #               [basisvecs[1].GetX(),basisvecs[1].GetY(),basisvecs[1].GetZ()],
     #               [basisvecs[2].GetX(),basisvecs[2].GetY(),basisvecs[2].GetZ()]])
     #invbasis = inv(transpose(basis))
-    #print "BASIS",basis
+    #print("BASIS",basis)
 
     #for obatom in openbabel.OBMolAtomIter(obmol):
         #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-    #    print "X",[obatom.GetX(),obatom.GetY(),obatom.GetZ()]
+    #    print("X",[obatom.GetX(),obatom.GetY(),obatom.GetZ()])
     
     #spacegroupnumber = unitcell.GetSpaceGroupNumber()    
     #sg = Spacegroup(spacegroupnumber)
@@ -152,13 +152,13 @@ def readstruct(ioa, struct, importers=None):
 
     #invbasis = inv(transpose(basis))
     
-    #print unitcell.GetAlpha(), unitcell.GetSpaceGroup()
+    #print(unitcell.GetAlpha(), unitcell.GetSpaceGroup())
 
     #for obatom in openbabel.OBMolAtomIter(obmol):
         #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-        #print [obatom.GetX(),obatom.GetY(),obatom.GetZ()]
+        #print([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
         
     #    sites.append([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
     #    occs.append(obatom.GetAtomicNum())
@@ -172,7 +172,7 @@ def readstruct(ioa, struct, importers=None):
     ##sites2 = transpose(dot(invpc,transpose(sites)))
 
     ##for i in range(len(sites2)):
-    ##    print "%.6f    %.6f    %.6f   %s" % (sites2[i][0],sites2[i][1],sites2[i][2],occs[i])
+    ##    print("%.6f    %.6f    %.6f   %s" % (sites2[i][0],sites2[i][1],sites2[i][2],occs[i]))
     
     #sites = array(sites)
     #symsites, kinds = sg.equivalent_sites(sites)
@@ -196,24 +196,24 @@ def readstruct(ioa, struct, importers=None):
     #        filteredsites.append(symsites[i])
     #        filteredoccs.append(occs[kinds[i]])
 
-    #print obmol.GetFormula()+" ("+obmol.GetTitle()+") SG:"+ str(unitcell.GetSpaceGroupNumber())
+    #print(obmol.GetFormula()+" ("+obmol.GetTitle()+") SG:"+ str(unitcell.GetSpaceGroupNumber()))
 
-    ##print "%.6f    %.6f    %.6f" % (newcell.GetA(),newcell.GetB(),newcell.GetC())
-    ##print "%.6f    %.6f    %.6f" % (newcell.GetAlpha(),newcell.GetBeta(),newcell.GetGamma())
+    ##print("%.6f    %.6f    %.6f" % (newcell.GetA(),newcell.GetB(),newcell.GetC()))
+    ##print("%.6f    %.6f    %.6f" % (newcell.GetAlpha(),newcell.GetBeta(),newcell.GetGamma()))
 
-    ##print "%.6f    %.6f    %.6f" % (vectors[0].GetX(),vectors[0].GetY(),vectors[0].GetZ())
-    ##print "%.6f    %.6f    %.6f" % (vectors[1].GetX(),vectors[1].GetY(),vectors[1].GetZ())
-    ##print "%.6f    %.6f    %.6f" % (vectors[2].GetX(),vectors[2].GetY(),vectors[2].GetZ())
+    ##print("%.6f    %.6f    %.6f" % (vectors[0].GetX(),vectors[0].GetY(),vectors[0].GetZ()))
+    ##print("%.6f    %.6f    %.6f" % (vectors[1].GetX(),vectors[1].GetY(),vectors[1].GetZ()))
+    ##print("%.6f    %.6f    %.6f" % (vectors[2].GetX(),vectors[2].GetY(),vectors[2].GetZ()))
 
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[0,0],primitive_cell[0,1],primitive_cell[0,2])
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[1,0],primitive_cell[1,1],primitive_cell[1,2])
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[2,0],primitive_cell[2,1],primitive_cell[2,2])
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[0,0],primitive_cell[0,1],primitive_cell[0,2]))
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[1,0],primitive_cell[1,1],primitive_cell[1,2]))
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[2,0],primitive_cell[2,1],primitive_cell[2,2]))
 
     #for i in range(len(filteredsites)):
-    #    print "%.6f    %.6f    %.6f   %s" % (filteredsites[i][0],filteredsites[i][1],filteredsites[i][2],filteredoccs[i])
+    #    print("%.6f    %.6f    %.6f   %s" % (filteredsites[i][0],filteredsites[i][1],filteredsites[i][2],filteredoccs[i]))
 
     ##for i in range(len(symsites)):
-    ##    print "%.6f    %.6f    %.6f   %s" % (symsites[i][0],symsites[i][1],symsites[i][2],symoccs[i])
+    ##    print("%.6f    %.6f    %.6f   %s" % (symsites[i][0],symsites[i][1],symsites[i][2],symoccs[i]))
 
     ##for obatom in openbabel.OBMolAtomIter(obmol):
     ##    obatom.GetAtomicNum()

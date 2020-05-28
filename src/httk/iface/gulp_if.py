@@ -73,7 +73,7 @@ def structure_to_gulp(iof, struct, runspec="single conp", postcards=[], potentia
         species = periodictable.atomic_symbol(struct.p1occupancies[i])
         f.write(species+" ")
         f.write(" ".join([str(float(x)) for x in struct.p1coords[i]])+"\n")
-        #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
+        #print("X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
     for card in postcards:
         f.write(card+"\n")
     if potentials is None:

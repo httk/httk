@@ -958,8 +958,8 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
 
     volume_ratio = abs((new_cell.basis.det()/abs(old_cell.basis.det()))).simplify()
     seek_counts = [int((volume_ratio*x).simplify()) for x in structure.uc_counts]
-    #print "HMM",(new_cell.basis.det()/old_cell.basis.det()).simplify()
-    #print "SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation
+    #print("HMM",(new_cell.basis.det()/old_cell.basis.det()).simplify())
+    #print("SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation)
     total_seek_counts = sum(seek_counts)
     if total_seek_counts > max_atoms:
         raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
@@ -977,20 +977,20 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
         max_search = None
 
     for offset in breath_first_idxs(dim=3, end=max_search, negative=True):
-        #print "X",offset, seek_counts
+        #print("X",offset, seek_counts)
         for idx in range(len(coordgroups)):
             coordgroup = coordgroups[idx]
             newcoordgroup = coordgroup+FracVector([offset]*len(coordgroup))
             new_reduced = newcoordgroup*conversion_matrix
-            #print "NEW:",FracVector.use(new_reduced).to_floats(),
+            #print("NEW:",FracVector.use(new_reduced).to_floats(),)
             new_reduced = [x for x in new_reduced if x[0] >= 0 and x[1] >= 0 and x[2] >= 0 and x[0] < 1 and x[1] < 1 and x[2] < 1]
             extendedcoordgroups[idx] += new_reduced
             c = len(new_reduced)
             seek_counts[idx] -= c
             total_seek_counts -= c
-            #print "ADD",str(c)
+            #print("ADD",str(c))
             if seek_counts[idx] < 0:
-                #print "X",offset, seek_counts
+                #print("X",offset, seek_counts)
                 raise Exception("Structure.transform safety check error, internal error: too many atoms in supercell.")
         if total_seek_counts == 0:
             break
@@ -1005,9 +1005,9 @@ def main():
     coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
     assignments = [2, 5]
 
-    print cell, coordgroups
+    print(cell, coordgroups)
     cell, coordgroups = coordswap(0, 2, cell, coordgroups)
-    print cell, coordgroups
+    print(cell, coordgroups)
     
     pass
 

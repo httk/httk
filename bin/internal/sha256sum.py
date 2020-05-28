@@ -19,9 +19,9 @@ if len(sys.argv)<2:
     message = sys.stdin.read()
     s = hashlib.sha256() 
     s.update(message) 
-    print s.hexdigest()+"  -"
+    print(s.hexdigest()+"  -")
     exit(0)
 else:
     for arg in sys.argv[1:]:
-        print hexhash(arg)+"  "+arg
+        print(hexhash(arg)+"  "+arg)
     exit(0)

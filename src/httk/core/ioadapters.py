@@ -285,7 +285,7 @@ def zdecompressor(f, mode, *args):
     if not os.path.exists(f):
         raise IOError("zlibdecompressor: File not found found:"+str(f))
 
-    #print "Opening: "+f
+    #print("Opening: "+f)
     
     if mode != 'r' and mode != 'rb':
         raise Exception("Cannot write inside zlib compressed files.")

@@ -14,5 +14,5 @@ the_page = response.read().strip()
 if the_page=="OK":
     exit(0)
 else:
-    print the_page
+    print(the_page)
     exit(1)

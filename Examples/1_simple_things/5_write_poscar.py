@@ -24,11 +24,11 @@ struct = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, as
 
 # One alternative
 struct.io.save("PbTiO3.vasp")
-print ("PbTiO3.vasp saved (POSCAR format)")
+print("PbTiO3.vasp saved (POSCAR format)")
 
 # Another alternative
 httk.save(struct, "PbTiO3_alt.vasp")
-print ("PbTiO3_alt.vasp saved (POSCAR format)")
+print("PbTiO3_alt.vasp saved (POSCAR format)")
 
 
 basis = [[1.0, 0.0, 0.0],

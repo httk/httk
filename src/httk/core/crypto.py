@@ -249,7 +249,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                 manifestfile.write(hh+" "+filename+"\n")
                 message += hh+" "+filename+"\n"
                 if debug:
-                    print "Adding:", hh+" "+filename
+                    print("Adding:", hh+" "+filename)
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root, d)
@@ -260,7 +260,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir, 'ht.config')):
                     if force or (not os.path.exists(os.path.join(fulldir, 'ht.manifest.bz2'))):
                         submanifestfile = bz2.BZ2File(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), 'w')
-                        print "Generating manifest:", os.path.join(basedir, fulldir, 'ht.manifest.bz2')
+                        print("Generating manifest:", os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
                         manifest_dir(os.path.join(basedir, fulldir), submanifestfile, os.path.join(basedir, fulldir, 'ht.config'), keydir, sk, pk)
                         submanifestfile.close()
                         os.rename(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
@@ -268,12 +268,12 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                     manifestfile.write(hh+" "+fulldir+"/\n")
                     message += hh+" "+fulldir+"/\n"
                     if debug:
-                        print "Adding:", hh+" "+fulldir+"/ "
+                        print("Adding:", hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
-    #print "===="+message+"===="
+    #print("===="+message+"====")
 
     sig = ed25519.signature(message, sk, pk)
     b64sig = base64.b64encode(sig)
@@ -387,20 +387,20 @@ def verify_crytpo_signature_old(signature, message, public_key_path):
 
 
 def main():
-    print "Generating keys, this may take some time."
+    print("Generating keys, this may take some time.")
     generate_keys("/tmp/pub.key", "/tmp/priv.key")
     message = "This is my message."
-    print "Signing message"
+    print("Signing message")
     my_signature = get_crypto_signature(message, "/tmp/priv.key")
-    print "Signature is"
-    print my_signature
-    print "Check if signature is valid"
+    print("Signature is")
+    print(my_signature)
+    print("Check if signature is valid")
     result = verify_crytpo_signature(my_signature, message, "/tmp/pub.key")
-    print "True message validates", result
+    print("True message validates", result)
     forged_message = "This is not my message."
     result = verify_crytpo_signature(my_signature, forged_message, "/tmp/pub.key")
-    print "Forged message validates", result
-    print "Finished"
+    print("Forged message validates", result)
+    print("Finished")
 
 if __name__ == "__main__":
     main()

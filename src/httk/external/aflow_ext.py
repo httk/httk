@@ -32,10 +32,10 @@ except Exception:
 def aflow(ioa_in, args, timeout=30):
     ioa_in = httk.IoAdapterString.use(ioa_in)
     #
-    #print "COMMAND AFLOW"
-    #print "SENDING IN",ioa_in.string
+    #print("COMMAND AFLOW")
+    #print("SENDING IN",ioa_in.string)
     out, err, completed = Command(aflow_path, args, inputstr=ioa_in.string).run(timeout)
-    #print "COMMAND AFLOW END"
+    #print("COMMAND AFLOW END")
     #return out, err
     #
     #p = subprocess.Popen([aflow_path]+args, stdin=subprocess.PIPE,stdout=subprocess.PIPE, 
@@ -52,7 +52,7 @@ def standard_primitive(struct):
 
     out, err = aflow(ioa, ["--prim"])
 
-    print err
+    print(err)
 
     ioa2 = httk.IoAdapterString(out)
     newstruct = httk.iface.vasp_if.poscar_to_structure(ioa2)

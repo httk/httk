@@ -40,14 +40,14 @@ class MyHTMLParser(HTMLParser):
             if len(text) > 0:
                 text = sub('[ \t\r\n]+', ' ', text)
                 self.content.append(text + ' ')
-                #print "  "*len(self.taglist) + text
+                #print("  "*len(self.taglist) + text)
 
     def handle_starttag(self, tag, attrs):
         if tag not in self.ignore_close_tags:
-            #print "  "*len(self.taglist) + "<"+tag+">"
+            #print("  "*len(self.taglist) + "<"+tag+">")
             self.taglist.append(tag)
         else:
-            #print "  "*len(self.taglist) + "<"+tag+"/>"
+            #print("  "*len(self.taglist) + "<"+tag+"/>")
             pass
         if tag == 'p':
             self.content.append('\n\n')
@@ -57,7 +57,7 @@ class MyHTMLParser(HTMLParser):
             self.ignore = True
 
     def handle_startendtag(self, tag, attrs):
-        #print "  "*len(self.taglist) + "<" + tag + "/>"
+        #print("  "*len(self.taglist) + "<" + tag + "/>")
         if tag == 'br':
             self.content.append('\n\n')
         elif tag in self.ignore_content:
@@ -68,10 +68,10 @@ class MyHTMLParser(HTMLParser):
             return
         oldtag = self.taglist.pop()
         if tag != oldtag:
-            #print "  "*len(self.taglist) + "</"+tag + "!=" + oldtag +">"
+            #print("  "*len(self.taglist) + "</"+tag + "!=" + oldtag +">")
             raise Exception("Badly formed html")
         else:
-            #print "  "*len(self.taglist) + "</"+tag+">"
+            #print("  "*len(self.taglist) + "</"+tag+">")
             pass
         if tag in self.ignore_content:
             self.ignore = False
@@ -155,8 +155,8 @@ class WebviewCurses(object):
         parser.feed(content)
         parser.close()
 
-        print parser.text()
+        print(parser.text())
 
         curses.wrapper(render_page)
-        print "Next url:",next_url
+        print("Next url:",next_url)
 

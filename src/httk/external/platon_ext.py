@@ -41,11 +41,11 @@ def platon(cwd, args, timeout=60):
     #p = subprocess.Popen([platon_path]+args, stdout=subprocess.PIPE, 
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #out, err = p.communicate()
-    #print "COMMAND PLATON"
+    #print("COMMAND PLATON")
     #raise Exception("PLATON")
-    #print "EXECUTING PLATON",platon_path,args
+    #print("EXECUTING PLATON",platon_path,args)
     out, err, completed = Command(platon_path, args, cwd=cwd).run(timeout)
-    #print "COMMAND PLATON END", out, err, completed, cwd
+    #print("COMMAND PLATON END", out, err, completed, cwd)
     return out, err, completed
 
 
@@ -108,7 +108,7 @@ def structure_addsym_and_tidy(struct):
     #out, err = platon("/tmp/platon",["atom.spf"])
     out, err = platon("/tmp/platon", ["-n", "atom.spf"])
     if err != "":
-        print err
+        print(err)
  
     #os.remove("/tmp/platon/atom.spf")
 
@@ -132,10 +132,10 @@ def structure_addsym_and_tidy(struct):
         os.unlink("/tmp/platon/atom.sty")
     out, err = platon("/tmp/platon", ["atom.res"])
     if err != "":
-        print err
+        print(err)
     out, err = platon("/tmp/platon", ["-Y", "atom.sty"])
     if err != "":
-        print err
+        print(err)
 
     sgtidystruct = httk.iface.platon_if.platon_styout_to_sgstruct(StringIO(out))
     sgtidystruct.nonequiv.tags['platon_sg'] = sgtidystruct.hall_symbol
@@ -180,7 +180,7 @@ def structure_tidy_old(struct):
     out, err = platon("/tmp/platon", ["atom.spf"])
     #out, err = platon("/tmp/platon",["-n","atom.spf"])
     if err != "":
-        print err
+        print(err)
  
     #os.remove("/tmp/platon/atom.spf")
 
@@ -204,10 +204,10 @@ def structure_tidy_old(struct):
         os.unlink("/tmp/platon/atom.sty")
     out, err = platon("/tmp/platon", ["atom.res"])
     if err != "":
-        print err
+        print(err)
     out, err = platon("/tmp/platon", ["-Y", "atom.sty"])
     if err != "":
-        print err
+        print(err)
 
     sgtidystruct = httk.iface.platon_if.platon_styout_to_sgstruct(StringIO(out))
     sgtidystruct.nonequiv.tags['platon_sg'] = sgtidystruct.hall_symbol
@@ -384,7 +384,7 @@ def structure_tidy(struct):
             f.close()
 
     #f = open(os.path.join(tmpdir,"atom.sty"))
-    #print "PLATON INPUT:",f.read()
+    #print("PLATON INPUT:",f.read())
     #f.close()
     
     out, err, completed = platon(tmpdir, ["-Y", "atom.sty"])
@@ -404,10 +404,10 @@ def structure_tidy(struct):
         pass
     
     if err != "":
-        print err
+        print(err)
     elif completed is None:
-        #print "OUT:",out
-        print "Platon did not run to completion."
+        #print("OUT:",out)
+        print("Platon did not run to completion.")
         return None
 
     tidystruct = httk.iface.platon_if.platon_styout_to_structure(StringIO.StringIO(out), based_on_struct=struct)

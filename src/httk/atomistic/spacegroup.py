@@ -50,7 +50,7 @@ class Spacegroup(HttkObject):
         if isinstance(spacegroup, Spacegroup):
             return spacegroup
 
-        #print "Creating spacegroup:",spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting, symops
+        #print("Creating spacegroup:",spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting, symops)
 
         hall = None
         if hall_symbol is not None or hm_symbol is not None or spacegroupnumber is not None or setting is not None or symops is not None:

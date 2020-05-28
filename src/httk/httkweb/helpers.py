@@ -63,7 +63,7 @@ def identify(topdir, relative_url, ext_to_class_mapper, allow_urls_without_ext=T
         if os.path.exists(absolute_filename):
             break
     else:
-        #print "Identify failed:",relative_url,relative_url_base,os.path.join(topdir,relative_url), "extensions examined:", [ext for ext in ext_to_class_mapper]
+        #print("Identify failed:",relative_url,relative_url_base,os.path.join(topdir,relative_url), "extensions examined:", [ext for ext in ext_to_class_mapper])
         raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.join(topdir,relative_url))
 
     return {'relative_url_base':relative_url_base,'url_ext':url_ext,'absolute_filename':absolute_filename,'relative_filename':relative_filename,'class':ext_to_class_mapper[ext]}
@@ -83,9 +83,9 @@ def read_config(srcdir, renderers, default_global_data = None, override_global_d
             config_info = identify(srcdir, config, renderers, allow_urls_without_ext=True)
         except IOError:
             if config == None:
-                print "Warning: no site configuration provided, and no file exists in "+str(srcdir)+"/config.(something)"
+                print("Warning: no site configuration provided, and no file exists in "+str(srcdir)+"/config.(something)")
             else:
-                print "Could not find site configuration at "+str(srcdir)+"/"+str(config)+".(something)"
+                print("Could not find site configuration at "+str(srcdir)+"/"+str(config)+".(something)")
         else:
             configdata = config_info['class'](srcdir, config_info['relative_filename'], global_data).metadata()
             global_data.update(configdata)

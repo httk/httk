@@ -22,7 +22,7 @@ from httk.atomistic import Structure, UnitcellStructure
 class StructureVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, struct):
-        #print "StructureVisualizerPlugin called",struct
+        #print("StructureVisualizerPlugin called",struct)
         self.struct = struct
         self.visualizer = None
 

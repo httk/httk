@@ -20,4 +20,4 @@ search.output(search_struct, 'structure')
 
 for match, header in list(search):
     struct = match[0]
-    print "Found structure", struct.formula, [str(struct.get_tags()[x]) for x in struct.get_tags()]
+    print("Found structure", struct.formula, [str(struct.get_tags()[x]) for x in struct.get_tags()])

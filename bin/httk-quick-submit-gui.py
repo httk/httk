@@ -108,9 +108,9 @@ project_description=d.description.replace("\n","\n  ")
 references=d.references
 
 if os.path.exists(os.path.join(project_path,"ht.project")):
-    print "This is already a httk project."
-    print "Either remove ht.project in the directory and re-run this script,"
-    print "or simply go to the directory and run httk-submit"
+    print("This is already a httk project.")
+    print("Either remove ht.project in the directory and re-run this script,")
+    print("or simply go to the directory and run httk-submit")
     exit(0)
     
 #d = TextboxDialog("Description of project")
@@ -120,12 +120,12 @@ if os.path.exists(os.path.join(project_path,"ht.project")):
 try:
     returncode = call(["httk-project-setup", project_name])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 except OSError:
     returncode = call([os.path.join(PATH_TO_HTTK_BIN_DIR,"httk-project-setup"), project_name])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 
 with open("ht.project/config", "w") as w:
@@ -142,10 +142,10 @@ with open("ht.project/references", "w") as w:
 try:
     returncode = call(["httk-project-submit"])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 except OSError:
     returncode = call([os.path.join(PATH_TO_HTTK_BIN_DIR,"httk-project-submit")])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)

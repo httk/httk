@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 #!/usr/bin/env python
 import sys, os, unittest, subprocess, argparse, difflib
-from itertools import izip_longest
 from contextlib import contextmanager
 from StringIO import StringIO
+
+if sys.version_info[0] == 3:
+    from itertools import zip_longest
+else:
+    from itertools import izip_longest
 
 import httk
 from timeit import itertools
@@ -12,21 +16,21 @@ logdata = []
 
 def run(command,args=[]):
     global logdata
-    
+
     logdata += ['Try to run: ' + command]
     p = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return p.communicate()
-    
+
 class TestStructreading(unittest.TestCase):
 
     def assert_equal_rows(self, orig, new):
         if orig != new:
             message = ''.join(difflib.ndiff(orig.splitlines(True),new.splitlines(True)))
-            self.fail("Multi-line strings are unequal:\n" + message)            
+            self.fail("Multi-line strings are unequal:\n" + message)
 
     def assert_numeric_data(self, orig, new):
         group = 0
-        midgroup = 0        
+        midgroup = 0
         subgroup = 0
         line = -1
         sizes = []
@@ -37,7 +41,7 @@ class TestStructreading(unittest.TestCase):
         new_basis = [[]]
         #message = ''.join(difflib.ndiff(orig.splitlines(True),new.splitlines(True)))
         message = ''
-        
+
         for orig_line, new_line in izip_longest(orig.splitlines(),new.splitlines()):
             if orig_line == "" and new_line == "":
                 emptylinecount += 1
@@ -48,10 +52,10 @@ class TestStructreading(unittest.TestCase):
                     group += 1
                     subgroup = 0
                     midgroup = 0
-                    line = -1                    
+                    line = -1
                     orig_set = [[[]]]
-                    new_set = [[[]]]                    
-                    continue                    
+                    new_set = [[[]]]
+                    continue
                 subgroup += 1
                 if group == 2:
                     orig_basis.append([])
@@ -100,10 +104,10 @@ class TestStructreading(unittest.TestCase):
                         except ValueError as e:
                             self.assertTrue(orig_datum == new_datum, "Comparing strings:"+orig_datum+" != "+new_datum+"\nFull diff:\n"+message)
                         else:
-                            self.assertAlmostEqual(orig_float,new_float, 5, "Comparing floats:"+orig_datum+" != "+new_datum+"\nFull diff:\n"+message)                         
+                            self.assertAlmostEqual(orig_float,new_float, 5, "Comparing floats:"+orig_datum+" != "+new_datum+"\nFull diff:\n"+message)
                     else:
                         self.assertEqual(orig_int, new_int, "Comparing ints:"+orig_datum+" != "+new_datum+"\nFull diff:\n"+message)
-                        
+
         def check_permut(orig_set, new_set, coord_permuts=[0,1,2]):
             self.assertEqual(len(orig_set),len(new_set),"Not equal amount of coordinates in this group.")
             for orig_line,new_line in zip(orig_set,new_set):
@@ -119,15 +123,15 @@ class TestStructreading(unittest.TestCase):
             new_group.sort()
             pc = 0
             permut = itertools.permutations(new_group)
-            for p in permut:   
+            for p in permut:
                 pc += 1
                 self.assertEqual(len(orig_group),len(p),"Not equal amount of coordinate groups.")
                 check, err = check_permut(orig_group, p, coord_permuts)
                 if check:
-                    print "Found match after considering",pc,"permutations."
-                    #print orig_group
-                    #print p
-                    #print "------------------------------------------------"
+                    print("Found match after considering",pc,"permutations.")
+                    #print(orig_group)
+                    #print(p)
+                    #print("------------------------------------------------")
                     return True, None
                 else:
                     if smallest_error is None or err[0] < smallest_error[0]:
@@ -137,7 +141,7 @@ class TestStructreading(unittest.TestCase):
         del orig_set[-1]
         del new_set[-1]
 
-        self.assertEqual(len(orig_basis),len(new_basis),"Unequal amount of basis vectors, misformed output.")        
+        self.assertEqual(len(orig_basis),len(new_basis),"Unequal amount of basis vectors, misformed output.")
         x_permuts = itertools.permutations(range(len(new_basis)))
         smallest_error = None
         for xp in x_permuts:
@@ -154,18 +158,18 @@ class TestStructreading(unittest.TestCase):
                 continue
             break
         else:
-            self.assertTrue(False,"Basis vectors not equal (despite considering all permutations)\n"+str(orig_basis)+'\nvs\n'+str(new_basis)+"\nSmallest error:"+str(smallest_error))                    
+            self.assertTrue(False,"Basis vectors not equal (despite considering all permutations)\n"+str(orig_basis)+'\nvs\n'+str(new_basis)+"\nSmallest error:"+str(smallest_error))
         coord_permuts = [coord_x_permuts[x] for x in coord_y_permuts]
 
         for orig_group,new_group in zip(orig_set,new_set):
             check, err = check_group(orig_group, new_group, coord_permuts)
             if not check:
-                self.assertTrue(False,"Coordinates not equal (despite considering all permutations), smallest error:"+str(err))                    
+                self.assertTrue(False,"Coordinates not equal (despite considering all permutations), smallest error:"+str(err))
                 break
-                                
+
             # Coordinates can be returned in any order...
-                
-    
+
+
     def test_read_all_spacegroups(self):
         compdir = 'structreading_data'
         topdir = '../Tutorial/tutorial_data'
@@ -186,7 +190,7 @@ class TestStructreading(unittest.TestCase):
         for subdir, dirs, files in os.walk(structdir):
             for f in files:
                 if f.endswith('.cif'):
-                    print "TESTING:",f
+                    print("TESTING:",f)
 
                     reldir = os.path.relpath(subdir, topdir)
                     ff = os.path.join(subdir, f)
@@ -195,18 +199,18 @@ class TestStructreading(unittest.TestCase):
                     #if not os.path.exists(reldir):
                     #    os.makedirs(reldir)
                     if struct.assignments.ratios != [1]*len(struct.assignments.ratios):
-                        print "Disordered structure, skipping"
+                        print("Disordered structure, skipping")
                         continue
-                    
+
                     if f in [ '70.cif', '26.cif', '190.cif']:
-                        print "Skipping structure incorrectly read by cif2cell"
+                        print("Skipping structure incorrectly read by cif2cell")
                         continue
                     #if f == '184.cif' or f == '119.cif' or f == '217.cif' or f == '200.cif':
                     #    # For some reason cif2cell has a different orientation here
                     #    continue
 
 
-                    of = open('structreading.tmp',"w") 
+                    of = open('structreading.tmp',"w")
                     #of.write(" ".join(struct.uc_formula_symbols)+"\n")
                     #of.write(" ".join([str(x) for x in struct.pc.uc_counts])+"\n")
                     #of.write(print_num_matrix(struct.pc.uc_cell.basis.to_floats()))
@@ -228,32 +232,32 @@ class TestStructreading(unittest.TestCase):
                     f = open('structreading.tmp')
                     s2 = f.read()
                     f.close()
-                    
+
                     self.assert_numeric_data(s1,s2)
                     #self.assertTrue(filecmp.cmp(compf, 'structreading.tmp'))
 
 
 #############################################################################
 
-            
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="Structure reading tests")
     ap.add_argument("--debug", help = 'Debug output', action='store_true')
     args, leftovers = ap.parse_known_args()
-    
+
     try:
         suite = unittest.TestLoader().loadTestsFromTestCase(TestStructreading)
-        unittest.TextTestRunner(verbosity=2).run(suite)        
+        unittest.TextTestRunner(verbosity=2).run(suite)
     finally:
         if args.debug:
-            print("") 
+            print("")
             print("Loginfo:")
             print(logdata)
 
 
 
 
-            
+
 #print("Formula:", struct.formula)
 #print("Volume:", float(struct.uc_volume))
 #print("Assignments", struct.uc_formula_symbols)

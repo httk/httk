@@ -90,7 +90,7 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
 
     for i in range(len(symbols)):
         f.write(symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
-        #print "XX",symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl)
+        #print("XX",symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
     
     f.write("end 'model' ")
     f.write(" "+copies+" "+supercell+" spacegroup '"+spacegroup+"' unitcell [ ")

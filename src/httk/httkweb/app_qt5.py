@@ -45,13 +45,13 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
 
     class WebEnginePage(QWebEnginePage):
         def javaScriptConsoleMessage(self, level, msg, line, source):
-            print 'Console (%s): %s line %d: %s' % (level, source, line, msg)
+            print('Console (%s): %s line %d: %s' % (level, source, line, msg))
     
     class Backend(QObject):
         @QtCore.pyqtSlot(str,result=str)
         def test(self,msg):
             pass
-            #print 'call received:'+msg
+            #print('call received:'+msg)
             #return 'call received:'+msg
        
     #class WebEngineUrlRequestInterceptor(QWebEngineUrlRequestInterceptor):
@@ -84,7 +84,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
         def readData(self, maxSize):
             #print('== READ', maxSize)
             data, self._data = self._data[:maxSize], self._data[maxSize:]
-            #print "** RETURNING:",data
+            #print("** RETURNING:",data)
             return data
     
         def close(self):
@@ -124,7 +124,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             query = url.query()
             query = dict(urlparse.parse_qsl(query,keep_blank_values=True))
              
-            #print "== REQUEST STARTED == RELPATH:", relpath, "QUERY:",query
+            #print("== REQUEST STARTED == RELPATH:", relpath, "QUERY:",query)
                 
             if relpath.startswith("/"):
                 relpath = relpath[1:]
@@ -171,16 +171,16 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             #    'PATH':os.defpath,
             #    'QUERY_STRING':self.querystring,
             #    'BACKEND':'app'
-            #}        
-            #print "ENV",env
-            #print "EXEC:",self.cgipath
+            #}
+            #print("ENV",env)
+            #print("EXEC:",self.cgipath)
             #
             #data = subprocess.check_output(self.cgipath, env=env)
             #headerstr, _dummy, self.content = data.partition("\n\n")
     
             #headerfp = StringIO.StringIO("\n"+data)
             #httpmsg = HTTPMessage(headerfp)
-            #httpmsg.readheaders()        
+            #httpmsg.readheaders()
     
             #for header in httpmsg:
             #    self.setRawHeader(header,httpmsg.getrawheader(header))

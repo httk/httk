@@ -71,9 +71,9 @@ except Exception:
 
 def run(cwd, args, timeout=None):
     ensure_has_cif2cell()
-    #print "COMMAND JMOL"
+    #print("COMMAND JMOL")
     out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
-    #print "COMMMDN JMOL END"
+    #print("COMMMDN JMOL END")
     return out, err, completed    
 
 
@@ -104,18 +104,18 @@ def main():
     jmol = start()
     jmol.send("background '#F5F5F5';\n")
     time.sleep(1)
-    print jmol.receive()
+    print(jmol.receive())
     time.sleep(3)
     jmol.send("background '#FFFFFF';\n")
     time.sleep(3)
     jmol.send("background '#FF0000';\n")
-    print "Waiting..."
+    print("Waiting...")
     time.sleep(1)
-    print "Print output"
-    print jmol.receive()
-    print "Killing..."
+    print("Print output")
+    print(jmol.receive())
+    print("Killing...")
     jmol.stop()
-    print "Killed."
+    print("Killed.")
 
 if __name__ == "__main__":
     main()

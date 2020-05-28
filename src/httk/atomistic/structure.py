@@ -230,7 +230,7 @@ class Structure(HttkObject):
         uc_sites_exception = None
         spacegroup_exception = None
 
-        #print "NEW STRUCTURE",rc_angles, rc_cosangles, rc_lengths
+        #print("NEW STRUCTURE",rc_angles, rc_cosangles, rc_lengths)
 
         if structure is not None:
             return cls.use(structure)
@@ -442,7 +442,7 @@ class Structure(HttkObject):
     def pc(self):
         if 'pc' not in self._other_reps:
             prim_t = get_primitive_basis_transform(self.rc_sites.hall_symbol)            
-            #print "PRIM TRANSFORM",prim_t.to_floats(),self.rc_cell.basis.to_floats()
+            #print("PRIM TRANSFORM",prim_t.to_floats(),self.rc_cell.basis.to_floats())
             asotf = self.rc_cell.get_axes_standard_order_transform()
             if asotf is not None:
                 self._other_reps['pc'] = self.cc.transform(prim_t*asotf)            
@@ -450,7 +450,7 @@ class Structure(HttkObject):
                 self._other_reps['pc'] = self.cc.transform(prim_t)            
             if 'uc' not in self._other_reps:
                 self._other_reps['uc'] = self._other_reps['pc']
-            #print "RESULT",self._other_reps['pc'].uc_basis.to_floats(), self._other_reps['pc'].uc_sites.reduced_coordgroups.to_floats()
+            #print("RESULT",self._other_reps['pc'].uc_basis.to_floats(), self._other_reps['pc'].uc_sites.reduced_coordgroups.to_floats())
         return self._other_reps['pc']
 
     @property
@@ -1011,7 +1011,7 @@ class StructureRef(HttkObject):
     
 
 def main():
-    print "Test"
+    print("Test")
         
 if __name__ == "__main__":
     main()

@@ -148,7 +148,7 @@ def platon_lis_to_struct_broken(ioa):
     else:
         occupancies = simple_occs
 
-    #print "OUT",out['occupancies']
+    #print("OUT",out['occupancies'])
     #exit(0)
 
     struct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -263,7 +263,7 @@ def platon_lis_to_struct_broken2(ioa):
     else:
         occupancies = simple_occs
 
-    #print "OUT",out['occupancies']
+    #print("OUT",out['occupancies'])
     #exit(0)
 
     struct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -342,7 +342,7 @@ def platon_styin_to_sgstruct(ioa):
 
     #spacegroup = "".join(out['spacegroup'].split())
     #spacegroup = spacegroup[0]+(spacegroup[1:].lower())
-    #print "GOT SPACEGROUP",spacegroup
+    #print("GOT SPACEGROUP",spacegroup)
     spacegroup = out['spacegroup']
 
     sgstruct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -457,7 +457,7 @@ def structure_to_platon(ioa, struct, precards, postcards):
         species = struct.rc_occupancies[i]
         f.write(species+str(idx)+" ")
         f.write(" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
-        #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
+        #print("X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
         idx = idx + 1
     for card in postcards:
         f.write(card+"\n")
@@ -482,7 +482,7 @@ def sites_to_platon(ioa, sites, cell, precards, postcards):
         species = sites.rc_occupancies[i]
         f.write(species+str(idx)+" ")
         f.write(" ".join([str(float(x)) for x in sites.coords[i]])+"\n")
-        #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
+        #print("X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
         idx = idx + 1
     for card in postcards:
         f.write(card+"\n")
@@ -583,8 +583,8 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
             results['in_setting'] = True
 
         newcoord = FracVector.create([match.group(4), match.group(5), match.group(6)]).limit_denominator(5000000).simplify()
-        #print "CHECK1",[match.group(4),match.group(5),match.group(6)]
-        #print "CHECK2:",newcoord
+        #print("CHECK1",[match.group(4),match.group(5),match.group(6)])
+        #print("CHECK2:",newcoord)
 
         results['setting'][-1]['coords'].append([match.group(4), match.group(5), match.group(6)])
         
@@ -614,7 +614,7 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         #['^Setting',None,setting_start],
     ], results=results, debug=False)
 
-    #print "HX",out['setting'][0]['wyckoff']
+    #print("HX",out['setting'][0]['wyckoff'])
 
     if based_on_struct is None:
         structdata = dict(out['cell'].items() + 

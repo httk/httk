@@ -27,5 +27,5 @@ for match, header in search:
         print("Generated run for:", struct.formula+" in "+dir)
     except Exception as e:
         raise
-        print e
+        print(e)
         pass

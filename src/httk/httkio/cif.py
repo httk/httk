@@ -36,7 +36,7 @@ def _read_cif_rewind_if_needed(f, row, done_fields):
 
 
 def _read_cif_loop(f, pragmatic=True, use_types=False):
-    #print "Read cif loop"
+    #print("Read cif loop")
     noteol = False
     loop_data = OrderedDict()
     header = []
@@ -74,10 +74,10 @@ def _read_cif_loop(f, pragmatic=True, use_types=False):
 
 
 def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=False):
-    #print "Read cif data value"
+    #print("Read cif data value")
     data_value = None
     for row in f:
-        #print "read_cif_data_value_row:",row
+        #print("read_cif_data_value_row:",row)
         striprow = row.strip()
         if striprow == "":
             noteol = False
@@ -170,11 +170,11 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
 
 
 def _read_cif_data_block(f, pragmatic=True, use_types=False):
-    #print "Read cif data block"
+    #print("Read cif data block")
     data_items = OrderedDict()
     loops = 0
     for row in f:
-        #print "Read data block read:",row
+        #print("Read data block read:",row)
         striprow = row.strip()
         lowrow = striprow.lower()
         if striprow.startswith("#"):
@@ -500,8 +500,8 @@ def main():
 
     datalist2, header2 = read_cif("/tmp/gurk2.cif")
 
-    print "MATCH1", header == header2
-    print "MATCH2", datalist == datalist2
+    print("MATCH1", header == header2)
+    print("MATCH2", datalist == datalist2)
     
     exit(0)
 

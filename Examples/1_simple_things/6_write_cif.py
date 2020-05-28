@@ -23,12 +23,12 @@ assignments = ['Pb', 'Ti', 'O']
 struct = Structure.create(uc_cell=cell, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
 
 struct.io.save("PbTiO3.cif")
-print ("PbTiO3.cif saved")
+print("PbTiO3.cif saved")
 
 symmetric_struct = struct.find_symmetry()
 
 symmetric_struct.io.save("PbTiO3_alt.cif")
-print ("PbTiO3_alt.cif saved")
+print("PbTiO3_alt.cif saved")
 
 basis = [[1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],

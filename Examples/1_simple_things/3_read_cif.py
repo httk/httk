@@ -14,8 +14,8 @@ for i in range(len(files)):
     struct = httk.load(filename)
     # More sophisticated way that allows choosing backends, and backend order
     struct = httk.atomistic.atomisticio.cif_to_struct(filename, backends=['cif2cell', 'internal'])
-    print "The formula is:", struct.formula+" ("+struct.anonymous_formula+")"
-    print "Tags:", [str(struct.get_tag(x)) for x in struct.get_tags()]
-    print "Refs:", [str(x) for x in struct.get_refs()]
+    print("The formula is:", struct.formula+" ("+struct.anonymous_formula+")")
+    print("Tags:", [str(struct.get_tag(x)) for x in struct.get_tags()])
+    print("Refs:", [str(x) for x in struct.get_refs()])
     #struct.vis.show()
 

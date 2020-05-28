@@ -96,7 +96,7 @@ class Cell(HttkObject):
         
         lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
         """
-        #print "Create cell:",cell,basis,angles, lengths,cosangles,a,b,c,alpha,beta,gamma
+        #print("Create cell:",cell,basis,angles, lengths,cosangles,a,b,c,alpha,beta,gamma)
          
         if cell is not None:
             return Cell.use(cell)

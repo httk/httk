@@ -104,7 +104,7 @@ class HttkObject(object):
                 data['derived'] += [(a, resolve)]
                 if a in params:
                     data['init_keydict'][a] = resolve
-                #print "SETTING TYPES: CLS",cls.__name__," DATA:",a
+                #print("SETTING TYPES: CLS",cls.__name__," DATA:",a)
             except AttributeError:
                 pass
         data['derived_keydict'] = dict(data['derived'])
@@ -176,7 +176,7 @@ class HttkObject(object):
                 keys += [(param, val)]
 
         keys = tuple(keys)
-        #print "TUPLE:",keys
+        #print("TUPLE:",keys)
         return keys
     
     @httk_typed_property(str)

@@ -290,9 +290,9 @@ def main():
     coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
     assignments = [2, 5]
 
-    print cell, coordgroups
+    print(cell, coordgroups)
     cell, coordgroups = coordswap(0, 2, cell, coordgroups)
-    print cell, coordgroups
+    print(cell, coordgroups)
     
     pass
 

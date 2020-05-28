@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -25,20 +25,20 @@ class RenderHttk(object):
 
     #left_punctuation_chars_quotes = "\\'\\(\\[\\{\\<:-\\\"; "
     #right_punctuation_chars_quotes = "'\\)\\]\\}\\>:,-\\!\\.\\?\\\"; "
-    
+
     adornment_chars = ['!','"','#','$','%','&',"'",'(',')','*','+',',','-','.','/',':',';','<','=','>','?','@','[',"\\",']','^','_','`','{','|','}','~']
     bullet_item_markers = ['- ', '* ', '+ ']
     option_list_characters = ['-','/']
-    
+
     def __init__(self, render_dir, render_filename, global_data):
-        
+
         self.render_dir = render_dir
         self.render_filename = render_filename
         self.filename = os.path.join(render_dir, render_filename)
-        
+
         with codecs.open(self.filename, 'r', encoding='utf-8') as f:
             source = f.read()
-    
+
         self.global_data = global_data
 
         if render_dir != '':
@@ -57,7 +57,7 @@ class RenderHttk(object):
         #s = re.sub('[^0-9a-zA-Z_]', '', s)
         #s = re.sub('^[^a-zA-Z_]+', '', s)
         return s
-        
+
     def rst_light_html_renderer(self, content):
         outstr = ''
         for entry in content:
@@ -118,7 +118,7 @@ class RenderHttk(object):
 
     def rst_light_parse_textstyle(self, content, start_marker, end_marker, style, allow_nested = False, unescape=True, handle_roles = False, handle_hyperlinks = False):
 
-        # Quote 
+        # Quote
         start_marker = re.escape(start_marker)
         end_marker = re.escape(end_marker)
 
@@ -130,7 +130,7 @@ class RenderHttk(object):
                 link = False
 
                 #try:
-                #print "REGEX",segment_text
+                #print("REGEX",segment_text)
                 found = re.finditer('(?P<start>['+self.left_punctuation_chars+']|^)(?P<role>:[^:]+:)?'+start_marker+'(?P<content>.+?)(?P<url> +<[^>]+>)?'+end_marker+'(?P<link>_?)(?P<end>['+self.right_punctuation_chars+']|$)',segment_text)
                 #except Exception:
                 #    print "RE ERROR",repr('(['+self.left_punctuation_chars+']|^)(:[^:]+:)?'+start_marker+'(.+?)( +<[^>]+>)?'+end_marker+'(_?)(['+self.right_punctuation_chars+']|$)')
@@ -143,49 +143,49 @@ class RenderHttk(object):
                     content = m.group('content') if m.group('content') is not None else ''
                     url = m.group('url').lstrip(" <").rstrip(">") if m.group('url') is not None else ''
                     link = m.group('link') if m.group('link') is not None else ''
-                    end = m.group('end') if m.group('end') is not None else ''                    
-                    
-                    #print "MATCH:",start,'|',role,'|',content,'|',url,'|',link,'|',end
+                    end = m.group('end') if m.group('end') is not None else ''
+
+                    #print("MATCH:",start,'|',role,'|',content,'|',url,'|',link,'|',end)
                     start_idx = m.start()
                     # Text role
                     if handle_roles and role != '' and link == '':
-                        #print "TEXT ROLE"
+                        #print("TEXT ROLE")
                         before_text = segment_text[end_idx:start_idx]+start
                         outcontent += [{'content':before_text,'modifiers':segment['modifiers'],'unescape':segment['unescape']}]
 
                         outcontent += [{'content':content+url,'role':role,'modifiers':segment['modifiers'] + [{'name':'role'}], 'unescape':unescape and segment['unescape']}]
                     # Hyperlink
                     elif handle_hyperlinks and role == '' and link != '':
-                        #print "HYPERLINK"
+                        #print("HYPERLINK")
                         before_text = segment_text[end_idx:start_idx]+start+role
                         outcontent += [{'content':before_text,'modifiers':segment['modifiers'],'unescape':segment['unescape']}]
                         if url == '':
-                            outcontent += [{'content':content,'anchor':self.make_id(content),'modifiers':segment['modifiers'] + [{'name':'anchor'}], 'unescape':unescape and segment['unescape']}] 
+                            outcontent += [{'content':content,'anchor':self.make_id(content),'modifiers':segment['modifiers'] + [{'name':'anchor'}], 'unescape':unescape and segment['unescape']}]
                         else:
-                            outcontent += [{'content':content,'url':url,'modifiers':segment['modifiers'] + [{'name':'link'}], 'unescape':unescape and segment['unescape']}] 
+                            outcontent += [{'content':content,'url':url,'modifiers':segment['modifiers'] + [{'name':'link'}], 'unescape':unescape and segment['unescape']}]
                     # Error condition, if it isn't a hyperlink but ends with _, reject the m
                     elif handle_hyperlinks and role != '' and link != '':
-                        #print "ERROR"
+                        #print("ERROR")
                         continue
-                    # Other markup    
+                    # Other markup
                     else:
-                        #print "OTHER MARKUP", m.start(), start, start,role
+                        #print("OTHER MARKUP", m.start(), start, start,role)
                         before_text = segment_text[end_idx:start_idx]+start+role
-                        #print "BEFORE TEXT", before_text
+                        #print("BEFORE TEXT", before_text)
                         outcontent += [{'content':before_text,'modifiers':segment['modifiers'],'unescape':segment['unescape']}]
-                        outcontent += [{'content':content + url,'modifiers':segment['modifiers'] + [style], 'unescape':unescape and segment['unescape']}] 
-                        
+                        outcontent += [{'content':content + url,'modifiers':segment['modifiers'] + [style], 'unescape':unescape and segment['unescape']}]
+
                     end_idx = m.end()-len(end)
-                    
+
                 after_text = segment_text[end_idx:]
                 if len(after_text) > 0:
                     outcontent += [{'content':after_text,'modifiers':segment['modifiers'],'unescape':segment['unescape']}]
 
             else:
                 outcontent += [{'content':segment['content'], 'modifiers':segment['modifiers'], 'unescape':segment['unescape']}]
-                    
+
         return outcontent
-    
+
     def rst_light_parser(self, source):
         adornment_levels = []
         fifo = []
@@ -193,13 +193,13 @@ class RenderHttk(object):
         section_hierarcy = []
         context = content
         block_modifiers = []
-        
+
         align_hierarcy = []
         last_align = 0
         align = 0
         last_list_index = None
-        
-        # Divide text into sections, add an empty line to make sure last textblock is terminated        
+
+        # Divide text into sections, add an empty line to make sure last textblock is terminated
         for line in source.splitlines() + [""]:
             fifo += [line]
             section_title = None
@@ -214,13 +214,13 @@ class RenderHttk(object):
 
             # Detect section header with over and underline
             elif len(fifo) == 2:
-                line1, line2 = fifo[-2].rstrip(), fifo[-1].rstrip()                
+                line1, line2 = fifo[-2].rstrip(), fifo[-1].rstrip()
                 if len(line1) == len(line2) and len(line2) > 0 and line2 == len(line2) * line2[0]:
                     section_title = line1.rstrip()
                     adornment = line2[0]
 
             # Handle titles
-            if section_title is not None:                    
+            if section_title is not None:
                 if adornment not in adornment_levels:
                     adornment_levels += [adornment]
                 level = adornment_levels.index(adornment)
@@ -242,7 +242,7 @@ class RenderHttk(object):
             last_align = align
             if len(fifo[-1].strip()) > 0:
                 align = len(fifo[-1]) - len(fifo[-1].lstrip(' '))
-                
+
             if align > last_align:
                 skip = False
                 # Class
@@ -263,7 +263,7 @@ class RenderHttk(object):
                     # Field list
                     if fifo[0][0] == ':' and fifo[0][-1] == ':':
                         skip = True
-                    # Definition list                                    
+                    # Definition list
                     else:
                         skip = True
                 # Option lists not yet supported
@@ -290,7 +290,7 @@ class RenderHttk(object):
                 if fifo[0][:3] == ".. ":
                     modparts = fifo[0][3:].split("::")
                     modname = modparts[0]
-                    if len(modparts) > 1:                        
+                    if len(modparts) > 1:
                         modargs = modparts[1].split()
                     else:
                         modargs = []
@@ -302,17 +302,17 @@ class RenderHttk(object):
                     fifo = []
                     continue
                 #elif fifo[0][0:2] in self.bullet_item_markers:
-                #    
+                #
                 #    list_fifo += {}
-                    
-                allcontent = (" ".join([x.strip() for x in fifo[:-1]])).strip()                
+
+                allcontent = (" ".join([x.strip() for x in fifo[:-1]])).strip()
                 allcontent = [{'content':allcontent,'modifiers':[],'unescape':True}]
                 allcontent = self.rst_light_parse_textstyle(allcontent,'``','``',{'name':'literal'},unescape=False)
                 allcontent = self.rst_light_parse_textstyle(allcontent,'**','**',{'name':'strong'})
                 allcontent = self.rst_light_parse_textstyle(allcontent,'*','*',{'name':'emphasis'})
                 # Roles and hyperlinks
                 allcontent = self.rst_light_parse_textstyle(allcontent,'`','`',{'name':'literal'}, handle_roles=True, handle_hyperlinks=True)
-                
+
                 # Unescape
                 for segment in allcontent:
                     if segment['unescape']:
@@ -328,11 +328,11 @@ class RenderHttk(object):
                 fifo = []
                 continue
 
-        #print "== RESULT"
+        #print("== RESULT")
         #pprint.pprint(content)
-        #print "=="
+        #print("==")
         return content
-        
+
     def split_content(self,source):
         if source.startswith("---"):
             alt1 = source[3:].find("---")
@@ -351,13 +351,13 @@ class RenderHttk(object):
 
             self.metadata_block = source[3:pos+3]
             self.content_block = self.rst_light_html_renderer(self.rst_light_parser(source[pos+6:]))
-            
+
         else:
             self.metadata_block = ''
             self.content_block = self.rst_light_html_renderer(self.rst_light(source))
 
         return
-            
+
     def content(self):
         return self.content_block
 

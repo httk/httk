@@ -47,15 +47,15 @@ class Command(object):
         
         def target():
             if debug:
-                print "Command: Launching subprocess:", self.cmd, " with args ", self.args
+                print("Command: Launching subprocess:", self.cmd, " with args ", self.args)
             
             if debug:
-                print "Command: Running communicate with inputstr:", self.inputstr
+                print("Command: Running communicate with inputstr:", self.inputstr)
             
             self.out, self.err = self.process.communicate(input=self.inputstr)
 
             if debug:
-                print "Command: Got back", self.out, self.err
+                print("Command: Got back", self.out, self.err)
 
         thread = threading.Thread(target=target)
         thread.start()

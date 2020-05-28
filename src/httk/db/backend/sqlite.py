@@ -79,7 +79,7 @@ class Sqlite(object):
         def execute(self, sql, values=[]):
             global database_debug
             if database_debug:
-                print >> sys.stderr, "DEBUG: EXECUTING SQL:"+sql+" :: "+str(values)
+                print(>> sys.stderr, "DEBUG: EXECUTING SQL:"+sql+" :: "+str(values))
             if database_debug_slow:
                 time1 = time.time()
             try:
@@ -91,14 +91,14 @@ class Sqlite(object):
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):
                     debug_cursor = self.db.connection.cursor()
-                    print >> sys.stderr, "SLOW DATABASE DEBUG: EXECUTING SQL:"+sql+" :: "+str(values)
-                    print >> sys.stderr, "sqlite execute finished in ", (time2-time1)*1000.0, "ms"
+                    print(>> sys.stderr, "SLOW DATABASE DEBUG: EXECUTING SQL:"+sql+" :: "+str(values))
+                    print(>> sys.stderr, "sqlite execute finished in ", (time2-time1)*1000.0, "ms")
                     try:
                         debug_cursor.execute("EXPLAIN QUERY PLAN "+sql, values)
                         queryplan = "### QUERY PLAN ####\n"+"\n".join([str(x) for x in debug_cursor.fetchall()]) + "\n########"
-                        print >> sys.stderr, queryplan
+                        print(>> sys.stderr, queryplan)
                     except sqlite.OperationalError:
-                        print >> sys.stderr, "(Could not retrieve query plan)"
+                        print(>> sys.stderr, "(Could not retrieve query plan)")
                         pass
                     debug_cursor.close()
 

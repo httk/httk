@@ -70,22 +70,22 @@ def print_citations():
     #for author in authors:
     #    creditlist.append(author+" ("+(", ".join(authors[author]))+")")
 
-    print ""
-    print "=================================================================="
-    print "This program used the high-throughput toolkit"
-    print "  httk v" + httk_version + " (" + httk_version_date + "), " + httk_copyright_note
-    print 
-    print "Credits for httk modules used in this run:"
+    print("")
+    print("==================================================================")
+    print("This program used the high-throughput toolkit")
+    print("  httk v" + httk_version + " (" + httk_version_date + "), " + httk_copyright_note)
+    print()
+    print("Credits for httk modules used in this run:")
     for module in module_citations:
-        print "  ("+module+")", ",".join(module_citations[module])
-        #print ", ".join(creditlist)
+        print("  ("+module+")", ",".join(module_citations[module]))
+        #print(", ".join(creditlist))
     if external_citations != {}:
-        print "From within httk the following software was also used:"
+        print("From within httk the following software was also used:")
     
         creditlist = []
         for software in external_citations:
-            print "  * "+software+" by "+", ".join(external_citations[software])
-    print "=================================================================="
+            print("  * "+software+" by "+", ".join(external_citations[software]))
+    print("==================================================================")
 
 
 def print_citations_at_exit():

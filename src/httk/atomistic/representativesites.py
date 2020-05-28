@@ -103,7 +103,7 @@ class RepresentativeSites(Sites):
         idx = 0
         for i in range(len(self.counts)):
             for j in range(self.counts[i]):
-                #print "HERE",self.wyckoff_symbols,idx,i,j
+                #print("HERE",self.wyckoff_symbols,idx,i,j)
                 wsymb = self.wyckoff_symbols[idx]
                 if wsymb == '&':
                     wsymb = 'zz'
@@ -146,7 +146,7 @@ class RepresentativeSites(Sites):
                 out += symbol+str(seen[symbol])
             else:
                 out += symbol
-        #print "OUT",out,sortedsymbs,seen
+        #print("OUT",out,sortedsymbs,seen)
         #exit(0)
         return out
 

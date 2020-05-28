@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import httk  
+import httk
 from httk.core.basic import is_sequence
 from httk.atomistic.data import periodictable, spacegroups
 from httk.atomistic import *
@@ -53,7 +53,7 @@ def struct_to_input(struct):
     inputstr += " ".join([str(group+1) for group in range(0, len(struct.uc_reduced_coordgroups)) for i in range(0, len(struct.uc_reduced_coordgroups[group]))]) + "\n"
     for row in struct.uc_reduced_coords:
         inputstr += "%.8f %.8f %.8f\n" % (row[0], row[1], row[2])
-    #print "INPUT",struct.formula,len(struct.uc_reduced_coords)
+    #print("INPUT",struct.formula,len(struct.uc_reduced_coords))
     return inputstr
 
 
@@ -73,18 +73,18 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
 
     def add_groupdata(results):
 
-        sorteddata = sorted(results['groupdata'], key=lambda data: (data[4], data[5], data[6]))                    
+        sorteddata = sorted(results['groupdata'], key=lambda data: (data[4], data[5], data[6]))
         for data in sorteddata:
-            #print "HUH",data[1],data[4],data[5],data[6]
+            #print("HUH",data[1],data[4],data[5],data[6])
             occustr = data[1]
             if not occustr in results['occucounts']:
                 results['occucounts'][occustr] = 0
             results['occucounts'][occustr] += 1
-            i = results['occucounts'][occustr]                        
+            i = results['occucounts'][occustr]
             data[0] = occustr+str(i)
             results['cif'] += " ".join(data)+"\n"
             results['data'] += " ".join(data)+"\n"
-        results['groupdata'] = []                   
+        results['groupdata'] = []
 
     def print_hm_and_hall(results):
         grpnbr = results['grpnbr']
@@ -126,10 +126,10 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
         results['grpnbr'] = match.group(1)
         if 'hm' in results and 'grpnbr' in results:
             print_hm_and_hall(results)
-        
+
     def coords(results, match):
         results['out'] = True
-        idx = ord(match.group(2)) - 65 
+        idx = ord(match.group(2)) - 65
         if results['group'] != idx:
             add_groupdata(results)
         if match.group(4) == 'alpha':
