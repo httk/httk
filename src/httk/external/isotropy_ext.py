@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*- 
-# 
+# -*- coding: utf-8 -*-
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,6 +17,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import sys, os, tempfile
 
 from httk.core import citation, IoAdapterString
@@ -37,15 +38,15 @@ def ensure_has_isotropy():
     if isotropy_path is None or isotropy_path == "":
         raise ImportError("httk.external.isotropy_ext imported with no access to isotropy binary")
 
-try:   
+try:
     isotropy_path = config.get('paths', 'isotropy')
 except Exception:
     pass
 
 def isotropy(cwd, args, inputstr, timeout=30):
     ensure_has_isotropy()
-    
-    #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE, 
+
+    #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE,
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #print("COMMAND CIF2CELL")
     out, err, completed = Command(os.path.join(isotropy_path, 'findsym'), args, cwd=cwd, inputstr=inputstr).run(timeout)
@@ -80,11 +81,11 @@ def uc_reduced_coordgroups_process_with_isotropy(coordgroup, cell, get_wyckoff=F
             print("Cell mismatch:", cell_mismatch)
             print("Structure hashes:", newstruct.rc_sites.hexhash, only_rc_struct.rc_sites.hexhash)
             #print("Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple())
-            raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
- 
+            raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")
+
         #order = [x.as_integer-1 for x in newstruct.assignments]
         #print("ORDER:",order)
-        
+
         if get_wyckoff:
             return newstruct.rc_reduced_coordgroups, newstruct.rc_sites.wyckoff_symbols, [[atomic_number(x) for x in y] for y in newstruct.assigments.symbols_list()]
         else:
@@ -103,9 +104,9 @@ def uc_reduced_coordgroups_process_with_isotropy(coordgroup, cell, get_wyckoff=F
 
 def struct_process_with_isotropy(struct):
     tmpdir = tempfile.mkdtemp(prefix='ht.tmp.isotropy_')
-    
+
     inputstr = httk.iface.isotropy_if.struct_to_input(struct)
-    #print(>> sys.stderr, "== Running findsym")
+    #print("== Running findsym", end="", file=sys.stderr)
     #print("==================== INPUT\n",inputstr)
     #print("====================")
     out, err, completed = isotropy(tmpdir, [], inputstr)
@@ -119,13 +120,13 @@ def struct_process_with_isotropy(struct):
         os.rmdir(tmpdir)
     except (IOError, OSError):
         pass
-    
-    #print(>> sys.stderr, "== Running findsym complete, stderr output follows:")
-    #print(>> sys.stderr, out)
-    #print(>> sys.stderr, "============================================")
-    #print(>> sys.stderr, err)
-    #print(>> sys.stderr, float(struct.volume))
-    #print(>> sys.stderr, "============================================")
+
+    #print("== Running findsym complete, stderr output follows:", end="", file=sys.stderr)
+    #print(out, end="", file=sys.stderr)
+    #print("============================================", end="", file=sys.stderr)
+    #print(err, end="", file=sys.stderr)
+    #print(float(struct.volume), end="", file=sys.stderr)
+    #print("============================================", end="", file=sys.stderr)
     #print("=== OUTPUT ====")
     #print(out)
     #print("==============")
@@ -136,12 +137,12 @@ def struct_process_with_isotropy(struct):
         cif = httk.iface.isotropy_if.out_to_cif(IoAdapterString(string=out), struct.assignments)
         newstruct = cif_to_struct(IoAdapterString(string=cif))
         #print("Rejected?")
-        
+
         newstruct.add_tags(struct.get_tags())
         newstruct._refs = struct.get_refs()
 
         #print("CHECKING",struct.uc_volume,newstruct.rc_volume)
-        
+
 #         only_rc_struct = cif_to_struct(IoAdapterString(string=cif), backends=['cif_reader_that_can_only_read_isotropy_cif'])
 #         #newstruct.rc_sites.wyckoff_symbols = only_rc_struct.rc_sites.wyckoff_symbols
 #         #newstruct.rc_sites._multiplicities = only_rc_struct.rc_sites._multiplicities
@@ -163,7 +164,7 @@ def struct_process_with_isotropy(struct):
 #             print only_rc_struct.to_tuple()
 #             print "======"
 #             #print "Structures:", newstruct.rc_sites.to_tuple(), only_rc_struct.rc_sites.to_tuple()
-#             raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")       
+#             raise Exception("isotropy_ext.struct_process_with_isotropy: internal error, structures that absolutely should be the same are not, sorry.")
         return newstruct
     else:
         print("ISOTROPY STDERR:")
@@ -175,4 +176,3 @@ def struct_process_with_isotropy(struct):
         print("========")
 
         raise Exception("isotropy_ext: isotropy did not complete.")
-

@@ -1,4 +1,3 @@
 * Fix lines where there is an empty print (just the print command and nothing else).
-* Fix lines with "print >> sys.stderr ..."
 * Fix imports
 * Change exit(0) to sys.exit(0)
