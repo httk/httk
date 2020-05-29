@@ -217,7 +217,7 @@ class SqlStore(object):
                     val = FracScalar.use(val)
                     val = int(val.limit_denominator(50000000)*1000000000)
                 #if isinstance(t,FracVector):
-                #    print "DOES THIS HAPPEN?",t,val
+                #    print("DOES THIS HAPPEN?",t,val)
                 #    val = int(val.limit_denominator(50000000))
                 else:
                     try:

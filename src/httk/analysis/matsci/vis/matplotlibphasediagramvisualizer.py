@@ -111,7 +111,7 @@ class MatplotlibPhaseDiagramVisualizer(object):
 
 #         lines = pd.hull_competing_phase_lines()
 #         for line in lines:
-#             #print "LINE",line[0],"->",line[1]
+#             #print("LINE",line[0],"->",line[1])
 #             #arrowplot(pp.ax,[newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],c='black')
 #             pp.ax.plot([newdata[line[0]][0],newdata[line[1]][0]],[newdata[line[0]][1],newdata[line[1]][1]],'k-')
 

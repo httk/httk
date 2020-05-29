@@ -49,5 +49,5 @@ spacegroup = 'P m -3 m'
 struct = Structure.create(rc_basis=basis, rc_reduced_coordgroups=coordgroups, assignments=assignments, rc_volume=62.79, spacegroup=spacegroup)
 
 struct.io.save("PbTiO3_alt2.cif")
-print ("PbTiO3_alt2.cif saved")
+print("PbTiO3_alt2.cif saved")
 

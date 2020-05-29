@@ -279,7 +279,7 @@ def main():
     print(anonymous_symbol_to_int("A"))
     
     
-    # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+    # print(list(breath_first_idxs(dim=3, end=[3,3,3],negative=True)))
 
 
 if __name__ == "__main__":

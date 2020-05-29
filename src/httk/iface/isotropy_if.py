@@ -97,11 +97,11 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
         results['data'] += "Columns as follows: label element symmetry_multiplicity Wykoff_label fract_x fract_y fact_z occupancy\n"
         #results['cif']+="_[local]_omdb_cod_original_Hall '"+struct.hall_symbol+"'\n"
         #if(struct.hall_symbol != hallsymb):
-        #    print >> sys.stderr, "== Hall symbol change!",struct.hall_symbol,hallsymb
+        #    print("== Hall symbol change!",struct.hall_symbol,hallsymb, end="", file=sys.stderr)
         #    with open("symmetry-differences.txt", "a") as myfile:
         #        myfile.write(filename+" :"+struct.hall_symbol+"|"+hallsymb+"\n")
         #else:
-        #    print >> sys.stderr, "== Hall symbol the same",struct.hall_symbol,hallsymb
+        #    print("== Hall symbol the same",struct.hall_symbol,hallsymb, end="", file=sys.stderr)
 
     def hm_symbol_origin(results, match):
         results['out'] = True

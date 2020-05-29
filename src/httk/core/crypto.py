@@ -131,12 +131,12 @@ def hexhash_ioa(ioa, prepend=None):
 #         hexhash1 = hexhash_str(manifest)
 #         hexhash2 = hexhash_str(test)
 #         hexhash3 = hexhash_ioa(manifestpath)
-#         #print hexhash,hexhash1, hexhash2,hexhash3
-#         #print "-----"
-#         #print test
-#         #print "-----"
-#         #print manifest
-#         #print "-----"
+#         #print(hexhash,hexhash1, hexhash2,hexhash3)
+#         #print("-----")
+#         #print(test)
+#         #print("-----")
+#         #print(manifest)
+#         #print("-----")
 #         if hexhash != hexhash2:
 #             raise Exception("Manifest mismatch, the ht.manifest in the directory does not match the actual files! Hashes are:"+str(hexhash)+" vs. "+str(hexhash2))
 #     else:

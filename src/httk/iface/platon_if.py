@@ -286,7 +286,7 @@ def platon_styin_to_sgstruct(ioa):
     """        
     ioa = httk.IoAdapterFileReader(ioa)    
 
-#     print ioa.file.read()
+#     print(ioa.file.read())
 #     exit()
 #     
 #     fi = iter(ioa)
@@ -416,7 +416,7 @@ def platon_styout_to_sgstruct(ioa):
         results['setting'][-1]['wycoff'].append([match.group(3)])
         results['in_setting'] = True
     #def debug(results,match):
-    #    print "DEBUG",match
+    #    print("DEBUG",match)
         
     out = httk.basic.micro_pyawk(ioa, [
         #['^Wyckoff',None,setting_stop],
@@ -603,7 +603,7 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         results['setting'][-1]['multiplicities'].append(multiplicity)
         results['in_setting'] = True
     #def debug(results,match):
-    #    print "DEBUG",match
+    #    print("DEBUG",match)
         
     out = httk.basic.micro_pyawk(ioa, [
         #['^Wyckoff',None,setting_stop],

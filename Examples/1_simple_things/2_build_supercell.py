@@ -5,7 +5,7 @@
 
 from httk import *
 from httk.atomistic import *
-import httk.atomistic.vis 
+import httk.atomistic.vis
 
 basis = [[1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
@@ -46,10 +46,10 @@ try:
 except Exception:
     print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
-print
-print "==== Building orthogonal supercells"
+print()
+print("==== Building orthogonal supercells")
 
-print "== Exact supercell (works):"
+print("== Exact supercell (works):")
 try:
     supercell = struct.supercell.orthogonal(tolerance=None)
     print(supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)])
@@ -96,6 +96,3 @@ print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [
 #supercell = struct.build_cubic_supercell(tolerance=70,max_search_cells=10000)
 #print(supercell.full_nbr_atoms,[supercell.alpha, supercell.beta, supercell.gamma], [float(supercell.a), float(supercell.b), float(supercell.c)])
 #supercell.vis.show()
-
-
-

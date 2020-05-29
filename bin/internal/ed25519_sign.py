@@ -149,5 +149,5 @@ secret_key = base64.b64decode(b64secret_key)
 public_key = publickey(secret_key)
 signature = signature(message,secret_key,public_key)
 b64signature = base64.b64encode(signature)
-print b64signature
+print(b64signature)
 

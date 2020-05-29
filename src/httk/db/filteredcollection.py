@@ -334,7 +334,7 @@ class FCMultiDict(FilteredCollection):
 # def sqlite_execute(cursor, sql, values=[]):
 #     global database_debug
 #     if os.environ.has_key('DATABASE_DEBUG') or database_debug:
-#         print >> sys.stderr, "SQL:"+sql
+#         print("SQL:"+sql, end="", file=sys.stderr)
 #     try:
 #         cursor.execute(sql,values)
 #     except:

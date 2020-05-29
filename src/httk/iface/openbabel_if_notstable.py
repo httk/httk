@@ -142,9 +142,9 @@ def readstruct(ioa, struct, importers=None):
     #    #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
     #    #frac = unitcell.CartesianToFractional(cart)
     #    #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-    #    print "Y",[obatomout.GetX(),obatomout.GetY(),obatomout.GetZ()]
+    #    print("Y",[obatomout.GetX(),obatomout.GetY(),obatomout.GetZ()])
 
-    ##print "Y",unitcell.CartesianToFractional(openbabel.double_array([obatom.GetX(),obatom.GetY(),obatom.GetZ()]))
+    ##print("Y",unitcell.CartesianToFractional(openbabel.double_array([obatom.GetX(),obatom.GetY(),obatom.GetZ()])))
     #basisvecs = unitcell.GetCellVectors()
     #basis = array([[basisvecs[0].GetX(),basisvecs[0].GetY(),basisvecs[0].GetZ()],
     #               [basisvecs[1].GetX(),basisvecs[1].GetY(),basisvecs[1].GetZ()],
@@ -179,7 +179,7 @@ def readstruct(ioa, struct, importers=None):
     ##symsites, kinds = (sites, range(len(occs)))
 
     #for i in range(len(symsites)):
-    #    print "X",symsites[i],kinds[i]
+    #    print("X",symsites[i],kinds[i])
 
     ##invpc = transpose(primitive_cell)
     ##symsites = transpose(dot(invpc,transpose(symsites)))
@@ -220,8 +220,8 @@ def readstruct(ioa, struct, importers=None):
     ##for obatom in openbabel.OBMolAtomIter(obmol):
     ##    v = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
     ##    fv = newcell.CartesianToFractional(v)
-    ##    print "%.6f    %.6f    %.6f" % (fv.GetX(),fv.GetY(),fv.GetZ())
-    ##    #print "%.6f    %.6f    %.6f" % (obatom.GetX(),obatom.GetY(),obatom.GetZ())
+    ##    print("%.6f    %.6f    %.6f" % (fv.GetX(),fv.GetY(),fv.GetZ()))
+    ##    #print("%.6f    %.6f    %.6f" % (obatom.GetX(),obatom.GetY(),obatom.GetZ()))
 
 
 ## Needed because of bug (?) in openbabel, which does not seem to be able to reproduce the correct textual spacegroup

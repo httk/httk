@@ -50,6 +50,6 @@ spacegroup = 'P m -3 m'
 struct = Structure.create(rc_basis=basis, rc_reduced_coordgroups=coordgroups, assignments=assignments, rc_volume=62.79, spacegroup=spacegroup)
 
 struct.io.save("PbTiO3_alt2.vasp")
-print ("PbTiO3_alt2.vasp saved (POSCAR format)")
+print(("PbTiO3_alt2.vasp saved (POSCAR format)"))
 
 

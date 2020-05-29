@@ -356,16 +356,16 @@ def cif_to_sgstructure(ioa):
 #     out, err = platon(tmpdir,["atom.spf"])
 #     #out, err = platon("/tmp/platon",["-n","atom.spf"])
 #     if err != "":
-#         print err
+#         print(err)
 #  
 #     if os.path.exists("/tmp/platon/atom.sty"):
 #         os.unlink("/tmp/platon/atom.sty")
 #     out, err = platon("/tmp/platon",["atom.res"])
 #     if err != "":
-#         print err
+#         print(err)
 #     out, err = platon("/tmp/platon",["-Y","atom.sty"])
 #     if err != "":
-#         print err
+#         print(err)
 # 
 #     sgtidystruct = httk.iface.platon_if.platon_styout_to_sgstruct(StringIO(out))
 #     sgtidystruct.nonequiv.tags['platon_sg'] = sgtidystruct.hall_symbol

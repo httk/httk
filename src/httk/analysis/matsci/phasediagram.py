@@ -195,7 +195,7 @@ class PhaseDiagram(object):
 #             done_points = []
 #             while len(points_to_check)>0:
 #                 point2 = points_to_check.pop()
-#                 print "CHECKING:",point2
+#                 print("CHECKING:",point2)
 #                 if point2 == point:
 #                     continue
 #                 if point2 in done_points:

@@ -133,8 +133,9 @@ class RenderHttk(object):
                 #print("REGEX",segment_text)
                 found = re.finditer('(?P<start>['+self.left_punctuation_chars+']|^)(?P<role>:[^:]+:)?'+start_marker+'(?P<content>.+?)(?P<url> +<[^>]+>)?'+end_marker+'(?P<link>_?)(?P<end>['+self.right_punctuation_chars+']|$)',segment_text)
                 #except Exception:
-                #    print "RE ERROR",repr('(['+self.left_punctuation_chars+']|^)(:[^:]+:)?'+start_marker+'(.+?)( +<[^>]+>)?'+end_marker+'(_?)(['+self.right_punctuation_chars+']|$)')
-                #    print "STRING",segment_text
+                #    print("RE ERROR",repr('(['+self.left_punctuation_chars+']|^)(:[^:]+:)?'+start_marker+'(.+?)(
+                #    +<[^>]+>)?'+end_marker+'(_?)(['+self.right_punctuation_chars+']|$)'))
+                #    print("STRING",segment_text)
                 #    raise
                 end_idx = 0
                 for m in found:

@@ -162,7 +162,7 @@ class SiteAssignment(HttkObject):
 #     @property
 #     def ratios(self):
 #         if self.extended:
-#             print "Not implemented yet"
+#             print("Not implemented yet")
 #             
 #         return FracVector.create([1]*len(self.elements))
 # 
