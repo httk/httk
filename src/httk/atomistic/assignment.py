@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core import HttkObject, httk_typed_init, httk_typed_property
-from data import periodictable
+from httk.atomistic.data import periodictable
 from httk.core import FracVector, FracScalar
 
 

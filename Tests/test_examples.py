@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys, os, unittest, subprocess, argparse
 from contextlib import contextmanager
-from StringIO import StringIO
+import codecs
 
 logdata = []
 
@@ -9,12 +9,15 @@ here = os.path.abspath(os.path.dirname(__file__))
 examples_path_rel = '../Examples'
 examples_path = os.path.join(here,examples_path_rel)
 
-def run(command,args=[]):
+def run(command, args=[]):
     global logdata
 
     logdata += ['Try to run: ' + command]
     p = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return p.communicate()
+    out, err = p.communicate()
+    out = codecs.decode(out, 'utf-8')
+    err = codecs.decode(err, 'utf-8')
+    return (out, err)
 
 class TestExamples(unittest.TestCase):
 
@@ -52,8 +55,8 @@ expected_output_example_vectors_python3 = \
 """
 (1/1)*((2, 3, 5), (3, 5, 4), (4, 6, 7))
 (1/1)*[[2, 3, 5], [3, 5, 4], [4, 6, 7]]
-'MAX in row [1]:', FracVector(5,1)
-'MAX in all of a', FracVector(7,1)
+MAX in row [1]: (1/1)*5
+MAX in all of a (1/1)*7
 <class 'httk.core.vectors.mutablefracvector.MutableFracVector'>
 (1/1)*((2, 3, 5), (3, 5, 4), (4, 6, 7))
 (1/1)*[[2, 3, 5], [3, 5, 4], [4, 4711, 23]]

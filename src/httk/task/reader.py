@@ -14,10 +14,14 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import glob, os, datetime, hashlib, ConfigParser, re, base64, bz2, sys
+import glob, os, datetime, hashlib, re, base64, bz2, sys
 from httk.core.crypto import manifest_dir, verify_crytpo_signature, read_keys
 from httk.core import Computation, ComputationProject, Code, IoAdapterFileReader, Signature, SignatureKey
 
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 def reader(projectpath, inpath, excludes=None, default_description=None, project_counter=0, force_remake_manifests=False):
     """
@@ -54,7 +58,7 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = ConfigParser.ConfigParser()
+                        configparser = configparser.ConfigParser()
                         configparser.read(os.path.join(dirpath, 'ht.config'))
                         if configparser.has_option('main', 'description'):
                             description = configparser.get('main', 'description')
@@ -117,7 +121,7 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = ConfigParser.ConfigParser()
+                        configparser = configparser.ConfigParser()
                         configparser.read(os.path.join(dirpath, 'ht.config'))
                         if configparser.has_option('main', 'description'):
                             description = configparser.get('main', 'description')

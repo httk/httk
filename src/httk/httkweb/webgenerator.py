@@ -15,11 +15,16 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, mimetypes, collections, time, StringIO
+import os, sys, mimetypes, collections, time
 
 import helpers
 from helpers import UnquotedStr
 from _ast import Or
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 class Page(object):
     def __init__(self,meta={}):
@@ -277,5 +282,5 @@ class WebGenerator(object):
                 return {'content':f, 'mimetype':mimetype}
 
         page = self._retrieve_page(relative_url, query, allow_urls_without_ext=allow_urls_without_ext, all_functions=all_functions)
-        content = StringIO.StringIO(page.content)
+        content = StringIO(page.content)
         return {'content':content, 'mimetype':page.mimetype, 'functions':page.functions}

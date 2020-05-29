@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -18,5 +18,4 @@
 from httk.core import citation
 citation.add_src_citation("httk_db", "Rickard Armiento")
 
-from sqlite import Sqlite
-
+from httk.db.backend.sqlite import Sqlite

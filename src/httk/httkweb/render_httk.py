@@ -15,8 +15,14 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re, StringIO, cgi, pprint, unicodedata, codecs, os
-import ConfigParser
+import os, sys, re, cgi, pprint, unicodedata, codecs
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+    import configparser
+else:
+    from StringIO import StringIO
+    import ConfigParser as configparser
 
 class RenderHttk(object):
 
@@ -364,8 +370,8 @@ class RenderHttk(object):
 
     def metadata(self):
         md = self.metadata_block
-        buf = StringIO.StringIO("[main]\n"+md)
-        config = ConfigParser.ConfigParser()
+        buf = StringIO("[main]\n"+md)
+        config = configparser.ConfigParser()
         config.readfp(buf)
         d = dict(config.items('main'))
         for i in d.keys():

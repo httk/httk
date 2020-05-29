@@ -1,3 +1,2 @@
-* Fix lines where there is an empty print (just the print command and nothing else).
-* Fix imports
-* Change exit(0) to sys.exit(0)
+* Change exit(0) to sys.exit(0) (Optional)
+* Fix next() and __next__() => can use six.advance_iterator()

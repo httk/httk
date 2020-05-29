@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,9 +17,9 @@
 
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from httk.core.basic import is_sequence
-from data import periodictable
+from httk.atomistic.data import periodictable
 from httk.core import FracVector, FracScalar
-from assignment import Assignment
+from httk.atomistic.assignment import Assignment
 
 
 class SiteAssignment(HttkObject):
@@ -27,22 +27,22 @@ class SiteAssignment(HttkObject):
     """
     Represents a possible vector of assignments
     """
-   
+
     @httk_typed_init({'assignments': [Assignment]}, index=['assignments'])
     def __init__(self, assignments):
         """
         Private constructor, as per httk coding guidelines. Use SiteAssignments.create instead.
         """
         self.assignments = assignments
-            
+
     @classmethod
     def create(cls, assignments=None):
         """
-        Create a new assignment object, 
+        Create a new assignment object,
 
-       assignments: a list-style object with one entry per 'atom type'. Any sensible type accepted, most notably, 
+       assignments: a list-style object with one entry per 'atom type'. Any sensible type accepted, most notably,
                      integers (for atom number)
-        """        
+        """
         if isinstance(assignments, SiteAssignment):
             return assignments
 
@@ -72,7 +72,7 @@ class SiteAssignment(HttkObject):
             print("Ratiosum:", ratiosum)
             print("Assignmnets:", assignments)
             raise Exception("siteassignment.create: sum of ratios for one site larger than 1, broken structure.")
-        
+
         return cls(newassignments)
 
     @classmethod
@@ -82,11 +82,11 @@ class SiteAssignment(HttkObject):
         try:
             return old.to_SiteAssignment()
         except Exception:
-            pass   
+            pass
         return cls.create(assignments=old)
 
     def to_basis(self):
-        return self.basis    
+        return self.basis
 
     @httk_typed_property([int])
     def atomic_numbers(self):
@@ -117,7 +117,7 @@ class SiteAssignment(HttkObject):
     def symbol(self):
         if len(self.assignments) == 1:
             return self.assignments[0].symbol
-        else:            
+        else:
             return "["+",".join(["%s%.2f" % (str(x.symbol), x.ratio) for x in self.assignments])+"]"
 
     @httk_typed_property(FracScalar)
@@ -142,33 +142,33 @@ class SiteAssignment(HttkObject):
 #         try:
 #             return old.to_Assignments()
 #         except Exception:
-#             pass   
+#             pass
 #         return cls.create(assignments=old)
-# 
+#
 #     def to_basis(self):
-#         return self.basis    
-# 
+#         return self.basis
+#
 #     @property
 #     def integers(self):
 #         return [x.to_integer() for x in self.siteassignments]
-# 
+#
 #     @property
 #     def symbols(self):
 #         if self.extended == True:
 #             raise Exception("Symbols of extended structure not implemented (yet?).")
 #         return [periodictable.atomic_symbol(x) for x in self.elements]
 # #        return [y.to_symbol() for x in self.siteassignments for y in x.as_list()]
-# 
+#
 #     @property
 #     def ratios(self):
 #         if self.extended:
 #             print("Not implemented yet")
-#             
+#
 #         return FracVector.create([1]*len(self.elements))
-# 
+#
 #     def __len__(self):
 #         return len(self.siteassignments)
-# 
+#
 #     def __getitem__(self,key):
 #         return self.assignments[key]
 
@@ -178,5 +178,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

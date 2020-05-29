@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -18,6 +18,7 @@
 Basic help functions
 """
 from fractions import Fraction
+from six import string_types
 
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -49,7 +50,7 @@ def is_sequence(arg):
 
 
 import re, errno, os, itertools, sys, tempfile, shutil, collections
-from ioadapters import IoAdapterFileReader
+from httk.core.ioadapters import IoAdapterFileReader
 
 
 def is_unary(e):
@@ -67,7 +68,7 @@ def flatten(l):
         flattened = l.flatten()
     except Exception:
         for el in l:
-            if isinstance(el, collections.Iterable) and not isinstance(el, basestring):
+            if isinstance(el, collections.Iterable) and not isinstance(el, string_types):
                 for sub in flatten(el):
                     yield sub
             else:
@@ -126,7 +127,7 @@ def mkdir_p(path):
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
     Small awk-mimicking search routine.
-       
+
     'f' is stream object to search through.
     'search' is the "search program", a list of lists/tuples with 3 elements; i.e.,
     [[regex,test,run],[regex,test,run],...]
@@ -135,18 +136,18 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
     Here regex is either as a Regex object, or a string that we compile into a Regex.
     test and run are callable objects.
 
-    This function goes through each line in filename, and if regex matches that line *and* 
-    test(results,line)==True (or test == None) we execute run(results,match), 
-    where match is the match object from running Regex.match.   
-    
-    The default results is an empty dictionary. Passing a results object let you interact 
-    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self. 
-    
+    This function goes through each line in filename, and if regex matches that line *and*
+    test(results,line)==True (or test == None) we execute run(results,match),
+    where match is the match object from running Regex.match.
+
+    The default results is an empty dictionary. Passing a results object let you interact
+    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self.
+
     Returns: results
     """
     ioa = IoAdapterFileReader.use(ioa)
     f = ioa.file
-    
+
     if results is None:
         results = {}
 
@@ -157,13 +158,13 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 entry[0] = re.compile(entry[0])
             except Exception as e:
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
-            
+
     for line in f:
-        if debug: 
+        if debug:
             sys.stdout.write("\n" + line[:-1])
         for i in range(len(search)):
             match = search[i][0].search(line)
-            if debug and match: 
+            if debug and match:
                 sys.stdout.write(": MATCH")
             if match and (search[i][1] is None or search[i][1](results, line)):
                 if debug:
@@ -173,7 +174,7 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 search[i][2](results, match)
                 if postdebugfunc is not None:
                     postdebugfunc(results, match)
-    if debug: 
+    if debug:
         sys.stdout.write("\n")
 
     ioa.close()
@@ -199,7 +200,7 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
             yield (e,)
             if end[0] is not None and e >= end[0]:
                 return
-   
+
     for e in eles:
         oeles = breath_first_idxs(dim-1, start=start[1:], end=[e]*(dim-1), perm=False)
         for oe in oeles:
@@ -257,12 +258,16 @@ class rewindable_iterator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    # Python 3 uses __next__
+    def __next__(self):
         if self._rewind:
             self._rewind = False
         else:
-            self._cache = self._iter.next()
+            self._cache = next(self._iter)
         return self._cache
+
+    # Python 2 uses next
+    next = __next__
 
     def rewind(self, rewindstr=None):
         if self._rewind:
@@ -272,19 +277,15 @@ class rewindable_iterator(object):
         self._rewind = True
         if rewindstr is not None:
             self._cache = rewindstr
-            
+
 
 def main():
     print(int_to_anonymous_symbol(0))
     print(anonymous_symbol_to_int("A"))
-    
-    
+
+
     # print(list(breath_first_idxs(dim=3, end=[3,3,3],negative=True)))
 
 
 if __name__ == "__main__":
     main()
-    
-
-
-

@@ -17,12 +17,18 @@
 """
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
-import hashlib, os.path, base64, re
+import hashlib, os.path, base64, re, sys
+
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
+
 try:
     import bz2
 except Exception:
     pass
-import ConfigParser
+
 from .ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
 
@@ -196,11 +202,11 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
         excludes = [x.strip() for x in f.readlines()]
         f.close()
     try:
-        cp = ConfigParser.ConfigParser()
+        cp = configparser.ConfigParser()
         cp.read(os.path.join(excludespath, "config"))
         excludestr = cp.get('main', 'excludes').strip()
         excludes += nested_split(excludestr, '[', ']')
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+    except (configparser.NoOptionError, configparser.NoSectionError):
         pass
 
     if len(excludes) == 0:

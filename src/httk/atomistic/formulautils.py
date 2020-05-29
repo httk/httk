@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,16 +16,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
-from representativestructure import RepresentativeStructure
-from unitcellstructure import UnitcellStructure
+from httk.atomistic.representativestructure import RepresentativeStructure
+from httk.atomistic.unitcellstructure import UnitcellStructure
 
 
 class StructureFormulaPlugin(HttkPlugin):
-            
+
     def plugin_init(self, struct):
         self.struct = struct
 
 RepresentativeStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
 UnitcellStructure.formula_builder = HttkPluginWrapper(StructureFormulaPlugin)
-
-

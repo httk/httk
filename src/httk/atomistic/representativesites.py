@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,11 +17,11 @@
 import sys
 from httk.core import HttkObject, FracVector
 from httk.core.basic import is_sequence, int_to_anonymous_symbol
-from spacegroup import Spacegroup
-from sitesutils import *
+from httk.atomistic.spacegroup import Spacegroup
+from httk.atomistic.sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from sites import Sites
-from unitcellsites import UnitcellSites
+from httk.atomistic.sites import Sites
+from httk.atomistic.unitcellsites import UnitcellSites
 from httk.atomistic.spacegrouputils import crystal_system_from_hall, lattice_symbol_from_hall, lattice_system_from_hall
 
 
@@ -30,46 +30,46 @@ class RepresentativeSites(Sites):
     """
     Represents any collection of sites in a unitcell
     """
-    
-    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int], 
+
+    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int],
                       'hall_symbol': str, 'pbc': (bool, 1, 3), 'wyckoff_symbols': [str], 'multiplicities': [int]},
                      index=['counts', 'hall_symbol', 'pbc', 'wyckoff_symbols',
                             'wyckoff_sequence', 'anonymous_wyckoff_sequence'])
-    def __init__(self, reduced_coordgroups=None, 
-                 cartesian_coordgroups=None, reduced_coords=None, 
-                 cartesian_coords=None, counts=None,  
+    def __init__(self, reduced_coordgroups=None,
+                 cartesian_coordgroups=None, reduced_coords=None,
+                 cartesian_coords=None, counts=None,
                  hall_symbol=None, pbc=None, wyckoff_symbols=None,
                  multiplicities=None):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
         """
-        super(RepresentativeSites, self).__init__(reduced_coordgroups=reduced_coordgroups, 
-                                                  reduced_coords=reduced_coords, 
-                                                  counts=counts,  
+        super(RepresentativeSites, self).__init__(reduced_coordgroups=reduced_coordgroups,
+                                                  reduced_coords=reduced_coords,
+                                                  counts=counts,
                                                   hall_symbol=hall_symbol, pbc=pbc)
 
         self.wyckoff_symbols = wyckoff_symbols
         self.multiplicities = multiplicities
-    
-    #TODO: Recreate multiplicities (and perhaps also wyckoff_symbols) if those are not given in construction
-    @classmethod           
-    def create(cls, sites=None, reduced_coordgroups=None, 
-               reduced_coords=None, 
-               counts=None, 
-               spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-               periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None):           
 
-        sites = super(RepresentativeSites, cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups, 
-                                                       reduced_coords=reduced_coords, 
-                                                       counts=counts, 
+    #TODO: Recreate multiplicities (and perhaps also wyckoff_symbols) if those are not given in construction
+    @classmethod
+    def create(cls, sites=None, reduced_coordgroups=None,
+               reduced_coords=None,
+               counts=None,
+               spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
+               periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None):
+
+        sites = super(RepresentativeSites, cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups,
+                                                       reduced_coords=reduced_coords,
+                                                       counts=counts,
                                                        spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting,
                                                        periodicity=periodicity, occupancies=occupancies)
         #sites.wyckoff_symbols = wyckoff_symbols
         #sites._multiplicity = multiplicity
         #return sites
-        return cls(reduced_coordgroups=sites.reduced_coordgroups, 
-                   reduced_coords=sites.reduced_coords, 
-                   counts=sites.counts,  
+        return cls(reduced_coordgroups=sites.reduced_coordgroups,
+                   reduced_coords=sites.reduced_coords,
+                   counts=sites.counts,
                    hall_symbol=sites.hall_symbol, pbc=sites.pbc, wyckoff_symbols=wyckoff_symbols,
                    multiplicities=multiplicities)
 
@@ -94,7 +94,7 @@ class RepresentativeSites(Sites):
 #        #if self._multiplicities is None:
 #        #    raise Exception("Representativesites.multiplicities: Not yet implemented getting multiplicities when not given.")
 #        return self._multiplicities
-                                        
+
     @httk_typed_property(str)
     def anonymous_wyckoff_sequence(self):
         if self.wyckoff_symbols is None:
@@ -142,7 +142,7 @@ class RepresentativeSites(Sites):
         sortedsymbs = sorted(seen.keys())
         out = ""
         for symbol in sortedsymbs:
-            if seen[symbol] > 1:  
+            if seen[symbol] > 1:
                 out += symbol+str(seen[symbol])
             else:
                 out += symbol
@@ -160,7 +160,7 @@ class RepresentativeSites(Sites):
 
     def clean(self):
         c = super(RepresentativeSites, self).clean()
-        return self.__class__(reduced_coords=c.reduced_coords, counts=c.counts, 
+        return self.__class__(reduced_coords=c.reduced_coords, counts=c.counts,
                               hall_symbol=self.hall_symbol, pbc=c.pbc, wyckoff_symbols=self.wyckoff_symbols, multiplicities=self.multiplicities)
 
     @httk_typed_property(str)
@@ -179,13 +179,11 @@ class RepresentativeSites(Sites):
         return sites_tidy(self)
 
     def __str__(self):
-        return "<RepresentativeSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+">" 
-                                        
+        return "<RepresentativeSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+">"
+
 
 def main():
     pass
 
 if __name__ == "__main__":
     main()
-
-

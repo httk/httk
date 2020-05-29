@@ -15,11 +15,16 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, StringIO, subprocess, cgitb, urlparse
+import sys, os, subprocess, cgitb, urlparse
 from httplib import HTTPMessage
 
 from webgenerator import WebGenerator
 import helpers
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 def run_app(appdir, renderers = None, template_engines = None, function_handlers = None, config = "config", debug = True, override_global_data = None):
 
@@ -150,7 +155,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                         raise
                     else:
                         outputstr = "<html><body>Could not display 404 error page.</body></html>"
-                    content = StringIO.StringIO(outputstr)
+                    content = StringIO(outputstr)
 
             except Exception as e:
                 response = 500
@@ -160,7 +165,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                     raise
                 else:
                     outputstr = "<html><body>An unexpected server error has occured.</body></html>"
-                content = StringIO.StringIO(outputstr)
+                content = StringIO(outputstr)
 
             #self.cgipath = os.path.abspath(os.path.join(self.appdir,path))
             #self.querystring = request.requestUrl().query()
@@ -178,7 +183,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             #data = subprocess.check_output(self.cgipath, env=env)
             #headerstr, _dummy, self.content = data.partition("\n\n")
 
-            #headerfp = StringIO.StringIO("\n"+data)
+            #headerfp = StringIO("\n"+data)
             #httpmsg = HTTPMessage(headerfp)
             #httpmsg.readheaders()
 

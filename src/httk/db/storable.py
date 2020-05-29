@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #from store.trivialstore import TrivialStore
-from filteredcollection import *
+from httk.db.filteredcollection import *
 import sys
 
 

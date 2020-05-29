@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Read and setup httk configuration and versioning data. 
+Read and setup httk configuration and versioning data.
 
 httk_python_root is derived as the directory config.py is in + ..
 
@@ -27,11 +27,11 @@ config is a configparser.config object where:
 - Using the latest definition of [general]/httk_root, read httk.cfg in that directory
 - Read ~/.httk/config
 
-In this config object, the section [general] is looked up for 'httk_root', which is exported as httk_root. If not present, 'root' is looked up in 
+In this config object, the section [general] is looked up for 'httk_root', which is exported as httk_root. If not present, 'root' is looked up in
 the section 'distdata'. If that is not present, the default of httk_python_root + ../.. is used.
 
-If the file distdata.py in httk_python_root exists, the config object section [distdata] is looked up for version, version_date, and copyright_note, 
-which are exported as httk_version, httk_version_date, httk_copyright_note. If this file does not exist, they identifiers are instead derived using the 'git' command. 
+If the file distdata.py in httk_python_root exists, the config object section [distdata] is looked up for version, version_date, and copyright_note,
+which are exported as httk_version, httk_version_date, httk_copyright_note. If this file does not exist, they identifiers are instead derived using the 'git' command.
 If that does not work, they are set to 'unknown', except for httk_copyright_note, which is set to a sensible default.
 
 This python file has no dependencies except for the standard library (neither within httk or outside).
@@ -50,27 +50,23 @@ _default_httk_root = '../..'
 _default_copyright_name = "Rickard Armiento, et al."
 _default_copyright_note = "(c) 2012 - 2018, " + _default_copyright_name
 
-import sys, os, inspect, subprocess, datetime 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import sys, os, inspect, subprocess, datetime
+import codecs
 
-import sys
-try:    
+try:
     python_major_version = sys.version_info[0]
     python_minor_version = sys.version_info[1]
 except Exception:
     raise RuntimeError("Python version too old, this appears to be a version of python older than python 2.0!")
-    
-try:
-    # Python 2
-    import ConfigParser as configparser
-except ImportError:
-    # Python 3
-    import configparser
 
-python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..')) 
+if sys.version_info[0] == 3:
+    from io import StringIO
+    import configparser
+else:
+    from StringIO import StringIO
+    import ConfigParser as configparser
+
+python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..'))
 httk_root = None
 _config = configparser.ConfigParser()
 
@@ -86,17 +82,17 @@ def read_config():
             httk_root = os.path.realpath(os.path.join(python_root,_config.get('distdata','root').strip('"')))
     except (IOError, configparser.NoSectionError, configparser.NoOptionError):
         httk_root = os.path.realpath(os.path.join(python_root,_default_httk_root))
-    
+
     config_files = []
     internal_cfgpathstr = os.path.join(python_root, 'httk.cfg')
     _config.read([internal_cfgpathstr])
-   
+
     try:
         httk_root_cfg = _config.get('general','httk_root')
         httk_root = os.path.join(python_root,httk_root_cfg)
     except (configparser.NoSectionError, configparser.NoOptionError):
         pass
-    
+
     global_cfgpathstr = os.path.join(python_root, 'httk.cfg')
     local_cfgpathstr = os.path.expanduser('~/.httk/config')
 
@@ -124,6 +120,7 @@ def determine_version_data():
         if (not _config.getboolean('general', 'bypass_git_version_lookup')) and os.path.exists(os.path.join(httk_root,'.git')):
             try:
                 httk_version = subprocess.check_output(["git", "describe","--dirty","--always"], cwd=python_root).strip()
+                httk_version = codecs.decode(httk_version, 'utf-8')
                 if httk_version.endswith('-dirty'):
                     _git_commit_datetime = datetime.datetime.now()
                 else:
@@ -183,4 +180,3 @@ class ExceptionlessConfig(object):
             return configattr
 
 config = ExceptionlessConfig(_config)
-

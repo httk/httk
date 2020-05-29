@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from phasediagramvisualizerplugin import PhaseDiagramVisualizerPlugin
+from httk.analysis.matsci.vis.phasediagramvisualizerplugin import PhaseDiagramVisualizerPlugin
 from httk.analysis.matsci.phasediagram import PhaseDiagram
 
 PhaseDiagram.vis = property(PhaseDiagramVisualizerPlugin)

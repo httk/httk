@@ -17,10 +17,10 @@
 
 
 from httk.core import HttkPlugin, HttkPluginWrapper, FracVector, breath_first_idxs 
-from unitcellstructure import UnitcellStructure
-from structure import Structure
+from httk.atomistic.unitcellstructure import UnitcellStructure
+from httk.atomistic.structure import Structure
 
-from cell import Cell
+from httk.atomistic.cell import Cell
 
 # TODO: The building of supercells should be moved elsewhere and not be part of this class
 

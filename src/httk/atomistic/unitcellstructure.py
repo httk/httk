@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,27 +16,27 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from httk.core.httkobject import HttkObject, httk_typed_property, httk_typed_property_resolve, httk_typed_property_delayed, httk_typed_init
 from httk.core.reference import Reference
-from cell import Cell
-from assignments import Assignments
-from unitcellsites import UnitcellSites
-from data import spacegroups
-from structureutils import *
-from spacegroup import Spacegroup
+from httk.atomistic.cell import Cell
+from httk.atomistic.assignments import Assignments
+from httk.atomistic.unitcellsites import UnitcellSites
+from httk.atomistic.data import spacegroups
+from httk.atomistic.structureutils import *
+from httk.atomistic.spacegroup import Spacegroup
 
 
 class UnitcellStructure(HttkObject):
 
     """
-    A UnitcellStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement. 
+    A UnitcellStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement.
     It keeps track of all the copies of the atoms within a unitcell.
-    
-    The structure object is meant to be immutable and assumes that no internal variables are changed after its creation. 
+
+    The structure object is meant to be immutable and assumes that no internal variables are changed after its creation.
     All methods that 'changes' the object creates and returns a new, updated, structure object.
-    
+
     Naming conventions in httk.atomistic:
 
     For cells:
-        cell = an abstract name for any reasonable representation of a 'cell' that defines 
+        cell = an abstract name for any reasonable representation of a 'cell' that defines
                the basis vectors used for representing the structure. When a 'cell' is returned,
                it is an object of type Cell
 
@@ -50,21 +50,21 @@ class UnitcellStructure(HttkObject):
 
     For sites:
         These following prefixes are used to describe types of site specifications:
-            representative cell/rc = only representative atoms are given, which are then to be 
+            representative cell/rc = only representative atoms are given, which are then to be
             repeated by structure symmetry group to give all sites
 
             unit cell/uc = all atoms in unitcell
-            
+
             reduced = coordinates given in cell vectors
-            
+
             cartesian = coordinates given as direct cartesian coordinates
 
         sites = used as an abstract name for any sensible representation of a list of coordinates and a cell,
-                when a 'sites' is returned, it is an object of type Sites 
-                  
+                when a 'sites' is returned, it is an object of type Sites
+
         counts = number of atoms of each type (one per entry in assignments)
-      
-        coordgroups = coordinates represented as a 3-level-list of coordinates, e.g. 
+
+        coordgroups = coordinates represented as a 3-level-list of coordinates, e.g.
         [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]] where level-1 list = groups: one group for each equivalent atom
 
         counts and coords = one list with the number of atoms of each type (one per entry in assignments)
@@ -76,12 +76,12 @@ class UnitcellStructure(HttkObject):
 
         atomic_numbers = a sequence of integers for the atomic number of each species
 
-        occupations = a sequence where the assignments are *repeated* for each coordinate as needed 
+        occupations = a sequence where the assignments are *repeated* for each coordinate as needed
         (prefixed with uc or rc depending on which coordinates)
 
     For cell scaling:
         scaling = abstract name for any representation of cell scaling
-        
+
         scale = multiply all basis vectors with this number
 
         volume = rescaling the cell such that it takes this volume
@@ -96,11 +96,11 @@ class UnitcellStructure(HttkObject):
     For spacegroup:
         spacegroup = abstract name for any spacegroup representation. When returned, is of type Spacegroup.
 
-        hall_symbol = specifically the hall_symbol string representation of the spacegroup      
-   
+        hall_symbol = specifically the hall_symbol string representation of the spacegroup
+
     """
     @httk_typed_init({'assignments': Assignments, 'uc_sites': UnitcellSites, 'uc_cell': Cell},
-                     index=['assignments', 'uc_sites', 'uc_cell'])    
+                     index=['assignments', 'uc_sites', 'uc_cell'])
     def __init__(self, assignments=None, uc_sites=None, uc_cell=None):
         """
         Private constructor, as per httk coding guidelines. Use Structure.create instead.
@@ -112,74 +112,74 @@ class UnitcellStructure(HttkObject):
     @classmethod
     def create(cls,
                structure=None,
-               
-               uc_cell=None, uc_basis=None, uc_lengths=None, 
-               uc_angles=None, uc_niggli_matrix=None, uc_metric=None, 
-               uc_a=None, uc_b=None, uc_c=None, 
+
+               uc_cell=None, uc_basis=None, uc_lengths=None,
+               uc_angles=None, uc_niggli_matrix=None, uc_metric=None,
+               uc_a=None, uc_b=None, uc_c=None,
                uc_alpha=None, uc_beta=None, uc_gamma=None,
-               uc_sites=None, 
+               uc_sites=None,
                uc_reduced_coordgroups=None, uc_cartesian_coordgroups=None,
                uc_reduced_coords=None, uc_cartesian_coords=None,
                uc_reduced_occupationscoords=None, uc_cartesian_occupationscoords=None,
                uc_occupancies=None, uc_counts=None,
                uc_scale=None, uc_scaling=None, uc_volume=None, volume_per_atom=None,
-                   
-               assignments=None, 
-               
-               periodicity=None, nonperiodic_vecs=None, 
+
+               assignments=None,
+
+               periodicity=None, nonperiodic_vecs=None,
 
                other_reps=None,
-               
+
                refs=None, tags=None):
         """
         A FullStructure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement, where the positions
-        of all cites are given (as opposed to a set of unique sites + symmetry operations). 
+        of all cites are given (as opposed to a set of unique sites + symmetry operations).
 
-        This is a swiss-army-type constructor that allows several different ways to create a FullStructure object.    
+        This is a swiss-army-type constructor that allows several different ways to create a FullStructure object.
 
         To create a new structure, three primary components are:
 
-           - cell: defines the basis vectors in which reduced coordinates are expressed, and the 
+           - cell: defines the basis vectors in which reduced coordinates are expressed, and the
              unit of repetition (*if* the structure has any periodicity - see the 'periodicity' parameter)
 
            - assignments: a list of 'things' (atoms, ions, etc.) that goes on the sites in the structure
 
            - sites: a sensible representation of location / coordinates of the sites.
 
-        Note: `uc_`-prefixes are consistently enforced for any quantity that would be different in a UniqueSitesStructure. This is to 
+        Note: `uc_`-prefixes are consistently enforced for any quantity that would be different in a UniqueSitesStructure. This is to
         allow for painless change between the various structure-type objects without worrying about accidently using
-        the wrong type of sites object.  
-      
-        Note: see help(Structure) for parameter naming conventions, i.e., what type of object is expected given a parameter name.      
-           
+        the wrong type of sites object.
+
+        Note: see help(Structure) for parameter naming conventions, i.e., what type of object is expected given a parameter name.
+
         Input parameters:
 
-           - ONE OF: 'uc_cell'; 'uc_basis', 'uc_length_and_angles'; 'uc_niggli_matrix'; 'uc_metric'; 
-             all of: uc_a,uc_b,uc_c, uc_alpha, uc_beta, uc_gamma. 
+           - ONE OF: 'uc_cell'; 'uc_basis', 'uc_length_and_angles'; 'uc_niggli_matrix'; 'uc_metric';
+             all of: uc_a,uc_b,uc_c, uc_alpha, uc_beta, uc_gamma.
              (cell requires a Cell object or a very specific format, so unless you know what you are doing, use one of the others.)
 
            - ONE OF: 'uc_assignments', 'uc_atomic_numbers', 'uc_occupations'
              (uc_assignments requires an Assignments object or a sequence.), uc_occupations repeats similar site assignments as needed
-           
+
            - ONE OF: 'uc_sites', 'uc_coords' (IF uc_occupations OR uc_counts are also given), or
              'uc_B_C', where B=reduced or cartesian, C=coordgroups, coords, or occupationscoords
 
-             Notes: 
+             Notes:
 
                   - occupationscoords may differ from coords by *order*, since giving occupations as, e.g., ['H','O','H'] does not necessarily
                     have the same order of the coordinates as the format of counts+coords as (2,1), ['H','O'].
 
-                  - uc_sites requires a Sites object or a python list on a very specific format, (so unless you know what you are doing, 
+                  - uc_sites requires a Sites object or a python list on a very specific format, (so unless you know what you are doing,
                     use one of the others.)
-                           
-           - ONE OF: uc_scale, uc_volume, or volume_per_atom: 
-                scale = multiply the basis vectors with this scaling factor, 
+
+           - ONE OF: uc_scale, uc_volume, or volume_per_atom:
+                scale = multiply the basis vectors with this scaling factor,
                 volume = the unit cell volume (overrides 'scale' if both are given)
                 volume_per_atom = cell volume / number of atoms
 
            - ONE OF periodicity or nonperiodic_vecs
-           
-        """          
+
+        """
         if structure is not None:
             UnitcellStructure.use(structure)
 
@@ -188,13 +188,13 @@ class UnitcellStructure(HttkObject):
         if uc_cell is not None:
             Cell.use(uc_cell)
         else:
-            uc_cell = Cell.create(cell=uc_cell, basis=uc_basis, metric=uc_metric, 
-                                  niggli_matrix=uc_niggli_matrix, 
-                                  a=uc_a, b=uc_b, c=uc_c, 
+            uc_cell = Cell.create(cell=uc_cell, basis=uc_basis, metric=uc_metric,
+                                  niggli_matrix=uc_niggli_matrix,
+                                  a=uc_a, b=uc_b, c=uc_c,
                                   alpha=uc_alpha, beta=uc_beta, gamma=uc_gamma,
                                   lengths=uc_lengths, angles=uc_angles,
                                   scale=uc_scale, scaling=uc_scaling, volume=uc_volume)
-        
+
         if uc_sites is not None:
             uc_sites = UnitcellSites.use(uc_sites)
         else:
@@ -204,18 +204,18 @@ class UnitcellStructure(HttkObject):
                     # Structure created by occupationscoords and occupations, this is a slightly tricky representation
                 if uc_reduced_occupationscoords is not None:
                     assignments, uc_reduced_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_reduced_occupationscoords, uc_occupancies)
-            
+
             if uc_reduced_coordgroups is not None or \
                     uc_reduced_coords is not None:
 
                 try:
-                    uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups, 
-                                                    reduced_coords=uc_reduced_coords, 
-                                                    counts=uc_counts, 
+                    uc_sites = UnitcellSites.create(reduced_coordgroups=uc_reduced_coordgroups,
+                                                    reduced_coords=uc_reduced_coords,
+                                                    counts=uc_counts,
                                                     periodicity=periodicity, occupancies=uc_occupancies)
                 except Exception:
                     uc_sites = None
-            
+
             else:
                 uc_sites = None
 
@@ -225,11 +225,11 @@ class UnitcellStructure(HttkObject):
             if uc_cartesian_coordgroups is None and uc_cartesian_coords is None and \
                     uc_occupancies is not None and uc_cartesian_occupationscoords is not None:
                 assignments, uc_cartesian_coordgroups = occupations_and_coords_to_assignments_and_coordgroups(uc_cartesian_occupationscoords, uc_occupancies)
-             
+
             if uc_cartesian_coords is not None and uc_cartesian_coordgroups is None:
                 uc_cartesian_coordgroups = coords_and_counts_to_coordgroups(uc_cartesian_coords, uc_counts)
 
-            if uc_cell is not None: 
+            if uc_cell is not None:
                 uc_reduced_coordgroups = coordgroups_cartesian_to_reduced(uc_cartesian_coordgroups, uc_cell)
 
         if assignments is not None:
@@ -241,7 +241,7 @@ class UnitcellStructure(HttkObject):
         new = cls(assignments=assignments, uc_sites=uc_sites, uc_cell=uc_cell)
 
         return new
-        
+
     @classmethod
     def use(cls, other):
         from structure import Structure
@@ -253,11 +253,11 @@ class UnitcellStructure(HttkObject):
         elif isinstance(other, RepresentativeStructure):
             return cls.use(Structure.use(other))
         raise Exception("RepresentativeStructure.use: do not know how to use object of class:"+str(other.__class__))
-           
+
     @property
     def uc_cartesian_occupationscoords(self):
         raise Exception("UnitcellStructure.uc_cartesian_occupationscoords: not implemented")
-        return 
+        return
 
     @property
     def uc_cartesian_coordgroups(self):
@@ -314,7 +314,7 @@ class UnitcellStructure(HttkObject):
     @httk_typed_property(int)
     def uc_cell_orientation(self):
         return self.uc_cell.orientation
-    
+
     @httk_typed_property((bool, 1, 3))
     def pbc(self):
         return self.uc_sites.pbc
@@ -331,5 +331,4 @@ class UnitcellStructure(HttkObject):
         return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
 
     def __str__(self):
-        return "<httk UnitcellStructure object:\n  "+str(self.uc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.uc_sites)+"\n>" 
-
+        return "<httk UnitcellStructure object:\n  "+str(self.uc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.uc_sites)+"\n>"

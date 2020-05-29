@@ -15,8 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import vectormath
-from vectormath import *
-from fracvector import FracVector, FracScalar
-from mutablefracvector import MutableFracVector
-
+from httk.core.vectors import vectormath
+from httk.core.vectors.vectormath import *
+from httk.core.vectors.fracvector import FracVector, FracScalar
+from httk.core.vectors.mutablefracvector import MutableFracVector

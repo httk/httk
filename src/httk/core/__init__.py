@@ -21,38 +21,37 @@ httk core module
 Basic utilities and data definitions that are used throughout the httk code.
 
 A few of the most important components:
-  fracvector: our general matrix object used to allow exact representation of arrays to allow, e.g., exact matching 
+  fracvector: our general matrix object used to allow exact representation of arrays to allow, e.g., exact matching
               of coordinates to existing structures in the database.
 
   ioadapters: our classes for generic handling of IO to files, streams, etc.
-  
+
   structure: our basic definition of a "structure of atoms"
 """
 
 import sys
-try:    
+try:
     python_major_version = sys.version_info[0]
     python_minor_version = sys.version_info[1]
 except Exception:
     raise Exception("Python version too old. Httk appear to be running on a version older than python 2.0!")
 
-import citation
+from httk.core import citation
 citation.add_src_citation("httk", "Rickard Armiento")
-from citation import dont_print_citations_at_exit, print_citations_at_exit
+from httk.core.citation import dont_print_citations_at_exit, print_citations_at_exit
 
-from basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
-from basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
-from code import Code
-from computation import Computation, Result, ComputationRelated, ComputationProject
-from reference import Author, Reference
-from project import Project, ProjectRef, ProjectTag
-import crypto
-from vectors import FracVector, FracScalar, MutableFracVector, vectormath
-from signature import Signature, SignatureKey
+from httk.core.basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
+from httk.core.basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
+from httk.core.code import Code
+from httk.core.computation import Computation, Result, ComputationRelated, ComputationProject
+from httk.core.reference import Author, Reference
+from httk.core.project import Project, ProjectRef, ProjectTag
+from httk.core import crypto
+from httk.core.vectors import FracVector, FracScalar, MutableFracVector, vectormath
+from httk.core.signature import Signature, SignatureKey
 
-from ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAppender, IoAdapterString, IoAdapterStringList, IoAdapterFilename
-from httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
-from httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
+from httk.core.ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAppender, IoAdapterString, IoAdapterStringList, IoAdapterFilename
+from httk.core.httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
+from httk.core.httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
 
-import console
-
+from httk.core import console

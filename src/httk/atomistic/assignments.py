@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,9 +16,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from httk.core.basic import is_sequence
-from data import periodictable
+from httk.atomistic.data import periodictable
 from httk.core import FracVector, FracScalar
-from siteassignment import SiteAssignment
+from httk.atomistic.siteassignment import SiteAssignment
 
 
 class Assignments(HttkObject):
@@ -26,23 +26,23 @@ class Assignments(HttkObject):
     """
     Represents a possible vector of assignments
     """
-   
+
     @httk_typed_init({'siteassignments': [SiteAssignment], 'extensions': [str]}, index=['siteassignments', 'extensions'])
     def __init__(self, siteassignments, extensions=[]):
         """
         Private constructor, as per httk coding guidelines. Use Assignments.create instead.
-        """    
+        """
         self.siteassignments = siteassignments
         self.extensions = extensions
-            
+
     @classmethod
     def create(cls, assignments=None):
         """
-        Create a new assignment object, 
+        Create a new assignment object,
 
-       assignments: a list-style object with one entry per 'atom type'. Any sensible type accepted, most notably, 
+       assignments: a list-style object with one entry per 'atom type'. Any sensible type accepted, most notably,
                      integers (for atom number)
-        """        
+        """
         if isinstance(assignments, Assignments):
             return assignments
 
@@ -58,7 +58,7 @@ class Assignments(HttkObject):
         for a in newassignments:
             extensions = extensions | set(a.get_extensions())
         extensions = sorted(extensions)
-        
+
         return cls(newassignments, extensions)
 
     @classmethod
@@ -68,11 +68,11 @@ class Assignments(HttkObject):
         try:
             return old.to_Assignments()
         except Exception:
-            pass   
+            pass
         return cls.create(assignments=old)
 
     def to_basis(self):
-        return self.basis    
+        return self.basis
 
     @httk_typed_property([int])
     def atomic_numbers(self):
@@ -105,7 +105,7 @@ class Assignments(HttkObject):
         return len(self.extensions) > 0
 
     def __str__(self):
-        return "<Assignments:"+str(self.symbollists)+">" 
+        return "<Assignments:"+str(self.symbollists)+">"
 
 #     @classmethod
 #     def use(cls,old):
@@ -114,33 +114,33 @@ class Assignments(HttkObject):
 #         try:
 #             return old.to_Assignments()
 #         except Exception:
-#             pass   
+#             pass
 #         return cls.create(assignments=old)
-# 
+#
 #     def to_basis(self):
-#         return self.basis    
-# 
+#         return self.basis
+#
 #     @property
 #     def integers(self):
 #         return [x.to_integer() for x in self.siteassignments]
-# 
+#
 #     @property
 #     def symbols(self):
 #         if self.extended == True:
 #             raise Exception("Symbols of extended structure not implemented (yet?).")
 #         return [periodictable.atomic_symbol(x) for x in self.elements]
 # #        return [y.to_symbol() for x in self.siteassignments for y in x.as_list()]
-# 
+#
 #     @property
 #     def ratios(self):
 #         if self.extended:
 #             print("Not implemented yet")
-#             
+#
 #         return FracVector.create([1]*len(self.elements))
-# 
+#
 #     def __len__(self):
 #         return len(self.siteassignments)
-# 
+#
 #     def __getitem__(self,key):
 #         return self.assignments[key]
 
@@ -150,5 +150,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

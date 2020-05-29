@@ -2,15 +2,15 @@
 #!/usr/bin/env python
 import sys, os, unittest, subprocess, argparse, difflib
 from contextlib import contextmanager
-from StringIO import StringIO
 
 if sys.version_info[0] == 3:
     from itertools import zip_longest
 else:
-    from itertools import izip_longest
+    from itertools import izip_longest as zip_longest
 
 import httk
 from timeit import itertools
+import codecs
 
 logdata = []
 
@@ -19,7 +19,10 @@ def run(command,args=[]):
 
     logdata += ['Try to run: ' + command]
     p = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return p.communicate()
+    out, err = p.communicate()
+    out = codecs.decode(out, 'utf-8')
+    err = codecs.decode(err, 'utf-8')
+    return out, err
 
 class TestStructreading(unittest.TestCase):
 
@@ -42,7 +45,7 @@ class TestStructreading(unittest.TestCase):
         #message = ''.join(difflib.ndiff(orig.splitlines(True),new.splitlines(True)))
         message = ''
 
-        for orig_line, new_line in izip_longest(orig.splitlines(),new.splitlines()):
+        for orig_line, new_line in zip_longest(orig.splitlines(),new.splitlines()):
             if orig_line == "" and new_line == "":
                 emptylinecount += 1
                 if emptylinecount == 2:
@@ -68,7 +71,7 @@ class TestStructreading(unittest.TestCase):
             emptylinecount = 0
             self.assertTrue(orig_line is not None, "Verification file missing line:"+new_line+"\nFull diff:\n"+message)
             self.assertTrue(new_line is not None, "New version missing line:"+orig_line+"\nFull diff:\n"+message)
-            for orig_datum, new_datum in izip_longest(orig_line.split(),new_line.split()):
+            for orig_datum, new_datum in zip_longest(orig_line.split(),new_line.split()):
                 self.assertTrue(orig_datum is not None, "Verification file missing datum: "+new_datum+"\nFull diff:\n"+message)
                 self.assertTrue(new_datum is not None, "New version missing datum:"+orig_datum+"\nFull diff:\n"+message)
                 if group == 1:

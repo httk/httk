@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -20,19 +20,19 @@ The high-throughput toolkit (httk)
 
 A set of tools and utilities meant to help with:
    - Project management, preparation of large-scale computational project.
-   - Execution of large-scale computational projects 
+   - Execution of large-scale computational projects
         - interface with supercomputer cluster queuing systems, etc.
         - aid with scripting multi-stage runs
         - retrieval of data from supercomputers
-   - Storage of data in databases 
+   - Storage of data in databases
    - Search, retrieval and 'processing' of data in storage
-   - Analysis (especially as a helpful interface against 3:rd party software)    
+   - Analysis (especially as a helpful interface against 3:rd party software)
 """
 from httk.config import *
 
 __version__ = version
 
-from .core import *
+from httk.core import *
 cout = console.cout
 cerr = console.cerr
 
