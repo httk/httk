@@ -19,18 +19,27 @@
 import sys, pickle, re
 import subprocess
 from fractions import Fraction
-import execnet
+
+if sys.version_info[0] == 3:
+    import execnet
+
+    def call_python27_hash(hashes):
+        gw = execnet.makegateway("popen//python=python2.7")
+        channel = gw.remote_exec("""
+            input = channel.receive()
+            hashes = []
+            for tmp in input:
+                hashes.append((long(tmp[0]), long(tmp[1])))
+            hashes = tuple(hashes)
+            out = hash(hashes)
+            out = str(out)
+            channel.send(out)
+        """)
+        channel.send(hashes)
+        return channel.receive()
 
 from httk.core import citation, FracVector
 
-def call_python_version(Version, Module, Function, ArgumentList):
-    gw      = execnet.makegateway("popen//python=python%s" % Version)
-    channel = gw.remote_exec("""
-        from %s import %s as the_function
-        channel.send(the_function(*channel.receive()))
-    """ % (Module, Function))
-    channel.send(ArgumentList)
-    return channel.receive()
 
 # Load data extracted from cctbx
 citation.add_src_citation("imported spacegroup data", "Computational Crystallography Toolbox, http://cctbx.sourceforge.net/")
@@ -48,10 +57,20 @@ def symopshash(symops):
     data = [symopstuple(x) for x in symops]
     hashes = tuple(sorted([(hash(x[0]), hash(x[1])) for x in data]))
     # Temporary fix to get same tuple hashes in Python3:
-    out = call_python_version("2.7", "builtins", "hash", hashes)
-    print(out)
-    return(out)
-    # return hash(hashes)
+    if sys.version_info[0] < 3:
+        # Python2 executes normally
+        return hash(hashes)
+    else:
+        # Python3 sends the hashes to a python2 interpreter and
+        # receives the hashed output.
+        # Cannot send long integers directly, so we send a
+        # tuple of strings.
+        hashes_str = []
+        for tmp in hashes:
+            hashes_str.append((str(tmp[0]), str(tmp[1])))
+        out = call_python27_hash(hashes_str)
+        out = int(out)
+        return out
 
 
 def val_to_tuple(val):

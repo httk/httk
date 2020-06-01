@@ -769,7 +769,7 @@ class Structure(HttkObject):
             else:
                 formdict[symbol] = ratios[i]*counts[i]
 
-        symbols = formdict.keys()
+        symbols = list(formdict.keys())
         rearrange = sorted(range(len(symbols)), key=lambda k: symbols[k])
         formparts = [(symbols[i], formdict[symbols[i]]) for i in rearrange]
         return formparts
@@ -807,7 +807,7 @@ class Structure(HttkObject):
             else:
                 formdict[symbol] = ratios[i]*counts[i]
 
-        symbols = formdict.keys()
+        symbols = list(formdict.keys())
         rearrange = sorted(range(len(symbols)), key=lambda k: symbols[k])
         formparts = [(symbols[i], formdict[symbols[i]]) for i in rearrange]
         return formparts

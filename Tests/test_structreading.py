@@ -193,7 +193,7 @@ class TestStructreading(unittest.TestCase):
         for subdir, dirs, files in os.walk(structdir):
             for f in files:
                 if f.endswith('.cif'):
-                    print("TESTING:",f)
+                    print("TESTING:", f)
 
                     reldir = os.path.relpath(subdir, topdir)
                     ff = os.path.join(subdir, f)
@@ -205,7 +205,7 @@ class TestStructreading(unittest.TestCase):
                         print("Disordered structure, skipping")
                         continue
 
-                    if f in [ '70.cif', '26.cif', '190.cif']:
+                    if f in ['70.cif', '26.cif', '190.cif']:
                         print("Skipping structure incorrectly read by cif2cell")
                         continue
                     #if f == '184.cif' or f == '119.cif' or f == '217.cif' or f == '200.cif':
@@ -213,7 +213,7 @@ class TestStructreading(unittest.TestCase):
                     #    continue
 
 
-                    of = open('structreading.tmp',"w")
+                    of = open('structreading.tmp', "w")
                     #of.write(" ".join(struct.uc_formula_symbols)+"\n")
                     #of.write(" ".join([str(x) for x in struct.pc.uc_counts])+"\n")
                     #of.write(print_num_matrix(struct.pc.uc_cell.basis.to_floats()))
@@ -236,7 +236,7 @@ class TestStructreading(unittest.TestCase):
                     s2 = f.read()
                     f.close()
 
-                    self.assert_numeric_data(s1,s2)
+                    self.assert_numeric_data(s1, s2)
                     #self.assertTrue(filecmp.cmp(compf, 'structreading.tmp'))
 
 

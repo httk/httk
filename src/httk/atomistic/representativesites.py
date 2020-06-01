@@ -139,7 +139,7 @@ class RepresentativeSites(Sites):
                 seen[symbol] += 1
             else:
                 seen[symbol] = 1
-        sortedsymbs = sorted(seen.keys())
+        sortedsymbs = sorted(list(seen.keys()))
         out = ""
         for symbol in sortedsymbs:
             if seen[symbol] > 1:
