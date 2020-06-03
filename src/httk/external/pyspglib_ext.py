@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -25,8 +25,8 @@ from httk.core import citation
 citation.add_ext_citation('spglib / pyspglib', "(Author list to be added)")
 
 from httk import config
-from command import Command
-from subimport import submodule_import_external
+from httk.external.command import Command
+from httk.external.subimport import submodule_import_external
 import httk
 
 try:
@@ -41,14 +41,14 @@ except Exception:
 
 pyspg_major_verion = None
 pyspg_minor_verion = None
-    
+
 def ensure_pyspg_is_imported():
     if pyspglib_path == "False" and spglib_path == "False":
         raise Exception("httk.external.ase_glue: module ase_glue imported, but ase is disabled in configuration file.")
     if pyspg_major_version is None:
         raise Exception("httk.external.pyspglib_ext imported, but could not access pyspg.")
 
-try:    
+try:
     if pyspglib_path is not None and spglib_path is not None:
         # Import spglib from pyspglib, with some magic to enable use of pyspglib.Atoms for the pyspglib ASE atoms emulation class
         pyspglib = submodule_import_external(os.path.join(pyspglib_path, 'lib', 'python'), 'pyspglib')
@@ -57,7 +57,7 @@ try:
         spglib.Atoms = atoms.Atoms
         del atoms  # Lets not pollute the namespace
         pyspg_major_version = spglib.__version__.split('.')[0]
-        pyspg_minor_version = spglib.__version__.split('.')[1]     
+        pyspg_minor_version = spglib.__version__.split('.')[1]
     else:
         try:
             external = config.get('general', 'allow_system_libs')
@@ -69,12 +69,12 @@ try:
             from pyspglib import spglib
             sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
             pyspg_major_version = spglib.__version__.split('.')[0]
-            pyspg_minor_version = spglib.__version__.split('.')[1]     
+            pyspg_minor_version = spglib.__version__.split('.')[1]
         else:
             pass
 except Exception:
     pass
-    
+
 def structure_to_spglib_atoms(struct):
     ensure_pyspg_is_imported()
 
@@ -88,7 +88,7 @@ def structure_to_spglib_atoms(struct):
     cell = struct.cell.to_floats()
 
     scaled_positions = struct.coords
-    
+
     atoms = spglib.Atoms(symbols=symbols,
                          cell=cell,
                          scaled_positions=scaled_positions,
@@ -109,7 +109,7 @@ def analysis(struct, symprec=1e-5):
 
 def primitive(struct, symprec=1e-5):
     ensure_pyspg_is_imported()
-    
+
     atoms = structure_to_spglib_atoms(struct)
     prim = spglib.refine_cell(atoms, symprec=symprec)
     sg = spglib.get_spacegroup(atoms)
@@ -117,5 +117,5 @@ def primitive(struct, symprec=1e-5):
     struct.comment = "Spacegroup: "+sg
     return struct
 
-    
-    
+
+

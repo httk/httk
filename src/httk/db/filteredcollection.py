@@ -18,6 +18,10 @@
 from __future__ import division
 import itertools, os, sys, re, inspect
 
+if sys.version_info[0] == 3:
+    string_types = (str,)
+else:
+    string_types = (str, unicode)
 
 class FilteredCollection(object):
 
@@ -520,7 +524,7 @@ def fc_sql(expr):
     if hasattr(expr, '_sql'):
         #print("HERE",expr._sql(), expr.__class__)
         return expr._sql()
-    elif isinstance(expr, (str, unicode)):
+    elif isinstance(expr, string_types):
         # TODO: Fix quoting system
         return "\""+str(expr).replace("'", "''")+"\""
 

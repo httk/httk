@@ -6,7 +6,7 @@ import httk.db
 from httk.atomistic import Structure
 import httk.task
 
-# Must be updated to your path to poscars, OR, set to None if you have 
+# Must be updated to your path to poscars, OR, set to None if you have
 # VASP_IF_POSCARPATH configured in httk.cfg
 # OR set environmental variable VASP_PSEUDOLIB
 poscarspath = None

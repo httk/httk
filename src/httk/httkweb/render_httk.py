@@ -57,7 +57,7 @@ class RenderHttk(object):
                 os.chdir(owd)
 
     def make_id(self, s):
-        s = unicodedata.normalize('NFKD', s).encode('ascii','ignore')
+        s = unicodedata.normalize('NFKD', s).encode('ascii','ignore').decode('utf-8')
         s = s.lower()
         s = s.replace(' ', '_')
         #s = re.sub('[^0-9a-zA-Z_]', '', s)
@@ -117,7 +117,8 @@ class RenderHttk(object):
                         else:
                             outstr += '<span class="'+(' '.join(modifiers))+'">'
                         endtag = '</span>' + endtag
-                    outstr +=  cgi.escape(segment['content']).encode('ascii', 'xmlcharrefreplace')
+                    outstr +=  cgi.escape(segment['content']).encode('ascii',
+                            'xmlcharrefreplace').decode('utf-8')
                     outstr += endtag
                 outstr += end_p_tag
         return outstr

@@ -17,6 +17,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
+from six import iterkeys
 
 from httk.core import is_sequence, breath_first_idxs, FracVector, FracScalar, MutableFracVector
 from httk.atomistic.cell import Cell
@@ -356,7 +357,8 @@ def normalized_formula(assignments, ratios, counts):
     formula = normalized_formula_parts(assignments, ratios, counts)
 
     normalized_formula = ""
-    for key in sorted(formula.iterkeys()):
+    # for key in sorted(formula.iterkeys()):
+    for key in sorted(iterkeys(formula)):
         if is_sequence(formula[key]):
             totval = sum(formula[key])
         else:
@@ -1013,12 +1015,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-

@@ -27,12 +27,12 @@ also of the data being used.
 """
 from __future__ import print_function
 from collections import OrderedDict
-from ..versioning import httk_version, httk_copyright_note, httk_version_date
+from httk.versioning import httk_version, httk_copyright_note, httk_version_date
 
 # TODO: Convert to using real instances of the core.reference.Reference class instead.
 
 from httk.config import config
-from .reference import Reference, Author
+from httk.core.reference import Reference, Author
 
 module_citations = OrderedDict()
 external_citations = OrderedDict()

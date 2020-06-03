@@ -192,8 +192,8 @@ class RepresentativeStructure(HttkObject):
 
     @classmethod
     def use(cls, other):
-        from structure import Structure
-        from unitcellstructure import UnitcellStructure
+        from httk.atomistic.structure import Structure
+        from httk.atomistic.unitcellstructure import UnitcellStructure
         if isinstance(other, RepresentativeStructure):
             return other
         elif isinstance(other, Structure):
@@ -278,4 +278,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

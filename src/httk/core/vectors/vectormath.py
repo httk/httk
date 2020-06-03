@@ -542,7 +542,7 @@ def e(x, **args):
 
 
 def main():
-    from fracvector import FracVector
+    from httk.core.vectors.fracvector import FracVector
 
     test = FracVector.create([3,5,7],14)
 
@@ -563,5 +563,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

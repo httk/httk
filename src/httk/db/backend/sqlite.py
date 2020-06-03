@@ -19,7 +19,7 @@
 This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
 """
 from __future__ import print_function
-from six import reraise as raise_
+from future.utils import raise_
 import os, sys, time
 import sqlite3 as sqlite
 import atexit
@@ -85,10 +85,12 @@ class Sqlite(object):
             if database_debug_slow:
                 time1 = time.time()
             try:
+                # print("sql = ", sql)
+                # print("values = ", values)
                 self.cursor.execute(sql, values)
             except Exception:
                 info = sys.exc_info()
-                raise_(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), None, info[2])
+                raise_(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), info[2])
             if database_debug_slow:
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):

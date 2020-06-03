@@ -17,8 +17,8 @@
 
 import os, sys, mimetypes, collections, time
 
-import helpers
-from helpers import UnquotedStr
+from httk.httkweb import helpers
+from httk.httkweb.helpers import UnquotedStr
 from _ast import Or
 
 if sys.version_info[0] == 3:
@@ -238,7 +238,8 @@ class WebGenerator(object):
         if allow_urls_without_ext is None:
             allow_urls_without_ext = self.allow_urls_without_ext
 
-        identity = helpers.identify(self.content_dir, relative_url,self.renderers,allow_urls_without_ext=allow_urls_without_ext)
+        identity = helpers.identify(self.content_dir, relative_url,self.renderers,
+                allow_urls_without_ext=allow_urls_without_ext)
 
         page = Page()
         if relative_url not in self.page_memcache_index:
@@ -251,7 +252,8 @@ class WebGenerator(object):
             page.timestamp_mtime = os.path.getmtime(identity['absolute_filename'])
             page.timestamp_last_stat = now
             page.timestamp_render = now
-            self._render_page(identity['relative_filename'], identity['class'], query, page, all_functions=all_functions)
+            self._render_page(identity['relative_filename'], identity['class'],
+                    query, page, all_functions=all_functions)
         except Exception:
             del self.page_memcache[canonical_request]
             del self.page_memcache_index[relative_url][canonical_request]

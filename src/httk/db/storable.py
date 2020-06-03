@@ -18,7 +18,7 @@
 #from store.trivialstore import TrivialStore
 from httk.db.filteredcollection import *
 import sys
-
+from future.utils import raise_
 
 def storable_types(name, *keyvals, **flags):
     index = flags.pop('index', [])
@@ -92,7 +92,7 @@ class Storable(object):
                 return self.__dict__[name]
             except KeyError:
                 info = sys.exc_info()
-                raise AttributeError("KeyError when accessing local dict: "+str(info[1])), None, info[2]
+                raise_(AttributeError, "KeyError when accessing local dict: "+str(info[1]), info[2])
         return self.store[name]
 
     def __setattr__(self, name, val):

@@ -19,9 +19,12 @@
 #   https://makina-corpus.com/blog/metier/2016/the-worlds-simplest-python-template-engine
 #   https://github.com/ebrehault/superformatter
 
+from __future__ import print_function
 import string, os, codecs, cgi
+import six
+import inspect
 
-from helpers import UnquotedStr
+from httk.httkweb.helpers import UnquotedStr
 
 class HttkTemplateFormatter(string.Formatter):
 
@@ -63,7 +66,7 @@ class HttkTemplateFormatter(string.Formatter):
                 except TypeError:
                     return ''
             if newspec == '':
-                return unicode(val)
+                return six.text_type(val)
             else:
                 return self.format_field(val, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('if:') or spec.startswith('if-not:') or spec.startswith('if-set:') or spec.startswith('if-unset:'):
@@ -95,11 +98,18 @@ class HttkTemplateFormatter(string.Formatter):
 
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
+        # In Python 3 the 'menuitems' field_name should be 'menuitems-list'?
+        # if six.PY3:
+            # if field_name == "menuitems":
+                # field_name = "menuitems-list"
         try:
-            val=super(HttkTemplateFormatter, self).get_field(field_name, args, kwargs)
+            val = super(HttkTemplateFormatter, self).get_field(field_name, args, kwargs)
+            # if six.PY3:
+                # if val[0] == "i":
+                    # val = ("index", field_name)
             # Python 3, 'super().get_field(field_name, args, kwargs)' works
         except (KeyError, AttributeError):
-            val=None,field_name
+            val = None, field_name
         return val
 
     def vformat(self, format_string, args, kwargs, used_args=None, recursion_depth=None):
@@ -141,8 +151,6 @@ class HttkTemplateFormatter(string.Formatter):
             return ''.join(result)
 
 
-
-
 class TemplateEngineHttk(object):
     def __init__(self, template_dir, template_filename, base_template_filename = None):
         self.template_dir = template_dir
@@ -151,7 +159,7 @@ class TemplateEngineHttk(object):
 
         self.dependency_filenames = [self.filename]
         if base_template_filename is not None:
-            self.base_filename = os.path.join(self.template_dir,base_template_filename)
+            self.base_filename = os.path.join(self.template_dir, base_template_filename)
             self.dependency_filenames += [self.base_filename]
         else:
             self.base_filename = None
@@ -172,16 +180,16 @@ class TemplateEngineHttk(object):
         data['content'] = content
         data['subcontent'] = subcontent
 
-        output = self.httk_tf.format(template,**data)
+        output = self.httk_tf.format(template, **data)
 
         if self.base_filename is not None:
-            with codecs.open(self.base_filename,encoding='utf-8') as f:
+            with codecs.open(self.base_filename, encoding='utf-8') as f:
                 base_template = f.read()
 
                 data['content'] = UnquotedStr(output)
                 del data['subcontent']
 
-                output = self.httk_tf.format(base_template,**data)
+                output = self.httk_tf.format(base_template, **data)
 
         return output
 
@@ -290,4 +298,3 @@ if __name__ == "__main__":
     print(tf.format("Quoting + formatting:       '{a:unquoted::>70}'",a="<i need to be quoted, \"indeed\" said the cat's hat>"))
     print(tf.format("Unquoted string: '{a}       '",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
     print(tf.format("Overriding unquoted string: '{a:quote}'",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
-

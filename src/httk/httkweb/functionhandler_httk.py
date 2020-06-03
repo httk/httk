@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -17,7 +17,7 @@
 import sys, os
 
 from importlib import import_module
-from helpers import UnquotedStr
+from httk.httkweb.helpers import UnquotedStr
 
 class FunctionHandlerHttk(object):
     def __init__(self, function_dir, function_filename, arg_names, global_data, instanced_template_engine = None):
@@ -28,13 +28,13 @@ class FunctionHandlerHttk(object):
         self.instanced_template_engine = instanced_template_engine
         self.filename = os.path.join(function_dir, function_filename)
         self.dependency_filenames = [self.filename]
-        
+
         if instanced_template_engine is not None:
             self.dependency_filenames += instanced_template_engine.get_dependency_filenames()
-         
+
         sys.path.append(function_dir)
         self.imported_module = import_module(self.function_name)
-        
+
     def execute(self, args = None):
         if args is None:
             args = {}
@@ -42,7 +42,7 @@ class FunctionHandlerHttk(object):
         callargs['global_data'] = self.global_data
         return self.imported_module.execute(**callargs)
 
-    def execute_and_format(self, args, data):        
+    def execute_and_format(self, args, data):
         output = self.execute(args)
         joint = dict(data)
         joint['result']=output
@@ -50,7 +50,7 @@ class FunctionHandlerHttk(object):
 
     def get_dependency_filenames(self):
         return self.dependency_filenames
-    
+
 #        data = dict(self.global_data)
 #        data['content'] = page._rendered_content
 #        if hasattr(page,_rendered_subcontent) and page._rendered_subcontent is not None:
@@ -59,6 +59,3 @@ class FunctionHandlerHttk(object):
 #        data['content'] = content
 #        del data['subcontent']
 #        return self.httk_tf.format(base_template,data)
-    
-
-    

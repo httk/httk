@@ -192,7 +192,7 @@ def _read_cif_data_block(f, pragmatic=True, use_types=False):
         elif lowrow.startswith("loop_"):
             _read_cif_rewind_if_needed(f, row, 1)
             loopdata = _read_cif_loop(f, pragmatic, use_types)
-            data_items['loop_'+str(loops)] = loopdata.keys()
+            data_items['loop_'+str(loops)] = list(loopdata.keys())
             loops += 1
             data_items.update(loopdata)
         elif striprow.startswith(";"):
@@ -267,10 +267,18 @@ _cif_any_print_char = _cif_ordinary_char+'"'+"#$"+"'"+"_ \t;[]"
 _cif_non_blank_char_table = maketrans_(_cif_non_blank_char, ' ' * len(_cif_non_blank_char))
 _cif_helper_table = maketrans_('', '')
 
+# Python 3 specific
+if sys.version_info[0] == 3:
+    _cif_non_blank_char_table = maketrans_(_cif_non_blank_char, _cif_non_blank_char)
+    _cif_unicode_translation_table = {}
+    for i in range(sys.maxunicode+1):
+        _cif_unicode_translation_table[i] = None
+    for key, value in _cif_non_blank_char_table.items():
+        _cif_unicode_translation_table[key] = value
+
 _cif_integer_regex = re.compile('^[+-]?[0-9]+$')
 _cif_float_regex = re.compile('^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$')
 _cif_simplestring_regex = re.compile('^[A-Za-z0-9()][A-Za-z0-9()+-]*$')
-
 
 def _cif_validate_name(name_unfiltered, context=None):
     if context is not None:
@@ -295,7 +303,10 @@ def _cif_is_int(data_value):
 
 
 def _cif_validate_non_blank_char(s, context=None):
-    out = s.translate(_cif_helper_table, _cif_non_blank_char_table)
+    if sys.version_info[0] == 3:
+        out = s.translate(_cif_unicode_translation_table)
+    else:
+        out = s.translate(_cif_helper_table, _cif_non_blank_char_table)
     if out != s:
         if context is not None:
             sys.stderr.write("***Warning: write_cif: non-permitted characters in "+context+" removed.")

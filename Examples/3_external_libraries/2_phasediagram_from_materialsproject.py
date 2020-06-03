@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import httk, httk.db, httk.atomistic
 from httk.core import IoAdapterString
 from httk.atomistic import Structure, StructurePhaseDiagram
@@ -7,14 +8,19 @@ from httk.analysis.matsci import PhaseDiagram
 import httk.analysis.matsci.vis
 from httk.external import pymatgen_glue
 
-import pymatgen, pymatgen.phasediagram.plotter, pymatgen.phasediagram.pdmaker, pymatgen.phasediagram.pdanalyzer
+import pymatgen
+# import pymatgen.phasediagram.plotter, pymatgen.phasediagram.pdmaker, pymatgen.phasediagram.pdanalyzer
 from pymatgen.entries.computed_entries import ComputedEntry
-from pymatgen.matproj.rest import MPRester
+from pymatgen import MPRester
 
 # Fill in your materials project API key here
-mp_key = 'xxxxxx'
+mp_key = '2bmcuCpKaET6PXIy'
 a = MPRester(mp_key)
-entries = a.get_entries_in_chemsys(['Ca', 'Ti', 'F'])
+entries = a.get_entries_in_chemsys(['Ca', 'Ti', 'F'],
+        property_data=['material_id','pretty_formula','unit_cell_formula'])
+
+# for i, entry in enumerate(entries):
+    # print(entry.data.keys())
 
 structures = []
 energies = []
@@ -45,4 +51,3 @@ for i, entry in enumerate(entries):
     print("Entry", i+1, "/", len(entries), ":", id)
 
 pd.vis.show(debug=True)
-

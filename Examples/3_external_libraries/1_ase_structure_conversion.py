@@ -3,6 +3,7 @@
 
 # This is a simple program that shows some interaction with ase using the ase_glue package
 
+from __future__ import print_function
 import httk
 from httk.atomistic import *
 import httk.external.ase_glue
@@ -14,7 +15,7 @@ import ase.lattice.cubic
 # By loading the httk.external.ase_glue package *before* 'import ase' you will load the ASE version specified in your httk configuration files.
 # The below two version are going to be the same.
 print("ASE version loaded by httk:", httk.external.ase_glue.ase_major_version, ".", httk.external.ase_glue.ase_minor_version)
-print("ASE version loaded in this script", ase.version.version)
+print("ASE version loaded in this script", ase.__version__)
 
 # First we create a structure object where we know the full set of coordinates.
 

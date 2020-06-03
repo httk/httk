@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import shlex, os, sys, shutil
 from string import Template
-from .basic import mkdir_p
+from httk.core.basic import mkdir_p
 
 if sys.version_info[0] == 3:
     from io import StringIO
@@ -49,7 +49,9 @@ def apply_template(template, output, envglobals=None, envlocals=None):
     # Read template and substitute $name entries
     template_file = open(template, 'r')
     ## shlex does not work with unicode, hence the .encode('ascii') to make sure the result is not unicode
-    result_step1 = Template(Template(template_file.read()).safe_substitute(envlocals)).safe_substitute(envglobals).encode('ascii')
+    # Henrik added: These days it looks like we don't need the ascii encoding anymore.
+    result_step1 = Template(Template(template_file.read()).safe_substitute(
+        envlocals)).safe_substitute(envglobals)#.encode('ascii')
     template_file.close()
 
     # Substitute $(some python code) entries

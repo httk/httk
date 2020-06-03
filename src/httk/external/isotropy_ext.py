@@ -25,7 +25,7 @@ citation.add_ext_citation('isotropy', "Harold T. Stokes, Dorian M. Hatch, and Br
 
 from httk.core.basic import int_to_anonymous_symbol
 from httk import config
-from command import Command
+from httk.external.command import Command
 import httk.httkio
 import httk.iface
 

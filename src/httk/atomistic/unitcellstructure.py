@@ -244,8 +244,8 @@ class UnitcellStructure(HttkObject):
 
     @classmethod
     def use(cls, other):
-        from structure import Structure
-        from representativestructure import RepresentativeStructure
+        from httk.atomistic.structure import Structure
+        from httk.atomistic.representativestructure import RepresentativeStructure
         if isinstance(other, UnitcellStructure):
             return other
         elif isinstance(other, Structure):

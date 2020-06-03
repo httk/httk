@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib, urlparse
+import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib
+
 
 class form_wrapper(file):
     def __init__(self, path, mode, name, filename, fields=[], prepend_progress=""):
@@ -13,14 +14,14 @@ class form_wrapper(file):
         self.boundary = mimetools.choose_boundary()
 
         self.predata = ""
-        for field in fields:            
+        for field in fields:
             self.predata += "--" + self.boundary + "\r\n"
             self.predata += 'Content-Disposition: form-data; name="%s"' % (field[0],) + "\r\n\r\n"
             self.predata += field[1] + "\r\n"
         self.predata += "--" + self.boundary + "\r\n"
         self.predata += 'Content-Disposition: file; name="%s"; filename="%s"' % (name, filename)
         #if path.endswith(".bz2"):
-        #    self.predata += 'Content-Type: %s' % ('application/x-bzip2',) + "\r\n\r\n"      
+        #    self.predata += 'Content-Type: %s' % ('application/x-bzip2',) + "\r\n\r\n"
         #else:
         self.predata += 'Content-Type: %s' % ('application/octet-stream',) + "\r\n\r\n"
         #self.predata += 'Content-Length: %d' % (self._total,) + "\r\n\r\n"
@@ -48,7 +49,7 @@ class form_wrapper(file):
             data += newdata
             size -= len(newdata)
             self._seen += len(newdata)
-            
+
         if len(data) > 0:
             progress = float((self._seen)) / len(self)
             sys.stdout.write('\r\033[K[{0}{1}] {2}%'.format('#'*int((100*progress/10)),' '*(10-int((100*progress/10))), int(100*progress))+" "+self._prepend_progress)
@@ -84,4 +85,3 @@ if result=="OK":
 else:
     print("===="+result+"====")
     exit(1)
-

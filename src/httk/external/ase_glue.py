@@ -29,7 +29,7 @@ from httk import config
 from httk.atomistic import Structure, UnitcellSites
 import httk.iface
 from httk.iface.ase_if import *
-from subimport import submodule_import_external
+from httk.external.subimport import submodule_import_external
 
 ase_major_version = None
 ase_minor_version = None

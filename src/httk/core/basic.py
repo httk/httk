@@ -44,9 +44,11 @@ def anonymous_symbol_to_int(symb):
 
 
 def is_sequence(arg):
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
+    # In python3 string types have __iter__ attribute,
+    # so in python3 the below test results in strings
+    # being sequences (True is returned instead of False).
+    return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
+            (hasattr(arg, "__iter__") and not isinstance(arg, str)))
 
 
 import re, errno, os, itertools, sys, tempfile, shutil, collections

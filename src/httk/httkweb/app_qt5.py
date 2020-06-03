@@ -15,11 +15,17 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, subprocess, cgitb, urlparse
-from httplib import HTTPMessage
+import sys, os, subprocess, cgitb
 
-from webgenerator import WebGenerator
-import helpers
+if sys.version_info[0] == 3:
+    import urllib.parse as urlparse
+    from http.client import HTTPMessage
+else:
+    import urlparse
+    from httplib import HTTPMessage
+
+from httk.httkweb.webgenerator import WebGenerator
+from httk.httkweb import helpers
 
 if sys.version_info[0] == 3:
     from io import StringIO
@@ -35,6 +41,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
         from PyQt5.QtWebEngineCore import QWebEngineUrlSchemeHandler, QWebEngineUrlRequestInterceptor
         from PyQt5.QtWebChannel import QWebChannel
     except ImportError as e:
+        print(e)
         try:
             from PySide2 import QtCore, QtWidgets
 
@@ -53,6 +60,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             print('Console (%s): %s line %d: %s' % (level, source, line, msg))
 
     class Backend(QObject):
+        print(QtCore.__file__)
         @QtCore.pyqtSlot(str,result=str)
         def test(self,msg):
             pass
@@ -69,7 +77,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             super(TestIODevice, self).__init__()
             self.open(self.ReadOnly | self.Unbuffered)
             # TODO: do proper file reading
-            self._data = str(data.read())
+            self._data = str(data.read()).encode()
             data.close()
             QtCore.QTimer.singleShot(200, self._dataReceived)
 
@@ -195,7 +203,9 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
             #    self.setRawHeader(header,headers['header'])
 
             self._dev = TestIODevice(content)
-            mimetype = headers['Content-type'].partition(';')[0]
+            # In Python 3 reply function requires the mimetype to be
+            # a bytes string, so encode it to bytes first.
+            mimetype = headers['Content-type'].partition(';')[0].encode()
             request.reply(mimetype, self._dev)
 
 
@@ -238,5 +248,3 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
     main_window.raise_()
 
     sys.exit(app.exec_())
-
-

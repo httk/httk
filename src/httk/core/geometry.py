@@ -224,7 +224,7 @@ def simplex_le_solver(a, b, c):
         M += [b[i].get_insert(0, 0).get_extend(ident).get_append(c[i])]
     M = MutableFracVector.create(M)
     obj = obj.get_append(0)
-    base = range(Na, Na+Nc)
+    base = list(range(Na, Na+Nc))
 
     while not min(obj[1:-1]) >= 0:
         pivot_col = obj[1:-1].argmin() + 1

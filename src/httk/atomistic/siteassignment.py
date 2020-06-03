@@ -70,7 +70,7 @@ class SiteAssignment(HttkObject):
 
         if ratiosum > 1:
             print("Ratiosum:", ratiosum)
-            print("Assignmnets:", assignments)
+            print("Assignments:", assignments)
             raise Exception("siteassignment.create: sum of ratios for one site larger than 1, broken structure.")
 
         return cls(newassignments)
@@ -178,5 +178,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

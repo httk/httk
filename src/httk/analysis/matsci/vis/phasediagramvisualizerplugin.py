@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,7 +19,7 @@ from httk.core.httkobject import HttkPlugin
 
 
 class PhaseDiagramVisualizerPlugin(HttkPlugin):
-            
+
     def plugin_init(self, phasediagram):
         print("PhaseDiagramVisualizerPlugin called")
         self.phasediagram = phasediagram
@@ -36,7 +36,7 @@ class PhaseDiagramVisualizerPlugin(HttkPlugin):
         for backend in backends:
             if backend == 'matplotlib':
                 try:
-                    from matplotlibphasediagramvisualizer import MatplotlibPhaseDiagramVisualizer
+                    from httk.analysis.matsci.vis.matplotlibphasediagramvisualizer import MatplotlibPhaseDiagramVisualizer
                     self.visualizer = MatplotlibPhaseDiagramVisualizer(self.phasediagram)
                     self.visualizer.show()
                     return

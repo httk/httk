@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib, urlparse
+import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib
+
 
 url = sys.argv[1]
 fields = {}

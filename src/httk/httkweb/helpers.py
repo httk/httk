@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -23,15 +23,15 @@ class UnquotedStr(object):
     def __str__(self):
         return str(self.val)
     def __repr__(self):
-        return str(self.val)    
+        return str(self.val)
 
 def setup_template_helpers(global_data):
-    
+
     def first_value(*vals):
         for val in vals:
             if val:
                 return val
-    
+
     #def getitem(a,i):
         #try:
         #    return global_data[a][i]
@@ -41,11 +41,11 @@ def setup_template_helpers(global_data):
     #        return a[i]
     #    except TypeError:
     #        return a[int(i)]
-        
+
     global_data['first_value'] = first_value
     # global_data['getitem'] = getitem
-    
-    
+
+
 def identify(topdir, relative_url, ext_to_class_mapper, allow_urls_without_ext=True):
 
     relative_url_base, __dummy, url_ext = relative_url.partition(os.extsep)
@@ -67,9 +67,9 @@ def identify(topdir, relative_url, ext_to_class_mapper, allow_urls_without_ext=T
         raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.join(topdir,relative_url))
 
     return {'relative_url_base':relative_url_base,'url_ext':url_ext,'absolute_filename':absolute_filename,'relative_filename':relative_filename,'class':ext_to_class_mapper[ext]}
-    
+
 def read_config(srcdir, renderers, default_global_data = None, override_global_data = None, config = "config"):
-            
+
         # Set defaults
         global_data = {'_content_subdir': 'content', '_static_subdir':'static', '_subcontent_subdir':'subcontent',
                        '_functions_subdir': '_functions', '_template_subdir': 'templates',
@@ -77,19 +77,19 @@ def read_config(srcdir, renderers, default_global_data = None, override_global_d
 
         if default_global_data is not None:
             global_data.update(default_global_data)
-                      
+
         # Read global config
         try:
             config_info = identify(srcdir, config, renderers, allow_urls_without_ext=True)
         except IOError:
-            if config == None:
+            if config is None:
                 print("Warning: no site configuration provided, and no file exists in "+str(srcdir)+"/config.(something)")
             else:
                 print("Could not find site configuration at "+str(srcdir)+"/"+str(config)+".(something)")
         else:
             configdata = config_info['class'](srcdir, config_info['relative_filename'], global_data).metadata()
             global_data.update(configdata)
-                        
+
         # Setup helper functions for templates to use
         setup_template_helpers(global_data)
 
@@ -97,25 +97,25 @@ def read_config(srcdir, renderers, default_global_data = None, override_global_d
             global_data.update(override_global_data)
 
         # Fix types of some settings (these must be set, as they are set in the defaults above)
-        global_data['_use_urls_without_ext'] = global_data['_use_urls_without_ext'] in ['yes', 'true', 'y', True]     
-        global_data['_allow_urls_without_ext'] = global_data['_allow_urls_without_ext'] in ['yes', 'true', 'y', True]     
+        global_data['_use_urls_without_ext'] = global_data['_use_urls_without_ext'] in ['yes', 'true', 'y', True]
+        global_data['_allow_urls_without_ext'] = global_data['_allow_urls_without_ext'] in ['yes', 'true', 'y', True]
         global_data['_page_memcache_limit'] = int(global_data['_page_memcache_limit'])
-    
+
         return global_data
-    
-def setup(renderers, template_engines, function_handlers):    
-    if renderers is None:    
-        from render_httk import RenderHttk
-        from render_rst import RenderRst        
+
+def setup(renderers, template_engines, function_handlers):
+    if renderers is None:
+        from httk.httkweb.render_httk import RenderHttk
+        from httk.httkweb.render_rst import RenderRst
         renderers = {'httkweb': RenderHttk, 'rst': RenderRst}
 
     if template_engines is None:
-        from templateengine_httk import TemplateEngineHttk
-        from templateengine_templator import TemplateEngineTemplator
+        from httk.httkweb.templateengine_httk import TemplateEngineHttk
+        from httk.httkweb.templateengine_templator import TemplateEngineTemplator
         template_engines = {'httkweb.html': TemplateEngineHttk, 'templator.html': TemplateEngineTemplator}
 
     if function_handlers is None:
-        from functionhandler_httk import FunctionHandlerHttk        
+        from httk.httkweb.functionhandler_httk import FunctionHandlerHttk
         function_handlers = {'py': FunctionHandlerHttk}
 
     return {'renderers':renderers, 'template_engines':template_engines, 'function_handlers':function_handlers}

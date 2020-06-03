@@ -15,7 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
-from six import reraise as raise_
+import six
+from future.utils import raise_
 
 from httk.core.httkobject import HttkObject, HttkPluginPlaceholder, httk_typed_property, httk_typed_property_resolve, httk_typed_property_delayed, httk_typed_init
 from httk.core.reference import Reference
@@ -788,7 +789,7 @@ class Structure(HttkObject):
             else:
                 formdict[symbol] = ratios[i]*counts[i]
 
-        symbols = formdict.keys()
+        symbols = list(formdict.keys())
         rearrange = sorted(range(len(symbols)), key=lambda k: symbols[k])
         formparts = [(symbols[i], formdict[symbols[i]]) for i in rearrange]
         return formparts
@@ -904,8 +905,9 @@ class Structure(HttkObject):
     @httk_typed_property([str])
     def formula_symbols(self):
         symbols = []
-        formula = normalized_formula_parts(self.assignments.symbollists, self.assignments.ratioslist, self.uc_sites.counts)
-        for key in sorted(formula.iterkeys()):
+        formula = normalized_formula_parts(self.assignments.symbollists,
+                self.assignments.ratioslist, self.uc_sites.counts)
+        for key in sorted(six.iterkeys(formula)):
             if is_sequence(key):
                 key = "".join([str(x[0])+str(("%.2f" % x[1])) for x in key])
             symbols += [key]
@@ -914,8 +916,9 @@ class Structure(HttkObject):
     @httk_typed_property([FracScalar])
     def formula_counts(self):
         counts = []
-        formula = normalized_formula_parts(self.assignments.symbollists, self.assignments.ratioslist, self.uc_sites.counts)
-        for key in sorted(formula.iterkeys()):
+        formula = normalized_formula_parts(self.assignments.symbollists,
+                self.assignments.ratioslist, self.uc_sites.counts)
+        for key in sorted(six.iterkeys(formula)):
             if is_sequence(formula[key]):
                 totval = sum(formula[key])
             else:

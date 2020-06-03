@@ -286,7 +286,7 @@ class FracVector(Vector):
 
         gcd = nested_reduce(lambda x, y: fractions.gcd(x, abs(int((y + eps) * resolution))), l, initializer=resolution)
         noms = cls.nested_map(lambda x: int((x + eps) * resolution) // gcd, l)
-        denom = resolution / gcd
+        denom = resolution // gcd
 
         return cls(noms, denom)
 
@@ -600,7 +600,7 @@ class FracVector(Vector):
         if self.denom != 1:
             gcd = self._reduce_over_noms(lambda x, y: fractions.gcd(x, abs(y)), initializer=self.denom)
             if gcd != 1:
-                denom = denom / gcd
+                denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))
 
         return self.__class__(noms, denom)

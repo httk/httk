@@ -18,6 +18,7 @@
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
 import hashlib, os.path, base64, re, sys
+import six
 
 if sys.version_info[0] == 3:
     import configparser
@@ -29,18 +30,18 @@ try:
 except Exception:
     pass
 
-from .ioadapters import IoAdapterFileReader, IoAdapterFileWriter
+from httk.core.ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
 
 
 def hexhash_str(data, prepend=None):
     s = hashlib.sha1()
-    s.update("httk\0")
+    s.update("httk\0".encode("utf-8"))
     if prepend is not None:
-        s.update(prepend)
-        s.update("\0")
-    s.update(data)
-    s.update("\0%u\0" % len(data))
+        s.update(prepend.encode("utf-8"))
+        s.update("\0".encode("utf-8"))
+    s.update(data.encode("utf-8"))
+    s.update("\0%u\0".encode("utf-8") % len(data))
     return s.hexdigest()
 
 
@@ -161,12 +162,13 @@ def tuple_to_str(t):
             #tuplestr += "\n"
             strlist.append(tuplestr)
         else:
-            strlist.append(unicode(i).encode("utf-8"))
+            # strlist.append(unicode(i).encode("utf-8"))
+            strlist.append(six.text_type(i))
     return " ".join(strlist)
 
 
 def read_keys(keydir):
-    from . import ed25519
+    from httk.core.crypto import ed25519
 
     f = open(os.path.join(keydir, 'key1.priv'), "r")
     b64sk = f.read()
@@ -192,7 +194,7 @@ def sha256file(filename):
 
 
 def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=False, force=False):
-    from . import ed25519
+    from httk.core.crypto import ed25519
 
     message = ""
 
@@ -339,7 +341,7 @@ def generate_keys(public_key_path, secret_key_path):
     """
     Generates a public and a private key pair and stores them in respective files
     """
-    from . import ed25519
+    from httk.core.crypto import ed25519
     try:
         secret_key = os.urandom(64)
         #sr = random.SystemRandom()
@@ -361,7 +363,7 @@ def generate_keys(public_key_path, secret_key_path):
 
 
 def get_crypto_signature(message, secret_key_path):
-    from . import ed25519
+    from httk.core.crypto import ed25519
 
     ioa = IoAdapterFileReader.use(secret_key_path)
     b64secret_key = ioa.file.read()
@@ -374,7 +376,7 @@ def get_crypto_signature(message, secret_key_path):
 
 
 def verify_crytpo_signature(signature, message, public_key):
-    from . import ed25519
+    from httk.core.crypto import ed25519
 
     binsignature = base64.b64decode(signature)
     binpublic_key = base64.b64decode(public_key)
@@ -382,7 +384,7 @@ def verify_crytpo_signature(signature, message, public_key):
 
 
 def verify_crytpo_signature_old(signature, message, public_key_path):
-    from . import ed25519
+    from httk.core.crypto import ed25519
 
     ioa = IoAdapterFileReader.use(public_key_path)
     b64public_key = ioa.file.read()

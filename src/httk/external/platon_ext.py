@@ -21,7 +21,7 @@ citation.add_ext_citation('Platon', "A. L. Spek, Utrecht University, Padualaan 8
 import os, sys, tempfile
 
 from httk import config
-from command import Command
+from httk.external.command import Command
 import httk
 
 if sys.version_info[0] == 3:

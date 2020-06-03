@@ -3,6 +3,7 @@
 
 # This is a simple program that just shows some basic functionality using the httk Structure object
 
+from __future__ import print_function
 from httk import *
 from httk.atomistic import *
 import httk.atomistic.vis
@@ -36,7 +37,8 @@ struct = httk.load("../../Tutorial/Step2/POSCAR2")
 try:
     struct.vis.show()
     struct.vis.wait()
-except Exception:
+except Exception as e:
+    print(e)
     print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
 supercell = struct.transform([[2, 0, 0], [0, 2, 0], [0, 0, 1]])
@@ -93,6 +95,11 @@ except Exception:
 print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 supercell = struct.supercell.cubic(tolerance=25)
 print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
+
+
+
+
+
 #supercell = struct.build_cubic_supercell(tolerance=70,max_search_cells=10000)
 #print(supercell.full_nbr_atoms,[supercell.alpha, supercell.beta, supercell.gamma], [float(supercell.a), float(supercell.b), float(supercell.c)])
 #supercell.vis.show()

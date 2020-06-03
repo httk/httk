@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+import sys
 import httk, httk.db
 from httk.atomistic import Structure
 from httk.external import pymatgen_glue
 
-import pymatgen, pymatgen.phasediagram.plotter, pymatgen.phasediagram.pdmaker, pymatgen.phasediagram.pdanalyzer
+import pymatgen
+from pymatgen.analysis.phase_diagram import PhaseDiagram, PDPlotter
+# pymatgen.phasediagram.plotter, pymatgen.phasediagram.pdmaker, pymatgen.phasediagram.pdanalyzer
 from pymatgen.entries.computed_entries import ComputedEntry
-from pymatgen.matproj.rest import MPRester
+from pymatgen import MPRester
 
 
 class TotalEnergyResult(httk.Result):
@@ -15,9 +18,10 @@ class TotalEnergyResult(httk.Result):
         self.computation = computation
         self.structure = structure
         self.total_energy = total_energy
-        
+
 # This reads the tutorial example database from step6
-backend = httk.db.backend.Sqlite('../../Tutorial/Step6/example.sqlite')
+# backend = httk.db.backend.Sqlite('../../Tutorial/Step6/example.sqlite')
+backend = httk.db.backend.Sqlite('../../Tutorial/tutorial_data/tutorial.sqlite')
 store = httk.db.store.SqlStore(backend)
 
 search = store.searcher()
@@ -45,7 +49,13 @@ for match, header in search:
 #     s=ca+ti+o
 #     form = 'Ca'+str(ca)+'Ti'+str(ti)+'O'+str(o)
 #     entries += [ComputedEntry(form, random.randrange(-10,0)*s)]
-    
-pd = pymatgen.phasediagram.pdmaker.PhaseDiagram(entries)
-plotter = pymatgen.phasediagram.plotter.PDPlotter(pd, show_unstable=False)
-plotter.show() 
+
+if len(entries) == 0:
+    sys.exit("entries list is empty! Your sqlite database is missing total energies.")
+else:
+    for row in entries:
+        print(entries)
+
+pd = PhaseDiagram(entries)
+plotter = PDPlotter(pd, show_unstable=False)
+plotter.show()

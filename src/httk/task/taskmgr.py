@@ -53,7 +53,7 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     old_path = os.getcwd()
     old_sys_argv = sys.argv
 
-    # Saftey check
+    # Safety check
     if instantiate_name is None or instantiate_name == '' or not isinstance(instantiate_name, str) or not instantiate_name:
         raise Exception("taskmgr.create_batch_task: empty or weird instantiate_name:" + str(instantiate_name))
 

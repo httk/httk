@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -45,11 +45,11 @@ class PhaseDiagram(object):
         self._competing_indices = None
         self._hull_competing_indices = None
         self._hull_distances = None
-        self._coordsys = None        
-        self._cache_hull = None    
+        self._coordsys = None
+        self._cache_hull = None
         self._cache_overhull = None
-        self._phase_lines = None    
-        
+        self._phase_lines = None
+
     @classmethod
     def create(cls):
         return cls()
@@ -60,6 +60,9 @@ class PhaseDiagram(object):
         """
         counts = FracVector.use(counts)
         phase = {}
+        # In Python 3 symbols in an iterator, so we should convert it to
+        # a list.
+        symbols = list(symbols)
         for i in range(len(symbols)):
             symbol = symbols[i]
             if symbol in phase:
@@ -86,13 +89,13 @@ class PhaseDiagram(object):
         self._hull_distances = hull_distances
         self._coord_system = coord_system
         self._phase_lines = phase_lines
-        
+
     @property
     def hull_indices(self):
         if self._hull_indices is None:
             self._hull_indices = self._hull()['hull_indices']
         return self._hull_indices
-        
+
     @property
     def competing_indices(self):
         if self._competing_indices is None:
@@ -104,7 +107,7 @@ class PhaseDiagram(object):
         if self._hull_competing_indices is None:
             self._hull_competing_indices = self._overhull()['competing_indices']
         return self._hull_competing_indices
-    
+
     @property
     def hull_distances(self):
         if self._hull_distances is None:
@@ -129,7 +132,7 @@ class PhaseDiagram(object):
                     lines[(i, j)] = True
             self._phase_lines = lines.keys()
         return self._phase_lines
-        
+
     def _hull(self):
         if self._cache_hull is None:
             sys.stderr.write("Warning: calculating convex hull, this may take some time.\n")
@@ -138,7 +141,7 @@ class PhaseDiagram(object):
             for phase in self.phases:
                 phaselist += [[phase[symbol] if symbol in phase else 0 for symbol in symbols]]
             self._cache_hull = hull_z(phaselist, self.energies)
-        return self._cache_hull 
+        return self._cache_hull
 
     def _overhull(self):
         if self._cache_overhull is None:
@@ -151,10 +154,10 @@ class PhaseDiagram(object):
                 phaselist += [[phase[symbol] if symbol in phase else 0 for symbol in symbols]]
             self._cache_overhull = hull_z(phaselist, energies)
         return self._cache_overhull
-        
+
     def hull_points(self):
         return [self.phases[x] for x in self.hull_indices], [self.ids[x] for x in self.hull_indices]
-        
+
     def hull_competing_phase_lines(self):
         hull_points = self.hull_indices
         closest = self.hull_competing_indices
@@ -163,7 +166,7 @@ class PhaseDiagram(object):
             for j in closest[i]:
                 lines[(i, j)] = True
         return lines.keys()
-        
+
     def hull_to_interior_competing_phase_lines(self):
         hull_points = self.hull_indicies
         closest = self.hull_competing_indices
@@ -206,7 +209,7 @@ class PhaseDiagram(object):
 #                     l2 = (j,i)
 #                     if not (l1 in lines or l2 in lines):
 #                         lines[l1]=True
-#                 else:                    
+#                 else:
 #                     done_points += [point2]
 #                     points_to_check += closest[point2]
 #         return lines.keys()
@@ -218,7 +221,7 @@ class PhaseDiagram(object):
         for phase in phases:
             tot = sum([phase[symbol] for symbol in phase])
             phasecoords += [[phase[symbol]/tot if symbol in phase else 0 for symbol in coordsys]]
-        
+
         return phasecoords, ids
 
     def interior_point_coords(self):
@@ -231,7 +234,7 @@ class PhaseDiagram(object):
                 phase = phases[i]
                 tot = sum([phase[symbol] for symbol in phase])
                 phasecoords += [[phase[symbol]/tot if symbol in phase else 0 for symbol in coordsys]]
-        
+
         return phasecoords, ids
 
     def other_point_coords(self):
@@ -242,7 +245,7 @@ class PhaseDiagram(object):
         for phase in phases:
             tot = sum([phase[symbol] for symbol in phase])
             phasecoords += [[phase[symbol]/tot if symbol in phase else 0 for symbol in coordsys]]
-        
+
         return phasecoords, ids
 
     def coords(self):
@@ -253,7 +256,7 @@ class PhaseDiagram(object):
         for phase in phases:
             tot = sum([phase[symbol] for symbol in phase])
             phasecoords += [[phase[symbol]/tot if symbol in phase else 0 for symbol in coordsys]]
-        
+
         return phasecoords, ids
 
     def line_coords(self):
@@ -262,8 +265,7 @@ class PhaseDiagram(object):
         linecoords = []
         for line in lines:
             linecoords += [[phasecoords[line[0]], phasecoords[line[1]]]]
-        
+
         return linecoords
-        
+
     vis = HttkPluginPlaceholder("import httk.analysis.matsci.vis")
-    

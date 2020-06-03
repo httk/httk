@@ -24,7 +24,7 @@ from httk.atomistic import Structure
 citation.add_ext_citation('cif2cell', "Torbjörn Björkman")
 
 from httk import config
-from command import Command, find_executable
+from httk.external.command import Command, find_executable
 import httk
 import httk.iface
 
@@ -109,7 +109,3 @@ def coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol):
     struct_to_cif(struct, ioa)
     struct = cif_to_structure_reduce(ioa)
     return struct.uc_sites, struct.uc_cell
-
-
-
-

@@ -17,6 +17,7 @@
 
 #from numpy import *
 import sys
+import six
 from httk.core.httkobject import HttkObject
 from httk.db.filteredcollection import *
 from httk.core.basic import flatten
@@ -119,7 +120,7 @@ class SqlStore(object):
                 derivedtypes = ()
 
                 self.create_table(subtablename, {'keys': subtypes, 'index': subindex, 'derived': derivedtypes}, cursor)
-                inindex = filter(lambda x: x != name, inindex)
+                inindex = list(filter(lambda x: x != name, inindex))
 
             # Tuple means array
             elif isinstance(t, tuple):
@@ -150,13 +151,14 @@ class SqlStore(object):
                     subtablecolumnname = name
                     subdimension = (tupletype, 1, t[2])
                     self.create_table(subtablename, {'keys': [(table+"_sid", int), (name+"_index", int), (subtablecolumnname, subdimension)], 'index': [table+'_sid'], 'derived': ()}, cursor)
-                    inindex = filter(lambda x: x != name, inindex)
+                    inindex = list(filter(lambda x: x != name, inindex))
 
             elif issubclass(t, HttkObject):
                 columnname = name+"_"+t.types()['name']+"_sid"
                 columns.append(columnname)
                 column_types.append(int)
-                #print("ININDEX",inindex)
+                # print("ININDEX",inindex)
+                inindex = list(inindex)
                 for i in range(len(inindex)):
                     if isinstance(inindex[i], tuple):
                         indexentry = list(inindex[i])
@@ -223,7 +225,7 @@ class SqlStore(object):
                     try:
                         val = t(val)
                     except UnicodeEncodeError:
-                        val = unicode(val)
+                        val = six.text_type(val)
                     except TypeError:
                         print("HUH", val, t)
                         raise
@@ -315,7 +317,7 @@ class SqlStore(object):
                 raise Exception("Dictstore.insert: unexpected class; can only handle basic types and subclasses of Storable. Offending class:"+str(t))
 
         # TODO: this logic is not finished, more elaborate updates need handling
-        if updatesid >= 0 or updatesid is None:
+        if (isinstance(updatesid, int) and updatesid >= 0) or updatesid is None:
             if updatesid is not None:
                 sid = self.db.update_row(table, table+"_id", updatesid, columns, columndata, cursor)
             else:

@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,8 +21,8 @@ from pylab import *
 
 
 class PolygonPlot(object):
-    
-    def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three'), sides=3, 
+
+    def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three'), sides=3,
                  label_offset=0.10, edge_args={'color': 'black', 'linewidth': 2}, fig_args = {'figsize': (8, 8), 'facecolor': 'white', 'edgecolor': 'white'},
                  text_args = {'fontsize': 24, 'color': 'black'}):
         """
@@ -41,14 +41,14 @@ class PolygonPlot(object):
                 [
                     cos(2*_*pi/sides + start_angle*pi/180),
                     sin(2*_*pi/sides + start_angle*pi/180)
-                ] 
+                ]
                 for _ in range(sides)
             ]
         )
 
         fig = figure(**fig_args)
         ax = fig.add_subplot(111)
-    
+
         for i, l in enumerate(labels):
             if i >= sides:
                 break
@@ -69,26 +69,26 @@ class PolygonPlot(object):
                 rotation=angle,
                 **text_args
             )
-    
+
         # Clear normal matplotlib axes graphics.
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_frame_on(False)
-    
+
         # Plot border
         ax.plot(
-            [self.basis[_, 0] for _ in range(sides) + [0, ]],
-            [self.basis[_, 1] for _ in range(sides) + [0, ]],
+            [self.basis[_, 0] for _ in list(range(sides)) + [0, ]],
+            [self.basis[_, 1] for _ in list(range(sides)) + [0, ]],
             **edge_args
         )
         self.ax = ax
-        
+
     def translate_coords(self, data, scaling=True):
         if len(data) == 0:
             return data
-        
-        data = array(data)        
-        
+
+        data = array(data)
+
         # If data is Nxsides, newdata is Nx2.
         if scaling:
             # Scales data for you.
@@ -105,8 +105,8 @@ if __name__ == '__main__':
     s = 1000
 
     data = vstack((
-        array([k, 0, 0]) + rand(s, 3), 
-        array([0, k, 0]) + rand(s, 3), 
+        array([k, 0, 0]) + rand(s, 3),
+        array([0, k, 0]) + rand(s, 3),
         array([0, 0, k]) + rand(s, 3)
     ))
     color = array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s)

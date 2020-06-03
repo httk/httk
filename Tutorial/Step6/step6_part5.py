@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import httk.db, httk.atomistic.vis
-from httk.atomistic import UnitcellStructure, StructurePhaseDiagram 
- 
+from httk.atomistic import UnitcellStructure, StructurePhaseDiagram
+
 
 class TotalEnergyResult(httk.Result):
 
@@ -34,4 +34,3 @@ for match, header in search:
 
 pd = StructurePhaseDiagram.create(structures, energies)
 pd.vis.show(debug=True)
-

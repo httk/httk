@@ -25,7 +25,7 @@ from httk.config import httk_root, config
 sourcedir = os.path.dirname(os.path.realpath(__file__))
 
 try:
-    from .distdata import version, version_date, copyright_note
+    from httk.distdata import version, version_date, copyright_note
     httk_version = version
     httk_version_date = version_date
     httk_copyright_note = copyright_note
