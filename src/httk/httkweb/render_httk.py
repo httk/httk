@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import os, sys, re, cgi, pprint, unicodedata, codecs
 
 if sys.version_info[0] == 3:
@@ -375,7 +376,11 @@ class RenderHttk(object):
         config = configparser.ConfigParser()
         config.readfp(buf)
         d = dict(config.items('main'))
-        for i in d.keys():
+        # In Python 3 d.keys() is not a list but an iterator,
+        # which means that when we do the deleting of keys and values
+        # below, something gets messed up with the iterator.
+        # Making sure that d.keys() is a list seems to fix the problem.
+        for i in list(d.keys()):
             if i.endswith("-list"):
                 l = d[i]
                 del d[i]
