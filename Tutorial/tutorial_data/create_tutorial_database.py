@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This is an example program using the High-Throughput toolkit (httk)
 # This program adds two (geometrically identical) structures to an sqlite database
-# 
+#
 import sys, os.path, inspect, datetime, argparse, os, errno
 
 # Workaround to allow this program to be run in a subdirectory of the httk directory even if the paths are not setup correctly.
@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description="Creates the tutorial sqlite database file")
     parser.add_argument('-debug', action='store_true')
     parser.add_argument('file', metavar='run', nargs='*', help='filenames or directories to import')
-    args = parser.parse_args()    
+    args = parser.parse_args()
 
     debug = args.debug
     #debug = True
@@ -49,12 +49,12 @@ def main():
     store.delay_commit()
 
     codeobj = httk.Code.create("create_tutorial_database", '1.0', refs=[httk.citation.httk_reference_main])
-    store.save(codeobj)  
+    store.save(codeobj)
     print("==== Name of this code:", codeobj.name)
 
     today = datetime.datetime.today().isoformat()
     print("==== Db import program started: "+today)
-    
+
     if len(args.file) == 0:
         files = [os.path.join(httk.httk_root, 'Tutorial/tutorial_data')]
     else:
@@ -65,7 +65,7 @@ def main():
     seen = {}
     for filek in range(argcount):
         f = files[filek]
-            
+
         if not os.path.exists(f):
             print("File or dir "+f+" not found.")
             continue
@@ -117,22 +117,18 @@ def main():
                     struct.add_tag("structure_tidy", "failed")
                     if debug:
                         raise
-            
-            store.save(struct)            
+
+            store.save(struct)
             compound = Compound.create(base_on_structure=struct)
             store.save(compound)
 
             cs = CompoundStructure.create(compound, struct)
             store.save(cs)
-            store.commit()            
-        
+            store.commit()
+
     print("==== Committing changes to database.")
     store.commit()
     print("==== Commit complete.")
-    
+
 if __name__ == "__main__":
     main()
-
-
-
-

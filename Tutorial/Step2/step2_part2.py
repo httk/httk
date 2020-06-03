@@ -1,17 +1,22 @@
 #!/usr/bin/env python
-import Tkinter 
+import sys
+
+if sys.version_info[0] == 3:
+    import tkinter
+else:
+    import Tkinter as tkinter
 
 import httk.atomistic.vis
 from httk.atomistic import Structure
 
 
 def delay(text):
-        root = Tkinter.Tk()
+        root = tkinter.Tk()
         root.title("Dialog")
-        frame = Tkinter.Frame(root)
+        frame = tkinter.Frame(root)
         frame.pack()
-        Tkinter.Label(frame, text="  "+text+"  \n").pack(side=Tkinter.TOP)
-        Tkinter.Button(frame, text="  Ok  ", command=frame.quit).pack(side=Tkinter.BOTTOM)
+        tkinter.Label(frame, text="  "+text+"  \n").pack(side=tkinter.TOP)
+        tkinter.Button(frame, text="  Ok  ", command=frame.quit).pack(side=tkinter.BOTTOM)
         root.mainloop()
         root.destroy()  # optional; see description below
 
@@ -20,11 +25,11 @@ def delay(text):
 
 struct = httk.load("POSCAR2")
 origbasis = struct.uc_basis
-# By printing the orthogonal transformation and see how it builds an orthogonal cell, 
+# By printing the orthogonal transformation and see how it builds an orthogonal cell,
 # you can then paste that into struct.build_supercell adjust manually adjust the supercell
 #print((struct.orthogonal_supercell_transformation(tolerance=20)))
 struct = struct.supercell.orthogonal(tolerance=20)
- 
+
 struct.vis.show({'bonds': True, 'extbonds': True, 'polyhedra': False, 'extmetals': False,
                  'defaults': 'publish', 'angle': '{0 0 0} 20.0', 'perspective': False,
                  'bgcolor': '#FFFFFF', 'unitcell': origbasis, 'show_supercell': True}, debug=True)
@@ -38,5 +43,3 @@ struct.vis.visualizer.save_and_quit("highres.png", 3200, 2500)
 # Helpful tip: if you open the jmol console and type: "show orientation;" you get a long string,
 # looking like the one in the 'moveto' command above. If you copy-pase that into your script you can
 # store a specific rotation / orientation that you like.
-
-

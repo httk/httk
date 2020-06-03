@@ -1,5 +1,5 @@
 #!/bin/bash
-source ../../setup.shell
+source ../../init.shell
 
 httk-project-setup tutorial_step6
 httk-computer-setup local local

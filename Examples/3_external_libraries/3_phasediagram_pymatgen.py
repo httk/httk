@@ -20,8 +20,8 @@ class TotalEnergyResult(httk.Result):
         self.total_energy = total_energy
 
 # This reads the tutorial example database from step6
-# backend = httk.db.backend.Sqlite('../../Tutorial/Step6/example.sqlite')
-backend = httk.db.backend.Sqlite('../../Tutorial/tutorial_data/tutorial.sqlite')
+backend = httk.db.backend.Sqlite('../../Tutorial/Step6/example.sqlite')
+# backend = httk.db.backend.Sqlite('../../Tutorial/tutorial_data/tutorial.sqlite')
 store = httk.db.store.SqlStore(backend)
 
 search = store.searcher()
