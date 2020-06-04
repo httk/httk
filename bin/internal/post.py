@@ -1,6 +1,10 @@
 #!/usr/bin/env python
-import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib
+import os, sys, urllib2, mimetools
 
+if sys.version_info[0] == 3:
+    from urllib.request import Request, urlopen
+else:
+    from urllib2 import Request, urlopen
 
 class form_wrapper(file):
     def __init__(self, path, mode, name, filename, fields=[], prepend_progress=""):
@@ -74,12 +78,12 @@ for i in range(argcount+2,len(sys.argv),2):
 stream = form_wrapper(path, 'rb', 'file', path, fields, prepend_progress)
 
 # Build the request
-request = urllib2.Request(url)
+request = Request(url)
 request.add_header('User-agent', 'httk-post')
 request.add_header('Content-type', 'multipart/form-data; boundary='+str(stream.boundary))
 request.add_header('Content-length', len(stream))
 request.add_data(stream)
-result = urllib2.urlopen(request).read()
+result = urlopen(request).read()
 if result=="OK":
     exit(0)
 else:
