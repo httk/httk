@@ -139,14 +139,14 @@ with the command "ls". Lets say you see "httk-1.1.2", then do the
 following:
 
    ln -f -s httk-1.1.2 httk-latest
-   source ~/bin/python/httk-latest/setup.shell
+   source ~/bin/python/httk-latest/init.shell
 
 If you add the very last line to your ".bashrc" and/or ".cshrc", httk
 will work in all new terminals you open. (Or alternatively, just add
 "~/bin/python/httk-latest/bin/" to your "PATH" environment variable,
 and "~/bin/python/httk-latest" to your PYTHONPATH environment
 varibale.) If you cannot figure out how to do this on your system, you
-will have to re-run "source ~/bin/python/httk-latest/setup.shell"
+will have to re-run "source ~/bin/python/httk-latest/init.shell"
 every time you want to use httk.
 
 You can now start using httk. There is no further compiling, etc.
