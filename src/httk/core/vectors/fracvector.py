@@ -21,6 +21,11 @@ from six import string_types, integer_types
 from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector
 
+try:
+    from math import gcd as calc_gcd
+except ImportError:
+    from fractions import gcd as calc_gcd
+    
 if sys.version_info[0] == 3:
     long = int
 # Utility functions needed before defining the class (due to some of them being statically assigned)
@@ -150,7 +155,7 @@ class FracVector(Vector):
         """
         def getlcd(a, y):
             b = abs(y).denominator
-            return a * b // fractions.gcd(a, b)
+            return a * b // calc_gcd(a, b)
 
         def getnumerators(x):
             return (x * lcd).numerator
@@ -284,7 +289,7 @@ class FracVector(Vector):
 
         eps = (1.0 / resolution) * 0.1
 
-        gcd = nested_reduce(lambda x, y: fractions.gcd(x, abs(int((y + eps) * resolution))), l, initializer=resolution)
+        gcd = nested_reduce(lambda x, y: calc_gcd(x, abs(int((y + eps) * resolution))), l, initializer=resolution)
         noms = cls.nested_map(lambda x: int((x + eps) * resolution) // gcd, l)
         denom = resolution // gcd
 
@@ -598,7 +603,7 @@ class FracVector(Vector):
         denom = self.denom
 
         if self.denom != 1:
-            gcd = self._reduce_over_noms(lambda x, y: fractions.gcd(x, abs(y)), initializer=self.denom)
+            gcd = self._reduce_over_noms(lambda x, y: calc_gcd(x, abs(y)), initializer=self.denom)
             if gcd != 1:
                 denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))
@@ -728,7 +733,7 @@ class FracVector(Vector):
 
     def dot(self, other):
         """
-        Returns the vector dot product of the 1D vector with the 1D vector 'other', i.e., A . B or A \cdot B. The same as A * B.T().
+        Returns the vector dot product of the 1D vector with the 1D vector 'other', i.e., A . B or A cdot B. The same as A * B.T().
         """
         Adim = self.dim
         Bdim = other.dim
@@ -1206,7 +1211,7 @@ class FracScalar(FracVector):
                 b = abs(fractions.Fraction(y)).denominator
             except TypeError:
                 b = abs(fractions.Fraction(str(y))).denominator
-            return a * b // fractions.gcd(a, b)
+            return a * b // calc_gcd(a, b)
 
         def frac(x):
             return (fractions.Fraction(x) * lcd).numerator

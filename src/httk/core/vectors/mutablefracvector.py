@@ -22,6 +22,12 @@ from six import integer_types
 from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
 from httk.core.vectors.vector import MutableVector
 
+try:
+    from math import gcd as calc_gcd
+except ImportError:
+    from fractions import gcd as calc_gcd
+    
+
 # Utility functions needed before defining the class (due to them being statically assigned)
 
 
@@ -216,7 +222,7 @@ class MutableFracVector(FracVector, MutableVector):
         Changes MutableFracVector; reduces any common factor between denominator and all nominators
         """
         if self.denom != 1:
-            gcd = self._reduce_over_noms(lambda x, y: fractions.gcd(x, abs(y)), initializer=self.denom)
+            gcd = self._reduce_over_noms(lambda x, y: calc_gcd(x, abs(y)), initializer=self.denom)
             if gcd != 1:
                 self.denom = self.denom / gcd
                 self._inmap_over_noms(lambda x: int(x / gcd))
