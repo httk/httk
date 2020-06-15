@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2014 Rickard Armiento
 #
@@ -21,19 +21,19 @@
 #
 # This is a simplified version of the full httk taskmanager
 #
-# This version of the taskmanager assumes no other taskmanagers are running in parallel. 
+# This version of the taskmanager assumes no other taskmanagers are running in parallel.
 # It takes the current working directory as a httk task and runs it. If subtasks are created,
-# they will be exectued one at a time in priority order (using recursion, starting a new 
-# single_job_taskmanager). When all subtasks are finished, the main task is called again, 
+# they will be exectued one at a time in priority order (using recursion, starting a new
+# single_job_taskmanager). When all subtasks are finished, the main task is called again,
 # just as with the normal taskmanager.
 #
 # Recommended uses of this simplified taskmanager:
 #
-#  - You are in the process of developing a run script and "just want to run through this 
-#    task" to debug it, with all output in the console. 
+#  - You are in the process of developing a run script and "just want to run through this
+#    task" to debug it, with all output in the console.
 #
 #  - You don't care for the parallelism, resource handling, and restart/continuation capability
-#    of the full httk taskmanager, and just want something to put in your cluster submit 
+#    of the full httk taskmanager, and just want something to put in your cluster submit
 #    script that will run one task to completion with a minimum of hassle.
 #
 if [ "$1" == "--rename" ]; then
@@ -48,7 +48,7 @@ export IDCODE="single-job-taskmgr"
 
 if [ -z $HT_TASK_STEP ]; then
     HT_TASK_STEP=start
-fi 
+fi
 
 function split {
   local SEP="$1"
@@ -70,13 +70,13 @@ DATE="$(date +"%Y-%m-%d_%H.%M.%S")"
 
 if [ "$RENAME" == 1 ]; then
     echo "Trying to rename source directory"
-    DIRNAME=(dirname "$HT_TASK_TOP_DIR")    
-    BASENAME=(basename "$HT_TASK_TOP_DIR" .waitstart)    
-    mv "$DIRNAME/$BASENAME.waitstart" "$DIRNAME/$BASENAME.singlejob" 
+    DIRNAME=(dirname "$HT_TASK_TOP_DIR")
+    BASENAME=(basename "$HT_TASK_TOP_DIR" .waitstart)
+    mv "$DIRNAME/$BASENAME.waitstart" "$DIRNAME/$BASENAME.singlejob"
 fi
 
 while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
-  
+
   if [ -e "$HT_TASK_TOP_DIR/ht_steps" ]; then
       echo "==== Trying to execute ht_steps: $HT_TASK_TOP_DIR/ht_steps $HT_TASK_STEP"
       (
@@ -89,7 +89,7 @@ while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
 
       RESULT=$?
       echo "==== Job return code: $RESULT"
-      exit "$RESULT" 
+      exit "$RESULT"
       )
       RESULT="$?"
       if [ -e "$HT_TASK_TOP_DIR/ht.run.$DATE/ht.nextstep" ]; then
@@ -108,7 +108,7 @@ while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
       RESULT=$?
       echo "==== Job return code: $RESULT"
 
-      exit "$RESULT" 
+      exit "$RESULT"
       )
       RESULT="$?"
       if [ -e "$HT_TASK_TOP_DIR/ht.nextstep" ]; then
@@ -116,20 +116,20 @@ while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
       else
 	  HT_TASK_STEP="unknown"
       fi
-  fi 
+  fi
 
-  if [ "$RESULT" -eq 3 ]; then 
+  if [ "$RESULT" -eq 3 ]; then
       for PRIORITY in 1 2 3 4 5; do
 	  echo "==== subtasks, checking priority $PRIORITY"
 	  # We only need to look for waitstart directories here, since we just spawn
-	  # a new single_job_taskmanager recursively and that one WILL run the 
+	  # a new single_job_taskmanager recursively and that one WILL run the
 	  # subtask into completion and rename it to *.finished. There is never going to
 	  # be tasks in an ongoing status mode here.
           find "$HT_TASK_TOP_DIR" -depth -name "ht.task.*.${PRIORITY}.waitstart" | (
 	      while read TASK; do
 		  echo "==== Task: $TASK"
 		  DIR=$(dirname "$TASK")
-		  FULLNAME=$(basename "$TASK")	    
+		  FULLNAME=$(basename "$TASK")
 
 		  TASKSET=$(split . 3 "$FULLNAME")
 		  TASKID=$(split . 4 "$FULLNAME")
@@ -152,7 +152,7 @@ while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
 
 		      cd "$DIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running"
 		      "$SELF" "$STEP"
-		  )		  
+		  )
 		  mv "$DIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" "$DIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.none.${PRIO}.finished"
 	      done
 	  )
@@ -162,12 +162,12 @@ done
 
 if [ "$RENAME" == 1 ]; then
     echo "Trying to rename source directory"
-    DIRNAME=(dirname "$HT_TASK_TOP_DIR")    
-    BASENAME=(basename "$HT_TASK_TOP_DIR" .waitstart)    
+    DIRNAME=(dirname "$HT_TASK_TOP_DIR")
+    BASENAME=(basename "$HT_TASK_TOP_DIR" .waitstart)
     if [ "$RESULT" == "10" ];then
-	mv "$DIRNAME/$BASENAME.singlejob" "$DIRNAME/$BASENAME.finished" 
+	mv "$DIRNAME/$BASENAME.singlejob" "$DIRNAME/$BASENAME.finished"
     else
-	mv "$DIRNAME/$BASENAME.singlejob" "$DIRNAME/$BASENAME.broken" 
+	mv "$DIRNAME/$BASENAME.singlejob" "$DIRNAME/$BASENAME.broken"
     fi
 fi
 

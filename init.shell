@@ -1,7 +1,7 @@
 ################################################################################
 #
-# This script is part of the httk framework. Its purpose is to set up the 
-# httk environment, to be used in the users init scripts. 
+# This script is part of the httk framework. Its purpose is to set up the
+# httk environment, to be used in the users init scripts.
 #
 # All that needs to be done to get the httk environment working is to add
 #   /path/to/httk/bin -> to your PATH variable
@@ -10,7 +10,7 @@
 #
 # For tcsh, csh, bash, zsh, ksh, simply do:
 #   source /path/to/httk/init.shell
-# 
+#
 # For sh and fish respectively you need to do this instead:
 #   sh: eval `/path/to/httk/init.shell.eval sh`
 #   fish: eval (/path/to/httk/init.shell.eval fish)
@@ -41,7 +41,6 @@ test "$?tcsh" = "0" -o "$?csh" = "0" && eval 'set COMMAND=(!!); set HERE="$COMMA
 test "$BASH_VERSION" != "" && eval 'HERE=${BASH_SOURCE[0]}; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
 test "$ZSH_VERSION" != "" && eval 'HERE=$0; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
 test "$KSH_VERSION" != "" && eval 'X=88; f() { typeset X=93; }; f; test "$X" = "93" && HERE="${.sh.file}"; test $X == "88" && echo "httk init.shell cannot configure the environment for the ksh88-type shell you are using. Run the following instead:" && echo "    eval \`/path/to/httk/init.shell.eval ksh88\`" && return; eval HEREDIR=$(dirname "$HERE"); DIR=$(cd "$HEREDIR"; pwd -P); export PATH=$DIR/bin:$PATH; export PYTHONPATH=$DIR/src:$PYTHONPATH; DONE=1'
-# regular sh falls here; I've found no way to 
+# regular sh falls here; I've found no way to
 # extract the path of a sourced script in sh :-(
 test "$DONE" != "1" && eval 'echo "httk init.shell cannot configure the environment for the shell you are using. Run the following instead:"; echo "    eval \`/path/to/httk/init.shell.eval [shell name]\`"'
-
