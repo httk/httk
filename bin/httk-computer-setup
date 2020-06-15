@@ -12,7 +12,7 @@ echo "==== httk-setup-computer"
 if [ -z "$HTTK_PROJECT_DIR" ]; then
     echo "You are not in a subdirectory to a project."
     echo "Hence, cannot setup project computers; will setup global computer."
-    PIPEPATH="$HTTK_HOME/computers/$PIPE/"
+    PIPEPATH="$HTTK_USER_HOME/computers/$PIPE/"
     exit 1
 else
     echo "Current project: $HTTK_PROJECT_NAME ($HTTK_PROJECT_DIR)"
