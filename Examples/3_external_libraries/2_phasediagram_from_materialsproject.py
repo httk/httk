@@ -14,7 +14,7 @@ from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen import MPRester
 
 # Fill in your materials project API key here
-mp_key = '2bmcuCpKaET6PXIy'
+mp_key = 'xxxxxx'
 a = MPRester(mp_key)
 entries = a.get_entries_in_chemsys(['Ca', 'Ti', 'F'],
         property_data=['material_id','pretty_formula','unit_cell_formula'])

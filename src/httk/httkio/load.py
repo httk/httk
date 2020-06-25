@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -28,22 +28,22 @@ from httk.atomistic import *
 def load(ioa, ext=None):
     """
     A *very* generic file reader method.
-    
+
     Load a file into a suitable httk object. Try to do the most sane thing possible given the input file.
     If you know what to expect from the input file, it may be safer to use a targeted method for that file type.
     """
     try:
         import httk.atomistic
         import httk.atomistic.atomisticio
-        
+
         return httk.atomistic.Structure.io.load(ioa, ext)
     except Exception:
         raise
-        pass        
+        pass
     raise Exception("httk.httkio.load: I do not know what to do with the file: "+str(ioa))
-    #info = sys.exc_info()   
+    #info = sys.exc_info()
     #raise Exception("httk.httkio.load: I do not know what to do with the file: "+str(ioa)+"\n("+str(e)+")"),None,info[2]
-    
+
 #     ioa = IoAdapterFilename.use(ioa)
 #     if ext == None:
 #         try:
@@ -54,7 +54,7 @@ def load(ioa, ext=None):
 #                     ext = '.vasp'
 #         except Exception:
 #             raise Exception("httk.httkio.load: original filename not known. Cannot open a generic file.")
-# 
+#
 #     if ext == '.vasp':
 #         return httk.iface.vasp_if.poscar_to_structure(filename)
 #     elif ext == '.cif':
@@ -67,8 +67,8 @@ def load(ioa, ext=None):
 #             return httk.httkio.cif_to_struct(ioa,backends=['cif2cell_reduce'])
 #     else:
 #         raise Exception("httk.httkio.load: I do not know what to do with the file:"+filename)
-#     
+#
 
 
 
-    
+

@@ -7,8 +7,7 @@ import httk.task
 
 # Must be updated to your path to poscars, OR, set to None if you have
 # 'vasp_pseudolib' configured in httk.cfg
-# poscarspath = '/opt/vasp/Pseudopotentials.raw/POT_GGA_PAW_PBE/'
-poscarspath = '/home/hpleva/synced_files/VASP'
+poscarspath = '/opt/vasp/Pseudopotentials.raw/POT_GGA_PAW_PBE/'
 # poscarspath = None
 
 backend = httk.db.backend.Sqlite('../../Tutorial/tutorial_data/tutorial.sqlite')
