@@ -24,7 +24,12 @@ PIPEPATH2="$HTTK_USER_HOME/computers/$PIPE/"
 
 QUEUE="${1#*:}"
 if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
-    QUEUE="default"
+    DEFAULT_QUEUE=$(HTTK_PROJECT_CFG main default_queue)
+    if [ -z "$DEFAULT_QUEUE" ]; then
+	QUEUE="default"
+    else
+	QUEUE="$DEFAULT_QUEUE"
+    fi
 fi
 shift 1
 
