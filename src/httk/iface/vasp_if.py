@@ -188,7 +188,7 @@ def poscar_to_strs(fio, included_decimals=''):
     symbols_or_count = next(fi).strip().split()
 
     try:
-        counts = map(int, symbols_or_count)
+        counts = list(map(int, symbols_or_count))
         symbols = None
         occupations = range(-1, -len(counts)-1, -1)
     except Exception:
@@ -215,14 +215,14 @@ def poscar_to_strs(fio, included_decimals=''):
         for i in range(N):
             nxt = next(fi)
             strcoord = nxt.strip().split()[:3]
-            coord = map(lambda x: x.strip(), strcoord)
+            coord = list(map(lambda x: x.strip(), strcoord))
             coords.append(coord)
     else:
         for i in range(N):
             nxt = next(fi)
             strcoord = nxt.strip().split()[:3]
-            tempcoord = map(lambda x: x.strip(), strcoord)
-            coord = map(lambda x: x[0:2+included_decimals], tempcoord)
+            tempcoord = list(map(lambda x: x.strip(), strcoord))
+            coord = list(map(lambda x: x[0:2+included_decimals], tempcoord))
             coords.append(coord)
 
     return (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
@@ -403,8 +403,8 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
     nbands_nospin += nbands_spin % 2
 
     data = {}
-    data['VASP_SPIECES_COUNTS'] = " ".join(map(str, spieces_counts))
-    data['VASP_MAGMOM'] = " ".join(map(str, magmoms))
+    data['VASP_SPIECES_COUNTS'] = " ".join(list(map(str, spieces_counts)))
+    data['VASP_MAGMOM'] = " ".join(list(map(str, magmoms)))
     data['VASP_NBANDS_SPIN'] = str(nbands_spin)
     data['VASP_NBANDS_NOSPIN'] = str(nbands_nospin)
 

@@ -14,7 +14,7 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import glob, os, datetime, hashlib, re, base64, bz2, sys
+import glob, os, datetime, hashlib, re, base64, bz2, sys, six
 from httk.core.crypto import manifest_dir, verify_crytpo_signature, read_keys
 from httk.core import Computation, ComputationProject, Code, IoAdapterFileReader, Signature, SignatureKey
 
@@ -147,6 +147,9 @@ def read_manifest(ioa, verify_signature=True):
     ioa.close()
 
     message = "".join(lines[:-2])
+    # Python 3 sha256 requires message to be bytes.
+    # In Python 2.6+ bytes() is an alias for str().
+    message = bytes(str(message).encode("utf-8"))
     s = hashlib.sha256(message)
     hexhash = s.hexdigest()
 

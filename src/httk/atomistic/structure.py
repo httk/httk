@@ -823,6 +823,22 @@ class Structure(HttkObject):
         parts = self.uc_formula_parts
         return [count for symbol, count in parts]
 
+    # setup_phasediagram() function in src/httk/atomistic/structurephasediagram.py
+    # expects this property to exist.
+    @httk_typed_property(str)
+    def uc_formula(self):
+        parts = self.uc_formula_parts
+        formula = ''
+        for symbol,count in parts:
+            count = FracScalar.use(count).set_denominator(100).simplify()
+            if count==1:
+                formula += symbol
+            elif count.denom == 1:
+                formula += symbol+"%d" % (count,)
+            else:
+                formula += symbol+"%.2f" % (count,)
+        return formula
+
     @property
     def formula_spaceseparated(self):
         parts = self.pc_formula_parts

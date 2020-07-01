@@ -69,7 +69,7 @@ else
     echo
     echo "Already configured computers:"
     (cd "$PIPEPATH"; ls)
-    echo 
+    echo
     echo "Name of new computer?"
 
     read NAME

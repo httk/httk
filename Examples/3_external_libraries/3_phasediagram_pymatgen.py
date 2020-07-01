@@ -21,7 +21,6 @@ class TotalEnergyResult(httk.Result):
 
 # This reads the tutorial example database from step6
 backend = httk.db.backend.Sqlite('../../Tutorial/Step6/example.sqlite')
-# backend = httk.db.backend.Sqlite('../../Tutorial/tutorial_data/tutorial.sqlite')
 store = httk.db.store.SqlStore(backend)
 
 search = store.searcher()
@@ -30,6 +29,7 @@ search_struct = search.variable(Structure)
 search.add(search_total_energy.structure == search_struct)
 search.add_all(search_struct.formula_symbols.is_in('O', 'Ca', 'Ti'))
 search.output(search_total_energy, 'total_energy_result')
+# search.output(search_total_energy, 'total_energy')
 
 entries = []
 

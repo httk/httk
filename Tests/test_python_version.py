@@ -12,7 +12,7 @@
 # publish, distribute, sublicense, and/or sell copies of the Software,
 # and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 #
@@ -31,9 +31,9 @@ if 'TEST_EXPECT_PYVER' in os.environ:
     check_pyver=os.environ['TEST_EXPECT_PYVER']
 else:
     check_pyver=None
-    
+
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-directory = os.path.join(top,'examples','parser') 
+directory = os.path.join(top,'examples','parser')
 
 def run(command,args=[]):
     args = list(args)
@@ -42,7 +42,7 @@ def run(command,args=[]):
     out = codecs.decode(out,'ascii')
     err = codecs.decode(err,'ascii')
     return out,err
-    
+
 def execute(self, command, *args):
     out,err = run(os.path.join(directory,command),args)
     self.assertTrue(len(err.strip())==0, msg=err)
@@ -76,19 +76,17 @@ class TestPythonVer(unittest.TestCase):
         if check_pyver == 'ignore':
             self.assertTrue(True)
         else:
-            out, err = run('python_versions/print_python_version.py')
+            out, err = run('Tests/python_versions/print_python_version.py')
             self.assertTrue(out.startswith(check_pyver), msg=out + " does not start with "+check_pyver)
 
-            
+
 #############################################################################
 
-            
+
 if __name__ == '__main__':
 
     ap = argparse.ArgumentParser(description="Parser tests")
     args, leftovers = ap.parse_known_args()
-    
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestPythonVer)
-    unittest.TextTestRunner(verbosity=2).run(suite)        
 
-    
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPythonVer)
+    unittest.TextTestRunner(verbosity=2).run(suite)

@@ -17,7 +17,7 @@ unittests2: link_python2
 
 unittests3: link_python3
 	echo "Running unittests with Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" python all.py)	
+	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" python all.py)
 
 pytest:
 	(cd Tests; TEST_EXPECT_PYVER=ignore py.test)
@@ -28,7 +28,7 @@ pytest2: link_python2
 
 pytest3: link_python3
 	echo "Running pytest with Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" py.test-3)	
+	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" py.test-3)
 
 link_python2:
 	if [ ! -e Tests/python_versions ]; then mkdir Tests/python_versions; fi
@@ -53,7 +53,7 @@ autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
 
-clean: 
+clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
 	(cd Examples; make clean)
 	(cd Tutorial; make clean)
@@ -64,7 +64,7 @@ clean:
 	rm -rf Docs/full/_build
 
 version:
-	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION	
+	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION
 
 .PHONY: version
 
@@ -85,13 +85,13 @@ dist: version docs httk_overview.pdf clean
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
 	if [ -e .git ];	then rm -f src/httk/distdata.py src/httk/distdata.pyc; fi
 
-httk_overview.pdf: Presentation/presentation.tex 
+httk_overview.pdf: Presentation/presentation.tex
 	( cd Presentation; \
 	   make; \
 	)
 	cp Presentation/presentation.pdf httk_overview.pdf
 
-docs: 
+docs:
 	sphinx-apidoc -F -o Docs/full src/httk
 	(cd Docs/full; make text)
 	cp Docs/full/_build/text/developers_guide.txt ./DEVELOPERS_GUIDE.txt
@@ -103,8 +103,8 @@ docs:
 
 webdocs: version httk_overview.pdf
 	rm -f Docs/full/httk.*
-	#sphinx-apidoc -F -o Docs/full src/httk 
-	mkdir -p Docs/full/_static/generated/httk_overview/	
+	#sphinx-apidoc -F -o Docs/full src/httk
+	mkdir -p Docs/full/_static/generated/httk_overview/
 	cp Presentation/generated/*.png Docs/full/_static/generated/httk_overview/.
 	cp Presentation/generated/httk_overview.html Docs/full/generated/.
 	cp Presentation/presentation.pdf Docs/full/_static/generated/httk_overview.pdf

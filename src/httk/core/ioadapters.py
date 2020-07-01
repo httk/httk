@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, tempfile
+import six
 
 if sys.version_info[0] == 3:
     from io import StringIO
@@ -305,7 +306,14 @@ def zdecompressor(f, mode, *args):
 def cleveropen(filename, mode, *args):
     basename_no_ext, ext = os.path.splitext(filename)
     if ext.lower() == '.bz2':
-        return bz2.BZ2File(filename, mode, *args)
+        # In Python 3 bz2 files are opened by default in binary mode,
+        # so for Python 3 we force them to be opened in text mode,
+        # which is accomplished by bz2.open() function (only in Python 3)
+        # and using the "t" flag, which stands for "text".
+        if six.PY2:
+            return bz2.BZ2File(filename, mode, *args)
+        else:
+            return bz2.open(filename, mode+"t", *args)
     elif ext.lower() == '.gz':
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
@@ -316,11 +324,17 @@ def cleveropen(filename, mode, *args):
         except IOError:
             pass
         try:
-            return bz2.BZ2File(filename+".bz2", mode, *args)
+            if six.PY2:
+                return bz2.BZ2File(filename+".bz2", mode, *args)
+            else:
+                return bz2.open(filename+".bz2", mode+"t", *args)
         except (IOError, NameError):
             pass
         try:
-            return bz2.BZ2File(filename+".BZ2", mode, *args)
+            if six.PY2:
+                return bz2.BZ2File(filename+".BZ2", mode, *args)
+            else:
+                return bz2.open(filename+".BZ2", mode+"t", *args)
         except (IOError, NameError):
             pass
         try:
