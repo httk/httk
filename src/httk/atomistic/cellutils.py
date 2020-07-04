@@ -17,8 +17,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core import FracVector
-from httk.core import vectormath
+from httk.core.vectors import FracVector, vectormath
 #from math import sqrt, acos, cos, sin, pi
 from fractions import Fraction
 from httk.atomistic.spacegrouputils import crystal_system_from_hall

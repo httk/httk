@@ -28,28 +28,34 @@ A set of tools and utilities meant to help with:
    - Search, retrieval and 'processing' of data in storage
    - Analysis (especially as a helpful interface against 3:rd party software)
 """
+import sys
+try:
+    python_major_version = sys.version_info[0]
+    python_minor_version = sys.version_info[1]
+except Exception:
+    raise Exception("Python version too old. Httk appear to be running on a version older than python 2.0!")
+
 from httk.config import *
 
 __version__ = version
 
-from httk.core import *
-cout = console.cout
-cerr = console.cerr
-
 from httk.httkio import load, save
 import httk.iface
+import httk.core 
 
-citation.add_src_citation("httk", "Rickard Armiento")
+from httk.core import *
+
+httk.core.citation.add_src_citation("httk", "Rickard Armiento")
 
 # From this module
 __all__ = ["httk_root", "python_root", "config", "load", "save",
            "iface", "__version__", "version_date", "copyright_note",
            "version", "major_version", "minor_version",
            "patch_version", "python_major_version",
-           "python_minor_version", "cout", "cerr"]
+           "python_minor_version", "cout", "cerr", "core"]
 
 # From core:
-__all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",
+__all__ += ["citation", "Code", "Computation", "Result", "ComputationRelated", "ComputationProject",
             "Author", "Reference", "Project", "ProjectRef", "ProjectTag", "crypto", "FracVector", "FracScalar",
             "MutableFracVector", "IoAdapterFileReader", "IoAdapterFileWriter", "IoAdapterFileAppender",
             "IoAdapterString", "IoAdapterStringList", "IoAdapterStringList", "HttkObject",
@@ -59,7 +65,7 @@ __all__ += ["citation", "basic", "Code", "Computation", "Result", "ComputationRe
 cli_modules = {'atomistic':'httk.atomistic.cli'}
 
 # Fiddling to get Sphinx document imported modules correctly
-crypto.__module__ = "httk"
-basic.__module__ = "httk"
-citation.__module__ = "httk"
-iface.__module__ = "httk"
+#crypto.__module__ = "httk"
+#basic.__module__ = "httk"
+#citation.__module__ = "httk"
+#iface.__module__ = "httk"

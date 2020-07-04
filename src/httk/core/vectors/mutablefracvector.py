@@ -18,9 +18,8 @@
 import fractions
 import operator
 import itertools
-from six import integer_types
 from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
-from httk.core.vectors.vector import MutableVector
+from httk.core.vectors.vector import MutableVector, integer_types
 
 try:
     from math import gcd as calc_gcd

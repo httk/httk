@@ -70,4 +70,4 @@ if __name__ == '__main__':
 
     # Name has changed?
     # publish_website(srcdir, outdir, baseurl='.')
-    publish(srcdir, outdir, baseurl='.')
+    #publish(srcdir, outdir, baseurl='.')

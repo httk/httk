@@ -15,7 +15,6 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pylab import *
 from httk.graphics.matplotlib.polygonplot import PolygonPlot
 from httk.graphics.matplotlib.arrowplot import arrowplot
 from httk.core import FracVector

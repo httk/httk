@@ -4,6 +4,7 @@ import unittest, argparse
 import test_python_version
 import test_examples
 import test_structreading
+import test_httk_src_inline
 
 logdata = []
 test_examples.logdata = logdata
@@ -20,6 +21,8 @@ try:
 
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_structreading.TestStructreading))
 
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_httk_src_inline.TestHttkSrcInline))
+    
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 finally:

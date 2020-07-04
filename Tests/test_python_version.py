@@ -32,8 +32,7 @@ if 'TEST_EXPECT_PYVER' in os.environ:
 else:
     check_pyver=None
 
-top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-directory = os.path.join(top,'examples','parser')
+testdir = os.path.abspath(os.path.dirname(__file__))
 
 def run(command,args=[]):
     args = list(args)
@@ -42,10 +41,6 @@ def run(command,args=[]):
     out = codecs.decode(out,'ascii')
     err = codecs.decode(err,'ascii')
     return out,err
-
-def execute(self, command, *args):
-    out,err = run(os.path.join(directory,command),args)
-    self.assertTrue(len(err.strip())==0, msg=err)
 
 class TestPythonVer(unittest.TestCase):
     def test_python_version_internal(self):
@@ -76,7 +71,7 @@ class TestPythonVer(unittest.TestCase):
         if check_pyver == 'ignore':
             self.assertTrue(True)
         else:
-            out, err = run('Tests/python_versions/print_python_version.py')
+            out, err = run(os.path.join(testdir,'python_versions/print_python_version.py'))
             self.assertTrue(out.startswith(check_pyver), msg=out + " does not start with "+check_pyver)
 
 

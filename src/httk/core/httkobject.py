@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import inspect
-import six
 from httk.core.crypto import tuple_to_hexhash
 from httk.core.basic import is_sequence
 
@@ -77,8 +76,7 @@ class HttkObject(object):
         typedata = cls.__init__.typed_init()
         inputkeydict = typedata[0]
         data = typedata[1]
-        # params = cls.__init__.func_code.co_varnames[1:]
-        params = six.get_function_code(cls.__init__).co_varnames[1:]
+        params = cls.__init__.__code__.co_varnames[1:]
 
         keys = []
         for param in params:
@@ -150,7 +148,7 @@ class HttkObject(object):
     def to_tuple(self, use_hexhash=False):
         self.types_resolved = {}
         keydict = self.types()['keydict']
-        params = six.get_function_code(self.__init__).co_varnames[1:]
+        params = self.__init__.__code__.co_varnames[1:]
 
         keys = [self.types()['name']]
         for param in params:

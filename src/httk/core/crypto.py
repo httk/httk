@@ -17,9 +17,9 @@
 """
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
-import hashlib, os.path, base64, re, sys
-from httk.core import ed25519
-import six
+import hashlib, os.path, base64, re, sys, codecs
+from httk.core import ed25519 
+from httk.core.basic import print_
 
 if sys.version_info[0] == 3:
     import configparser
@@ -163,8 +163,7 @@ def tuple_to_str(t):
             #tuplestr += "\n"
             strlist.append(tuplestr)
         else:
-            # strlist.append(unicode(i).encode("utf-8"))
-            strlist.append(six.text_type(i))
+            strlist.append(unicode(i).encode("utf-8"))
     return " ".join(strlist)
 
 
@@ -350,27 +349,31 @@ def generate_keys(public_key_path, secret_key_path):
     b64public_key = base64.b64encode(public_key)
 
     pubfile = IoAdapterFileWriter.use(public_key_path)
-    pubfile.file.write(b64public_key)
+    pubfile.file.write(codecs.decode(b64public_key,'utf-8'))
     pubfile.close()
 
     secfile = IoAdapterFileWriter.use(secret_key_path)
-    secfile.file.write(b64secret_key)
+    secfile.file.write(codecs.decode(b64secret_key,'utf-8'))
     secfile.close()
 
 
-def get_crypto_signature(message, secret_key_path):
-
-    ioa = IoAdapterFileReader.use(secret_key_path)
-    b64secret_key = ioa.file.read()
-    ioa.close()
-    secret_key = base64.b64decode(b64secret_key)
+def get_crypto_signature(message, secret_key=None, keyfile=None):
+    if keyfile:
+        ioa = IoAdapterFileReader.use(keyfile)
+        secret_key = ioa.file.read()
+        ioa.close()
+    secret_key = base64.b64decode(secret_key)
     public_key = ed25519.publickey(secret_key)
     signature = ed25519.signature(message, secret_key, public_key)
     b64signature = base64.b64encode(signature)
     return b64signature
 
 
-def verify_crytpo_signature(signature, message, public_key):
+def verify_crytpo_signature(signature, message, public_key=None, keyfile=None):
+    if keyfile:
+        ioa = IoAdapterFileReader.use(keyfile)
+        public_key = ioa.file.read()
+        ioa.close()
     binsignature = base64.b64decode(signature)
     binpublic_key = base64.b64decode(public_key)
     return ed25519.checkvalid(binsignature, message, binpublic_key)
@@ -386,20 +389,22 @@ def verify_crytpo_signature_old(signature, message, public_key_path):
 
 
 def main():
-    print("Generating keys, this may take some time.")
+    print_("Generating keys, this may take some time.")
     generate_keys("/tmp/pub.key", "/tmp/priv.key")
     message = "This is my message."
-    print("Signing message")
-    my_signature = get_crypto_signature(message, "/tmp/priv.key")
-    print("Signature is")
-    print(my_signature)
-    print("Check if signature is valid")
-    result = verify_crytpo_signature(my_signature, message, "/tmp/pub.key")
-    print("True message validates", result)
+    print_("Signing message")
+    my_signature = get_crypto_signature(message, keyfile="/tmp/priv.key")
+    print_("Signature is")
+    print_(my_signature)
+    print_("Check if signature is valid")
+    result = verify_crytpo_signature(my_signature, message, keyfile="/tmp/pub.key")
+    print_("True message validates", result)
+    assert(result == True)
     forged_message = "This is not my message."
-    result = verify_crytpo_signature(my_signature, forged_message, "/tmp/pub.key")
-    print("Forged message validates", result)
-    print("Finished")
+    result = verify_crytpo_signature(my_signature, forged_message, keyfile="/tmp/pub.key")
+    print_("Forged message validates", result)
+    assert(result == False)
+    print_("Finished")
 
 if __name__ == "__main__":
     main()

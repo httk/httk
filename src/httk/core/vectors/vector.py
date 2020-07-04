@@ -14,9 +14,17 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import random
-from six import string_types, integer_types
+import sys, random
 from functools import reduce
+
+# Retain python2 compatibility without a dependency on httk.core
+if sys.version[0] == "2":
+    string_types = basestring
+    integer_types = (long, int)
+else:
+    string_types = str
+    integer_types = (int,)
+    
 
 class Vector(object):
 
@@ -710,7 +718,7 @@ class Vector(object):
 #                 return self.__class__(self.nom**exp, self.denom**exp)
 #             if exp < 0:
 #                 return self.__class__(self.denom**(-exp), self.nom**(-exp))
-#         if isinstance(exp, six.integer_types:
+#         if isinstance(exp, integer_types:
 #             if exp == 0:
 #                 return self.eye(self.dim)
 #             if exp > 0:

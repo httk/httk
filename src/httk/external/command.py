@@ -23,10 +23,7 @@ from httk import config
 from httk.config import httk_root
 import platform
 
-if httk.core.python_major_version >= 3:
-    from queue import Queue, Empty
-else:
-    from Queue import Queue, Empty
+from httk.core import queue
 
 
 class Command(object):
@@ -104,7 +101,7 @@ class Command(object):
         self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE,
                                         stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, bufsize=1, **kwargs)
 
-        self.output_queue = Queue()
+        self.output_queue = queue.Queue()
         self.output_thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self.output_queue))
         self.output_thread.start()
 
@@ -153,7 +150,7 @@ class Command(object):
             while(True):
                 line = self.output_queue.get_nowait()
                 lines += line
-        except Empty:
+        except queue.Empty:
             pass
 
         return lines

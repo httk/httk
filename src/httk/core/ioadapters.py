@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, tempfile
-import six
 
 if sys.version_info[0] == 3:
     from io import StringIO
@@ -120,7 +119,7 @@ class IoAdapterFileWriter(object):
             return IoAdapterFileWriter(other.file, name=other.name, close=other.close_file)
         if isinstance(other, IoAdapterFilename):
             f = cleveropen(other.filename, 'w')
-            return IoAdapterFileReader(f, name=other.name, close=True)
+            return IoAdapterFileWriter(f, name=other.name, close=True)
         return cls.use(universal_opener(other))
 
 
@@ -223,7 +222,7 @@ class IoAdapterStringList(object):
             stringlist = other.file.readlines()
             return IoAdapterStringList(stringlist, name=other.name)
         if isinstance(other, IoAdapterFilename):
-            with cleveropen(other.filename) as f:
+            with cleveropen(other.filename,'r') as f:
                 stringlist = f.file.readlines()
             return IoAdapterStringList(stringlist, name=other.name)
         return cls.use(universal_opener(other))
@@ -306,14 +305,7 @@ def zdecompressor(f, mode, *args):
 def cleveropen(filename, mode, *args):
     basename_no_ext, ext = os.path.splitext(filename)
     if ext.lower() == '.bz2':
-        # In Python 3 bz2 files are opened by default in binary mode,
-        # so for Python 3 we force them to be opened in text mode,
-        # which is accomplished by bz2.open() function (only in Python 3)
-        # and using the "t" flag, which stands for "text".
-        if six.PY2:
-            return bz2.BZ2File(filename, mode, *args)
-        else:
-            return bz2.open(filename, mode+"t", *args)
+        return bz2.BZ2File(filename, mode, *args)
     elif ext.lower() == '.gz':
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
@@ -324,17 +316,11 @@ def cleveropen(filename, mode, *args):
         except IOError:
             pass
         try:
-            if six.PY2:
-                return bz2.BZ2File(filename+".bz2", mode, *args)
-            else:
-                return bz2.open(filename+".bz2", mode+"t", *args)
+            return bz2.BZ2File(filename+".bz2", mode, *args)
         except (IOError, NameError):
             pass
         try:
-            if six.PY2:
-                return bz2.BZ2File(filename+".BZ2", mode, *args)
-            else:
-                return bz2.open(filename+".BZ2", mode+"t", *args)
+            return bz2.BZ2File(filename+".BZ2", mode, *args)
         except (IOError, NameError):
             pass
         try:
@@ -357,3 +343,21 @@ def cleveropen(filename, mode, *args):
             raise Exception("IOAdapters.cleveropen: file not found: "+str(filename))
         else:
             raise Exception("IOAdapters.cleveropen: Do not know how to open:"+str(filename))
+
+def main():
+    import codecs
+    
+    outname = IoAdapterFilename("/tmp/test.bz2")
+    output = IoAdapterFileWriter.use(outname)
+    output.file.write(codecs.encode("text",'utf-8'))
+    output.close()
+
+    inname = IoAdapterFilename("/tmp/test.bz2")
+    inp = IoAdapterFileReader.use(inname)
+    data = codecs.decode(inp.file.read(),'utf-8')
+    inp.close()    
+
+    assert(data == "text")
+    
+if __name__ == "__main__":
+    main()

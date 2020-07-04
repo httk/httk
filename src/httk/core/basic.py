@@ -17,8 +17,15 @@
 """
 Basic help functions
 """
+import sys
 from fractions import Fraction
-from six import string_types
+
+# Import python2 and 3-specific routunes
+if sys.version_info[0] <= 2:
+    from httk.core._basic_py2 import *
+else:
+    from httk.core._basic_py3 import *
+
 
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -43,14 +50,6 @@ def anonymous_symbol_to_int(symb):
     return s-1
 
 
-def is_sequence(arg):
-    # In python3 string types have __iter__ attribute,
-    # so in python3 the below test results in strings
-    # being sequences (True is returned instead of False).
-    return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
-            (hasattr(arg, "__iter__") and not isinstance(arg, str)))
-
-
 import re, errno, os, itertools, sys, tempfile, shutil, collections
 from httk.core.ioadapters import IoAdapterFileReader
 
@@ -70,7 +69,7 @@ def flatten(l):
         flattened = l.flatten()
     except Exception:
         for el in l:
-            if isinstance(el, collections.Iterable) and not isinstance(el, string_types):
+            if is_sequence(el):
                 for sub in flatten(el):
                     yield sub
             else:
@@ -208,7 +207,9 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
         for oe in oeles:
             base = (e,) + oe
             if perm:
-                for p in set(itertools.permutations(base)):
+                # sorted here is not strictly necessary, but is needed to ensure we get
+                # the same order every time.
+                for p in sorted(set(itertools.permutations(base))):
                     if negative:
                         nonneg = [i for i in range(len(p)) if p[i] != 0]
                         for x in itertools.chain.from_iterable(itertools.combinations(nonneg, r) for r in range(len(nonneg)+1)):
@@ -280,14 +281,21 @@ class rewindable_iterator(object):
         if rewindstr is not None:
             self._cache = rewindstr
 
-
 def main():
-    print(int_to_anonymous_symbol(0))
-    print(anonymous_symbol_to_int("A"))
-
-
-    # print(list(breath_first_idxs(dim=3, end=[3,3,3],negative=True)))
-
-
+    asym = int_to_anonymous_symbol(42)
+    assert(asym == "Aq")
+    print("Anoymous symbol:"+asym)
+    i = anonymous_symbol_to_int(asym)
+    assert(i == 42)
+    l = list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+    ll = [[0, 0, 0], [0, 0, -1], [0, 0, 1], [0, -1, 0], [0, 1, 0], [-1, 0, 0], [1, 0, 0], [0, -1, -1]]
+    print("Length:"+str(len(l)))
+    assert(len(l)==343)
+    print("First elements:"+str(l[:8]))
+    assert(l[:8]==ll)
+    f = list(flatten([[42,"bx"],"xyz",["32",[[6],str]]]))
+    print("Flattened list:"+str(f))
+    assert(f == [42, 'bx', 'xyz', '32', 6, str])
+    
 if __name__ == "__main__":
     main()

@@ -17,9 +17,8 @@
 
 import sys, fractions, random, operator, itertools, decimal
 from functools import reduce
-from six import string_types, integer_types
 from httk.core.vectors.fracmath import *
-from httk.core.vectors.vector import Vector
+from httk.core.vectors.vector import Vector, string_types, integer_types
 
 try:
     from math import gcd as calc_gcd

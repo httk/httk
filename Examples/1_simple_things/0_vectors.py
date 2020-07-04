@@ -13,9 +13,9 @@ b = MutableFracVector.create(a)
 print(a)
 print(b)
 
-print("MAX in row [1]:", max(a[1]))
+print("MAX in row [1]: "+str(max(a[1])))
 
-print("MAX in all of a", a.max())
+print("MAX in all of a "+str(a.max()))
 
 print(b.__class__)
 b[2, 1:] = [4711, 23]

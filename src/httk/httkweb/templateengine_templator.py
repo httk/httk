@@ -16,8 +16,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Do import inside class __init__ so that the missing import is only triggered if the class is actually used.
-import os
-import six
+import os, sys
+
+# Retain python2 compatibility without a dependency on httk.core
+if sys.version[0] == "2":
+    unicode_type=unicode
+else:
+    unicode_type=str
+
 
 class TemplateEngineTemplator(object):
     def __init__(self, template_dir, template_filename, base_template_filename = None):
@@ -45,12 +51,14 @@ class TemplateEngineTemplator(object):
             data = {}
         else:
             self.data = dict(data)
+        #TODO: Look into whether the unicode conversion really is necessary here, or if we just
+        #can make sure the template application always returns unicode
         if self.base_filename is not None:
             templator = self.render(self.template_dir,base=self.base_template,globals=data)
-            output = six.text_type(getattr(templator,self.template_name)(content,*subcontent))
+            output = unicode_type(getattr(templator,self.template_name)(content,*subcontent))
         else:
             templator = self.render(self.template_dir,globals=data)
-            output = six.text_type(getattr(templator,self.template_name)(content,*subcontent))
+            output = unicode_type(getattr(templator,self.template_name)(content,*subcontent))
 
         return output
 

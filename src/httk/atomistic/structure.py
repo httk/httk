@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
@@ -15,13 +16,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
-import six
-from future.utils import raise_
 
+from httk.core.basic import *
 from httk.core.httkobject import HttkObject, HttkPluginPlaceholder, httk_typed_property, httk_typed_property_resolve, httk_typed_property_delayed, httk_typed_init
 from httk.core.reference import Reference
-from httk.core import FracScalar
-from httk.core.basic import breath_first_idxs
+from httk.core.vectors import FracScalar
 from httk.atomistic.cell import Cell
 from httk.atomistic.cellutils import get_primitive_to_conventional_basis_transform
 from httk.atomistic.assignments import Assignments
@@ -244,7 +243,7 @@ class Structure(HttkObject):
                 spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting)
                 hall_symbol = spacegroupobj.hall_symbol
             except Exception as e:
-                spacegroup_exception = (e, None, sys.exc_info()[2])
+                spacegroup_exception = preserve_exception_backtrace(e)
                 spacegroupobj = None
                 hall_symbol = None
 
@@ -261,7 +260,7 @@ class Structure(HttkObject):
                                       lengths=uc_lengths, angles=uc_angles, cosangles=uc_cosangles,
                                       scale=uc_scale, scaling=uc_scaling, volume=uc_volume)
             except Exception as e:
-                uc_cell_exception = (e, None, sys.exc_info()[2])
+                uc_cell_exception = preserve_exception_backtrace(e)
                 uc_cell = None
 
         if rc_cell is not None:
@@ -275,7 +274,7 @@ class Structure(HttkObject):
                                       lengths=rc_lengths, angles=rc_angles, cosangles=rc_cosangles,
                                       scale=rc_scale, scaling=rc_scaling, volume=rc_volume)
             except Exception as e:
-                rc_cell_exception = (e, None, sys.exc_info()[2])
+                rc_cell_exception = preserve_exception_backtrace(e)
                 rc_cell = None
 
         if uc_sites is not None:
@@ -297,7 +296,7 @@ class Structure(HttkObject):
                                                     counts=uc_counts,
                                                     periodicity=periodicity, occupancies=uc_occupancies)
                 except Exception as e:
-                    uc_sites_exception = (e, None, sys.exc_info()[2])
+                    uc_sites_exception = preserve_exception_backtrace(e)
                     uc_sites = None
 
             else:
@@ -346,7 +345,7 @@ class Structure(HttkObject):
                                                               multiplicities=multiplicities, occupancies=rc_occupancies)
 
                 except Exception as e:
-                    rc_sites_exception = (e, None, sys.exc_info()[2])
+                    rc_sites_exception = preserve_exception_backtrace(e)
                     rc_sites = None
             else:
                 rc_sites = None
@@ -375,15 +374,15 @@ class Structure(HttkObject):
 
         if assignments is None or ((uc_sites is None or uc_cell is None) and (rc_sites is None or rc_cell is None or hall_symbol is None)):
             if rc_cell_exception is not None:
-                raise_(rc_cell_exception[0], rc_cell_exception[1], rc_cell_exception[2])
+                reraise_from(Exception,"Cell creation raised an exception",rc_cell_exception)
             if rc_sites_exception is not None:
-                raise_(rc_sites_exception[0], rc_sites_exception[1], rc_sites_exception[2])
+                reraise_from(Exception,"Sites creation raised an exception",rc_sites_exception)
             if rc_cell is not None and rc_sites is not None and hall_symbol is None:
-                raise_(spacegroup_exception[0], spacegroup_exception[1], spacegroup_exception[2])
+                reraise_from(Exception,"Spacegroup creation raised an exception",rc_spacegroup_exception)
             if uc_cell_exception is not None:
-                raise_(uc_cell_exception[0], uc_cell_exception[1], uc_cell_exception[2])
+                reraise_from(Exception,"Cell creation raised an exception", uc_cell_exception)
             if uc_sites_exception is not None:
-                raise_(uc_sites_exception[0], uc_sites_exception[1], uc_sites_exception[2])
+                reraise_from(Exception,"Sites creation raised an exception", uc_sites_exception)
             raise Exception("Structure.create: not enough information given to create a structure object.")
 
         if uc_sites is not None and uc_cell is not None:
@@ -923,7 +922,7 @@ class Structure(HttkObject):
         symbols = []
         formula = normalized_formula_parts(self.assignments.symbollists,
                 self.assignments.ratioslist, self.uc_sites.counts)
-        for key in sorted(six.iterkeys(formula)):
+        for key in sorted(formula.keys()):
             if is_sequence(key):
                 key = "".join([str(x[0])+str(("%.2f" % x[1])) for x in key])
             symbols += [key]
@@ -934,7 +933,7 @@ class Structure(HttkObject):
         counts = []
         formula = normalized_formula_parts(self.assignments.symbollists,
                 self.assignments.ratioslist, self.uc_sites.counts)
-        for key in sorted(six.iterkeys(formula)):
+        for key in sorted(formula.keys()):
             if is_sequence(formula[key]):
                 totval = sum(formula[key])
             else:
@@ -1031,7 +1030,33 @@ class StructureRef(HttkObject):
 
 
 def main():
-    print("Test")
+    from httk.core.basic import print_
+
+    basis = [[1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0]]
+
+    coordgroups = [[
+                   [0.5, 0.5, 0.5]
+                   ], [
+                   [0.0, 0.0, 0.0]
+                   ], [
+                   [0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]
+                   ]]
+
+    assignments = ['Pb', 'Ti', 'O']
+
+    # To create a structure, the primary thing to keep track of is what coordinate representation is used (and what its name is in
+    # the Structure.create constructor
+    struct = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
+    print_("The formula is:", struct.formula+" ("+struct.anonymous_formula+")")
+
+    try:
+        broken_struct = Structure.create(uc_basis="dummy", uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
+    except Exception as e:
+        print_(e)
+    else:
+        raise Exception("Unexpected success when creating a broken structure.")
 
 if __name__ == "__main__":
     main()

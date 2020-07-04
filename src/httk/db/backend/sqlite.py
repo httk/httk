@@ -19,11 +19,11 @@
 This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
 """
 from __future__ import print_function
-from future.utils import raise_
 import os, sys, time
 import sqlite3 as sqlite
 import atexit
 from httk.core import FracScalar
+from httk.core import reraise_from
 
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
@@ -90,7 +90,7 @@ class Sqlite(object):
                 self.cursor.execute(sql, values)
             except Exception:
                 info = sys.exc_info()
-                raise_(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), info[2])
+                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), info)
             if database_debug_slow:
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):

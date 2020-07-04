@@ -17,14 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import cgitb, sys, codecs, cgi, shutil
-import six
-
-if sys.version_info[0] == 3:
-    string_types = (str,)
-    import io
-else:
-    string_types = (str, unicode)
+import cgitb, sys, codecs, cgi, shutil, io
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -75,29 +68,28 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
         return debug_info
 
     def wfile_write_encoded(self, s, encoding='utf-8'):
-        # In Python 3 this function crashes because of a bug
-        # that can be reproduced by the following short script:
-        #
-        # import encodings
-        # import io
-        # reader = encodings.utf_8.StreamReader(io.StringIO())
-        # reader.read()
-        #
-        # => TypeError: can't concat str to bytes
-        #
-        # Workaround for Python 3:
-        if six.PY3:
+        if hasattr(s, 'read'):
+            #reader = codecs.getreader(encoding)
+            # Wrapping the reader doesn't work in 
+            # Python 3 because of a bug (?)
+            # that can be reproduced by the following short script:
+            #
+            # import encodings
+            # import io
+            # reader = encodings.utf_8.StreamReader(io.StringIO())
+            # reader.read()
+            #
+            # => TypeError: can't concat str to bytes
+            #
+            # Hence, we wrap the writer instead
             if isinstance(s, io.StringIO):
-                # Turn s into a string
-                s = s.read()
-
-        if isinstance(s, string_types):
-            self.wfile.write(codecs.encode(s, encoding))
+                writer = codecs.getwriter(encoding)
+                shutil.copyfileobj(s, writer(self.wfile))
+            else:
+                shutil.copyfileobj(s, self.wfile)
         else:
-            reader = codecs.getreader(encoding)
-            # print(type(reader(s)))
-            # print(s.read())
-            shutil.copyfileobj(reader(s), self.wfile)
+            self.wfile.write(codecs.encode(s, encoding))
+
 
     def do_GET(self):
 
@@ -150,12 +142,19 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile_write_encoded(e.content, e.encoding)
 
+        except IOError as e:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
+            
         except Exception as e:
             self.send_response(500)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
                 self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                raise
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 

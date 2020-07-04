@@ -61,7 +61,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
 
     class Backend(QObject):
         print(QtCore.__file__)
-        @QtCore.pyqtSlot(str,result=str)
+        @pyqtSlot(str,result=str)
         def test(self,msg):
             pass
             #print('call received:'+msg)

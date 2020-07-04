@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, re
+from httk.core import is_string
 from collections import OrderedDict
-from six import string_types
 
 if sys.version_info[0] == 3:
     maketrans_ = str.maketrans
@@ -389,7 +389,7 @@ def _cif_write_data_value(f, orig_data_value, noteol, max_line_length, use_types
             return True
     else:
         # Always quote when a string, never quote otherwise
-        if isinstance(orig_data_value, string_types):
+        if is_string(orig_data_value):
             f.write("'"+data_value+"'")
         else:
             f.write(data_value)
@@ -509,17 +509,17 @@ def write_cif(ioa, data, header=None, max_line_length=80, use_types=False):
 
 
 def main():
-    gurk = open("/tmp/gurk.cif", "r")
-    datalist, header = read_cif(gurk)
+    #gurk = open("/tmp/gurk.cif", "r")
+    #datalist, header = read_cif(gurk)
 
-    gurk = open("/tmp/gurk2.cif", "w")
-    write_cif(gurk, datalist, header)
-    gurk.close()
+    #gurk = open("/tmp/gurk2.cif", "w")
+    #write_cif(gurk, datalist, header)
+    #gurk.close()
 
-    datalist2, header2 = read_cif("/tmp/gurk2.cif")
+    #datalist2, header2 = read_cif("/tmp/gurk2.cif")
 
-    print("MATCH1", header == header2)
-    print("MATCH2", datalist == datalist2)
+    #print("MATCH1", header == header2)
+    #print("MATCH2", datalist == datalist2)
 
     exit(0)
 

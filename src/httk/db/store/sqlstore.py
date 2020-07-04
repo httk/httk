@@ -17,7 +17,7 @@
 
 #from numpy import *
 import sys
-import six
+from httk.core import unicode_type
 from httk.core.httkobject import HttkObject
 from httk.db.filteredcollection import *
 from httk.core.basic import flatten
@@ -225,7 +225,7 @@ class SqlStore(object):
                     try:
                         val = t(val)
                     except UnicodeEncodeError:
-                        val = six.text_type(val)
+                        val = unicode_type(val)
                     except TypeError:
                         print("HUH", val, t)
                         raise

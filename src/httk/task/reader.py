@@ -14,7 +14,9 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import glob, os, datetime, hashlib, re, base64, bz2, sys, six
+
+import glob, os, datetime, hashlib, re, base64, bz2, sys, codecs
+from httk.core.basic import print_
 from httk.core.crypto import manifest_dir, verify_crytpo_signature, read_keys
 from httk.core import Computation, ComputationProject, Code, IoAdapterFileReader, Signature, SignatureKey
 
@@ -143,14 +145,13 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
 def read_manifest(ioa, verify_signature=True):
     hashlib.sha1()
     ioa = IoAdapterFileReader.use(ioa)
-    lines = ioa.file.readlines()
+    data = ioa.file.read()
     ioa.close()
 
+    lines = codecs.decode(data,'utf-8').splitlines(True)
+    
     message = "".join(lines[:-2])
-    # Python 3 sha256 requires message to be bytes.
-    # In Python 2.6+ bytes() is an alias for str().
-    message = bytes(str(message).encode("utf-8"))
-    s = hashlib.sha256(message)
+    s = hashlib.sha256(codecs.encode(message,'utf-8'))
     hexhash = s.hexdigest()
 
     keys = []
@@ -174,3 +175,17 @@ def read_manifest(ioa, verify_signature=True):
         #print("Manifest verified ok")
 
     return (hexhash, signatures, projectkey, keys)
+
+
+def main():
+    print_("Testing task/reader")
+
+    d = os.path.dirname(os.path.abspath(__file__))    
+    read_manifest(os.path.join(d,'test_working_manifest.bz2'))
+    try:
+        read_manifest(os.path.join(d,'test_broken_manifest.bz2'))
+    except Exception as e:
+        assert str(e) == "Project manifest did not verify."
+        
+if __name__ == "__main__":
+    main()

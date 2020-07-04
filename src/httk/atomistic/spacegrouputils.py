@@ -20,25 +20,8 @@ import sys, pickle, re
 import subprocess
 from fractions import Fraction
 
-if sys.version_info[0] == 3:
-    import execnet
-
-    def call_python27_hash(hashes):
-        gw = execnet.makegateway("popen//python=python2.7")
-        channel = gw.remote_exec("""
-            input = channel.receive()
-            hashes = []
-            for tmp in input:
-                hashes.append((long(tmp[0]), long(tmp[1])))
-            hashes = tuple(hashes)
-            out = hash(hashes)
-            out = str(out)
-            channel.send(out)
-        """)
-        channel.send(hashes)
-        return channel.receive()
-
-from httk.core import citation, FracVector
+import httk.core.citation as citation
+from httk.core.vectors import FracVector
 
 
 # Load data extracted from cctbx
@@ -50,28 +33,6 @@ f.close()
 spacegroupdata = allspacegroupdata['data']
 itcnbr_index = allspacegroupdata['itc_nbr_index']
 hm_index = allspacegroupdata['hm_index']
-symops_hash_index = allspacegroupdata['symops_hash_index']
-all_symops = allspacegroupdata['symops']
-
-def symopshash(symops):
-    data = [symopstuple(x) for x in symops]
-    hashes = tuple(sorted([(hash(x[0]), hash(x[1])) for x in data]))
-    # Temporary fix to get same tuple hashes in Python3:
-    if sys.version_info[0] < 3:
-        # Python2 executes normally
-        return hash(hashes)
-    else:
-        # Python3 sends the hashes to a python2 interpreter and
-        # receives the hashed output.
-        # Cannot send long integers directly, so we send a
-        # tuple of strings.
-        hashes_str = []
-        for tmp in hashes:
-            hashes_str.append((str(tmp[0]), str(tmp[1])))
-        out = call_python27_hash(hashes_str)
-        out = int(out)
-        return out
-
 
 def val_to_tuple(val):
     frac = Fraction(val)
@@ -159,6 +120,23 @@ def symopstuple(symop, val_transform=val_to_tuple):
 
     return tuple([tuple(x) for x in transf]), tuple(transl)
 
+# symops_hash_index = allspacegroupdata['symops_hash_index']
+# Re-hash the hashes, due to hash function not being stable between version 2 and 3.
+# TODO: skip pre-generated hashes altogheter, and find a better way to do this
+
+def symopshash(symops):
+    data = [symopstuple(x) for x in symops]
+    hashes = tuple(sorted([(hash(x[0]), hash(x[1])) for x in data]))
+    return hash(hashes)
+
+symops_hash_index = {}
+for hall in spacegroupdata:
+    symops = spacegroupdata[hall]['symops_mtrx']
+    h = symopshash(symops)
+    symops_hash_index[h] = hall
+    spacegroupdata[hall]['symops_hash'] = h
+
+all_symops = allspacegroupdata['symops']
 
 # Valid settings, from: http://www.mx.iucr.org/iucr-top/cif/cif_core/definitions/Cdata_symmetry_cell_setting.html
 # These are really crystal systems...

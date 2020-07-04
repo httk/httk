@@ -41,8 +41,8 @@ expected_output_example_vectors_python2 = \
 """
 (1/1)*((2, 3, 5), (3, 5, 4), (4, 6, 7))
 (1/1)*[[2, 3, 5], [3, 5, 4], [4, 6, 7]]
-('MAX in row [1]:', FracVector(5,1))
-('MAX in all of a', FracVector(7,1))
+MAX in row [1]: (1/1)*5
+MAX in all of a (1/1)*7
 <class 'httk.core.vectors.mutablefracvector.MutableFracVector'>
 (1/1)*((2, 3, 5), (3, 5, 4), (4, 6, 7))
 (1/1)*[[2, 3, 5], [3, 5, 4], [4, 4711, 23]]

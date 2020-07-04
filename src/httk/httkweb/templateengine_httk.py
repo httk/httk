@@ -20,9 +20,14 @@
 #   https://github.com/ebrehault/superformatter
 
 from __future__ import print_function
-import string, os, codecs, cgi
-import six
+import string, os, sys, codecs, html
 import inspect
+
+# Retain python2 compatibility without a dependency on httk.core
+if sys.version[0] == "2":
+    unicode_type=unicode
+else:
+    unicode_type=str
 
 from httk.httkweb.helpers import UnquotedStr
 
@@ -65,8 +70,10 @@ class HttkTemplateFormatter(string.Formatter):
                     val = value[int(idx)] if spec.startswith('getitem:') else ''
                 except TypeError:
                     return ''
+            # TODO: Check if the unicode conversion really is necessary here,
+            # or if we can make sure val is always unicode.
             if newspec == '':
-                return six.text_type(val)
+                return unicode_type(val)
             else:
                 return self.format_field(val, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('if:') or spec.startswith('if-not:') or spec.startswith('if-set:') or spec.startswith('if-unset:'):
@@ -88,7 +95,7 @@ class HttkTemplateFormatter(string.Formatter):
                 except TypeError:
                     quote = True
             if quote and (not hasattr(self,'quote') or self.quote == True):
-                output = cgi.escape(output,quote=True)
+                output = html.escape(output,quote=True)
                 #output = output.replace(":", "&#58;")
                 output = output.replace("'", "&apos;")
             #if type(value) != unicode and type(value) != str:
