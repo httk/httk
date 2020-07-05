@@ -58,8 +58,8 @@ if ase_path != "False":
     try:
         import ase
         import ase.io
-        import ase.utils.geometry
-        from ase.lattice.spacegroup import crystal
+        import ase.geometry
+        from ase.spacegroup import crystal
         from ase.atoms import Atoms
         try:
             from ase import version
@@ -86,7 +86,7 @@ def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
 
     sg = spacegroup.Spacegroup(spacegroup, setting)
     prim_cell = sg.scaled_primitive_cell  # Check if we need to transpose
-    return ase.utils.geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])
+    return ase.geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])
 
 
 def structure_to_ase_atoms(struct):
@@ -127,9 +127,9 @@ def structure_to_ase_atoms(struct):
 
         hall = struct.rc_sites.hall_symbol
         symops = get_symops_strs(hall)
-        rot, trans = ase.lattice.spacegroup.spacegroup.parse_sitesym(symops)
+        rot, trans = ase.spacegroup.spacegroup.parse_sitesym(symops)
         spgnbr, setting = spacegroup_get_number_and_setting(hall)
-        spg = ase.lattice.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall,
+        spg = ase.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall,
                                                                      centrosymmetric=None,
                                                                      scaled_primitive_cell=None,
                                                                      reciprocal_cell=None,

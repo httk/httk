@@ -17,11 +17,23 @@
 
 # Note: this is a placeholder, this does not yet work
 
-from HTMLParser import HTMLParser
-import urllib2
+try:
+    from html.parser import HTMLParser
+except ImportError:
+    # Python 2 compatibility
+    from HTMLParser import HTMLParser
+
+try:
+    from urllib.request import urlopen
+except ImportError:
+    # Python 2 compatibility    
+    from urllib2 import urlopen
+
+from curses import wrapper
+
+    
 from re import sub
 from sys import stderr
-import curses.wrapper
 
 class MyHTMLParser(HTMLParser):
 
@@ -157,6 +169,6 @@ class WebviewCurses(object):
 
         print(parser.text())
 
-        curses.wrapper(render_page)
+        wrapper(render_page)
         print("Next url:",next_url)
 

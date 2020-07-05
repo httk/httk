@@ -18,7 +18,7 @@
 from numpy import *
 from numpy.linalg import norm, inv
 #from external.spacegroup import Spacegroup
-from httk.core import ioadapters
+from httk.core import ioadapters, reraise_from
 from httk.atomistic import Structure
 import sys
 #from matsci.structure import structure
@@ -46,10 +46,9 @@ def readstruct(ioa, struct, importers=None):
                 coords = atoms.get_positions()
                 basis = atoms.get_cell()
                 return Structure(basis=basis, coords=coords, species=species)
-            except:
+            except Exception as e:
                 if importers is not None:
-                    info = sys.exc_info()
-                    raise Exception("Error while trying ase importer: "+str(info[1])), None, info[2]
+                    reraise_from(Exception,"Error while trying ase importer: "+str(info[1]), e)
     
         elif importer == 'openbabel':
             try:
@@ -84,7 +83,7 @@ def readstruct(ioa, struct, importers=None):
             except:        
                 if importers is not None:
                     info = sys.exc_info()
-                    raise Exception("Error while trying openbabel importer: "+str(info[1])), None, info[2]
+                    reraise_from(Exception, "Error while trying openbabel importer: "+str(info[1]), info)
 
     raise Exception("Could not figure out a way to read structure")
     return None

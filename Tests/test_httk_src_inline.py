@@ -43,16 +43,23 @@ def execute(self, command, *args):
 class TestHttkSrcInline(unittest.TestCase):
     pass
 
+# We divide py files into those that actually execute a test
+# and those where the test is just that they don't break on import.
+# That way it is a bit eaiser to see where we should add
+# unit tests.
 test_programs = []
+test_importers = []
 for root, d, files in os.walk(httk_src_dir):
     for f in fnmatch.filter(files, "*.py"):
         fullname = os.path.join(root,f)
         if not f.startswith('_'):
             with open(fullname,'r') as ff:
                 lines = ff.readlines()
-                if 'if __name__ == "__main__":\n' in lines:
+                if 'if __name__ == "__main__":\n' in lines or "if __name__ == '__main__':\n" in lines:
                     test_programs += [fullname]
-
+                else:
+                    test_importers += [fullname]
+                    
 def function_factory(program):
     def exec_func(slf):
         execute(slf,program)
@@ -67,6 +74,15 @@ for program in test_programs:
     program_name = program_name.replace('/','_')
     setattr(TestHttkSrcInline,'test_'+program_name,exec_func)
 
+for program in test_importers:
+    exec_func = function_factory(program)
+    program_path = os.path.dirname(program)
+    program_file = os.path.basename(program)
+    rel_program = os.path.relpath(program, httk_src_dir)
+    program_name, ext = os.path.splitext(rel_program)
+    program_name = program_name.replace('/','_')
+    setattr(TestHttkSrcInline,'test_IMPORT_'+program_name,exec_func)
+    
 
 #############################################################################
 

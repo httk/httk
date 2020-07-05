@@ -109,7 +109,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
         axes.annotate('', xy=(ax0, ay0), xycoords='data',
                       xytext=(ax1, ay1), textcoords='data',
-                      arrowprops=dict(headwidth=hw, frac=1., ec=c, fc=c))
+                      arrowprops=dict(headwidth=hw, headlength=10, ec=c, fc=c))
 
     axes.plot(x, y, color=c)
     #axes.set_xlim(x.min()*.9,x.max()*1.1)
@@ -129,4 +129,6 @@ if __name__ == '__main__':
     y = [0, 1]
     arrowplot(axes, x, y)
 
-    plt.show()
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()

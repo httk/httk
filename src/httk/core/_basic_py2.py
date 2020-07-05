@@ -31,7 +31,8 @@ def reraise_from(exc_cls, message, from_exc):
     try:
         old_backtrace_str = from_exc.__backtrace_str__
     except Exception:
-        raise exc_cls(message)
+        # If old backtrace isn't preserved, assume it is the latest triggered exception
+        old_backtrace_str = traceback.format_exc()
 
     raise exc_cls("%s\n\nThe above exception was caused by the following exception:\n\n%s" % (message, old_backtrace_str))
 

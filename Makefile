@@ -80,7 +80,7 @@ dist: version docs httk_overview.pdf clean
 		tar -zcf "$$THISDIR/httk-$$(cat $$THISDIR/VERSION).tgz" "$$THISDIR/Examples" "$$THISDIR/Tutorial" "$$THISDIR/Execution" "$$THISDIR/src" "$$THISDIR/"*.txt "$$THISDIR/README.rst" "$$THISDIR/httk_overview.pdf" "$$THISDIR/bin" \
 		"$$THISDIR/httk.cfg.example" "$$THISDIR/VERSION" \
 		"$$THISDIR/httk.minimal.files" "$$THISDIR/init.shell" "$$THISDIR/init.shell.eval"  "$$THISDIR/setup.py" \
-		--exclude=".*" --transform "flags=r;s|httk.cfg.example|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
+		--transform "flags=r;s|httk.cfg.example|httk.cfg|;s|$$THISDIR|httk-$$(cat $$THISDIR/VERSION)|"\
 	)
 	md5sum "httk-$$(cat VERSION).tgz" > "httk-$$(cat VERSION).md5"
 	if [ -e .git ];	then rm -f src/httk/distdata.py src/httk/distdata.pyc; fi
