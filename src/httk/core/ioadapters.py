@@ -17,9 +17,12 @@
 
 import os, sys, tempfile
 
-if sys.version_info[0] == 3:
+from httk.core.basic import bz2open
+
+try:
     from io import StringIO
-else:
+except ImportError:
+    # Python2 compatibility
     from StringIO import StringIO
 
 try:
@@ -304,8 +307,9 @@ def zdecompressor(f, mode, *args):
 
 def cleveropen(filename, mode, *args):
     basename_no_ext, ext = os.path.splitext(filename)
+
     if ext.lower() == '.bz2':
-        return bz2.BZ2File(filename, mode, *args)
+        return bz2open(filename, mode, *args)
     elif ext.lower() == '.gz':
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
@@ -316,11 +320,11 @@ def cleveropen(filename, mode, *args):
         except IOError:
             pass
         try:
-            return bz2.BZ2File(filename+".bz2", mode, *args)
+            return bz2open(filename+".bz2", mode, *args)
         except (IOError, NameError):
             pass
         try:
-            return bz2.BZ2File(filename+".BZ2", mode, *args)
+            return bz2open(filename+".BZ2", mode, *args)
         except (IOError, NameError):
             pass
         try:

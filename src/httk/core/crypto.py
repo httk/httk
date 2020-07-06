@@ -18,8 +18,8 @@
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
 import hashlib, os.path, base64, re, sys, codecs
-from httk.core import ed25519 
-from httk.core.basic import print_
+from httk.core.basic import print_, unicode_type
+from httk.core import ed25519
 
 if sys.version_info[0] == 3:
     import configparser
@@ -163,7 +163,7 @@ def tuple_to_str(t):
             #tuplestr += "\n"
             strlist.append(tuplestr)
         else:
-            strlist.append(unicode(i).encode("utf-8"))
+            strlist.append(unicode_type(i))
     return " ".join(strlist)
 
 

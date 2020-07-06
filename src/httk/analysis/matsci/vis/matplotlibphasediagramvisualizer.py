@@ -18,7 +18,7 @@
 from httk.graphics.matplotlib.polygonplot import PolygonPlot
 from httk.graphics.matplotlib.arrowplot import arrowplot
 from httk.core import FracVector
-
+from pylab import sqrt, show
 
 class MatplotlibPhaseDiagramVisualizer(object):
 

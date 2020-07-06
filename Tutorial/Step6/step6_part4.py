@@ -3,7 +3,7 @@
 import os, errno
 import httk, httk.iface.vasp_if
 import httk.db
-from httk.atomistic import UnitcellStructure
+from httk.atomistic import Structure
 import httk.task
 
 try:
@@ -15,7 +15,7 @@ except OSError as e:
 
 class TotalEnergyResult(httk.Result):
 
-    @httk.httk_typed_init({'computation': httk.Computation, 'structure': UnitcellStructure, 'total_energy': float})
+    @httk.httk_typed_init({'computation': httk.Computation, 'structure': Structure, 'total_energy': float})
     def __init__(self, computation, structure, total_energy):
         self.computation = computation
         self.structure = structure

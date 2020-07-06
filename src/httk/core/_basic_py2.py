@@ -16,7 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import sys, collections, traceback
+
+import sys, collections, traceback, bz2
 
 import Queue as queue
 
@@ -47,3 +48,6 @@ def is_sequence(l):
 
 def is_string(s):
     return isinstance(s, basestring)
+
+def bz2open(filename, mode, *args):
+    return bz2.BZ2File(filename, mode, *args)

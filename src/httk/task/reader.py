@@ -145,11 +145,9 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
 def read_manifest(ioa, verify_signature=True):
     hashlib.sha1()
     ioa = IoAdapterFileReader.use(ioa)
-    data = ioa.file.read()
+    lines = ioa.file.readlines()
     ioa.close()
 
-    lines = codecs.decode(data,'utf-8').splitlines(True)
-    
     message = "".join(lines[:-2])
     s = hashlib.sha256(codecs.encode(message,'utf-8'))
     hexhash = s.hexdigest()
