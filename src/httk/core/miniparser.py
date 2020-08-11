@@ -10,7 +10,7 @@
 # (But please contribute updates and report bugs to the httk version,
 # found via http://httk.org.)
 #
-# The license terms for this file is given below.
+# The license terms for this file is given below. 
 #
 # -------------------------------------------------------------------
 # Permission is hereby granted, free of charge, to any person
@@ -20,7 +20,7 @@
 # publish, distribute, sublicense, and/or sell copies of the Software,
 # and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 #
@@ -42,9 +42,9 @@ LR(1) miniparser
 Introduction
 ------------
 
-A relatively bare-bones LR(1) parser that parses strings into abstract
-syntax trees (ast) for generic languages. Python 2 and 3 compatible.
-Language grammars can be given in textual EBNF.
+A relatively bare-bones LR(1) parser that parses strings into abstract 
+syntax trees (ast) for generic languages. Python 2 and 3 compatible. 
+Language grammars can be given in textual EBNF. 
 
 A simple usage example::
 
@@ -55,7 +55,7 @@ A simple usage example::
          S = E ;
          E = T, '+', E ;
          E = T ;
-         T = id ;
+         T = id ;    
       """,
       'tokens': {'id': '[a-zA-Z][a-zA-Z0-9_]*'}
     }
@@ -67,12 +67,12 @@ A simple usage example::
 
 Usage example of a simple grammar for balanced parentheses. This
 also shows using inline regex via an EBNF special sequence::
-
+ 
     from miniparser import parser
     ls = {
       'ebnf_grammar': """
-         Expr = Group
-              | Expr , Expr
+         Expr = Group 
+              | Expr , Expr 
               | id ;
          Group = '(', Expr, ')' ;
          id = ? [a-zA-Z0-9 _]+ ? ;
@@ -87,11 +87,11 @@ also shows using inline regex via an EBNF special sequence::
     print(result)
 
 Note: in the above examples, the parse tables are generated on the
-first call to parse, and then cached inside the 'ls' dict.
+first call to parse, and then cached inside the 'ls' dict. 
 However, if one wants to pre-generate the parse tables (e.g., for
-looking at them), that can be done by calling build_ls(ls=ls)
+looking at them), that can be done by calling build_ls(ls=ls) 
 before parse. You can, if you want, save the 'ls' variable to disk
-(e.g. using pickle). However, since a modern computer builds the parse
+(e.g. using pickle). However, since a modern computer builds the parse 
 tables in a time comparable with starting up the python interpreter,
 this may not be so useful.
 
@@ -113,8 +113,8 @@ This is roughly how the parser operates:
 
    1.3. A string to parse.
 
-2. The fist time this langague is parsed, the parser builds up the
-   necessary data structures for the language using the function
+2. The fist time this langague is parsed, the parser builds up the 
+   necessary data structures for the language using the function 
    `build_ls`. The steps are:
 
    2.1. The parser uses itself to parse `ebnf_grammar` into
@@ -129,7 +129,7 @@ This is roughly how the parser operates:
         form that expands alteration, optionals, groupings, and
         repetitions into separate rules: `bnf_grammar_ast`.
 
-   2.3. The `bnf_grammar_ast` is processed into a `rule_table`.
+   2.3. The `bnf_grammar_ast` is processed into a `rule_table`. 
         This is a dictionary that maps every symbol to a list of
         possible right hand sides in the production rules.
 
@@ -145,15 +145,15 @@ This is roughly how the parser operates:
         the state the machine progresses to: `action_table` and
         `goto_table`.
 
-3. The parse string is processed the python generator `lexer`,
+3. The parse string is processed the python generator `lexer`, 
    which splits the input into lexical tokens.
 
 4. The LR state machine is initialized in its starting state.  Tokens
    are read from the lexer, and shift/reduce actions and state changes
    are made according to `action_table` and `goto_table`. The results
-   of the parsing are collected on the symbol stack in the from of an ast.
-
-5. When all input has been reduced into the starting symbol, the
+   of the parsing are collected on the symbol stack in the from of an ast. 
+    
+5. When all input has been reduced into the starting symbol, the 
    ast connected to that symbol is returned.
 
 
@@ -166,27 +166,27 @@ Diagnostic output
 - For more fine-tuned output, set verbosity = LogVerbosity(verbosity, [<flags>])
   flags can be various flags that can be found in the source code.
 
-  Known flags at the time of writing:
+  Known flags at the time of writing: 
 
-  - `print_all_tokens=True` lets makes the parser have the lexer process
+  - `print_all_tokens=True` lets makes the parser have the lexer process 
     all input first and prints all tokens before the parsing starts.
 
-  - `<function name>_verbosity = <verbosity level>` adjusts the verbosity level
+  - `<function name>_verbosity = <verbosity level>` adjusts the verbosity level 
     for just that one function. For example:
-
+  
       parser(ls, source, verbosity=LogVerbosity(0,parser_verbosity=3))
 
   prints out diagnostic output on level 3 for the parser function, but
   skips any other diagnostic output.
 
-- If you do not want the default behavior of printing diagnostic output on stdout,
+- If you do not want the default behavior of printing diagnostic output on stdout, 
   both parser and build_ls takes the argument logger=<function>, which redirects
-  all diagnostic output to that function. The function should have the signature:
+  all diagnostic output to that function. The function should have the signature: 
 
-      logger(*args,**kargs):
+      logger(*args,**kargs):    
 
   where the args is the diagnostic info being printed, and the keyword arguments
-  communicates flags. In particular, pretty=True indicates that complex objects
+  communicates flags. In particular, pretty=True indicates that complex objects 
   are passed which would benefit from using, e.g., pprint.pprint to typeset the output.
 '''
 
@@ -203,8 +203,8 @@ ls_ebnf = {
         Alteration = Rhs , "|" , Rhs ;
         Concatenation = Rhs , "," , Rhs ;
 
-        Rhs = identifier
-             | terminal
+        Rhs = identifier 
+             | terminal 
              | special
              | Optional
              | Repetition
@@ -222,7 +222,8 @@ ls_ebnf = {
     'literals': ['[', ']', '{', '}', '(', ')', '|', ',', ';', '='],
     'precedence': (('left', '|'), ('left', ',')),
     'tokens': {'identifier': '[a-zA-Z][a-zA-Z0-9_]*',
-               'terminal': r'"[^"]+"|\'[^\']+\'',
+               'terminal': r'"([^\\"]|.)*"|' + r"'([^\\']|.)*'",
+               #'terminal': r'"([^\\"]|\\.)*"|' + r"'([^\\']|\\.)*'",
                'special': r'\?[^?]*\?'},
     'simplify': ['Rhs'],
     'remove': ['[', ']', '{', '}', '(', ')', '|', ',', ';', '='],
@@ -303,15 +304,15 @@ def logger(*args, **kargs):
 
 class LogVerbosity(object):
     """
-    Class to send in as keyword argument for verbosity to fine-tune
+    Class to send in as keyword argument for verbosity to fine-tune 
     diagnostic output from certain functions.
 
     Set the keyword argument as follows::
 
          verbosity = LogVerbosity(verbosity, [<flags>])
 
-    flags can be various flags that can be found in the source code, e.g.,
-    `print_all_tokens=True` lets makes the parser have the lexer process
+    flags can be various flags that can be found in the source code, e.g., 
+    `print_all_tokens=True` lets makes the parser have the lexer process 
     all input first and prints all tokens before the parsing starts.
 
     Specifically, set `<function name>_verbosity = <verbosity level>`
@@ -325,7 +326,7 @@ class LogVerbosity(object):
 
     def __init__(self, verbosity, **flags):
         """
-        Create LogVerbosity object.
+        Create LogVerbosity object. 
 
         Args:
           verbosity(int): main verbosity level to display
@@ -353,13 +354,13 @@ class LogVerbosity(object):
         return self._get_verbosity(sys._getframe(1).f_code.co_name) < other
 
     def __le__(self, other):
-        return self._get_verbosity(sys._getframe(1).f_code.co_name) <= other
+        return self._get_verbosity(sys._getframe(1).f_code.co_name) <= other    
 
     def __eq__(self, other):
         return self._get_verbosity(sys._getframe(1).f_code.co_name) == other
 
     def __sub__(self, other):
-        return self(self.verbosity - other, **flags)
+        return self(self.verbosity - other, **self.flags)
 
 #### Main functions
 
@@ -369,8 +370,8 @@ def parser(ls, source, verbosity=0, logger=logger):
     This is a fairly straightforward implementation of an LR(1) parser.
     It should do well for parsing somewhat simple grammars.
 
-    The parser takes a language specification (ls),
-    and a string to parse (source). The string is then parsed according
+    The parser takes a language specification (ls), 
+    and a string to parse (source). The string is then parsed according 
     to that ls into a syntax tree, which is returned.
 
     An ls is produced by calling the function `build_ls` (see help(build_ls))
@@ -382,7 +383,7 @@ def parser(ls, source, verbosity=0, logger=logger):
     if 'parse_table' not in ls:
         build_ls(ls=ls, verbosity=verbosity, logger=logger)
 
-    tokens = lexer(source, ls['tokens'], ls['literals'], ls['ignore'], ls['comment_markers'], verbosity=verbosity, logger=logger)
+    tokens = lexer(source, ls['tokens'], ls['partial_tokens'], ls['literals'], ls['ignore'], ls['comment_markers'], verbosity=verbosity, logger=logger)    
 
     if hasattr(verbosity, 'print_all_tokens') and verbosity.print_all_tokens == True:
         tokens = list(tokens)
@@ -395,7 +396,6 @@ def parser(ls, source, verbosity=0, logger=logger):
     goto_table = ls['parse_table']['goto']
     symbol_stack = []
     state_stack = [1]
-    parse_stack = []
     symbol, inp, pos = next(tokens)
 
     while True:
@@ -443,7 +443,7 @@ def parser(ls, source, verbosity=0, logger=logger):
                         if subsubnode[0] == node[0]:
                             collect += subsubnode[1:]
                         else:
-                            collect += [subsubnode]
+                            collect += [subsubnode]                    
                     filtered_subnodes += [tuple([node[0]] + collect)]
                 elif node[0] not in ls['remove']:
                     filtered_subnodes += [node]
@@ -452,13 +452,13 @@ def parser(ls, source, verbosity=0, logger=logger):
             new_state = goto_table[state_stack[-1]][arg[0]]
             state_stack += [new_state]
             if verbosity >= 3:
-                logger("PARSE ACTION REDUCE: ", arg[0], "<-", arg[1], loglevel=1), " AND GOTO: ", new_state
+                logger("PARSE ACTION REDUCE: ", arg[0], "<-", arg[1], loglevel=1), " AND GOTO: ", new_state                        
         elif action == 'accept':
             break
         else:
             raise ParserInternalError("Parser internal error: unknown instruction in parse table:"+str(action))
     if len(symbol_stack) > 1:
-        raise ParserInternalError("Parser internal error: unexpected state after completed parse:"+str([x[0] for x in symbol_stack]))
+        raise ParserInternalError("Parser internal error: unexpected state after completed parse:"+str([x[0] for x in symbol_stack]))                    
 
     if symbol_stack[0][0] in ls['simplify']:
         symbol_stack[0] = symbol_stack[0][1:]
@@ -473,14 +473,14 @@ def split_chars_strip_comments(source, comment_markers):
 
     Args:
       source (str): input string
-      comment_markers (list of tuples): a list of entries (start_marker, end_marker)
-        that designate comments. A marker can be end-of-line or end with end-of-line, but
-        multiline comment separators are not allowed, i.e., no characters may follow
-        the end-of-line.
+      comment_markers (list of tuples): a list of entries (start_marker, end_marker) 
+        that designate comments. A marker can be end-of-line or end with end-of-line, but 
+        multiline comment separators are not allowed, i.e., no characters may follow 
+        the end-of-line.        
     """
     # Speed things up if there are no comment markers
     if len(comment_markers) == 0:
-        l = 0
+        l = 0        
         for line in source.splitlines(True):
             l += 1
             p = 0
@@ -489,7 +489,6 @@ def split_chars_strip_comments(source, comment_markers):
                 yield c, (l, p, line.rstrip('\n'))
         return
 
-    posbuf = []
     comment_start_markers = [x[0] for x in comment_markers]
     comments_dict = dict([(x[0], x[1]) for x in comment_markers])
     comment_end_marker = None
@@ -499,7 +498,7 @@ def split_chars_strip_comments(source, comment_markers):
         l += 1
         p = 0
         sline = line.rstrip('\n')
-        # We are not in a comment, and no comment start marker is found, just keep going
+        # We are not in a comment, and no comment start marker is found, just keep going        
         if comment_end_marker is None and not any([line.find(x) != -1 for x in comment_start_markers]):
             for c in line:
                 p += 1
@@ -538,70 +537,83 @@ def split_chars_strip_comments(source, comment_markers):
                 line = ""
                 poslist = []
 
-
-def lexer(source, tokens, literals, ignore, comment_markers=[], verbosity=0, logger=logger):
+def lexer(source, tokens, partial_tokens, literals, ignore, comment_markers=[], verbosity=0, logger=logger):
     """
     A generator that turn source into tokens.
 
     Args:
       source (str): input string
-      tokens (dict): a dictonary that maps all tokens of the
-                     language on regular expressions that match them.
+      tokens (dict): a dictonary that maps all tokens of the 
+                     language on regular expressions that match them. 
+      partial_tokens (dict): a dictionary that maps token names on
+                     regular expressions for partial token matches.
+                     This is used to allow finding longer matches if
+                     there is intermediate length input that does not
+                     match. E.g., to match 5.32e6 as a number instead
+                     as as Number(5.32) + Identifier(e) + Number(6).
       literals (list): a list of single character strings that are
                      to be treated as literals.
+
     """
-    stack = ""
-    seen_token, seen_token_pos = None, None
+    seen_token, seen_token_pos, seen_token_len = None, None, None
     last_good_pos = (0, 0, "")
     last_good_pos_next = (0, 0, "")
 
     token_regexes = dict([(x, re.compile("("+tokens[x]+r')\Z')) for x in tokens.keys()])
-
+    partial_token_regexes = dict([(x, re.compile("("+partial_tokens[x]+r')\Z')) for x in partial_tokens.keys()])
+    all_token_regexes = set(tokens.keys()) | set(partial_tokens.keys())
+    
     prescan = iter(split_chars_strip_comments(source, comment_markers))
-    c, pos = next(prescan)
-    stack = c
+    pushback = ""
+    stack = ""
+    c = None
 
-    while True:
+    class MatchFound(Exception):
+        pass
+    
+    while c != '' or len(pushback)>0 or seen_token is not None: 
+        if len(pushback)>0:
+            c = pushback[0]
+            pushback = pushback[1:]
+        else:
+            try:
+                c, pos = next(prescan)
+            except StopIteration:
+                c = ''
+        stack += c
+        
         if verbosity >= 5:
-            logger("LEX INPUT:", c)
+            logger("LEX INPUT:'"+c+"'")
+            
         if last_good_pos_next is None:
             last_good_pos_next = pos
-        for l in literals.union(ignore):
-            if stack == l:
-                seen_token, seen_token_pos = l, pos
-                last_good_pos, last_good_pos_next = pos, None
-                break
-        else:
-            for t in token_regexes:
-                #print("THIS SHOULD MATCH",t,token_regexes[t].match(stack) is None,stack)
-                if token_regexes[t].match(stack) is not None:
-                    seen_token, seen_token_pos = t, pos
-                    last_good_pos, last_good_pos_next = pos, None
-                    break
-            else:
-                # No token matched
-                if seen_token is not None:
-                    if seen_token not in ignore:
-                        if verbosity >= 4:
-                            logger("LEX YIELD:", (seen_token, stack[:-1]))
-                        yield (seen_token, stack[:-1], seen_token_pos)
-                    seen_token, seen_token_pos = None, None
-                    stack = c
-                    continue
-        try:
-            c, pos = next(prescan)
-        except StopIteration:
-            break
-        stack += c
 
-    if seen_token is not None and ((seen_token in literals)
-                                   or (seen_token in ignore)
-                                   or (token_regexes[seen_token].match(stack) is not None)):
-        if seen_token not in ignore:
-            if verbosity >= 4:
-                logger("LEX YIELD:", (seen_token, stack))
-            yield (seen_token, stack, seen_token_pos)
-        stack = ""
+        if c != '':                
+            try:
+                for l in literals.union(ignore):
+                    if stack == l:
+                        seen_token, seen_token_pos, seen_token_len = l, pos, len(l)
+                        last_good_pos, last_good_pos_next = pos, None
+                        raise MatchFound()
+
+                for t in all_token_regexes:
+                    if t in token_regexes and token_regexes[t].match(stack) is not None:
+                        seen_token, seen_token_pos, seen_token_len = t, pos, len(stack)
+                        last_good_pos, last_good_pos_next = pos, None
+                        raise MatchFound()
+                    elif t in partial_token_regexes and partial_token_regexes[t].match(stack) is not None:
+                        raise MatchFound()
+            except MatchFound:
+                continue
+                
+        if seen_token is not None:
+            if seen_token not in ignore:
+                if verbosity >= 4:
+                    logger("LEX YIELD:", (seen_token, stack[:seen_token_len]))
+                yield (seen_token, stack[:seen_token_len], seen_token_pos)
+            pushback += stack[seen_token_len:]
+            stack = ""
+            seen_token, seen_token_pos, seen_token_len = None, None, None
 
     if stack != "":
         if last_good_pos is not None:
@@ -617,7 +629,7 @@ def lexer(source, tokens, literals, ignore, comment_markers=[], verbosity=0, log
     yield (None, None, pos)
 
 
-def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=" \t\n", simplify=[], aggregate=[], start=None, skip=[], remove=[], comment_markers=[], ls=None, verbosity=0, logger=logger):
+def build_ls(ebnf_grammar=None, tokens={}, partial_tokens={}, literals=None, precedence=[], ignore=" \t\n", simplify=[], aggregate=[], start=None, skip=[], remove=[], comment_markers=[], ls=None, verbosity=0, logger=logger):
     """
     Build a language specification from an ebnf grammar and some meta-info of the language.
 
@@ -626,29 +638,35 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
          tokens (dict,optional): a dict of token names and the regexs that defines them, they
              are considered terminals in the parsing. (They may also be defined
              as production rules in the ebnf, but if so, those definitions are ignored.)
-         literals (list of str): a list of strings of 1 or more characters which
-             define literal symbols of the language (i.e, the tokenizer name the
-             tokens the same as the string), if not given, an attemt is made to
-             auto-extract them from the grammar.
+         partial_tokens (dict): a dictionary that maps token names on
+                     regular expressions for partial token matches.
+                     This is used to allow finding longer matches if
+                     there is intermediate length input that does not
+                     match. E.g., to match 5.32e6 as a number instead
+                     as as Number(5.32) + Identifier(e) + Number(6).
+         literals (list of str): a list of strings of 1 or more characters which 
+             define literal symbols of the language (i.e, the tokenizer name the 
+             tokens the same as the string), if not given, an attemt is made to 
+             auto-extract them from the grammar. 
          precedence (list,optional): list of tuples of the format (associativity, symbol, ...),
              the order of this list defines the precedence of those symbols,
-             later in the list = higher precedence. The associativity
-             can be 'left', 'right', or 'noassoc'.
+             later in the list = higher precedence. The associativity 
+             can be 'left', 'right', or 'noassoc'.  
          ignore (str,optional): a string of characters, or a list of strings for symbols,
-             which are withheld by the tokenizer. (This is commonly used to skip emitting
-             whitespace tokens, while still supprting whitespace inside tokens,
+             which are withheld by the tokenizer. (This is commonly used to skip emitting 
+             whitespace tokens, while still supprting whitespace inside tokens, 
              e.g., quoted strings.)
          simplify (list,optional): a list of symbol identifiers that are simplified away
-             when the parse tree is generated.
-         aggregate (list,optional): a list of symbol identifiers that when consituting
-             consequtive nodes are 'flattened', removing the ambiguity of left or right
+             when the parse tree is generated. 
+         aggregate (list,optional): a list of symbol identifiers that when consituting 
+             consequtive nodes are 'flattened', removing the ambiguity of left or right 
              associativity.
          start (str,optional): the start (topmost) symbol of the grammar. A successful
-             parsing means reducing all input into this symbol.
-         remove (list): list of symbols to just skip in the output parse tree
+             parsing means reducing all input into this symbol.      
+         remove (list): list of symbols to just skip in the output parse tree 
              (useful to, e.g., skip uninteresting literals).
          skip (list): list of rules to completely ignore in the grammar.
-             (useful to skip rules in a complete EBNF which reduces the tokens
+             (useful to skip rules in a complete EBNF which reduces the tokens 
              into single characters entities, when one rather wants to handle
              those tokens by regex:es by passing the token argument)
          ls (dict): As an alternative to giving the above parameters, a dict can
@@ -657,6 +675,7 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
     _ls = {
         'ebnf_grammar': ebnf_grammar,
         'tokens': tokens,
+        'partial_tokens': partial_tokens,
         'precedence': precedence,
         'ignore': set(ignore),
         'simplify': simplify,
@@ -681,9 +700,7 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
     if 'bnf_grammar_ast' not in ls:
         if ('ebnf_grammar' not in ls) and ('ebnf_grammar_ast' not in ls):
             raise ParserGrammarError("Parser grammar error: build_ls needs at least one of ebnf_grammar, ebnf_grammar_ast, or bnf_grammar_ast.")
-        if 'ebnf_grammar_ast' in ls:
-            ebnf_grammar_ast = ls['ebnf_grammar_ast']
-        else:
+        if 'ebnf_grammar_ast' not in ls:
             # First bootstrap ls_ebnf if it also is missing its parse table
             if 'parse_table' not in ls_ebnf:
                 build_ls(ls=ls_ebnf, verbosity=0, logger=logger)
@@ -708,10 +725,10 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
             logger("Auto-extracted non-literals:", ls['nonliterals'])
 
     if not isinstance(ls['literals'], set):
-        ls['literals'] = set(ls['literals'])
+        ls['literals'] = set(ls['literals'])        
 
     if 'terminals' not in ls:
-        ls['terminals'] = set(ls['tokens'].keys())
+        ls['terminals'] = set(ls['tokens'].keys())         
         ls['terminals'].update(ls['literals'])
         # The 'nothing' (epsilon) symbol
         ls['terminals'].add(None)
@@ -747,7 +764,7 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
     return ls
 
 
-#### Helper functions
+#### Helper functions    
 
 def _build_rule_table(bnf_grammar_ast, terminals, skip):
     """
@@ -756,18 +773,18 @@ def _build_rule_table(bnf_grammar_ast, terminals, skip):
       terminals (list): list of terminals of the language
 
     Returns:
-      A dict that maps every non-terminal to a list of
+      A dict that maps every non-terminal to a list of 
       right hand sides of production rules from that non-terminal.
     """
-    rule_table = {}
+    rule_table = {}    
     for rule in bnf_grammar_ast:
         lhs = rule[0]
         rhs = rule[1]
         if lhs in terminals or lhs in skip:
-            continue
+            continue        
         if lhs not in rule_table:
             rule_table[lhs] = []
-        rule_table[lhs] += [rhs]
+        rule_table[lhs] += [rhs]        
     return rule_table
 
 
@@ -799,7 +816,7 @@ def _build_first_table(rule_table, terminals):
             count += len(first[symbol])
         if count == lastcount:
             break
-        lastcount = count
+        lastcount = count            
     return first
 
 
@@ -808,7 +825,7 @@ def _closure(items, rule_table, first_table, terminals):
     Args:
       items: a list of LR "items" to get the CLOSURE set for.
       rule_table: a rule table produced by _build_rule_table
-      first_table: a first table produced by _build_first_table
+      first_table: a first table produced by _build_first_table 
       terminals (list): list of terminals of the language
 
     Returns:
@@ -826,7 +843,7 @@ def _closure(items, rule_table, first_table, terminals):
             elif len(i[1]) == pos+1:
                 symbol = i[1][pos]
                 ts = [lookahead]
-            else:
+            else: 
                 symbol = i[1][pos]
                 if i[1][pos+1] not in first_table:
                     raise ParserGrammarError("Encountered EBNF symbol not in grammar or terminals: '"+str(i[1][pos+1])+"'")
@@ -849,14 +866,14 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
     """
     Args:
       rule_table: a rule table produced by _build_rule_tables
-      first_table: a first table produced by _build_first_table
+      first_table: a first table produced by _build_first_table 
       terminals (list): extra symbols apart from tokens and literals that are to
          be treated as terminals
       start (str,optional): the start (topmost) symbol of the grammar. A successful
-         parsing means reducing all input into this symbol.
+         parsing means reducing all input into this symbol.      
 
     Returns:
-        A parse_table dict with two tables 'action_table' and 'goto_table'
+        A parse_table dict with two tables 'action_table' and 'goto_table' 
         which encode a state machine that for every starting state S tells
         the LR state machine to either shift or reduce, and when doing so,
         the state the machine progresses to.
@@ -898,7 +915,7 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                     return 'shift'
                 else:
                     assert(precedence_table[symbol][1] == 'nonassoc')
-                    return 'empty'
+                    return 'empty'                    
             else:
                 if precedence_table[symbol][0] > precedence_table[foundsym][0]:
                     return 'shift'
@@ -926,7 +943,7 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
         for item in cl:
             lhs = item[0]
             pos = item[3]
-            rhs = item[1]
+            rhs = item[1]            
             if len(rhs) > pos:
                 arg = rhs[pos]
             else:
@@ -945,24 +962,24 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                 lhs = item[0]
                 pos = item[3]
                 rhs = item[1]
-                lookahead = item[2]
+                lookahead = item[2]        
 
                 if len(rhs) > pos:
                     if symbol is None:
                         action_table[state][symbol] = ('accept', None)
-                    else:
+                    else:                    
                         newitem = (lhs, rhs, lookahead, pos+1)
-                        new_state_items.add(newitem)
+                        new_state_items.add(newitem)                    
                 else:
                     if lookahead not in action_table[state]:
                         action_table[state][lookahead] = ('reduce', (lhs, rhs))
                     elif action_table[state][lookahead][0] == 'shift':
                         check = precedence_check(lookahead, rhs)
-                        if check is 'reduce':
+                        if check == 'reduce':
                             action_table[state][lookahead] = ('reduce', (lhs, rhs))
-                        elif check is 'shift':
+                        elif check == 'shift':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][lookahead]
                         else:
                             assert(check == 'unknown')
@@ -971,7 +988,7 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                             if (lhs, rhs) not in warnings[lookahead]:
                                 warnings[lookahead] = [(lhs, rhs)]
                     else:
-                        assert(action_table[state][lookahead][0] == 'reduce')
+                        assert(action_table[state][lookahead][0] == 'reduce')                        
                         raise ParserGrammarError("reduce/reduce conflict in state " +
                                                  str(state)+" for symbol:"+str(lookahead)+":\n"+str(action_table[state][lookahead][1])+" vs "+str((lhs, rhs)))
 
@@ -983,15 +1000,15 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                         action_table[state][symbol] = ('shift', new_state)
                     elif action_table[state][symbol][0] == 'shift':
                         raise ParserGrammarError("shift/shift conflict in state "+str(state)+" for symbol:"+str(symbol))
-                    else:
+                    else:                        
                         assert(action_table[state][symbol][0] == 'reduce')
                         rhs = action_table[state][symbol][1][1]
                         check = precedence_check(symbol, rhs)
-                        if check is 'shift':
+                        if check == 'shift':
                             action_table[state][symbol] = ('shift', new_state)
-                        elif check is 'reduce':
+                        elif check == 'reduce':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][symbol]
                         else:
                             assert(check == 'unknown')
@@ -1002,10 +1019,10 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                             action_table[state][symbol] = ('shift', new_state)
                 else:
                     goto_table[state][symbol] = new_state
-                todo.append(new_cl)
+                todo.append(new_cl)                    
 
     for warning in warnings:
-        logger("WARNING: shift/reduce conflict soved by shift for symbol:'"+str(warning)+"', involving rules:")
+        logger("WARNING: shift/reduce conflict solved by shift for symbol:'"+str(warning)+"', involving rules:")
         logger(warnings[warning], pretty=True)
 
     return parse_table
@@ -1016,7 +1033,7 @@ def _ebnf_to_bnf_rhs(rhs, bnf_grammar_ast, lhs_name='', recursion=0):
     Args:
       rhs: a right hand side of a EBNF grammar rule.
       bnf_grammar_ast: a list of BNF grammar rules that this function
-          can add to when expanding repetition-type rules.
+          can add to when expanding repetition-type rules. 
 
     Returns:
         A list of BNF grammar rules that correspond to the EBNF rhs.
@@ -1041,7 +1058,7 @@ def _ebnf_to_bnf_rhs(rhs, bnf_grammar_ast, lhs_name='', recursion=0):
         bnf_grammar_ast += [('?'+repstr, (special,))]
         return [(repstr,)]
     elif op == 'terminal':
-        return [(rhs[1][1:-1],)]
+        return [(ebnf_unqote(rhs[1][1:-1]),)]
 
     elif op == 'Concatenation':
         new_rhs = []
@@ -1085,7 +1102,7 @@ def _ebnf_grammar_to_bnf(ebnf_grammar_ast, tokens, skip):
 
     Args:
       ebnf_grammar_ast: an ast representation of the EBNF grammar
-          as produced by parser when ebnf_ls is used for the
+          as produced by parser when ebnf_ls is used for the 
           language specification.
       tokens (dict): a dictionary defining tokens of the language.
       skip (list): skip the rules for these symbols.
@@ -1102,7 +1119,7 @@ def _ebnf_grammar_to_bnf(ebnf_grammar_ast, tokens, skip):
         assert(lhs[0] == 'identifier')
         symbol = lhs[1]
         if symbol in tokens or symbol in skip:
-            continue
+            continue        
         rhs = rule[2]
         new_rhs_list = _ebnf_to_bnf_rhs(rhs, bnf_grammar, lhs_name=symbol)
         for rhs in new_rhs_list:
@@ -1114,8 +1131,15 @@ def _ebnf_grammar_to_bnf(ebnf_grammar_ast, tokens, skip):
 
     return bnf_grammar
 
-
-# If this python file is run as a program,
+def ebnf_unqote(s):
+    s = s.replace(r'\t','\t')
+    s = s.replace(r'\n','\n')
+    s = s.replace(r'\r','\r')
+    # Skip support for general escapes so that '\' does what one expects
+    #s = '\\'.join([x.replace('\\','') for x in s.split('\\\\')])
+    return s
+    
+# If this python file is run as a program, 
 # Parse the EBNF description of EBNF using the
 # language specification for EBNF and check
 # that it returns the same as is already provided.
@@ -1124,6 +1148,9 @@ if __name__ == "__main__":
 
     result = parser(ls_ebnf, ls_ebnf['ebnf_grammar'])
 
-    pprint.pprint(result)
+    pprint.pprint(result)    
 
     assert(result == ls_ebnf['ebnf_grammar_ast'])
+
+
+

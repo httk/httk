@@ -20,8 +20,14 @@
 #   https://github.com/ebrehault/superformatter
 
 from __future__ import print_function
-import string, os, sys, codecs, html
+import string, os, sys, codecs
 import inspect
+
+# Python 2 compatibility
+try:
+    from html import escape
+except ImportError:
+    from cgi import escape
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
@@ -95,7 +101,7 @@ class HttkTemplateFormatter(string.Formatter):
                 except TypeError:
                     quote = True
             if quote and (not hasattr(self,'quote') or self.quote == True):
-                output = html.escape(output,quote=True)
+                output = escape(output,quote=True)
                 #output = output.replace(":", "&#58;")
                 output = output.replace("'", "&apos;")
             #if type(value) != unicode and type(value) != str:

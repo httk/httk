@@ -99,7 +99,7 @@ class Command(object):
             out.close()
 
         self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE,
-                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, bufsize=1, **kwargs)
+                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, **kwargs)
 
         self.output_queue = queue.Queue()
         self.output_thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self.output_queue))
@@ -148,7 +148,7 @@ class Command(object):
         lines = ""
         try:
             while(True):
-                line = self.output_queue.get_nowait()
+                line = codecs.decode(self.output_queue.get_nowait(),'utf-8')
                 lines += line
         except queue.Empty:
             pass

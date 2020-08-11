@@ -8,6 +8,10 @@ httk.cfg:
 tox:
 	tox
 
+tests: unittests2 unittests3
+
+pytests: pytest2 pytest3
+
 unittests:
 	(cd Tests; TEST_EXPECT_PYVER=ignore python all.py)
 

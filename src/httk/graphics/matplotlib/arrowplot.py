@@ -59,7 +59,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
     #aspace = r.sum() / narrs
     narrs = r.sum()/aspace
 
-    if direc is 'neg':
+    if direc == 'neg':
         dspace = -1.*abs(dspace)
     else:
         dspace = abs(dspace)
@@ -96,7 +96,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
         dx1 = -1.*np.sin(theta)*hl/2. + ax
         dy1 = -1.*np.cos(theta)*hl/2. + ay
 
-        if direc is 'neg':
+        if direc == 'neg':
             ax0 = dx0
             ay0 = dy0
             ax1 = dx1

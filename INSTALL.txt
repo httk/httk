@@ -146,7 +146,7 @@ will work in all new terminals you open. (Or alternatively, just add
 "~/bin/python/httk-latest/bin/" to your "PATH" environment variable,
 and "~/bin/python/httk-latest" to your PYTHONPATH environment
 varibale.) If you cannot figure out how to do this on your system, you
-will have to re-run "source ~/bin/python/httk-latest/init.shell"
+will have to re-run "source ~/bin/python/httk-latest/setup.shell"
 every time you want to use httk.
 
 You can now start using httk. There is no further compiling, etc.

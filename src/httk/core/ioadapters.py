@@ -353,12 +353,12 @@ def main():
     
     outname = IoAdapterFilename("/tmp/test.bz2")
     output = IoAdapterFileWriter.use(outname)
-    output.file.write(codecs.encode("text",'utf-8'))
+    output.file.write("text")
     output.close()
 
     inname = IoAdapterFilename("/tmp/test.bz2")
     inp = IoAdapterFileReader.use(inname)
-    data = codecs.decode(inp.file.read(),'utf-8')
+    data = inp.file.read()
     inp.close()    
 
     assert(data == "text")
