@@ -958,11 +958,11 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                         action_table[state][lookahead] = ('reduce', (lhs, rhs))
                     elif action_table[state][lookahead][0] == 'shift':
                         check = precedence_check(lookahead, rhs)
-                        if check is 'reduce':
+                        if check == 'reduce':
                             action_table[state][lookahead] = ('reduce', (lhs, rhs))
-                        elif check is 'shift':
+                        elif check == 'shift':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][lookahead]
                         else:
                             assert(check == 'unknown')
@@ -987,11 +987,11 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                         assert(action_table[state][symbol][0] == 'reduce')
                         rhs = action_table[state][symbol][1][1]
                         check = precedence_check(symbol, rhs)
-                        if check is 'shift':
+                        if check == 'shift':
                             action_table[state][symbol] = ('shift', new_state)
-                        elif check is 'reduce':
+                        elif check == 'reduce':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][symbol]
                         else:
                             assert(check == 'unknown')

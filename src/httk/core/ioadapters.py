@@ -19,10 +19,18 @@ import os, sys, tempfile
 
 from httk.core.basic import bz2open
 
-try:
+# Python 2 also has the io module, but the io.StringIO doesn't work
+# correctly.
+# try:
+    # from io import StringIO
+# except ImportError:
+    #Python2 compatibility
+    # from StringIO import StringIO
+
+if sys.version_info[0] > 2:
     from io import StringIO
-except ImportError:
-    # Python2 compatibility
+else:
+    #Python2 compatibility
     from StringIO import StringIO
 
 try:
@@ -350,18 +358,20 @@ def cleveropen(filename, mode, *args):
 
 def main():
     import codecs
-    
+
     outname = IoAdapterFilename("/tmp/test.bz2")
     output = IoAdapterFileWriter.use(outname)
-    output.file.write(codecs.encode("text",'utf-8'))
+    #output.file.write(codecs.encode("text",'utf-8'))
+    output.file.write("text")
     output.close()
 
     inname = IoAdapterFilename("/tmp/test.bz2")
     inp = IoAdapterFileReader.use(inname)
-    data = codecs.decode(inp.file.read(),'utf-8')
-    inp.close()    
+    #data = codecs.decode(inp.file.read(),'utf-8')
+    data = inp.file.read()
+    inp.close()
 
     assert(data == "text")
-    
+
 if __name__ == "__main__":
     main()
