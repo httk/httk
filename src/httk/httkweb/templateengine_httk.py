@@ -23,15 +23,15 @@ from __future__ import print_function
 import string, os, sys, codecs
 import inspect
 
-# The "html" module is not a builtin in Python 2.
-# Also the Python 2 html module was last updated in 2011
-# (version 1.16), so we should avoid using it in Python 2.
-# In Python 2 we can use the builtin cgi module to get the
-# escape function.
-# import html
-
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
+    # Note:
+    # The "html" module is not a builtin in Python 2.
+    # If it happens to be installed, we still do not
+    # want to use it since it is old (last updated in 2011,
+    # version 1.16). Use the builtin cgi module to get the
+    # escape funtion instead.
+
     from cgi import escape
     unicode_type=unicode
 else:
