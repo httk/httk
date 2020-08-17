@@ -23,16 +23,19 @@ from __future__ import print_function
 import string, os, sys, codecs
 import inspect
 
-# Python 2 compatibility
-try:
-    from html import escape
-except ImportError:
-    from cgi import escape
+# The "html" module is not a builtin in Python 2.
+# Also the Python 2 html module was last updated in 2011
+# (version 1.16), so we should avoid using it in Python 2.
+# In Python 2 we can use the builtin cgi module to get the
+# escape function.
+# import html
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
+    from cgi import escape
     unicode_type=unicode
 else:
+    from html import escape
     unicode_type=str
 
 from httk.httkweb.helpers import UnquotedStr

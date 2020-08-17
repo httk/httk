@@ -50,7 +50,13 @@ class Command(object):
             if debug:
                 print("Command: Running communicate with inputstr:", self.inputstr)
 
-            self.out, self.err = self.process.communicate(input=self.inputstr)
+            # In Python 3 the communicate function needs input to be bytes,
+            # so we encode the input string (in Python 2 the .encode() method has no effect).
+            # Sometimes self.inputstr is NoneType, however, which has no "encode()" attribute.
+            if type(self.inputstr) is str:
+                self.out, self.err = self.process.communicate(input=self.inputstr.encode())
+            else:
+                self.out, self.err = self.process.communicate(input=self.inputstr)
             self.out = codecs.decode(self.out, 'utf-8')
             self.err = codecs.decode(self.err, 'utf-8')
 
@@ -148,7 +154,7 @@ class Command(object):
         lines = ""
         try:
             while(True):
-                line = codecs.decode(self.output_queue.get_nowait(),'utf-8')
+                line = codecs.decode(self.output_queue.get_nowait(), 'utf-8')
                 lines += line
         except queue.Empty:
             pass

@@ -44,6 +44,14 @@ def struct_to_input(struct):
     # 1
     #inputstr += "0.001\n"; #2
     inputstr += "0.001\n"
+    ##################################################################
+    # With FINDSYM, Version 7.1, Jul 2020, lattice, atomic, and magnetic
+    # accuracies have to be all given.
+    # This fixes the format of the input file, but there is still the
+    # "illegal seek" pipe problem.
+    # inputstr += "0.001\n"
+    # inputstr += "0.001\n"
+    ##################################################################
     # 2
     inputstr += "2\n"  # 3
     inputstr += "%.8f %.8f %.8f %.8f %.8f %.8f\n" % (struct.uc_a, struct.uc_b, struct.uc_c, struct.uc_alpha, struct.uc_beta, struct.uc_gamma)  # 4
@@ -75,7 +83,14 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
 
         sorteddata = sorted(results['groupdata'], key=lambda data: (data[4], data[5], data[6]))
         for data in sorteddata:
-            #print("HUH",data[1],data[4],data[5],data[6])
+            # print("HUH",data[1],data[4],data[5],data[6])
+            #
+            ##################################################################
+            # data[1] is a SiteAssignment object in the devel/python3 branch,
+            # but a string in the master branch.
+            # Is it OK if we redefine data[1] like below to make it a string?
+            data[1] = data[1].symbol
+            ##################################################################
             occustr = data[1]
             if not occustr in results['occucounts']:
                 results['occucounts'][occustr] = 0
