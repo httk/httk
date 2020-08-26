@@ -1,8 +1,12 @@
 #! /usr/bin/env python
 
-import sys, os, hashlib, base64, re, ConfigParser, bz2
-
+import sys, os, hashlib, base64, re, bz2
 import hashlib
+
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 b = 256
 q = 2**255 - 19
@@ -146,17 +150,17 @@ def nested_split(s,start,stop):
     return parts
 
 def hexhash(filename):
-    def chunks(f, size=8192): 
-        while True: 
-            s = f.read(size) 
-            if not s: break 
-            yield s     
+    def chunks(f, size=8192):
+        while True:
+            s = f.read(size)
+            if not s: break
+            yield s
     f = open(filename,'rb')
-    s = hashlib.sha256() 
-    for chunk in chunks(f): 
-        s.update(chunk) 
+    s = hashlib.sha256()
+    for chunk in chunks(f):
+        s.update(chunk)
     f.close()
-    return s.hexdigest() 
+    return s.hexdigest()
 
 def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
     message=""
@@ -167,11 +171,11 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
         excludes=[x.stip() for x in f.readlines()]
         f.close()
     try:
-        cp=ConfigParser.ConfigParser()
+        cp=configparser.ConfigParser()
         cp.read(os.path.join(excludespath,"config"))
         excludestr=cp.get('main','excludes').strip()
         excludes+=nested_split(excludestr,'[',']')
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+    except (configparser.NoOptionError, configparser.NoSectionError):
         pass
 
     if len(excludes) == 0:
@@ -182,14 +186,14 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
 
     b64pubkey=manifestfile.readline()
     message += b64pubkey
-    key = manifestfile.readline()    
+    key = manifestfile.readline()
     while key!='\n' and key != '':
         message += key
         key = manifestfile.readline()
     message += key
 
     for root, unsorteddirs, unsortedfiles in os.walk(basedir,topdown=True, followlinks=False):
-        if root==basedir: 
+        if root==basedir:
             root = ""
         else:
             root = os.path.relpath(root, basedir)
@@ -207,10 +211,10 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                 message+=compare
                 hh = hexhash(truefilename)
                 if compare != hh + " " + filename + "\n":
-                    print "FAILURE1:",compare+"|"+ hh + " " + filename + "\n"
+                    print("FAILURE1:",compare+"|"+ hh + " " + filename + "\n")
                     return False
                 if debug:
-                    print "Checked:",hh+" "+filename+" "
+                    print("Checked:",hh+" "+filename+" ")
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root,d)
@@ -219,7 +223,7 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                     break
             else:
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir,'ht.config')):
-                    print "Validating task manifest in:",fulldir
+                    print("Validating task manifest in:",fulldir)
                     result = check_manifest_dir(fulldir,os.path.join(fulldir,'ht.manifest.bz2'),os.path.join(fulldir,'ht.config'))
                     if not result:
                         return False
@@ -227,28 +231,28 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
                     message+=compare
                     hh = hexhash(os.path.join(fulldir,'ht.manifest.bz2'))
                     if compare != hh + " " + fulldir + "/\n":
-                        print "FAILURE2:",compare,"|"+ hh + " " + fulldir + "/\n"
+                        print("FAILURE2:",compare,"|"+ hh + " " + fulldir + "/\n")
                         return False
                     if debug:
-                        print "Checked:",hh+" "+fulldir+"/ "
+                        print("Checked:",hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
     compare = manifestfile.readline()
     if compare != "\n":
-        print "FAILURE3:",compare,"|","(should be empty)"
+        print("FAILURE3:",compare,"|","(should be empty)")
         return False
 
     b64signature = manifestfile.readline()
-    #print "===="+message+"===="
+    #print("===="+message+"====")
 
     pk = base64.b64decode(b64pubkey)
     signature = base64.b64decode(b64signature)
 
     result = checkvalid(signature,message,pk)
     if not result:
-        print "FAILURE: Signature does not verify."
+        print("FAILURE: Signature does not verify.")
         return False
 
     manifestfile.close()
@@ -257,8 +261,8 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
 basedir = sys.argv[1]
 result = check_manifest_dir(basedir,'ht.project/manifest.bz2', 'ht.project',debug=False)
 if result:
-    print "Manifest check sucessful."
+    print("Manifest check sucessful.")
     exit(42)
 else:
-    print "Manifest check FAILED."
+    print("Manifest check FAILED.")
     exit(13)

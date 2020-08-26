@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from structurevisualizerplugin import StructureVisualizerPlugin
+from httk.atomistic.vis.structurevisualizerplugin import StructureVisualizerPlugin
 from httk.atomistic.structure import Structure
 from httk.atomistic.structurephasediagram import StructurePhaseDiagram
 from httk.atomistic.vis.structurephasediagramvisualizerplugin import StructurePhaseDiagramVisualizerPlugin

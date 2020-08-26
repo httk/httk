@@ -50,7 +50,7 @@ def load_struct(ioa, ext=None, filename=None):
         import httk.iface.vasp_if
         return httk.iface.vasp_if.poscar_to_structure(ioa)
     elif ext == '.cif':
-        from structure_cif_io import cif_to_struct
+        from httk.atomistic.atomisticio.structure_cif_io import cif_to_struct
         return cif_to_struct(ioa)
     else:
         raise Exception("httk.httkio.load: I do not know what to do with the file:" + filename)
@@ -86,7 +86,7 @@ def save_struct(struct, ioa, ext=None):
         import httk.iface.vasp_if
         return httk.iface.vasp_if.structure_to_poscar(ioa, struct)
     elif ext == '.cif':
-        from structure_cif_io import struct_to_cif
+        from httk.atomistic.atomisticio.structure_cif_io import struct_to_cif
         return struct_to_cif(struct, ioa)
     else:
         raise Exception("httk.httkio.save: I do not know what to do with the file:" + filename)

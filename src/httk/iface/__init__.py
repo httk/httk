@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -20,10 +20,10 @@ httk Interface module
 
   - The interface between httk and other software. Note: the idea is that this module should be useable without
     the other software installed. E.g., generation of input files to gulp shouldn't require gulp installed.
-    
+
 """
 
+from httk.iface import ase_if, cif2cell_if, gulp_if, isotropy_if, jmol_if
+from httk.iface import spglib_if, vasp_if, platon_if
 from httk.core import citation
 citation.add_src_citation("httk", "Rickard Armiento")
-
-import ase_if, cif2cell_if, gulp_if, isotropy_if, jmol_if, spglib_if, vasp_if, platon_if

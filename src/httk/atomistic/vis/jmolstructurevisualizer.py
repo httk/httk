@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -98,12 +98,12 @@ class JmolStructureVisualizer(object):
 #         polyhedra bonds (~cations and (connected(3) or connected(4) or connected(5) or connected(6) or connected(7) or connected(8)) and visible) distanceFactor 2.0;
 #         color polyhedra translucent;
 #         """)
-#         
+#
 #         if extbonds == False:
 #             self.jmol.send("restrict cell={2 2 2};\n")
 #         if bonds == False:
 #             self.jmol.send("connect (all) (all) DELETE;\n")
-    
+
         #self.jmol.send("center visible;\n")
         #self.jmol.send("zoom 0;\n")
 
@@ -130,10 +130,10 @@ class JmolStructureVisualizer(object):
 #         delete (NOT (unitcell OR connected(unitcell)));
 #         polyhedra delete;
 #         polyhedra ON;
-#         polyhedra BONDS (NOT ~anions); 
+#         polyhedra BONDS (NOT ~anions);
 #         color polyhedra translucent;
 #         """)
-# 
+#
 #         #polyhedra bonds (NOT ~anions and (connected(3) or connected(4) or connected(5) or connected(6) or connected(7) or connected(8)) and visible) distanceFactor 2.0;
 #         if self.params['polyhedra'] == False:
 #             self.jmol.send("polyhedra OFF;\n")
@@ -141,7 +141,7 @@ class JmolStructureVisualizer(object):
 #             self.jmol.send("restrict cell={2 2 2};\n")
 #         if self.params['bonds'] == False:
 #             self.jmol.send("connect (all) (all) DELETE;\n")
-#     
+#
 #         self.jmol.send("center visible;\n")
 #         #self.jmol.send("rotate BEST;\n")
 #         self.jmol.send("rotate AXISANGLE "+ self.params['angle']+";\n")
@@ -206,7 +206,7 @@ class JmolStructureVisualizer(object):
         self.jmol.send("""
         polyhedra delete;
         polyhedra ON;
-        polyhedra BONDS (NOT ~anions); 
+        polyhedra BONDS (NOT ~anions);
         color polyhedra translucent;
         unitcell off;
         """)
@@ -219,7 +219,7 @@ class JmolStructureVisualizer(object):
             self.jmol.send("connect (all) (all) DELETE;\n")
 
         if self.params['show_unitcell']:
-    
+
             if self.params['unitcell'] is None:
                 if self.struct.has_rc_repr:
                     basis = self.struct.rc_basis
@@ -227,16 +227,16 @@ class JmolStructureVisualizer(object):
                     basis = self.struct.uc_basis
             else:
                 basis = self.params['unitcell']
-    
+
             origin = (0*(basis[0] + 0*basis[1] + 0*basis[2]))
             newbasis = []
             newbasis += [((origin + basis[0])).to_floats()]
             newbasis += [((origin + basis[1])).to_floats()]
             newbasis += [((origin + basis[2])).to_floats()]
             origin = origin.to_floats()
-    
+
             #newbasis = [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]
-            
+
             unitcellstr = "unitcell [ "
             unitcellstr += "{" + str(origin[0])+" "+str(origin[1])+" "+str(origin[2])+"} "
             unitcellstrs = []
@@ -251,16 +251,16 @@ class JmolStructureVisualizer(object):
             else:
                 unitcellstr += "unitcell {0 0 0};\n"
             unitcellstr += "unitcell on;\nunitcell 0.025;\n"
-    
+
             self.jmol.send(unitcellstr)
 
         if self.params['extracell']:
-            basis = self.params['extracell']                       
+            basis = self.params['extracell']
             origin = (0*(basis[0] + 0*basis[1] + 0*basis[2]))
-            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]            
+            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]
             edges = ((0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (3, 5), (3, 6), (2, 6), (2, 4), (4, 7), (6, 7), (5, 7))
             for i, edge in enumerate(edges, start=1):
-                line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())                 
+                line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())
                 self.jmol.send("draw line_ec_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06;\n" % tuple(line))
 
         if self.params['show_supercell']:
@@ -269,16 +269,16 @@ class JmolStructureVisualizer(object):
             elif self.struct.has_uc_repr:
                 basis = self.struct.uc_basis
             origin = (0*(basis[0] + 0*basis[1] + 0*basis[2]))
-            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]            
+            p = [origin, basis[0], basis[1], basis[2], basis[0]+basis[1], basis[0]+basis[2], basis[1]+basis[2], basis[0]+basis[1]+basis[2]]
             edges = ((0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (3, 5), (3, 6), (2, 6), (2, 4), (4, 7), (6, 7), (5, 7))
             for i, edge in enumerate(edges, start=1):
-                line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())                 
+                line = (p[edge[0]].to_floats()) + (p[edge[1]].to_floats())
                 self.jmol.send("draw line_sc_"+str(i)+" {%f %f %f} {%f %f %f} DIAMETER 0.06 COLOR blue;\n" % tuple(line))
-                            
+
         #axis off;
 
         #polyhedra bonds (NOT ~anions and (connected(3) or connected(4) or connected(5) or connected(6) or connected(7) or connected(8)) and visible) distanceFactor 2.0;
-    
+
         self.jmol.send("rotate BEST;\n")
         self.jmol.send("display all;\n")
         self.jmol.send("center visible;\n")
@@ -317,15 +317,15 @@ class JmolStructureVisualizer(object):
             self.initialize()
             httk.external.jmol.structure_to_jmol(self.jmol.stdin, self.struct, copies=[4, 4, 4], repeat=self.params['repetitions'])
             if self.params['defaults'] == 'publish':
-                self.defaults_publish() 
+                self.defaults_publish()
             else:
-                self.defaults_publish() 
+                self.defaults_publish()
 
     def save_and_quit(self, filename, resx=3200, resy=2500):
         self.jmol.send('write image '+str(resx)+' '+str(resy)+' "'+filename+'";exitJmol;\n')
         self.jmol.wait_finish()
         self.jmol = None
-                 
+
     def show(self, repeat=None):
         if self.jmol is None:
             self.jmol = httk.external.jmol.start()
@@ -349,5 +349,4 @@ class JmolStructureVisualizer(object):
                 self.jmol.send("spin on;\n")
             else:
                 self.jmol.send("spin off;\n")
-    
-    
+

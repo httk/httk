@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2013 Rickard Armiento
 #
@@ -19,14 +19,14 @@ import fractions
 
 from httk.core import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
-import spacegrouputils
+from httk.atomistic import spacegrouputils
 
 
 def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]
     newcoordgroups = []
     newindividual_data = []
-    for group in range(len(counts)): 
+    for group in range(len(counts)):
         order = sorted(range(counts[group]), key=lambda x: (coordgroups[group][x][0], coordgroups[group][x][1], coordgroups[group][x][2]))
         newcoordgroups.append(coordgroups[group][order])
         if individual_data is not None:
@@ -55,7 +55,7 @@ def coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies):
             coordgroups.append([])
         coordgroups[idx].append(coords[i])
     return coordgroups, group_occupancies
-        
+
 
 def coords_to_coordgroups(coords, counts):
     coordgroups = []
@@ -63,7 +63,7 @@ def coords_to_coordgroups(coords, counts):
     for count in counts:
         coordgroups.append(coords[idx:count+idx])
         idx += count
-    
+
     return coordgroups
 
 
@@ -96,7 +96,7 @@ def coords_and_counts_to_coordgroups(coords, counts):
     for count in counts:
         coordgroups.append(coords[idx:count+idx])
         idx += count
-    
+
     return coordgroups
 
 
@@ -106,10 +106,10 @@ def coordswap(fromidx, toidx, cell, coordgroups):
         coords = MutableFracVector.from_FracVector(group)
         rows = coords[:, toidx]
         coords[:, toidx] = coords[:, fromidx]
-        coords[:, fromidx] = rows        
+        coords[:, fromidx] = rows
         new_coordgroups.append(coords.to_FracVector())
     coordgroups = FracVector.create(new_coordgroups)
-    
+
     cell = MutableFracVector.from_FracVector(cell)
     row = cell[toidx]
     cell[toidx] = cell[fromidx]
@@ -130,7 +130,7 @@ def clean_coordgroups_and_assignments(coordgroups, assignments):
     for i in range(len(assignments)):
         for j in range(len(new_assignments)):
             if assignments[i] == new_assignments[j]:
-                idx = j 
+                idx = j
                 new_coordgroups[idx] = FracVector.chain_vecs([new_coordgroups[idx], coordgroups[i]])
                 break
         else:
@@ -142,8 +142,8 @@ def clean_coordgroups_and_assignments(coordgroups, assignments):
 # TODO: Cleanup formula generation
 
 
-def normalized_formula_parts(assignments, ratios, counts):    
-        
+def normalized_formula_parts(assignments, ratios, counts):
+
     formula = {}
     alloccs = {}
     maxc = 0
@@ -160,14 +160,14 @@ def normalized_formula_parts(assignments, ratios, counts):
             maxc = alloccs[assignment]
 
     alloccs = FracVector.create(alloccs.values())
-    alloccs = (alloccs/maxc).simplify()        
+    alloccs = (alloccs/maxc).simplify()
 
     for symbol in formula.keys():
-        formula[symbol] = (formula[symbol]*alloccs.denom/maxc).simplify()         
+        formula[symbol] = (formula[symbol]*alloccs.denom/maxc).simplify()
     #    if abs(value-int(value))<1e-6:
-    #        formula[symbol] = int(value) 
+    #        formula[symbol] = int(value)
     #    elif int(100*(value-(int(value)))) > 1:
-    #        formula[symbol] = float("%d.%.2e" % (value, 100*(value-(int(value))))) 
+    #        formula[symbol] = float("%d.%.2e" % (value, 100*(value-(int(value)))))
     #    else:
     #        formula[symbol] = float("%d" % (value,))
 
@@ -183,13 +183,13 @@ def abstract_symbol(count):
 
 
 def anonymous_formula(filled_counts):
-    
+
     formula = normalized_formula_parts(range(len(filled_counts)), [1]*len(filled_counts), filled_counts)
 
     idx = 0
     abstract_formula = ""
-    
-    for val in sorted(formula.items(), key=lambda x: x[1]):        
+
+    for val in sorted(formula.items(), key=lambda x: x[1]):
         idx += 1
         c = abstract_symbol(idx)
 
@@ -201,9 +201,9 @@ def anonymous_formula(filled_counts):
                 abstract_formula += "%s%d" % (c, xval.floor())
         else:
             abstract_formula += "%s%d.%02d" % (c, xval.floor(), ((xval-xval.floor())*100).floor())
-        
+
         #abstract_formula += "%s%g" % (c,val[1])
-        
+
     return abstract_formula
 
 
@@ -247,7 +247,7 @@ def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegrou
                 from httk.external import isotropy_ext
                 return isotropy_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True)
             except ImportError:
-                raise 
+                raise
                 pass
     raise Exception("structure_reduced_coordgroups_to_representative: None of the available backends available.")
 
@@ -256,7 +256,7 @@ def sites_tidy(sites, backends=['platon']):
     for backend in backends:
         if backend == 'platon':
             try:
-                from httk.external import platon_ext        
+                from httk.external import platon_ext
                 return platon_ext.sites_tidy(sites)
             except ImportError:
                 raise
@@ -290,17 +290,12 @@ def main():
     coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
     assignments = [2, 5]
 
-    print cell, coordgroups
+    print(cell, coordgroups)
     cell, coordgroups = coordswap(0, 2, cell, coordgroups)
-    print cell, coordgroups
-    
+    print(cell, coordgroups)
+
     pass
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-    

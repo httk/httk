@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -15,11 +15,22 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, StringIO, subprocess, cgitb, urlparse
-from httplib import HTTPMessage
+import sys, os, subprocess, cgitb
 
-from webgenerator import WebGenerator
-import helpers
+if sys.version_info[0] == 3:
+    import urllib.parse as urlparse
+    from http.client import HTTPMessage
+else:
+    import urlparse
+    from httplib import HTTPMessage
+
+from httk.httkweb.webgenerator import WebGenerator
+from httk.httkweb import helpers
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 def run_app(appdir, renderers = None, template_engines = None, function_handlers = None, config = "config", debug = True, override_global_data = None):
 
@@ -30,6 +41,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
         from PyQt5.QtWebEngineCore import QWebEngineUrlSchemeHandler, QWebEngineUrlRequestInterceptor
         from PyQt5.QtWebChannel import QWebChannel
     except ImportError as e:
+        print(e)
         try:
             from PySide2 import QtCore, QtWidgets
 
@@ -45,93 +57,94 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
 
     class WebEnginePage(QWebEnginePage):
         def javaScriptConsoleMessage(self, level, msg, line, source):
-            print 'Console (%s): %s line %d: %s' % (level, source, line, msg)
-    
+            print('Console (%s): %s line %d: %s' % (level, source, line, msg))
+
     class Backend(QObject):
-        @QtCore.pyqtSlot(str,result=str)
+        print(QtCore.__file__)
+        @pyqtSlot(str,result=str)
         def test(self,msg):
             pass
-            #print 'call received:'+msg
+            #print('call received:'+msg)
             #return 'call received:'+msg
-       
+
     #class WebEngineUrlRequestInterceptor(QWebEngineUrlRequestInterceptor):
         #def interceptRequest(self, info):
         #    pass
-        #    #print "== INTERCEPT",info.requestUrl(),"::",info.resourceType()
-    
+        #    #print("== INTERCEPT",info.requestUrl(),"::",info.resourceType())
+
     class TestIODevice(QtCore.QIODevice):
         def __init__(self, data):
             super(TestIODevice, self).__init__()
             self.open(self.ReadOnly | self.Unbuffered)
             # TODO: do proper file reading
-            self._data = str(data.read())
+            self._data = str(data.read()).encode()
             data.close()
             QtCore.QTimer.singleShot(200, self._dataReceived)
-    
+
         def _dataReceived(self):
             #print('== RECV')
             self._data = b'foo'
             self.readyRead.emit()
-    
+
         def bytesAvailable(self):
             count = len(self._data) + super(TestIODevice, self).bytesAvailable()
             #print('== AVAIL', count)
             return count
-    
+
         def isSequential(self):
             return True
-    
+
         def readData(self, maxSize):
             #print('== READ', maxSize)
             data, self._data = self._data[:maxSize], self._data[maxSize:]
-            #print "** RETURNING:",data
+            #print("** RETURNING:",data)
             return data
-    
+
         def close(self):
             #print('== CLOSE')
             super(TestIODevice, self).close()
-    
-    
+
+
     class TestHandler(QWebEngineUrlSchemeHandler):
-    
+
         def __init__(self, srcdir, renderers = None, template_engines = None, function_handlers = None, debug=True, config = None, override_global_data = None):
             super(TestHandler, self).__init__()
-    
+
             self.debug = debug
-    
+
             default_global_data = {'_use_urls_without_ext':True}
-    
-            setup = helpers.setup(renderers, template_engines, function_handlers) 
+
+            setup = helpers.setup(renderers, template_engines, function_handlers)
             global_data = helpers.read_config(srcdir, setup['renderers'], default_global_data, override_global_data, config)
-        
+
             global_data['_baseurl'] = 'backend:'
             global_data['_basefunctionurl'] = 'backend:'
             global_data['_functionext'] = ''
-            global_data['_render_mode'] = 'app'    
-            global_data['_allow_urls_without_ext'] = True    
-            global_data['_urls_without_ext'] = True    
-                        
-            self._webgenerator = WebGenerator(srcdir, global_data, **setup)        
-    
-            
+            global_data['_render_mode'] = 'app'
+            global_data['_allow_urls_without_ext'] = True
+            global_data['_urls_without_ext'] = True
+
+            self._webgenerator = WebGenerator(srcdir, global_data, **setup)
+
+
         def requestStarted(self, request):
-    
+
             headers = {}
             response = 200
-                    
-            url = request.requestUrl()        
+
+            url = request.requestUrl()
             relpath = url.path()
             query = url.query()
             query = dict(urlparse.parse_qsl(query,keep_blank_values=True))
-             
-            #print "== REQUEST STARTED == RELPATH:", relpath, "QUERY:",query
-                
+
+            #print("== REQUEST STARTED == RELPATH:", relpath, "QUERY:",query)
+
             if relpath.startswith("/"):
                 relpath = relpath[1:]
-    
+
             if os.path.basename(relpath) == '':
                 relpath = os.path.join(relpath,"index.html")
-        
+
             try:
                 output = self._webgenerator.retrieve(relpath, query)
                 response = 200
@@ -150,8 +163,8 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                         raise
                     else:
                         outputstr = "<html><body>Could not display 404 error page.</body></html>"
-                    content = StringIO.StringIO(outputstr)
-    
+                    content = StringIO(outputstr)
+
             except Exception as e:
                 response = 500
                 headers['Content-type'] = 'text/html'
@@ -160,42 +173,44 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                     raise
                 else:
                     outputstr = "<html><body>An unexpected server error has occured.</body></html>"
-                content = StringIO.StringIO(outputstr)
-                
+                content = StringIO(outputstr)
+
             #self.cgipath = os.path.abspath(os.path.join(self.appdir,path))
             #self.querystring = request.requestUrl().query()
-    
+
             #if not self.cgipath.startswith(self.appdir):
             #    raise Exception("Unallowed cgi path:"+str(self.cgipath)+" is not "+str(self.appdir))
             #env = {
             #    'PATH':os.defpath,
             #    'QUERY_STRING':self.querystring,
             #    'BACKEND':'app'
-            #}        
-            #print "ENV",env
-            #print "EXEC:",self.cgipath
+            #}
+            #print("ENV",env)
+            #print("EXEC:",self.cgipath)
             #
             #data = subprocess.check_output(self.cgipath, env=env)
             #headerstr, _dummy, self.content = data.partition("\n\n")
-    
-            #headerfp = StringIO.StringIO("\n"+data)
+
+            #headerfp = StringIO("\n"+data)
             #httpmsg = HTTPMessage(headerfp)
-            #httpmsg.readheaders()        
-    
+            #httpmsg.readheaders()
+
             #for header in httpmsg:
             #    self.setRawHeader(header,httpmsg.getrawheader(header))
-            #    print "Set header",header,"=",httpmsg.getrawheader(header)
-    
+            #    print("Set header",header,"=",httpmsg.getrawheader(header))
+
             #for header in headers:
             #    self.setRawHeader(header,headers['header'])
-            
+
             self._dev = TestIODevice(content)
-            mimetype = headers['Content-type'].partition(';')[0]
+            # In Python 3 reply function requires the mimetype to be
+            # a bytes string, so encode it to bytes first.
+            mimetype = headers['Content-type'].partition(';')[0].encode()
             request.reply(mimetype, self._dev)
 
-       
+
     appdir = os.path.abspath(appdir)
-    
+
     handler = TestHandler(appdir, renderers=renderers, template_engines=template_engines, function_handlers = function_handlers, config=config, debug=debug, override_global_data=override_global_data)
     #interceptor = WebEngineUrlRequestInterceptor()
 
@@ -233,6 +248,3 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
     main_window.raise_()
 
     sys.exit(app.exec_())
-
-    
-

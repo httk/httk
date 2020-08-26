@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,7 +19,7 @@ from httk.core.geometry import is_point_inside_cell
 from httk.core import HttkObject, httk_typed_init, httk_typed_property
 from httk.core import FracVector, FracScalar
 from httk.core.basic import is_sequence
-from cellutils import *
+from httk.atomistic.cellutils import *
 
 
 class CellShape(HttkObject):
@@ -27,8 +27,8 @@ class CellShape(HttkObject):
     """
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
     """
- 
-    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'orientation': int})       
+
+    @httk_typed_init({'niggli_matrix': (FracVector, 3, 2), 'orientation': int})
     def __init__(self, niggli_matrix, orientation=1, basis=None):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
@@ -45,9 +45,9 @@ class CellShape(HttkObject):
             else:
                 scale = (maxele).simplify()
             basis = (basis * scale.inv()).simplify()
-        
+
         self._basis = basis
- 
+
         self.det = basis.det()
         self.inv = basis.inv()
         self.volume = abs(self.det)
@@ -57,19 +57,19 @@ class CellShape(HttkObject):
 
         self.lengths = [FracVector.use(x).simplify() for x in self.lengths]
         self.angles = [FracVector.use(x).simplify() for x in self.angles]
-        
+
         self.a, self.b, self.c = self.lengths
-        self.alpha, self.beta, self.gamma = self.angles        
+        self.alpha, self.beta, self.gamma = self.angles
 
     #def create(cls, basis=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, volume=None, scale=None, niggli_matrix=None, orientation=1, lengths=None, angles=None, normalize=True):
-            
+
     @classmethod
     def create(cls, cellshape=None, basis=None, metric=None, niggli_matrix=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None,
                lengths=None, angles=None, scale=None, scaling=None, volume=None, periodicity=None, nonperiodic_vecs=None, orientation=1):
         """
-        Create a new cell object, 
-        
-        cell: any one of the following: 
+        Create a new cell object,
+
+        cell: any one of the following:
 
           - a 3x3 array with (in rows) the three basis vectors of the cell (a non-periodic system should conventionally use an identity matrix)
 
@@ -87,8 +87,8 @@ class CellShape(HttkObject):
 
         periodicity: free form input parsed for periodicity
             sequence: True/False for each basis vector being periodic
-            integer: number of non-periodic basis vectors 
-        
+            integer: number of non-periodic basis vectors
+
         """
         if isinstance(cellshape, CellShape):
             basis = cellshape.basis
@@ -119,13 +119,13 @@ class CellShape(HttkObject):
 
         if niggli_matrix is None:
             raise Exception("CellShape.create: Not enough information to specify a cell given.")
-                
+
         if scaling is None and scale is not None:
             scaling = scale
 
         if scaling is not None and volume is not None:
             raise Exception("CellShape.create: cannot specify both scaling and volume!")
-            
+
         if volume is not None:
             scaling = vol_to_scale(basis, volume)
 
@@ -136,7 +136,7 @@ class CellShape(HttkObject):
                 basis = (basis*scaling).simplify()
 
         # For the basis we use a somewhat unusual normalization where the largest one element
-        # in the cell = 1, this way we avoid floating point operations for prototypes created 
+        # in the cell = 1, this way we avoid floating point operations for prototypes created
         # from cell vector (prototypes created from lengths and angles is another matter)
 
         if basis is not None:
@@ -152,7 +152,7 @@ class CellShape(HttkObject):
         c = niggli_matrix
         maxele = max(c[0, 0], c[0, 1], c[0, 2])
         niggli_matrix = (niggli_matrix * maxele.inv()).simplify()
-      
+
         return cls(niggli_matrix, orientation, basis)
 
     @httk_typed_property((FracVector, 3, 3))
@@ -166,20 +166,20 @@ class CellShape(HttkObject):
         coords = FracVector.use(coords)
         return coords*self.basis
 
-    def coordgroups_reduced_to_cartesian(self, coordgroups):    
-        newcoordgroups = []    
+    def coordgroups_reduced_to_cartesian(self, coordgroups):
+        newcoordgroups = []
         for coordgroup in coordgroups:
-            newcoordgroups += [self.coords_reduced_to_cartesian(coordgroup)]    
+            newcoordgroups += [self.coords_reduced_to_cartesian(coordgroup)]
         return FracVector.stack(newcoordgroups)
 
     def coords_cartesian_to_reduced(self, coords):
         coords = FracVector.use(coords)
         return coords*self.inv
 
-    def coordgroups_cartesian_to_reduced(self, coordgroups):    
-        newcoordgroups = []    
+    def coordgroups_cartesian_to_reduced(self, coordgroups):
+        newcoordgroups = []
         for coordgroup in coordgroups:
-            newcoordgroups += [self.coords_cartesian_to_reduced(coordgroup)]    
+            newcoordgroups += [self.coords_cartesian_to_reduced(coordgroup)]
         return FracVector.stack(newcoordgroups)
 
     def is_point_inside(self, cartesian_coord):
@@ -189,12 +189,12 @@ class CellShape(HttkObject):
         newbasis = self.basis.limit_denominator(5000000)
         new_niggli = self.niggli_matrix.limit_denominator(5000000)
         return self.__class__(niggli_matrix=new_niggli, basis=newbasis)
-        
+
 
 def main():
     pass
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

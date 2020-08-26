@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,7 +15,23 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, tempfile, StringIO
+import os, sys, tempfile
+
+from httk.core.basic import bz2open
+
+# Python 2 also has the io module, but the io.StringIO doesn't work
+# correctly.
+# try:
+    # from io import StringIO
+# except ImportError:
+    #Python2 compatibility
+    # from StringIO import StringIO
+
+if sys.version_info[0] > 2:
+    from io import StringIO
+else:
+    #Python2 compatibility
+    from StringIO import StringIO
 
 try:
     import bz2
@@ -30,7 +46,7 @@ except ImportError:
 
 def universal_opener(other):
     #if isinstance(other, file):
-    if isinstance(other, StringIO.StringIO):
+    if isinstance(other, StringIO):
         return IoAdapterFileReader(other)
     elif hasattr(other, 'read'):
         return IoAdapterFileReader(other, name=other.name)
@@ -59,18 +75,18 @@ class IoAdapterFileReader(object):
             self.file = None
         if self.deletefilename is not None:
             os.unlink(self.deletefilename)
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterFileReader):
             return other
         if isinstance(other, IoAdapterString):
-            f = StringIO.StringIO(other.string)
+            f = StringIO(other.string)
             return IoAdapterFileReader(f, name=other.name)
         if isinstance(other, IoAdapterFileWriter):
             return IoAdapterFileReader(other.fire, name=other.name, close=other.close_file)
         if isinstance(other, IoAdapterStringList):
-            f = StringIO.StringIO("\n".join(other.stringlist))
+            f = StringIO("\n".join(other.stringlist))
             return IoAdapterFileReader(f, name=other.name)
         if isinstance(other, IoAdapterFilename):
             f = cleveropen(other.filename, 'r')
@@ -84,7 +100,7 @@ class IoAdapterFileReader(object):
             self.close()
         except GeneratorExit:
             self.close()
-        
+
 
 class IoAdapterFileWriter(object):
 
@@ -101,20 +117,20 @@ class IoAdapterFileWriter(object):
         if self.file and self.close_file:
             self.file.close()
             self.file = None
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterFileWriter):
             return other
         if isinstance(other, IoAdapterString):
-            f = StringIO.StringIO(other.string)
+            f = StringIO(other.string)
             other._reroute = f
             return IoAdapterFileWriter(f, name=other.name)
         if isinstance(other, IoAdapterFileReader):
             return IoAdapterFileWriter(other.file, name=other.name, close=other.close_file)
         if isinstance(other, IoAdapterFilename):
             f = cleveropen(other.filename, 'w')
-            return IoAdapterFileReader(f, name=other.name, close=True)
+            return IoAdapterFileWriter(f, name=other.name, close=True)
         return cls.use(universal_opener(other))
 
 
@@ -132,13 +148,13 @@ class IoAdapterFileAppender(object):
         if self.file:
             self.file.close()
             self.file = None
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterFileWriter):
             return other
         if isinstance(other, IoAdapterString):
-            f = StringIO.StringIO(other.string)
+            f = StringIO(other.string)
             return IoAdapterFileAppender(f, name=other.name)
         if isinstance(other, IoAdapterFilename):
             f = cleveropen(other.filename, 'a')
@@ -149,7 +165,7 @@ class IoAdapterFileAppender(object):
 class IoAdapterString(object):
 
     """
-    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io    
+    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io
     """
 
     def __init__(self, string=None, name=None):
@@ -178,7 +194,7 @@ class IoAdapterString(object):
         if self._reroute is not None:
             self._reroute.close()
         pass
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterString):
@@ -200,13 +216,13 @@ class IoAdapterString(object):
 class IoAdapterStringList(object):
 
     """
-    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io    
+    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io
     """
 
     def __init__(self, stringlist, name=None):
         self.stringlist = stringlist
         self.name = name
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterStringList):
@@ -217,7 +233,7 @@ class IoAdapterStringList(object):
             stringlist = other.file.readlines()
             return IoAdapterStringList(stringlist, name=other.name)
         if isinstance(other, IoAdapterFilename):
-            with cleveropen(other.filename) as f:
+            with cleveropen(other.filename,'r') as f:
                 stringlist = f.file.readlines()
             return IoAdapterStringList(stringlist, name=other.name)
         return cls.use(universal_opener(other))
@@ -229,7 +245,7 @@ class IoAdapterStringList(object):
 class IoAdapterFilename(object):
 
     """
-    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io    
+    Universal io adapter, helps handling the passing of filenames, files, and strings to functions that deal with io
     """
 
     def __init__(self, filename, name=None, deletefilename=None):
@@ -243,7 +259,7 @@ class IoAdapterFilename(object):
     def close(self):
         if self.deletefilename is not None:
             os.unlink(self.deletefilename)
-        
+
     @classmethod
     def use(cls, other):
         if isinstance(other, IoAdapterFilename):
@@ -285,8 +301,8 @@ def zdecompressor(f, mode, *args):
     if not os.path.exists(f):
         raise IOError("zlibdecompressor: File not found found:"+str(f))
 
-    #print "Opening: "+f
-    
+    #print("Opening: "+f)
+
     if mode != 'r' and mode != 'rb':
         raise Exception("Cannot write inside zlib compressed files.")
 
@@ -294,13 +310,14 @@ def zdecompressor(f, mode, *args):
     result = p.communicate()
     if p.returncode != 0:
         raise Exception('zdecompressor needed to call out to gunzip binary, which failed with error:'+str(result[1]))
-    return StringIO.StringIO(result[0])
-    
+    return StringIO(result[0])
+
 
 def cleveropen(filename, mode, *args):
     basename_no_ext, ext = os.path.splitext(filename)
+
     if ext.lower() == '.bz2':
-        return bz2.BZ2File(filename, mode, *args)
+        return bz2open(filename, mode, *args)
     elif ext.lower() == '.gz':
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
@@ -311,11 +328,11 @@ def cleveropen(filename, mode, *args):
         except IOError:
             pass
         try:
-            return bz2.BZ2File(filename+".bz2", mode, *args)
+            return bz2open(filename+".bz2", mode, *args)
         except (IOError, NameError):
             pass
         try:
-            return bz2.BZ2File(filename+".BZ2", mode, *args)
+            return bz2open(filename+".BZ2", mode, *args)
         except (IOError, NameError):
             pass
         try:
@@ -339,4 +356,21 @@ def cleveropen(filename, mode, *args):
         else:
             raise Exception("IOAdapters.cleveropen: Do not know how to open:"+str(filename))
 
+def main():
+    import codecs
 
+    outname = IoAdapterFilename("/tmp/test.bz2")
+    output = IoAdapterFileWriter.use(outname)
+    output.file.write("text")
+    output.close()
+
+    inname = IoAdapterFilename("/tmp/test.bz2")
+    inp = IoAdapterFileReader.use(inname)
+
+    data = inp.file.read()
+    inp.close()
+
+    assert(data == "text")
+
+if __name__ == "__main__":
+    main()

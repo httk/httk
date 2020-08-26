@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,9 +17,9 @@
 import sys
 from httk.core import FracVector
 from httk.core.basic import is_sequence
-from cellshape import CellShape
-from spacegroup import Spacegroup
-from sitesutils import *
+from httk.atomistic.cellshape import CellShape
+from httk.atomistic.spacegroup import Spacegroup
+from httk.atomistic.sitesutils import *
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 
 
@@ -33,13 +33,13 @@ class Sites(HttkObject):
     #    return cls.types_declare(
     #                        (('reduced_coords',(FracVector,0,3)),('counts',[int]),('cell',Cell),('hall_symbol',str),('pbc',(bool,1,3))),
     #                         index=[])
-    
-    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int], 
+
+    @httk_typed_init({'reduced_coords': (FracVector, 0, 3), 'counts': [int],
                       'hall_symbol': str, 'pbc': (bool, 1, 3)},
                      index=['counts', 'hall_symbol', 'pbc'])
-    def __init__(self, reduced_coordgroups=None, 
-                 reduced_coords=None, 
-                 counts=None, 
+    def __init__(self, reduced_coordgroups=None,
+                 reduced_coords=None,
+                 counts=None,
                  hall_symbol=None, pbc=None):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
@@ -52,38 +52,38 @@ class Sites(HttkObject):
         if pbc is None:
             self.pbc = (True, True, True)
         else:
-            self.pbc = pbc 
-                                        
+            self.pbc = pbc
+
     @classmethod
-    def create(cls, sites=None, reduced_coordgroups=None, 
-               reduced_coords=None, 
+    def create(cls, sites=None, reduced_coordgroups=None,
+               reduced_coords=None,
                counts=None, occupancies=None,
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
                pbc=None, periodicity=None):
         """
         Create a new sites object
-        """        
+        """
         if isinstance(sites, Sites):
             return cls(reduced_coords=sites.reduced_coords, counts=sites.counts, cell=sites.cell, spacegroupobj=sites.spacegroupobj, pbc=sites.pbc, refs=sites.refs, tags=sites.tags)
 
         if reduced_coordgroups is None and reduced_coords is None:
-            raise Exception("Sites.create: no valid coordinate specifications given.")       
+            raise Exception("Sites.create: no valid coordinate specifications given.")
 
         if reduced_coordgroups is None and counts is None and occupancies is None:
-            raise Exception("Sites.create: if giving coordinates, counts or occupancies must also be given.")       
+            raise Exception("Sites.create: if giving coordinates, counts or occupancies must also be given.")
 
         if reduced_coordgroups is None and counts is None and reduced_coords is not None and occupancies is not None:
             reduced_coordgroups, assignments = coords_and_occupancies_to_coordgroups_and_assignments(reduced_coords, occupancies)
 
         if spacegroup is not None or hall_symbol is not None or spacegroupnumber is not None or setting is not None:
-            spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting) 
+            spacegroupobj = Spacegroup.create(spacegroup=spacegroup, hall_symbol=hall_symbol, spacegroupnumber=spacegroupnumber, setting=setting)
             hall_symbol = spacegroupobj.hall_symbol
         else:
             hall_symbol = None
-        
+
         if reduced_coordgroups is not None:
             reduced_coordgroups = FracVector.use(reduced_coordgroups)
-        
+
         if reduced_coords is not None:
             reduced_coords = FracVector.use(reduced_coords)
 
@@ -102,9 +102,9 @@ class Sites(HttkObject):
         if counts is None or reduced_coords is None:
             raise Exception("Sites.create: not enough information to create sites object.")
 
-        sites = cls(reduced_coordgroups=reduced_coordgroups, 
-                    reduced_coords=reduced_coords, 
-                    counts=counts, 
+        sites = cls(reduced_coordgroups=reduced_coordgroups,
+                    reduced_coords=reduced_coords,
+                    counts=counts,
                     hall_symbol=hall_symbol, pbc=pbc)
 
         return sites
@@ -112,12 +112,12 @@ class Sites(HttkObject):
     @classmethod
     def use(cls, old, cell=None, hall_symbol=None, periodicity=None):
         if isinstance(old, Sites):
-            return old                
+            return old
         try:
             return old.to_Sites()
         except Exception:
-            pass 
-        return cls.create(sites=old, cell=cell, hall_symbol=hall_symbol, periodicity=periodicity)        
+            pass
+        return cls.create(sites=old, cell=cell, hall_symbol=hall_symbol, periodicity=periodicity)
 
     #@property
     #reduced_coordgroups: provided as member
@@ -133,7 +133,7 @@ class Sites(HttkObject):
             #elif self._cartesian_coords != None:
             #    reduced_coordgroups = coords_and_counts_to_coordgroups(self._cartesian_coords,self._counts)
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(reduced_coordgroups,self.cell.basis)
-        return self._reduced_coordgroups 
+        return self._reduced_coordgroups
 
     def get_cartesian_coordgroups(self, cell):
         return coordgroups_reduced_to_cartesian(cell.basis, self.reduced_coordgroups)
@@ -166,20 +166,20 @@ class Sites(HttkObject):
         return anonymous_formula(self.counts)
 
     def clean(self):
-        
+
         reduced_coordgroups = self.reduced_coordgroups.limit_denominator(5000000)
         reduced_coords = self.reduced_coords.limit_denominator(5000000)
-            
-        return self.__class__(reduced_coordgroups=reduced_coordgroups, 
-                              reduced_coords=reduced_coords, 
-                              counts=self.counts,  
+
+        return self.__class__(reduced_coordgroups=reduced_coordgroups,
+                              reduced_coords=reduced_coords,
+                              counts=self.counts,
                               hall_symbol=self.hall_symbol, pbc=self.pbc)
 
     @property
     def total_number_of_atoms(self):
         raise Exception("Sites: attempt to call total_number_of_atoms on generic site, needs unitcellsites or representativesites")
 
-        
+
     #def tidy(self):
     #    return Sites(self._unique_coordgroups, self._uc_coordgroups, self.cell, self.hall_symbol, self.periodicity, self.refs, self.tags)
 
@@ -188,5 +188,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

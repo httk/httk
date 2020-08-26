@@ -24,6 +24,6 @@ def spglib_out_to_struct(out):
     cell = FracVector.from_floats(out[0].tolist())
     coords = FracVector.from_floats(out[1].tolist()) 
     occupations = out[2]
-    print "OCCUPATIONS:", occupations
+    print("OCCUPATIONS:", occupations)
     return Structure.create(cell=cell, coords=coords, occupations=occupations)
 

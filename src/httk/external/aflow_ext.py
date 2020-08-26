@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,10 +19,10 @@ from httk.core import citation
 citation.add_ext_citation('aflow', "(Author list to be added)")
 
 from httk import config
-from command import Command
+from httk.external.command import Command
 import httk
 
-try:    
+try:
     aflow_path = config.get('paths', 'aflow')
 except Exception:
     aflow_path = None
@@ -32,13 +32,13 @@ except Exception:
 def aflow(ioa_in, args, timeout=30):
     ioa_in = httk.IoAdapterString.use(ioa_in)
     #
-    #print "COMMAND AFLOW"
-    #print "SENDING IN",ioa_in.string
+    #print("COMMAND AFLOW")
+    #print("SENDING IN",ioa_in.string)
     out, err, completed = Command(aflow_path, args, inputstr=ioa_in.string).run(timeout)
-    #print "COMMAND AFLOW END"
+    #print("COMMAND AFLOW END")
     #return out, err
     #
-    #p = subprocess.Popen([aflow_path]+args, stdin=subprocess.PIPE,stdout=subprocess.PIPE, 
+    #p = subprocess.Popen([aflow_path]+args, stdin=subprocess.PIPE,stdout=subprocess.PIPE,
     #                                   stderr=subprocess.PIPE)
     #out, err = p.communicate(input=ioa_in.string)
     ioa_in.close()
@@ -47,16 +47,15 @@ def aflow(ioa_in, args, timeout=30):
 
 def standard_primitive(struct):
     ioa = httk.IoAdapterString()
-    
+
     httk.iface.vasp_if.structure_to_poscar(ioa, struct)
 
     out, err = aflow(ioa, ["--prim"])
 
-    print err
+    print(err)
 
     ioa2 = httk.IoAdapterString(out)
     newstruct = httk.iface.vasp_if.poscar_to_structure(ioa2)
     ioa.close()
     ioa2.close()
     return newstruct
-

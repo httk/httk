@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,16 +16,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import threading, subprocess, sys, os, signal, glob, distutils.spawn
+import codecs
 import httk.core
 from httk.core.basic import is_sequence
 from httk import config
-from httk.config import httk_root    
+from httk.config import httk_root
 import platform
 
-if httk.core.python_major_version >= 3:
-    from queue import Queue, Empty
-else:
-    from Queue import Queue, Empty
+from httk.core import queue
 
 
 class Command(object):
@@ -42,20 +40,28 @@ class Command(object):
 
     def run(self, timeout, debug=False):
 
-        self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE, 
+        self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE,
                                         stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd)
-        
+
         def target():
             if debug:
-                print "Command: Launching subprocess:", self.cmd, " with args ", self.args
-            
-            if debug:
-                print "Command: Running communicate with inputstr:", self.inputstr
-            
-            self.out, self.err = self.process.communicate(input=self.inputstr)
+                print("Command: Launching subprocess:", self.cmd, " with args ", self.args)
 
             if debug:
-                print "Command: Got back", self.out, self.err
+                print("Command: Running communicate with inputstr:", self.inputstr)
+
+            # In Python 3 the communicate function needs input to be bytes,
+            # so we encode the input string (in Python 2 the .encode() method has no effect).
+            # Sometimes self.inputstr is NoneType, however, which has no "encode()" attribute.
+            if type(self.inputstr) is str:
+                self.out, self.err = self.process.communicate(input=self.inputstr.encode())
+            else:
+                self.out, self.err = self.process.communicate(input=self.inputstr)
+            self.out = codecs.decode(self.out, 'utf-8')
+            self.err = codecs.decode(self.err, 'utf-8')
+
+            if debug:
+                print("Command: Got back", self.out, self.err)
 
         thread = threading.Thread(target=target)
         thread.start()
@@ -72,7 +78,7 @@ class Command(object):
                 completed = None
 
         self.process = None
-                
+
         return self.out, self.err, completed
 
     def start(self):
@@ -91,28 +97,32 @@ class Command(object):
             kwargs['preexec_fn'] = os.setsid
             kwargs['close_fds'] = 'posix' in sys.builtin_module_names
         else:  # Python 3.2+ and Unix
-            kwargs['start_new_session'] = True        
-        
+            kwargs['start_new_session'] = True
+
         def enqueue_output(out, queue):
             for line in iter(out.readline, b''):
                 queue.put(line)
             out.close()
-        
-        self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE, 
-                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, bufsize=1, **kwargs)
-    
-        self.output_queue = Queue()
+
+        self.process = subprocess.Popen([self.cmd]+self.args, stdout=subprocess.PIPE,
+                                        stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, **kwargs)
+
+        self.output_queue = queue.Queue()
         self.output_thread = threading.Thread(target=enqueue_output, args=(self.process.stdout, self.output_queue))
         self.output_thread.start()
 
     def wait_finish(self, timeout=None):
-        if self.process is not None:                 
-            def target():            
+
+        if "HTTK_DONT_HOLD" in os.environ and timeout is None:
+            timeout = 5
+
+        if self.process is not None:
+            def target():
                 self.process.wait()
-    
+
             thread = threading.Thread(target=target)
             thread.start()
-    
+
             thread.join(timeout)
             if thread.is_alive():
                 self._terminate()
@@ -130,33 +140,36 @@ class Command(object):
             except OSError:
                 # Possible racing condition, the process may have died
                 pass
-                
+
         self.output_thread.join()
         self.output_thread = None
         self.output_queue = None
-        self.process = None            
-    
+        self.process = None
+
     def stop(self):
-        if self.process is not None:                 
-            
+        if self.process is not None:
+
             if self.stophook is not None:
                 self.stophook(self)
-            
-            self._terminate()            
-    
+
+            self._terminate()
+
     def receive(self):
         lines = ""
         try:
             while(True):
-                line = self.output_queue.get_nowait()
+                line = codecs.decode(self.output_queue.get_nowait(), 'utf-8')
                 lines += line
-        except Empty:
+        except queue.Empty:
             pass
-        
+
         return lines
-    
+
     def send(self, command):
-        self.process.stdin.write(command)
+        # Python 3 requires encoding to bytes and
+        # the buffer also has to be explicitly flushed.
+        self.process.stdin.write(command.encode())
+        self.process.stdin.flush()
 
     @property
     def stdin(self):
@@ -166,7 +179,7 @@ class Command(object):
 def find_executable(executables, config_name):
     if not is_sequence(executables):
         executables = [executables]
-    
+
     path_conf = config.get('paths', config_name)
     if path_conf is not None and path_conf != "":
         paths = glob.glob(os.path.expandvars(os.path.expanduser(path_conf)))
@@ -177,8 +190,8 @@ def find_executable(executables, config_name):
         try:
             path = os.path.join(httk_root, 'External')
             externaldirs = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
-            extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == config_name]    
-            extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))    
+            extvers = [name.split('-')[1] for name in externaldirs if name.split('-')[0] == config_name]
+            extvers = sorted(extvers, key=lambda x: map(int, x.split('.')))
             bestversion = config_name+'-'+extvers[-1]
             for executable in executables:
                 p = os.path.join(path, bestversion, executable)
@@ -187,8 +200,8 @@ def find_executable(executables, config_name):
         except Exception:
             pass
 
-        for executable in executables:        
-            path = distutils.spawn.find_executable(executable) 
+        for executable in executables:
+            path = distutils.spawn.find_executable(executable)
             if path is not None:
                 return path
 

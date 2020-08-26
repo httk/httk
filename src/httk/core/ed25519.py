@@ -19,13 +19,13 @@ l = 2**252 + 27742317777372353535851937790883648493
 
 
 def H(m):
-    return hashlib.sha512(m).digest()
+    return bytearray(hashlib.sha512(m).digest())
 
 
 def expmod(b, e, m):
     if e == 0:
         return 1
-    t = expmod(b, e/2, m)**2 % m
+    t = expmod(b, e//2, m)**2 % m
     if e & 1:
         t = (t*b) % m
     return t
@@ -35,12 +35,12 @@ def inv(x):
     return expmod(x, q-2, q)
 
 d = -121665 * inv(121666)
-I = expmod(2, (q-1)/4, q)
+I = expmod(2, (q-1)//4, q)
 
 
 def xrecover(y):
     xx = (y*y-1) * inv(d*y*y+1)
-    x = expmod(xx, (q+3)/8, q)
+    x = expmod(xx, (q+3)//8, q)
     if (x*x - xx) % q != 0:
         x = (x*I) % q
     if x % 2 != 0:
@@ -66,7 +66,7 @@ def edwards(P, Q):
 def scalarmult(P, e):
     if e == 0:
         return [0, 1]
-    Q = scalarmult(P, e/2)
+    Q = scalarmult(P, e//2)
     Q = edwards(Q, Q)
     if e & 1:
         Q = edwards(Q, P)
@@ -75,21 +75,23 @@ def scalarmult(P, e):
 
 def encodeint(y):
     bits = [(y >> i) & 1 for i in range(b)]
-    return ''.join([chr(sum([bits[i * 8 + j] << j for j in range(8)])) for i in range(b/8)])
+    return bytearray([sum([bits[i * 8 + j] << j for j in range(8)]) for i in range(b//8)])
 
 
 def encodepoint(P):
     x = P[0]
     y = P[1]
     bits = [(y >> i) & 1 for i in range(b - 1)] + [x & 1]
-    return ''.join([chr(sum([bits[i * 8 + j] << j for j in range(8)])) for i in range(b/8)])
+    #return ''.join([chr(sum([bits[i * 8 + j] << j for j in range(8)])) for i in range(b//8)])
+    return bytearray([sum([bits[i * 8 + j] << j for j in range(8)]) for i in range(b//8)])
 
 
 def bit(h, i):
-    return (ord(h[i/8]) >> (i % 8)) & 1
+    return (h[i//8] >> (i % 8)) & 1
 
 
 def publickey(sk):
+    sk = bytearray(sk)
     h = H(sk)
     a = 2**(b-2) + sum(2**i * bit(h, i) for i in range(3, b-2))
     A = scalarmult(B, a)
@@ -102,9 +104,12 @@ def Hint(m):
 
 
 def signature(m, sk, pk):
+    sk = bytearray(sk)
+    pk = bytearray(pk)
+    m = bytearray(m,'utf-8')
     h = H(sk)
     a = 2**(b-2) + sum(2**i * bit(h, i) for i in range(3, b-2))
-    r = Hint(''.join([h[i] for i in range(b/8, b/4)]) + m)
+    r = Hint(bytearray([h[i] for i in range(b//8, b//4)]) + m)
     R = scalarmult(B, r)
     S = (r + Hint(encodepoint(R) + pk + m) * a) % l
     return encodepoint(R) + encodeint(S)
@@ -132,13 +137,16 @@ def decodepoint(s):
 
 
 def checkvalid(s, m, pk):
-    if len(s) != b/4:
+    s = bytearray(s)
+    pk = bytearray(pk)
+    m = bytearray(m,'utf-8')
+    if len(s) != b//4:
         raise Exception("signature length is wrong")
-    if len(pk) != b/8:
+    if len(pk) != b//8:
         raise Exception("public-key length is wrong")
-    R = decodepoint(s[0:b/8])
+    R = decodepoint(s[0:b//8])
     A = decodepoint(pk)
-    S = decodeint(s[b/8:b/4])
+    S = decodeint(s[b//8:b//4])
     h = Hint(encodepoint(R) + pk + m)
     if scalarmult(B, S) != edwards(R, scalarmult(A, h)):
         #raise Exception("signature does not pass verification")
@@ -148,43 +156,47 @@ def checkvalid(s, m, pk):
 
 # Extra checks
 assert b >= 10
-assert 8 * len(H("hash input")) == 2 * b
+assert 8 * len(H(bytearray("hash input",'utf-8'))) == 2 * b
 assert expmod(2, q-1, q) == 1
 assert q % 4 == 1
 assert expmod(2, l-1, l) == 1
 assert l >= 2**(b-4)
 assert l <= 2**(b-3)
-assert expmod(d, (q-1)/2, q) == q-1
+assert expmod(d, (q-1)//2, q) == q-1
 assert expmod(I, 2, q) == q-1
 assert isoncurve(B)
 assert scalarmult(B, l) == [0, 1]
 
 
 def main():
-    import base64
-    print "This runs some tests of the ed25519 python implementation"
+    import os, base64, subprocess
+    
+    print("This runs some tests of the ed25519 python implementation")
     message = "This is my message."
-    my_secret_key = "swordfish"
-    print "Generating public key"
+    my_secret_key = bytearray("swordfish",'utf-8')
+    print("Generating public key")
     my_public_key = publickey(my_secret_key)
-    print "Signing message"
+    print("Signing message")
     my_signature = signature(message, my_secret_key, my_public_key)
-    print "base64 encoding of signature"
+    print("base64 encoding of signature")
     b64signature = base64.b64encode(my_signature)
-    print "Signature is"
-    print b64signature
-    print "base64 encoding of signature"
+    print("Signature is")
+    print(b64signature)
+    assert(bytearray(b64signature) == bytearray('EiK38c3M9nFH9niBnqg6kxQg+VqHVXf11028CjBmaY4Ua+SOAM/qQc52OhcJTo23oOyWdPzbvXNlNr5PF6ldDQ==','utf-8'))
+    print("base64 encoding of signature")
     my_signature = base64.b64decode(b64signature)
-    print "Check if signature is valid"
-    checkvalid(my_signature, message, my_public_key)
+    print("Check if signature is valid")
+    result = checkvalid(my_signature, message, my_public_key)
+    assert(result == True)
     forged_message = "This is not my message."
-    try:
-        print "Check if forged message is valid"
-        checkvalid(my_signature, forged_message, my_public_key)
-    except Exception:
-        print "The forged message did not have the right signature."
-        pass
-    print "Finished"
+    print("Check if forged message is valid")
+    result = checkvalid(my_signature, forged_message, my_public_key)
+    assert(result==False)
+    #print("Check if implementation matches original python 2 implementation")
+    #output = subprocess.check_output("python2 -c 'import base64; from _ed25519_orig import *; my_secret_key = \"swordfish\"; print base64.b64encode(publickey(my_secret_key))'", shell=True)
+    #my_public_key_orig = bytearray(base64.b64decode(output))
+    #assert(my_public_key_orig == my_public_key)
+    print("Finished")
 
 if __name__ == "__main__":
     main()

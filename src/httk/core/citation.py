@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*- 
-# 
+# -*- coding: utf-8 -*-
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,17 +21,18 @@ Keep track of citation information for different parts of httk, so that this inf
 Turn on either explicitly by calling httk.config.print_citations_at_exit() from your program, or implicitly for all software
 using httk by setting 'auto_print_citations_at_exit=yes' in httk.cfg
 
-Right now this is mostly a proof of concept code, and was added in response to a concern that co-authors of the software 
+Right now this is mostly a proof of concept code, and was added in response to a concern that co-authors of the software
 would not get credit. We should extend this to add a facility to make it easier to track and acknowledge citations
 also of the data being used.
 """
+from __future__ import print_function
 from collections import OrderedDict
-from ..versioning import httk_version, httk_copyright_note, httk_version_date
+from httk.versioning import httk_version, httk_copyright_note, httk_version_date
 
 # TODO: Convert to using real instances of the core.reference.Reference class instead.
 
 from httk.config import config
-from .reference import Reference, Author
+from httk.core.reference import Reference, Author
 
 module_citations = OrderedDict()
 external_citations = OrderedDict()
@@ -70,22 +71,22 @@ def print_citations():
     #for author in authors:
     #    creditlist.append(author+" ("+(", ".join(authors[author]))+")")
 
-    print ""
-    print "=================================================================="
-    print "This program used the high-throughput toolkit"
-    print "  httk v" + httk_version + " (" + httk_version_date + "), " + httk_copyright_note
-    print 
-    print "Credits for httk modules used in this run:"
+    print("")
+    print("==================================================================")
+    print("This program used the high-throughput toolkit")
+    print("  httk v" + httk_version + " (" + httk_version_date + "), " + httk_copyright_note)
+    print()
+    print("Credits for httk modules used in this run:")
     for module in module_citations:
-        print "  ("+module+")", ",".join(module_citations[module])
-        #print ", ".join(creditlist)
+        print("  ("+module+")", ",".join(module_citations[module]))
+        #print(", ".join(creditlist))
     if external_citations != {}:
-        print "From within httk the following software was also used:"
-    
+        print("From within httk the following software was also used:")
+
         creditlist = []
         for software in external_citations:
-            print "  * "+software+" by "+", ".join(external_citations[software])
-    print "=================================================================="
+            print("  * "+software+" by "+", ".join(external_citations[software]))
+    print("==================================================================")
 
 
 def print_citations_at_exit():

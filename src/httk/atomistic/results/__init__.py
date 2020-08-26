@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,5 +15,5 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from totalenergyresult import Result_TotalEnergyResult
-from relaxedcellresult import Result_RelaxedCellResult
+from httk.atomistic.results.totalenergyresult import Result_TotalEnergyResult
+from httk.atomistic.results.relaxedcellresult import Result_RelaxedCellResult

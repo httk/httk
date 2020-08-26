@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -24,6 +24,6 @@ httk Io module
 from httk.core import citation
 citation.add_src_citation("httk", "Rickard Armiento")
 
-from load import load
-from save import save
-from cif import read_cif, write_cif
+from httk.httkio.load import load
+from httk.httkio.save import save
+from httk.httkio.cif import read_cif, write_cif

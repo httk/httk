@@ -169,7 +169,7 @@ class DictStore(object):
                         self.insert(subtablename, data)
                                    
             elif issubclass(t, Storable):
-                print "VAL", val
+                print("VAL", val)
                 if val.store != self:
                     raise Exception("DictStore.insert: Can only use Storable variables pertaining to the same store within another Storable.")
                 columnname = name+"_"+t.types[0]+"_sid"                
@@ -183,7 +183,7 @@ class DictStore(object):
     def get(self, table, sid, name):
         types = self.types[table]        
 
-        print "GET on", table, name
+        print("GET on", table, name)
         t = self.typedicts[table][name]
 
         # Regular column, no strangeness            
@@ -200,7 +200,7 @@ class DictStore(object):
                     if entry[table+"_sid"] != sid:
                         continue
                     new = t[0].instantiate_from_store(self, entry[t[0].types[0]+"_sid"])
-                    #print "I AM HERE:",new,self,entry[t[0].types[0]+"_sid"]
+                    #print("I AM HERE:",new,self,entry[t[0].types[0]+"_sid"])
                     entries.append(new)
             else:
                 for key in self.store[subtablename]:

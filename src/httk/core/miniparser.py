@@ -222,7 +222,8 @@ ls_ebnf = {
     'literals': ['[', ']', '{', '}', '(', ')', '|', ',', ';', '='],
     'precedence': (('left', '|'), ('left', ',')),
     'tokens': {'identifier': '[a-zA-Z][a-zA-Z0-9_]*',
-               'terminal': r'"[^"]+"|\'[^\']+\'',
+               'terminal': r'"([^\\"]|.)*"|' + r"'([^\\']|.)*'",
+               #'terminal': r'"([^\\"]|\\.)*"|' + r"'([^\\']|\\.)*'",
                'special': r'\?[^?]*\?'},
     'simplify': ['Rhs'],
     'remove': ['[', ']', '{', '}', '(', ')', '|', ',', ';', '='],
@@ -359,7 +360,7 @@ class LogVerbosity(object):
         return self._get_verbosity(sys._getframe(1).f_code.co_name) == other
 
     def __sub__(self, other):
-        return self(self.verbosity - other, **flags)
+        return self(self.verbosity - other, **self.flags)
 
 #### Main functions
 
@@ -382,7 +383,7 @@ def parser(ls, source, verbosity=0, logger=logger):
     if 'parse_table' not in ls:
         build_ls(ls=ls, verbosity=verbosity, logger=logger)
 
-    tokens = lexer(source, ls['tokens'], ls['literals'], ls['ignore'], ls['comment_markers'], verbosity=verbosity, logger=logger)    
+    tokens = lexer(source, ls['tokens'], ls['partial_tokens'], ls['literals'], ls['ignore'], ls['comment_markers'], verbosity=verbosity, logger=logger)    
 
     if hasattr(verbosity, 'print_all_tokens') and verbosity.print_all_tokens == True:
         tokens = list(tokens)
@@ -395,7 +396,6 @@ def parser(ls, source, verbosity=0, logger=logger):
     goto_table = ls['parse_table']['goto']
     symbol_stack = []
     state_stack = [1]
-    parse_stack = []
     symbol, inp, pos = next(tokens)
 
     while True:
@@ -489,7 +489,6 @@ def split_chars_strip_comments(source, comment_markers):
                 yield c, (l, p, line.rstrip('\n'))
         return
 
-    posbuf = []
     comment_start_markers = [x[0] for x in comment_markers]
     comments_dict = dict([(x[0], x[1]) for x in comment_markers])
     comment_end_marker = None
@@ -538,70 +537,83 @@ def split_chars_strip_comments(source, comment_markers):
                 line = ""
                 poslist = []
 
-
-def lexer(source, tokens, literals, ignore, comment_markers=[], verbosity=0, logger=logger):
+def lexer(source, tokens, partial_tokens, literals, ignore, comment_markers=[], verbosity=0, logger=logger):
     """
     A generator that turn source into tokens.
 
     Args:
       source (str): input string
       tokens (dict): a dictonary that maps all tokens of the 
-                     language on regular expressions that match them.
+                     language on regular expressions that match them. 
+      partial_tokens (dict): a dictionary that maps token names on
+                     regular expressions for partial token matches.
+                     This is used to allow finding longer matches if
+                     there is intermediate length input that does not
+                     match. E.g., to match 5.32e6 as a number instead
+                     as as Number(5.32) + Identifier(e) + Number(6).
       literals (list): a list of single character strings that are
                      to be treated as literals.
+
     """
-    stack = ""
-    seen_token, seen_token_pos = None, None
+    seen_token, seen_token_pos, seen_token_len = None, None, None
     last_good_pos = (0, 0, "")
     last_good_pos_next = (0, 0, "")
 
     token_regexes = dict([(x, re.compile("("+tokens[x]+r')\Z')) for x in tokens.keys()])
-
+    partial_token_regexes = dict([(x, re.compile("("+partial_tokens[x]+r')\Z')) for x in partial_tokens.keys()])
+    all_token_regexes = set(tokens.keys()) | set(partial_tokens.keys())
+    
     prescan = iter(split_chars_strip_comments(source, comment_markers))
-    c, pos = next(prescan)
-    stack = c
+    pushback = ""
+    stack = ""
+    c = None
 
-    while True:
+    class MatchFound(Exception):
+        pass
+    
+    while c != '' or len(pushback)>0 or seen_token is not None: 
+        if len(pushback)>0:
+            c = pushback[0]
+            pushback = pushback[1:]
+        else:
+            try:
+                c, pos = next(prescan)
+            except StopIteration:
+                c = ''
+        stack += c
+        
         if verbosity >= 5:
-            logger("LEX INPUT:", c)
+            logger("LEX INPUT:'"+c+"'")
+            
         if last_good_pos_next is None:
             last_good_pos_next = pos
-        for l in literals.union(ignore):
-            if stack == l:
-                seen_token, seen_token_pos = l, pos
-                last_good_pos, last_good_pos_next = pos, None
-                break
-        else:
-            for t in token_regexes:
-                #print "THIS SHOULD MATCH",t,token_regexes[t].match(stack) is None,stack
-                if token_regexes[t].match(stack) is not None:
-                    seen_token, seen_token_pos = t, pos
-                    last_good_pos, last_good_pos_next = pos, None
-                    break
-            else:
-                # No token matched
-                if seen_token is not None:
-                    if seen_token not in ignore:
-                        if verbosity >= 4:
-                            logger("LEX YIELD:", (seen_token, stack[:-1]))
-                        yield (seen_token, stack[:-1], seen_token_pos)
-                    seen_token, seen_token_pos = None, None
-                    stack = c
-                    continue
-        try:
-            c, pos = next(prescan)
-        except StopIteration:
-            break
-        stack += c
 
-    if seen_token is not None and ((seen_token in literals)
-                                   or (seen_token in ignore)
-                                   or (token_regexes[seen_token].match(stack) is not None)):
-        if seen_token not in ignore:
-            if verbosity >= 4:
-                logger("LEX YIELD:", (seen_token, stack))
-            yield (seen_token, stack, seen_token_pos)
-        stack = ""
+        if c != '':                
+            try:
+                for l in literals.union(ignore):
+                    if stack == l:
+                        seen_token, seen_token_pos, seen_token_len = l, pos, len(l)
+                        last_good_pos, last_good_pos_next = pos, None
+                        raise MatchFound()
+
+                for t in all_token_regexes:
+                    if t in token_regexes and token_regexes[t].match(stack) is not None:
+                        seen_token, seen_token_pos, seen_token_len = t, pos, len(stack)
+                        last_good_pos, last_good_pos_next = pos, None
+                        raise MatchFound()
+                    elif t in partial_token_regexes and partial_token_regexes[t].match(stack) is not None:
+                        raise MatchFound()
+            except MatchFound:
+                continue
+                
+        if seen_token is not None:
+            if seen_token not in ignore:
+                if verbosity >= 4:
+                    logger("LEX YIELD:", (seen_token, stack[:seen_token_len]))
+                yield (seen_token, stack[:seen_token_len], seen_token_pos)
+            pushback += stack[seen_token_len:]
+            stack = ""
+            seen_token, seen_token_pos, seen_token_len = None, None, None
 
     if stack != "":
         if last_good_pos is not None:
@@ -617,7 +629,7 @@ def lexer(source, tokens, literals, ignore, comment_markers=[], verbosity=0, log
     yield (None, None, pos)
 
 
-def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=" \t\n", simplify=[], aggregate=[], start=None, skip=[], remove=[], comment_markers=[], ls=None, verbosity=0, logger=logger):
+def build_ls(ebnf_grammar=None, tokens={}, partial_tokens={}, literals=None, precedence=[], ignore=" \t\n", simplify=[], aggregate=[], start=None, skip=[], remove=[], comment_markers=[], ls=None, verbosity=0, logger=logger):
     """
     Build a language specification from an ebnf grammar and some meta-info of the language.
 
@@ -626,6 +638,12 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
          tokens (dict,optional): a dict of token names and the regexs that defines them, they
              are considered terminals in the parsing. (They may also be defined
              as production rules in the ebnf, but if so, those definitions are ignored.)
+         partial_tokens (dict): a dictionary that maps token names on
+                     regular expressions for partial token matches.
+                     This is used to allow finding longer matches if
+                     there is intermediate length input that does not
+                     match. E.g., to match 5.32e6 as a number instead
+                     as as Number(5.32) + Identifier(e) + Number(6).
          literals (list of str): a list of strings of 1 or more characters which 
              define literal symbols of the language (i.e, the tokenizer name the 
              tokens the same as the string), if not given, an attemt is made to 
@@ -657,6 +675,7 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
     _ls = {
         'ebnf_grammar': ebnf_grammar,
         'tokens': tokens,
+        'partial_tokens': partial_tokens,
         'precedence': precedence,
         'ignore': set(ignore),
         'simplify': simplify,
@@ -681,9 +700,7 @@ def build_ls(ebnf_grammar=None, tokens={}, literals=None, precedence=[], ignore=
     if 'bnf_grammar_ast' not in ls:
         if ('ebnf_grammar' not in ls) and ('ebnf_grammar_ast' not in ls):
             raise ParserGrammarError("Parser grammar error: build_ls needs at least one of ebnf_grammar, ebnf_grammar_ast, or bnf_grammar_ast.")
-        if 'ebnf_grammar_ast' in ls:
-            ebnf_grammar_ast = ls['ebnf_grammar_ast']
-        else:
+        if 'ebnf_grammar_ast' not in ls:
             # First bootstrap ls_ebnf if it also is missing its parse table
             if 'parse_table' not in ls_ebnf:
                 build_ls(ls=ls_ebnf, verbosity=0, logger=logger)
@@ -958,11 +975,11 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                         action_table[state][lookahead] = ('reduce', (lhs, rhs))
                     elif action_table[state][lookahead][0] == 'shift':
                         check = precedence_check(lookahead, rhs)
-                        if check is 'reduce':
+                        if check == 'reduce':
                             action_table[state][lookahead] = ('reduce', (lhs, rhs))
-                        elif check is 'shift':
+                        elif check == 'shift':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][lookahead]
                         else:
                             assert(check == 'unknown')
@@ -987,11 +1004,11 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                         assert(action_table[state][symbol][0] == 'reduce')
                         rhs = action_table[state][symbol][1][1]
                         check = precedence_check(symbol, rhs)
-                        if check is 'shift':
+                        if check == 'shift':
                             action_table[state][symbol] = ('shift', new_state)
-                        elif check is 'reduce':
+                        elif check == 'reduce':
                             pass
-                        elif check is 'empty':
+                        elif check == 'empty':
                             del action_table[state][symbol]
                         else:
                             assert(check == 'unknown')
@@ -1005,7 +1022,7 @@ def _build_parse_tables(rule_table, first_table, terminals, start, precedence):
                 todo.append(new_cl)                    
 
     for warning in warnings:
-        logger("WARNING: shift/reduce conflict soved by shift for symbol:'"+str(warning)+"', involving rules:")
+        logger("WARNING: shift/reduce conflict solved by shift for symbol:'"+str(warning)+"', involving rules:")
         logger(warnings[warning], pretty=True)
 
     return parse_table
@@ -1041,7 +1058,7 @@ def _ebnf_to_bnf_rhs(rhs, bnf_grammar_ast, lhs_name='', recursion=0):
         bnf_grammar_ast += [('?'+repstr, (special,))]
         return [(repstr,)]
     elif op == 'terminal':
-        return [(rhs[1][1:-1],)]
+        return [(ebnf_unqote(rhs[1][1:-1]),)]
 
     elif op == 'Concatenation':
         new_rhs = []
@@ -1114,7 +1131,14 @@ def _ebnf_grammar_to_bnf(ebnf_grammar_ast, tokens, skip):
 
     return bnf_grammar
 
-
+def ebnf_unqote(s):
+    s = s.replace(r'\t','\t')
+    s = s.replace(r'\n','\n')
+    s = s.replace(r'\r','\r')
+    # Skip support for general escapes so that '\' does what one expects
+    #s = '\\'.join([x.replace('\\','') for x in s.split('\\\\')])
+    return s
+    
 # If this python file is run as a program, 
 # Parse the EBNF description of EBNF using the
 # language specification for EBNF and check

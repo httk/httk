@@ -23,7 +23,7 @@ import httk.analysis.matsci.vis
 class StructurePhaseDiagramVisualizerPlugin(HttkPlugin):
             
     def plugin_init(self, structurephasediagram):
-        print "PhaseDiagramVisualizerPlugin called"
+        print("PhaseDiagramVisualizerPlugin called")
         self.structurephasediagram = structurephasediagram
 
     def show(self, **params):        

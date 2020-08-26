@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012 - 2018 Rickard Armiento
 #
@@ -15,12 +15,10 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-Read and setup httk configuration and versioning data. 
+Read and setup httk configuration and versioning data.
 
 See docstring in config.py for more info.
 """
 
-from .config import *
+from httk.config.config import *
 __doc__ = config.__doc__
-
-

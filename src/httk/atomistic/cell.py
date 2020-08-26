@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,12 +16,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 from httk.core.geometry import is_point_inside_cell
-from httk.core import HttkObject, httk_typed_init, httk_typed_property
-from httk.core import FracVector, FracScalar
+from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
+from httk.core.vectors import FracVector, FracScalar
 from httk.core.basic import is_sequence
-from cellutils import *
-from cellshape import CellShape
-from spacegrouputils import crystal_system_from_hall, lattice_system_from_hall
+from httk.atomistic.cellutils import *
+from httk.atomistic.cellshape import CellShape
+from httk.atomistic.spacegrouputils import crystal_system_from_hall, lattice_system_from_hall
 
 #TODO: Make this inherit CellShape
 
@@ -30,20 +30,20 @@ class Cell(HttkObject):
 
     """
     Represents a cell (e.g., a unitcell, but also possibly just the basis vectors of a non-periodic system)
-    
+
     (The ability to represent the cell for a non-periodic system is also the reason this class is not called Lattice.)
     """
- 
-    @httk_typed_init({'basis': (FracVector, 3, 3), 'lattice_system': str, 'orientation': int})       
+
+    @httk_typed_init({'basis': (FracVector, 3, 3), 'lattice_system': str, 'orientation': int})
     def __init__(self, basis, lattice_system, orientation=1):
         """
         Private constructor, as per httk coding guidelines. Use Cell.create instead.
-        """    
+        """
         self.basis = basis
         self.orientation = orientation
         self.lattice_system = lattice_system
         self.niggli_matrix, self.orientation = basis_to_niggli_and_orientation(basis)
- 
+
         self.det = basis.det()
         self.inv = basis.inv()
         self._volume = abs(self.det)
@@ -54,25 +54,25 @@ class Cell(HttkObject):
         self.lengths = [FracVector.use(x).simplify() for x in self.lengths]
         self.angles = [FracVector.use(x).simplify() for x in self.angles]
         _dummy, self.cosangles, self.sinangles = niggli_to_lengths_and_trigangles(self.niggli_matrix)
-        
+
         self.a, self.b, self.c = self.lengths
-        self.alpha, self.beta, self.gamma = self.angles        
-        self.cosalpha, self.cosbeta, self.cosgamma = self.cosangles        
-        self.sinalpha, self.sinbeta, self.singamma = self.sinangles        
-        
+        self.alpha, self.beta, self.gamma = self.angles
+        self.cosalpha, self.cosbeta, self.cosgamma = self.cosangles
+        self.sinalpha, self.sinbeta, self.singamma = self.sinangles
+
     #def create(cls, basis=None, a=None, b=None, c=None, alpha=None, beta=None, gamma=None, volume=None, scale=None, niggli_matrix=None, orientation=1, lengths=None, angles=None, normalize=True):
-            
+
     @classmethod
-    def create(cls, cell=None, basis=None, metric=None, niggli_matrix=None, 
-               a=None, b=None, c=None, alpha=None, beta=None, gamma=None, 
-               lengths=None, angles=None, cosangles=None, scale=None, 
-               scaling=None, volume=None, periodicity=None, 
+    def create(cls, cell=None, basis=None, metric=None, niggli_matrix=None,
+               a=None, b=None, c=None, alpha=None, beta=None, gamma=None,
+               lengths=None, angles=None, cosangles=None, scale=None,
+               scaling=None, volume=None, periodicity=None,
                nonperiodic_vecs=None, orientation=1, hall=None,
                lattice_system=None, eps=0):
         """
-        Create a new cell object, 
-        
-        cell: any one of the following: 
+        Create a new cell object,
+
+        cell: any one of the following:
 
           - a 3x3 array with (in rows) the three basis vectors of the cell (a non-periodic system should conventionally use an identity matrix)
 
@@ -90,14 +90,14 @@ class Cell(HttkObject):
 
         periodicity: free form input parsed for periodicity
             sequence: True/False for each basis vector being periodic
-            integer: number of non-periodic basis vectors 
+            integer: number of non-periodic basis vectors
 
-        hall: giving the hall symbol makes it possible to determine the lattice system without numerical inaccuracy    
-        
-        lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'  
+        hall: giving the hall symbol makes it possible to determine the lattice system without numerical inaccuracy
+
+        lattice_system: any one of: 'cubic', 'hexagonal', 'tetragonal', 'orthorhombic', 'trigonal', 'triclinic', 'monoclinic', 'unknown'
         """
-        #print "Create cell:",cell,basis,angles, lengths,cosangles,a,b,c,alpha,beta,gamma
-         
+        #print("Create cell:",cell,basis,angles, lengths,cosangles,a,b,c,alpha,beta,gamma)
+
         if cell is not None:
             return Cell.use(cell)
 
@@ -109,7 +109,7 @@ class Cell(HttkObject):
 
         if lengths is None and not (a is None or b is None or c is None):
             lengths = [a, b, c]
-        
+
         if cosangles is None and angles is not None:
             cosangles = angles_to_cosangles(angles)
 
@@ -140,13 +140,13 @@ class Cell(HttkObject):
 
         if basis is None:
             raise Exception("cell.create: Not enough information to specify a cell given.")
-                
+
         if scaling is None and scale is not None:
             scaling = scale
 
         if scaling is not None and volume is not None:
             raise Exception("Cell.create: cannot specify both scaling and volume!")
-            
+
         if volume is not None:
             scaling = vol_to_scale(basis, volume)
 
@@ -165,7 +165,7 @@ class Cell(HttkObject):
 
         if basis is None:
             basis = FracVector.use(niggli_to_conventional_basis(niggli_matrix, lattice_system, orientation=orientation))
-            
+
         return cls(basis, lattice_system, orientation)
 
     @classmethod
@@ -175,7 +175,7 @@ class Cell(HttkObject):
         else:
             try:
                 if len(other) == 3:
-                    return cls.create(basis=other)        
+                    return cls.create(basis=other)
                 elif len(other) == 2:
                     return cls.create(niggli_matrix=other)
                 elif len(other) == 1:
@@ -206,20 +206,20 @@ class Cell(HttkObject):
         coords = FracVector.use(coords)
         return coords*self.basis
 
-    def coordgroups_reduced_to_cartesian(self, coordgroups):    
-        newcoordgroups = []    
+    def coordgroups_reduced_to_cartesian(self, coordgroups):
+        newcoordgroups = []
         for coordgroup in coordgroups:
-            newcoordgroups += [self.coords_reduced_to_cartesian(coordgroup)]    
+            newcoordgroups += [self.coords_reduced_to_cartesian(coordgroup)]
         return FracVector.stack(newcoordgroups)
 
     def coords_cartesian_to_reduced(self, coords):
         coords = FracVector.use(coords)
         return coords*self.inv
 
-    def coordgroups_cartesian_to_reduced(self, coordgroups):    
-        newcoordgroups = []    
+    def coordgroups_cartesian_to_reduced(self, coordgroups):
+        newcoordgroups = []
         for coordgroup in coordgroups:
-            newcoordgroups += [self.coords_cartesian_to_reduced(coordgroup)]    
+            newcoordgroups += [self.coords_cartesian_to_reduced(coordgroup)]
         return FracVector.stack(newcoordgroups)
 
     def is_point_inside(self, cartesian_coord):
@@ -235,7 +235,7 @@ class Cell(HttkObject):
 #             data['volume'] = FracVector(data['volume_g'],1000000000)
 #             del(data['volume_g'])
 #         return data
-# 
+#
 #     @classmethod
 #     def types_to_primitive(cls,data):
 #         if 'maxnorm_basis' in data:
@@ -269,7 +269,7 @@ class Cell(HttkObject):
         # We use the somewhat unusual normalization where the largest one element
         # in the cell = 1, this way we avoid floating point operations for prototypes created from cell vectors
         # (prototypes created from lengths and angles is another matter)
-        #        
+        #
         c = self.basis
         maxele = max(c[0, 0], c[0, 1], c[0, 2], c[1, 0], c[1, 1], c[1, 2], c[2, 0], c[2, 1], c[2, 2])
         maxeleneg = max(-c[0, 0], -c[0, 1], -c[0, 2], -c[1, 0], -c[1, 1], -c[1, 2], -c[2, 0], -c[2, 1], -c[2, 2])
@@ -290,13 +290,13 @@ class Cell(HttkObject):
         return Cell.create(basis=self.basis*scale.simplify())
 
     def __str__(self):
-        return "<Cell: %.8f * \n    [" % (self.normalization_scale)+"\n     ".join(["% .8f % .8f % .8f" % (x[0], x[1], x[2]) for x in self.get_normalized().basis.to_floats()])+"]>" 
-        
+        return "<Cell: %.8f * \n    [" % (self.normalization_scale)+"\n     ".join(["% .8f % .8f % .8f" % (x[0], x[1], x[2]) for x in self.get_normalized().basis.to_floats()])+"]>"
+
 
 def main():
     pass
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

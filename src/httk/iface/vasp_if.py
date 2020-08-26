@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -19,9 +19,9 @@ import os, shutil, math
 
 import httk
 from httk import config
-from httk.core.template import apply_templates 
+from httk.core.template import apply_templates
 from httk.atomistic.data import periodictable
-from httk.core.ioadapters import cleveropen 
+from httk.core.ioadapters import cleveropen
 from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
@@ -30,11 +30,11 @@ from httk.atomistic.structureutils import cartesian_to_reduced
 
 def get_pseudopotential(species, poscarspath=None):
     if poscarspath is None:
-        try:   
+        try:
             poscarspath = config.get('paths', 'vasp_pseudolib')
         except Exception:
             #return [name for name in os.listdir(a_dir)
-            #        if os.path.isdir(os.path.join(a_dir, name))]    
+            #        if os.path.isdir(os.path.join(a_dir, name))]
             poscarspath = None
 
     if poscarspath is None and "VASP_PSEUDOLIB" in os.environ:
@@ -59,13 +59,13 @@ def get_pseudopotential(species, poscarspath=None):
                 raise
                 pass
 
-    raise Exception("httk.iface.vasp_if.get_pseudopotentials: could not find a suitable pseudopotential for "+str(species))            
+    raise Exception("httk.iface.vasp_if.get_pseudopotentials: could not find a suitable pseudopotential for "+str(species))
 
 
 def write_kpoints_file(fio, kpoints, comment=None, mp=True, gamma_centered=False):
     """
-    """            
-    fio = IoAdapterFileWriter.use(fio)    
+    """
+    fio = IoAdapterFileWriter.use(fio)
     f = fio.file
     f.write(str(comment)+"\n")
     f.write("0\n")
@@ -83,8 +83,8 @@ def write_kpoints_file(fio, kpoints, comment=None, mp=True, gamma_centered=False
 
 def write_generic_kpoints_file(fio, comment=None, mp=True):
     """
-    """            
-    fio = IoAdapterFileWriter.use(fio)    
+    """
+    fio = IoAdapterFileWriter.use(fio)
     f = fio.file
     f.write(str(comment)+"\n")
     f.write("0\n")
@@ -117,7 +117,7 @@ def is_dualmagnetic(ion, ionlist):
 def magnetization_recurse(basemags, dualmags, high, low):
     if len(dualmags) == 0:
         return [basemags]
-    
+
     index = dualmags.pop()
     basemags[index] = high
     hi_list = magnetization_recurse(list(basemags), list(dualmags), high, low)
@@ -125,7 +125,7 @@ def magnetization_recurse(basemags, dualmags, high, low):
     low_list = magnetization_recurse(list(basemags), list(dualmags), high, low)
 
     return hi_list + low_list
-    
+
 
 def get_magnetizations(ionlist, high, low):
     basemags = []
@@ -139,9 +139,9 @@ def get_magnetizations(ionlist, high, low):
                 basemags.append(high)
             else:
                 basemags.append(low)
-                
+
     return magnetization_recurse(basemags, dualmags, high, low)
-    
+
 
 def copy_template(dirtemplate, dirname, templatename):
     template = os.path.join(dirname, "ht.template."+templatename)
@@ -152,7 +152,7 @@ def copy_template(dirtemplate, dirname, templatename):
 
 def poscar_to_strs(fio, included_decimals=''):
     """
-    Parses a file on VASPs POSCAR format. Returns 
+    Parses a file on VASPs POSCAR format. Returns
       (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
     where
       cell: 3x3 nested list of *strings* designating the cell
@@ -164,9 +164,9 @@ def poscar_to_strs(fio, included_decimals=''):
       occupations: which species of each atom type (integers), or -1, ... -N if no species are given.
       comment: the comment string given at the top of the file
     """
-    fio = IoAdapterFileReader.use(fio)    
+    fio = IoAdapterFileReader.use(fio)
     f = fio.file
-    
+
     fi = iter(f)
 
     comment = next(fi).strip()
@@ -179,16 +179,16 @@ def poscar_to_strs(fio, included_decimals=''):
         scale = vol_or_scale
         vol = None
 
-    cell = [['', '', ''], ['', '', ''], ['', '', '']]        
+    cell = [['', '', ''], ['', '', ''], ['', '', '']]
     for i in [0, 1, 2]:
         cellline = next(fi).strip().split()
         for j, v in enumerate(cellline):
             cell[i][j] = v
-   
+
     symbols_or_count = next(fi).strip().split()
 
     try:
-        counts = map(int, symbols_or_count)
+        counts = list(map(int, symbols_or_count))
         symbols = None
         occupations = range(-1, -len(counts)-1, -1)
     except Exception:
@@ -199,9 +199,9 @@ def poscar_to_strs(fio, included_decimals=''):
     N = sum(counts)
 
     coordtype_or_selectivedynamics = next(fi).strip()
-    if coordtype_or_selectivedynamics[0] in 'Ss':       
+    if coordtype_or_selectivedynamics[0] in 'Ss':
         # Skip row if selective dynamics specifier
-        coordtype = next(fi).strip()        
+        coordtype = next(fi).strip()
     else:
         coordtype = coordtype_or_selectivedynamics
 
@@ -215,14 +215,14 @@ def poscar_to_strs(fio, included_decimals=''):
         for i in range(N):
             nxt = next(fi)
             strcoord = nxt.strip().split()[:3]
-            coord = map(lambda x: x.strip(), strcoord)
+            coord = list(map(lambda x: x.strip(), strcoord))
             coords.append(coord)
     else:
         for i in range(N):
             nxt = next(fi)
             strcoord = nxt.strip().split()[:3]
-            tempcoord = map(lambda x: x.strip(), strcoord)
-            coord = map(lambda x: x[0:2+included_decimals], tempcoord)
+            tempcoord = list(map(lambda x: x.strip(), strcoord))
+            coord = list(map(lambda x: x[0:2+included_decimals], tempcoord))
             coords.append(coord)
 
     return (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
@@ -233,11 +233,11 @@ def poscar_to_structure(f, included_decimals=''):
 
     frac_cell = FracVector.create(cell, simplify=True)
     counts = [int(x) for x in counts]
-        
+
     if coords_reduced:
         frac_coords = cartesian_to_reduced(cell, coords)
     else:
-        frac_coords = FracVector.create(coords, simplify=True)   
+        frac_coords = FracVector.create(coords, simplify=True)
 
     if volume is not None:
         volume = FracScalar.create(volume)
@@ -258,8 +258,8 @@ def write_poscar(fio, cell, coords, coords_reduced, counts, occupations, comment
     """
     Writes a file on VASPs POSCAR format. Where it says *string* below, any type that works with str(x) is also ok.
 
-    Input arguments  
-      f: file stream to put output on  
+    Input arguments
+      f: file stream to put output on
       cell: 3x3 nested list of *strings* designating the cell
       coords: Nx3 nested list of *strings* designating the coordinates
       coords_reduced: bool, true = coords are given in reduced coordinate (in vasp D or Direct), false = coords are given in cartesian coordinates
@@ -268,15 +268,15 @@ def write_poscar(fio, cell, coords, coords_reduced, counts, occupations, comment
       comment: (optional) the comment string given at the top of the file
       scale: (optional) *string* representing the overall scale of the cell
       vol: *string* representing the volume of the cell (only one of scale and vol can be set)
-    """        
-    fio = IoAdapterFileWriter.use(fio)    
+    """
+    fio = IoAdapterFileWriter.use(fio)
     f = fio.file
     f.write(str(comment)+"\n")
     if vol is not None:
         f.write("-"+str(vol)+"\n")
     else:
         f.write(str(scale)+"\n")
-    for c1, c2, c3 in cell:  
+    for c1, c2, c3 in cell:
         f.write(str(c1)+" "+str(c2)+" "+str(c3)+"\n")
 
     for i in range(len(counts)):
@@ -285,7 +285,7 @@ def write_poscar(fio, cell, coords, coords_reduced, counts, occupations, comment
         else:
             f.write(str(occupations[i]) + " ")
     f.write("\n")
- 
+
     for count in counts:
         f.write(str(count) + " ")
     f.write("\n")
@@ -300,7 +300,7 @@ def write_poscar(fio, cell, coords, coords_reduced, counts, occupations, comment
 def structure_to_comment(struct):
     tags = struct.get_tags().values()
     if len(tags) > 0:
-        tagstr = " tags: " + ", ".join([tag.tag+":"+tag.value for tag in tags])        
+        tagstr = " tags: " + ", ".join([tag.tag+":"+tag.value for tag in tags])
     else:
         tagstr = ""
     if struct.has_rc_repr and struct.has_uc_repr:
@@ -309,7 +309,7 @@ def structure_to_comment(struct):
         return struct.formula + " " + tagstr
 
 
-def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None, primitive_cell=True):    
+def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None, primitive_cell=True):
     if comment is None:
         comment = structure_to_comment(struct)
     if primitive_cell:
@@ -325,20 +325,20 @@ def structure_to_poscar(f, struct, fix_negative_determinant=False, comment=None,
         basis = struct.uc_basis
         coords = struct.uc_reduced_coords
         vol = struct.uc_volume
-        counts = struct.uc_counts        
-        
+        counts = struct.uc_counts
+
     if basis.det() < 0:
         if fix_negative_determinant:
             basis = -basis
             coords = (-coords).normalize()
-    
+
     write_poscar(f, basis.to_strings(), coords.to_strings(), True, counts, struct.symbols, comment, vol=vol.to_string())
 
 
 def calculate_kpoints(struct, dens=20):
     #local KPTSLINE=$(awk -v "LVAL=$LVAL" -v"equalkpts=$EQUAL_KPTS" -v"bumpkpts=$BUMP_KPTS" '
     basis = struct.uc_basis
-    
+
     celldet = basis.det()
     cellvol = abs(celldet)
 
@@ -358,12 +358,12 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
         mkdir_p(dirpath)
     else:
         os.mkdir(dirpath)
-    structure_to_poscar(os.path.join(dirpath, "POSCAR"), struct, fix_negative_determinant=True)         
+    structure_to_poscar(os.path.join(dirpath, "POSCAR"), struct, fix_negative_determinant=True)
     #write_generic_kpoints_file(os.path.join(dirpath,"KPOINTS"),comment=structure_to_comment(struct))
     kpoints = calculate_kpoints(struct)
     write_kpoints_file(os.path.join(dirpath, "KPOINTS"), kpoints, comment=structure_to_comment(struct))
     ioa = IoAdapterFileWriter.use(os.path.join(dirpath, "POTCAR"))
-    f = ioa.file			
+    f = ioa.file
     spieces_counts = []
     magmomlist = get_magnetizations(struct.symbols, 5, 1)
     magmom_per_ion = magmomlist[0]
@@ -378,10 +378,10 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
         pp = get_pseudopotential(symbol, poscarspath)
         f.write(pp)
         spieces_counts.append(count)
-        #magmoms.append(str(count)+"*"+str(get_magmom(symbol)))    
+        #magmoms.append(str(count)+"*"+str(get_magmom(symbol)))
         magmom = magmom_per_ion[i]
-        magmoms.append(str(count)+"*"+str(magmom))    
-        
+        magmoms.append(str(count)+"*"+str(magmom))
+
         def zval(results, match):
             results['zval'] = float(match.group(1))
         results = micro_pyawk(IoAdapterString(pp), [["^ *POMASS.*; *ZVAL *= *([^ ]+)", None, zval]])
@@ -401,16 +401,16 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
     nbands2 = int(math.ceil(nelect/2.0)+20+0.1)
     nbands_nospin = max(1, nbands1, nbands2)
     nbands_nospin += nbands_spin % 2
-    
-    data = {}	
-    data['VASP_SPIECES_COUNTS'] = " ".join(map(str, spieces_counts))
-    data['VASP_MAGMOM'] = " ".join(map(str, magmoms))
+
+    data = {}
+    data['VASP_SPIECES_COUNTS'] = " ".join(list(map(str, spieces_counts)))
+    data['VASP_MAGMOM'] = " ".join(list(map(str, magmoms)))
     data['VASP_NBANDS_SPIN'] = str(nbands_spin)
     data['VASP_NBANDS_NOSPIN'] = str(nbands_nospin)
 
     if template.startswith('t:'):
         template = os.path.join(httk.httk_root, 'Execution', 'tasks-templates', template[2:])
-    
+
     apply_templates(template, dirpath, envglobals=data, mkdir=False)
 
 
@@ -435,11 +435,7 @@ class OutcarReader():
                               ["FREE ENERGIE", None, set_final],
                               ], results, debug=False)
         self.parsed = True
- 
+
 
 def read_outcar(ioa):
     return OutcarReader(ioa)
-    
-
-    
-    

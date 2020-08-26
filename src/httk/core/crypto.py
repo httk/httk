@@ -17,24 +17,32 @@
 """
 Provides a few central and very helpful functions for cryptographic hashes, etc.
 """
-import hashlib, os.path, base64, re
+import hashlib, os.path, base64, re, sys, codecs
+from httk.core.basic import print_, unicode_type
+from httk.core import ed25519
+
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
+
 try:
     import bz2
 except Exception:
     pass
-import ConfigParser
-from .ioadapters import IoAdapterFileReader, IoAdapterFileWriter
+
+from httk.core.ioadapters import IoAdapterFileReader, IoAdapterFileWriter
 from httk.core.basic import nested_split
 
 
 def hexhash_str(data, prepend=None):
     s = hashlib.sha1()
-    s.update("httk\0")
+    s.update("httk\0".encode("utf-8"))
     if prepend is not None:
-        s.update(prepend)
-        s.update("\0")
-    s.update(data)
-    s.update("\0%u\0" % len(data))
+        s.update(prepend.encode("utf-8"))
+        s.update("\0".encode("utf-8"))
+    s.update(data.encode("utf-8"))
+    s.update("\0%u\0".encode("utf-8") % len(data))
     return s.hexdigest()
 
 
@@ -131,12 +139,12 @@ def hexhash_ioa(ioa, prepend=None):
 #         hexhash1 = hexhash_str(manifest)
 #         hexhash2 = hexhash_str(test)
 #         hexhash3 = hexhash_ioa(manifestpath)
-#         #print hexhash,hexhash1, hexhash2,hexhash3
-#         #print "-----"
-#         #print test
-#         #print "-----"
-#         #print manifest
-#         #print "-----"
+#         #print(hexhash,hexhash1, hexhash2,hexhash3)
+#         #print("-----")
+#         #print(test)
+#         #print("-----")
+#         #print(manifest)
+#         #print("-----")
 #         if hexhash != hexhash2:
 #             raise Exception("Manifest mismatch, the ht.manifest in the directory does not match the actual files! Hashes are:"+str(hexhash)+" vs. "+str(hexhash2))
 #     else:
@@ -155,13 +163,11 @@ def tuple_to_str(t):
             #tuplestr += "\n"
             strlist.append(tuplestr)
         else:
-            strlist.append(unicode(i).encode("utf-8"))
+            strlist.append(unicode_type(i))
     return " ".join(strlist)
 
 
 def read_keys(keydir):
-    from . import ed25519
-
     f = open(os.path.join(keydir, 'key1.priv'), "r")
     b64sk = f.read()
     f.close()
@@ -186,8 +192,6 @@ def sha256file(filename):
 
 
 def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=False, force=False):
-    from . import ed25519
-
     message = ""
 
     excludes = []
@@ -196,11 +200,11 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
         excludes = [x.strip() for x in f.readlines()]
         f.close()
     try:
-        cp = ConfigParser.ConfigParser()
+        cp = configparser.ConfigParser()
         cp.read(os.path.join(excludespath, "config"))
         excludestr = cp.get('main', 'excludes').strip()
         excludes += nested_split(excludestr, '[', ']')
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+    except (configparser.NoOptionError, configparser.NoSectionError):
         pass
 
     if len(excludes) == 0:
@@ -249,7 +253,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                 manifestfile.write(hh+" "+filename+"\n")
                 message += hh+" "+filename+"\n"
                 if debug:
-                    print "Adding:", hh+" "+filename
+                    print("Adding:", hh+" "+filename)
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root, d)
@@ -260,7 +264,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir, 'ht.config')):
                     if force or (not os.path.exists(os.path.join(fulldir, 'ht.manifest.bz2'))):
                         submanifestfile = bz2.BZ2File(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), 'w')
-                        print "Generating manifest:", os.path.join(basedir, fulldir, 'ht.manifest.bz2')
+                        print("Generating manifest:", os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
                         manifest_dir(os.path.join(basedir, fulldir), submanifestfile, os.path.join(basedir, fulldir, 'ht.config'), keydir, sk, pk)
                         submanifestfile.close()
                         os.rename(os.path.join(basedir, fulldir, 'ht.tmp.manifest.bz2'), os.path.join(basedir, fulldir, 'ht.manifest.bz2'))
@@ -268,12 +272,12 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
                     manifestfile.write(hh+" "+fulldir+"/\n")
                     message += hh+" "+fulldir+"/\n"
                     if debug:
-                        print "Adding:", hh+" "+fulldir+"/ "
+                        print("Adding:", hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
-    #print "===="+message+"===="
+    #print("===="+message+"====")
 
     sig = ed25519.signature(message, sk, pk)
     b64sig = base64.b64encode(sig)
@@ -333,7 +337,6 @@ def generate_keys(public_key_path, secret_key_path):
     """
     Generates a public and a private key pair and stores them in respective files
     """
-    from . import ed25519
     try:
         secret_key = os.urandom(64)
         #sr = random.SystemRandom()
@@ -346,38 +349,37 @@ def generate_keys(public_key_path, secret_key_path):
     b64public_key = base64.b64encode(public_key)
 
     pubfile = IoAdapterFileWriter.use(public_key_path)
-    pubfile.file.write(b64public_key)
+    pubfile.file.write(codecs.decode(b64public_key,'utf-8'))
     pubfile.close()
 
     secfile = IoAdapterFileWriter.use(secret_key_path)
-    secfile.file.write(b64secret_key)
+    secfile.file.write(codecs.decode(b64secret_key,'utf-8'))
     secfile.close()
 
 
-def get_crypto_signature(message, secret_key_path):
-    from . import ed25519
-
-    ioa = IoAdapterFileReader.use(secret_key_path)
-    b64secret_key = ioa.file.read()
-    ioa.close()
-    secret_key = base64.b64decode(b64secret_key)
+def get_crypto_signature(message, secret_key=None, keyfile=None):
+    if keyfile:
+        ioa = IoAdapterFileReader.use(keyfile)
+        secret_key = ioa.file.read()
+        ioa.close()
+    secret_key = base64.b64decode(secret_key)
     public_key = ed25519.publickey(secret_key)
     signature = ed25519.signature(message, secret_key, public_key)
     b64signature = base64.b64encode(signature)
     return b64signature
 
 
-def verify_crytpo_signature(signature, message, public_key):
-    from . import ed25519
-
+def verify_crytpo_signature(signature, message, public_key=None, keyfile=None):
+    if keyfile:
+        ioa = IoAdapterFileReader.use(keyfile)
+        public_key = ioa.file.read()
+        ioa.close()
     binsignature = base64.b64decode(signature)
     binpublic_key = base64.b64decode(public_key)
     return ed25519.checkvalid(binsignature, message, binpublic_key)
 
 
 def verify_crytpo_signature_old(signature, message, public_key_path):
-    from . import ed25519
-
     ioa = IoAdapterFileReader.use(public_key_path)
     b64public_key = ioa.file.read()
     ioa.close()
@@ -387,20 +389,22 @@ def verify_crytpo_signature_old(signature, message, public_key_path):
 
 
 def main():
-    print "Generating keys, this may take some time."
+    print_("Generating keys, this may take some time.")
     generate_keys("/tmp/pub.key", "/tmp/priv.key")
     message = "This is my message."
-    print "Signing message"
-    my_signature = get_crypto_signature(message, "/tmp/priv.key")
-    print "Signature is"
-    print my_signature
-    print "Check if signature is valid"
-    result = verify_crytpo_signature(my_signature, message, "/tmp/pub.key")
-    print "True message validates", result
+    print_("Signing message")
+    my_signature = get_crypto_signature(message, keyfile="/tmp/priv.key")
+    print_("Signature is")
+    print_(my_signature)
+    print_("Check if signature is valid")
+    result = verify_crytpo_signature(my_signature, message, keyfile="/tmp/pub.key")
+    print_("True message validates", result)
+    assert(result == True)
     forged_message = "This is not my message."
-    result = verify_crytpo_signature(my_signature, forged_message, "/tmp/pub.key")
-    print "Forged message validates", result
-    print "Finished"
+    result = verify_crytpo_signature(my_signature, forged_message, keyfile="/tmp/pub.key")
+    print_("Forged message validates", result)
+    assert(result == False)
+    print_("Finished")
 
 if __name__ == "__main__":
     main()

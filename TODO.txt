@@ -1,0 +1,2 @@
+* Change exit(0) to sys.exit(0) (Optional)
+* Fix next() and __next__() => can use six.advance_iterator()

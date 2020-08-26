@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This is an example program using the High-Throughput toolkit (httk)
 # This program adds two (geometrically identical) structures to an sqlite database
-# 
+#
 import sys, os.path, inspect, datetime, argparse, os, errno
 
 # Workaround to allow this program to be run in a subdirectory of the httk directory even if the paths are not setup correctly.
@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description="Creates the tutorial sqlite database file")
     parser.add_argument('-debug', action='store_true')
     parser.add_argument('file', metavar='run', nargs='*', help='filenames or directories to import')
-    args = parser.parse_args()    
+    args = parser.parse_args()
 
     debug = args.debug
     #debug = True
@@ -49,12 +49,12 @@ def main():
     store.delay_commit()
 
     codeobj = httk.Code.create("create_tutorial_database", '1.0', refs=[httk.citation.httk_reference_main])
-    store.save(codeobj)  
-    print "==== Name of this code:", codeobj.name
+    store.save(codeobj)
+    print("==== Name of this code:", codeobj.name)
 
     today = datetime.datetime.today().isoformat()
-    print "==== Db import program started: "+today
-    
+    print("==== Db import program started: "+today)
+
     if len(args.file) == 0:
         files = [os.path.join(httk.httk_root, 'Tutorial/tutorial_data')]
     else:
@@ -65,9 +65,9 @@ def main():
     seen = {}
     for filek in range(argcount):
         f = files[filek]
-            
+
         if not os.path.exists(f):
-            print "File or dir "+f+" not found."
+            print("File or dir "+f+" not found.")
             continue
         if os.path.isdir(f):
             filelist = []
@@ -84,17 +84,17 @@ def main():
 
         for i in range(len(filelist)):
             filename = filelist[i]
-            print "Filename:"+filename
+            print("Filename:"+filename)
             # Uncomment for better control in how to load structures
             #if filename.endswith(".cif"):
             #    struct = httk.httkio.cif_to_struct(filename,backends=['cif2cell_reduce'])
             #elif filename.endswith(".vasp"):
             #    struct = httk.iface.vasp_if.poscar_to_structure(filename)
             struct = httk.load(filename).clean()
-            print "The formula is:", struct.formula+" ("+struct.anonymous_formula+")"
-            print "Volume", float(struct.uc_volume)
-            print "Tags:", [str(struct.get_tag(x)) for x in struct.get_tags()]
-            print "Refs:", [str(x) for x in struct.get_refs()]
+            print("The formula is:", struct.formula+" ("+struct.anonymous_formula+")")
+            print("Volume", float(struct.uc_volume))
+            print("Tags:", [str(struct.get_tag(x)) for x in struct.get_tags()])
+            print("Refs:", [str(x) for x in struct.get_refs()])
 
             if process_with_isotropy:
                 try:
@@ -102,7 +102,7 @@ def main():
                     newstruct.add_tag("isotropy/findsym", "done")
                     struct = newstruct
                 except Exception as e:
-                    print "Isotropy failed with:"+str(e)
+                    print("Isotropy failed with:"+str(e))
                     struct.add_tag("isotropy", "failed")
                     if debug:
                         raise
@@ -113,26 +113,22 @@ def main():
                     newstruct.add_tag("structure_tidy", "done")
                     struct = newstruct
                 except Exception as e:
-                    print "Structure tidy failed with:"+str(e)
+                    print("Structure tidy failed with:"+str(e))
                     struct.add_tag("structure_tidy", "failed")
                     if debug:
                         raise
-            
-            store.save(struct)            
+
+            store.save(struct)
             compound = Compound.create(base_on_structure=struct)
             store.save(compound)
 
             cs = CompoundStructure.create(compound, struct)
             store.save(cs)
-            store.commit()            
-        
-    print "==== Committing changes to database."
+            store.commit()
+
+    print("==== Committing changes to database.")
     store.commit()
-    print "==== Commit complete."
-    
+    print("==== Commit complete.")
+
 if __name__ == "__main__":
     main()
-
-
-
-

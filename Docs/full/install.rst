@@ -30,7 +30,7 @@ Alternative 1: Install via pip to just access the python library
 
 2. Issue in your terminal window::
 
-     pip install httk 
+     pip install httk
 
    If you at a later point want to upgrade your installation, just
    issue::
@@ -38,12 +38,12 @@ Alternative 1: Install via pip to just access the python library
      pip install httk --upgrade
 
 You should now be able to simply do ``import httk`` in your python programs to use the *httk* python library.
-     
+
 Alternative 2: Install via pip for python library + binaries + ability to develop *httk*
 ****************************************************************************************
 
 1. In addition to Python 2.7 and pip, you also need git.
-   You can get git from here: https://git-scm.com/ 
+   You can get git from here: https://git-scm.com/
 
 2. Issue in your terminal window::
 
@@ -78,13 +78,13 @@ You are now ready to use *httk*.
     in your httk directory. To switch back to the stable release, do::
 
 	 git checkout master
-	 pip install . --upgrade --user	
-  
+	 pip install . --upgrade --user
+
   * An alternative to installing with ``pip install`` is to just run httk out of the
     httk directory. In that case, skip the pip install step above and just append
     ``source ~/path/to/httk/init.shell`` to your shell init files,
     with ``~/path/to/httk`` replaced by the path of your httk directory.)*
-  
+
 
 Alternative 3: For experienced users: direct manual install
 ***********************************************************
@@ -104,7 +104,7 @@ That is all that is needed. As your first test, you can try to run
 first time you run this command it can be rather slow, since python is
 creating ``*.pyc`` files for all httk modules.)
 
- 
+
 Alternative 4: Step-by-step instructions for installation from archive
 **********************************************************************
 
@@ -120,14 +120,14 @@ Run the following in a terminal::
   rm -f httk-<version>.tgz
 
 where you have to fill in <download link> and <version> according to the release page.
-  
+
 The archive extaction (tar -zxf) will have created a subdirectory
 named after the actual version of httk that you downloaded. Check this
 with the command ``ls``. Lets say you see ``httk-1.1.2``, then do the
 following::
 
   ln -f -s httk-1.1.2 httk-latest
-  source ~/bin/python/httk-latest/setup.shell
+  source ~/bin/python/httk-latest/init.shell
 
 If you add the very last line to your ``.bashrc`` and/or ``.cshrc``, httk will work in all new terminals you open. (Or alternatively, just add
 ``~/bin/python/httk-latest/bin/`` to your ``PATH`` environment variable, and
@@ -158,10 +158,10 @@ Then do this::
 
   cd ~/bin/python
   rm -f httk-latest.tgz
-  curl -L <download link> --output httk-<version>.tar.gz  
+  curl -L <download link> --output httk-<version>.tar.gz
   tar -zxf httk-<version>.tgz
   rm -f httk-<version>.tar.gz
-  
+
 If the new version is, e.g., v1.1.3)::
 
   cp httk-latest/httk.cfg httk-1.1.3/httk.cfg
@@ -205,7 +205,7 @@ line blank. If you have some libraries installed in the system
 you want to make sure *not* to use system libraries, set
 allow_system_libs=no (this is useful if you are forced to work on a
 machine with too old versions installed in the system)
-      
+
 .. raw:: html
 
   <p>Now, please check out the various resources mentioned in :doc:`index` and look at the Tutorial/ and/or Examples/ programs.</p>
@@ -213,5 +213,3 @@ machine with too old versions installed in the system)
 .. raw:: text
 
   Now you should read relevant parts of README.txt and look at the Tutorial/ and/or Examples/ programs.
-
-

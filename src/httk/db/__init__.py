@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,8 +17,8 @@
 
 # TODO: The db package is in need of heavy cleanup. The API is ok, so it shouldn't affect the rest of the code.
 
-from httkobjdbplugin import HttkObjDbPlugin
+from httk.db.httkobjdbplugin import HttkObjDbPlugin
 from httk.core.httkobject import HttkObject
-import backend
-import store
-from storable import Storable
+from httk.db import backend
+from httk.db import store
+from httk.db.storable import Storable

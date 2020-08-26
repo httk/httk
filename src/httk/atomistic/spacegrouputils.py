@@ -2,7 +2,7 @@
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
-#    Some parts imported from cif2cell, (C) Torbjörn Björkman 
+#    Some parts imported from cif2cell, (C) Torbjörn Björkman
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -16,10 +16,13 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import pickle, re
+import sys, pickle, re
+import subprocess
 from fractions import Fraction
 
-from httk.core import citation, FracVector
+import httk.core.citation as citation
+from httk.core.vectors import FracVector
+
 
 # Load data extracted from cctbx
 citation.add_src_citation("imported spacegroup data", "Computational Crystallography Toolbox, http://cctbx.sourceforge.net/")
@@ -30,14 +33,6 @@ f.close()
 spacegroupdata = allspacegroupdata['data']
 itcnbr_index = allspacegroupdata['itc_nbr_index']
 hm_index = allspacegroupdata['hm_index']
-symops_hash_index = allspacegroupdata['symops_hash_index']
-all_symops = allspacegroupdata['symops']
-
-def symopshash(symops):
-    data = [symopstuple(x) for x in symops]
-    hashes = tuple(sorted([(hash(x[0]), hash(x[1])) for x in data]))
-    return hash(hashes)
-
 
 def val_to_tuple(val):
     frac = Fraction(val)
@@ -125,6 +120,23 @@ def symopstuple(symop, val_transform=val_to_tuple):
 
     return tuple([tuple(x) for x in transf]), tuple(transl)
 
+# symops_hash_index = allspacegroupdata['symops_hash_index']
+# Re-hash the hashes, due to hash function not being stable between version 2 and 3.
+# TODO: skip pre-generated hashes altogheter, and find a better way to do this
+
+def symopshash(symops):
+    data = [symopstuple(x) for x in symops]
+    hashes = tuple(sorted([(hash(x[0]), hash(x[1])) for x in data]))
+    return hash(hashes)
+
+symops_hash_index = {}
+for hall in spacegroupdata:
+    symops = spacegroupdata[hall]['symops_mtrx']
+    h = symopshash(symops)
+    symops_hash_index[h] = hall
+    spacegroupdata[hall]['symops_hash'] = h
+
+all_symops = allspacegroupdata['symops']
 
 # Valid settings, from: http://www.mx.iucr.org/iucr-top/cif/cif_core/definitions/Cdata_symmetry_cell_setting.html
 # These are really crystal systems...
@@ -252,7 +264,7 @@ def get_hm_setting(hm, setting):
 def filter_itcnbr_setting(itcnbr, setting=None, halls=None):
     try:
         itcnbr = str(int(itcnbr))
-    except Exception:        
+    except Exception:
         return []
     if halls is None:
         halls = spacegroupdata.keys()
@@ -284,7 +296,7 @@ def filter_hm(hm, setting=None, halls=None):
         except KeyError:
             pass
     if hm in hm_index:
-        possible_halls = hm_index[hm] 
+        possible_halls = hm_index[hm]
         return list(set(halls) & set(possible_halls))
     return halls
 
@@ -308,16 +320,16 @@ def filter_symops(symops, halls=None):
     symops_hash = symopshash(symops)
 
     if symops_hash in symops_hash_index:
-        symop_hall = symops_hash_index[symops_hash] 
+        symop_hall = symops_hash_index[symops_hash]
         if symop_hall in halls:
             return [symop_hall]
 
-    #print "FAILED?", halls, symops_hash, spacegroupdata[halls[0]]['symops_hash']
-    #print "************"
-    #print sorted([(x,symopstuple(x)) for x in symops])
-    #print "************"
-    #print sorted([(x,symopstuple(x)) for x in spacegroupdata[halls[0]]['symops_mtrx']])
-    #print "************"
+    #print("FAILED?", halls, symops_hash, spacegroupdata[halls[0]]['symops_hash'])
+    #print("************")
+    #print(sorted([(x,symopstuple(x)) for x in symops]))
+    #print("************")
+    #print(sorted([(x,symopstuple(x)) for x in spacegroupdata[halls[0]]['symops_mtrx']]))
+    #print("************")
 
     return []
 
@@ -385,7 +397,7 @@ def spacegroup_filter_specific(hall=None, hm=None, itcnbr=None, setting=None, sy
             hallparse = "-"+hallparse[1].upper() + (hallparse[2:].lower())
         else:
             hallparse = hallparse[0].upper() + (hallparse[1:].lower())
-            
+
         # Sometimes a commment, e.g., about the setting follows the hall symbol
         # But some hall symbols should have paranthesis...
         #if '(' in hallparse:
@@ -497,7 +509,7 @@ def crystal_system_from_spacegroupnbr(spacegroupnr):
     else:
         return "unknown"
 
-lattice_types = {'P': 'primitive', 'I': 'body-centered', 
+lattice_types = {'P': 'primitive', 'I': 'body-centered',
                  'F': 'face-centered', 'A': 'base-centered',
                  'B': 'base-centered', 'C': 'base-centered',
                  'R': 'rhombohedral'}
@@ -516,7 +528,7 @@ def lattice_system_from_hall(hall):
         return 'rhombohedral'
     else:
         return 'hexagonal'
-    
+
 
 def lattice_type_from_hall(hall):
     return lattice_types[lattice_symbol_from_hall(hall)]
@@ -565,7 +577,7 @@ def reduce_by_symops(coordgroups, symopvs, hall_symbol):
     wyckoffs = []
     for letter, spec in sorted(zip(letters, spacegroupdata[hall_symbol]['wyckoff_rep_spec_pos_op'])):
         wyckoffs += [(spec, letter)]
-    
+
     reduced_coordgroups = []
     wyckoff_symbols = []
     for coordgroup in coordgroups:
@@ -579,12 +591,12 @@ def reduce_by_symops(coordgroups, symopvs, hall_symbol):
                 keep_coords += [coord]
                 wyckoff_symbols += [wyckoff_symbol_matcher(wyckoffs, coord)]
         reduced_coordgroups += [keep_coords]
-    
+
     #wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
     #multiplicities = [1]*sum([len(x) for x in coordgroups])
 
     multiplicities = [mults[letters.index(x)] for x in wyckoff_symbols]
-    
+
     return reduced_coordgroups, wyckoff_symbols, multiplicities
 
 
@@ -593,7 +605,7 @@ def trivial_symmetry_reduce(coordgroups):
     Looks for 'trivial' ways to reduce the coordinates in the given coordgroups by a standard set of symmetry operations.
     This is not a symmetry finder (and it is not intended to be), but for a standard primitive cell taken from a standard
     conventional cell, it reverses the primitive unit cell coordgroups into the symmetry reduced coordgroups.
-    """    
+    """
     # TODO: Actually implement, instead of this placeholder that just gives up and returns P 1
 
     symops = []
@@ -609,21 +621,19 @@ def trivial_symmetry_reduce(coordgroups):
         hall_symbol = symops_hash_index[shash]
         rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
         return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
-    
+
     rc_reduced_coordgroups = coordgroups
     hall_symbol = 'P 1'
     wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
     multiplicities = [1]*sum([len(x) for x in coordgroups])
-    
+
     return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
 
 
 def main():
-    print allspacegroupdata['symops']
-
+    print(allspacegroupdata['symops'])
     #result = spacegroup_filter('134')
-    #print result
-
+    #print(result)
     pass
 
 

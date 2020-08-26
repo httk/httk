@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -30,24 +30,24 @@ from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 
 from httk import config
 from httk.atomistic import Structure, UnitcellSites
-import httk.iface 
-from subimport import submodule_import_external
-try:   
+import httk.iface
+from httk.external.subimport import submodule_import_external
+try:
     pymatgen_path = config.get('paths', 'pymatgen')
 except Exception:
     pymatgen_path = None
 
 pymatgen_major_version = None
 pymatgen_minor_version = None
-    
+
 def ensure_pymatgen_is_imported():
     if pymatgen_path == "False":
         raise Exception("httk.external.pymatgen_glue: module pymatgen_glue imported, but pymatgen is disabled in configuration file.")
     if pymatgen_major_version is None:
         raise ImportError("httk.external.pymatgen_glue imported without access to the pymatgen python library.")
-    
+
 if pymatgen_path != "False":
-    if pymatgen_path is not None:    
+    if pymatgen_path is not None:
         submodule_import_external(os.path.join(pymatgen_path), 'pymatgen')
     else:
         try:
@@ -60,7 +60,7 @@ if pymatgen_path != "False":
 
         pymatgen_major_version = pymatgen.__version__.split('.')[0]
         pymatgen_minor_version = pymatgen.__version__.split('.')[1]
-        
+
     except ImportError:
         pass
 
@@ -70,4 +70,3 @@ mp_key = ""
 def set_mp_key(key):
     global mp_key
     mp_key = key
-

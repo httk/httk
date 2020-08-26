@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -15,11 +15,16 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, mimetypes, collections, time, StringIO
+import os, sys, mimetypes, collections, time
 
-import helpers
-from helpers import UnquotedStr
+from httk.httkweb import helpers
+from httk.httkweb.helpers import UnquotedStr
 from _ast import Or
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 class Page(object):
     def __init__(self,meta={}):
@@ -31,15 +36,15 @@ class Page(object):
     def update_metadata(self, meta):
         for item in meta:
             setattr(self,item,meta[item])
-            
+
     def __str__(self):
         return str(self.content)
     def __repr__(self):
         return str(self.content)
 
-    
+
 class WebGenerator(object):
-    
+
     def __init__(self, srcdir, global_data, renderers, template_engines, function_handlers):
 
         # Setup the crucial pages function
@@ -47,7 +52,7 @@ class WebGenerator(object):
             page = self._retrieve_page(relative_url, update_access_timestamp=False, query = False)
             return getattr(page, subfield)
         global_data['pages'] = access_pages
-                
+
         self.global_data = global_data
         self.srcdir = srcdir
         self.renderers = renderers
@@ -55,7 +60,7 @@ class WebGenerator(object):
         self.function_handlers = function_handlers
         self.page_memcache = collections.OrderedDict()
         self.page_memcache_index = {}
-        
+
         self.static_dir = os.path.join(srcdir, global_data['_static_subdir'])
         self.content_dir = os.path.join(srcdir, global_data['_content_subdir'])
         self.functions_dir = os.path.join(srcdir, global_data['_functions_subdir'])
@@ -65,7 +70,7 @@ class WebGenerator(object):
 
         self.allow_urls_without_ext = global_data['_allow_urls_without_ext']
         self.use_urls_without_ext = global_data['_use_urls_without_ext']
-        
+
         try:
             init_function_info = helpers.identify(os.path.join(srcdir,'functions'), 'init', function_handlers, allow_urls_without_ext=True)
         except IOError:
@@ -80,13 +85,13 @@ class WebGenerator(object):
         global_data['page'] = page
         global_data['query'] = query
         try:
-            render_output = render_class(self.content_dir, relative_filename, global_data)            
+            render_output = render_class(self.content_dir, relative_filename, global_data)
         except IOError as e:
             raise IOError("Requested page not found")
-        
+
         metadata = render_output.metadata()
         content = render_output.content()
-        
+
         # Support for web functions
         page.functions = []
         for entry in list(metadata):
@@ -107,7 +112,7 @@ class WebGenerator(object):
                         continue
                     else:
                         function_execute = False
-                         
+
                 for function_handler_ext in self.function_handlers:
                     if function_name.endswith(function_handler_ext):
                         function_filename = os.path.join(self.srcdir,"functions",function_name)
@@ -115,7 +120,7 @@ class WebGenerator(object):
                     else:
                         function_filename = os.path.join(self.srcdir,"functions",function_name+"."+function_handler_ext)
                     if os.path.exists(os.path.join(function_filename)):
-                        break                    
+                        break
                 else:
                     raise Exception("Could not find function handler for function: "+function_name)
 
@@ -123,7 +128,7 @@ class WebGenerator(object):
                 for template_engine_ext in self.template_engines:
                     if function_template.endswith("."+template_engine_ext):
                         template_filename = os.path.join(self.srcdir,"templates",page.template)
-                        function_template = function_template[:-len("."+template_engine_ext)] 
+                        function_template = function_template[:-len("."+template_engine_ext)]
                     else:
                         template_filename = os.path.join(self.srcdir,"templates",function_template+"."+template_engine_ext)
                     if os.path.exists(os.path.join(template_filename)):
@@ -131,10 +136,10 @@ class WebGenerator(object):
                 else:
                     raise Exception("Could not find template for function: "+function_template)
 
-                instanciated_template_engine = self.template_engines[template_engine_ext](os.path.join(self.srcdir,"templates"),function_template+"."+template_engine_ext)                
+                instanciated_template_engine = self.template_engines[template_engine_ext](os.path.join(self.srcdir,"templates"),function_template+"."+template_engine_ext)
                 instanciated_function = self.function_handlers[function_handler_ext](os.path.join(self.srcdir,"functions"),function_name, function_args, global_data, instanciated_template_engine)
                 page.functions += [{'name':function_name, 'output_name':function_output_name, 'instance':instanciated_function, 'execute':function_execute}]
-                
+
         page.update_metadata(metadata)
         page._rendered_content = content
 
@@ -155,9 +160,9 @@ class WebGenerator(object):
         if self.use_urls_without_ext:
             relurl = os.path.splitext(relative_filename)[0]
         else:
-            relurl = os.path.splitext(relative_filename)[0]+'.html'        
-        page.relurl = relurl    
-        page.absurl = global_data['_baseurl'] + relurl 
+            relurl = os.path.splitext(relative_filename)[0]+'.html'
+        page.relurl = relurl
+        page.absurl = global_data['_baseurl'] + relurl
         page.functionurl = global_data['_basefunctionurl'] + os.path.splitext(relative_filename)[0] + global_data['_functionext']
 
         page._rendered_subcontent = []
@@ -173,17 +178,17 @@ class WebGenerator(object):
         # Handle query function processing
         for function in page.functions:
             if function['execute']:
-                outstr = function['instance'].execute_and_format(query,global_data)                                
+                outstr = function['instance'].execute_and_format(query,global_data)
                 page.update_metadata({function['output_name']:outstr})
-                #print "RESULT OF RUN:",outstr,"::",function['output_name']
-        
+                #print("RESULT OF RUN:",outstr,"::",function['output_name'])
+
         base_template_identity = helpers.identify(self.templates_dir,page.base_template,self.template_engines, allow_urls_without_ext=True)
-        instaced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])        
+        instaced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])
         page.content = instaced_template_engine.apply(UnquotedStr(page._rendered_content), data=global_data, *page._rendered_subcontent)
-        
+
         page.mimetype = 'text/html'
         page.dependency_filenames += instaced_template_engine.get_dependency_filenames()
-        
+
     def _retrieve_page(self, relative_url, query=None, update_access_timestamp=True, allow_urls_without_ext=None, all_functions = False):
 
         now = time.time()
@@ -194,9 +199,9 @@ class WebGenerator(object):
             query = {}
 
         canonical_request = (relative_url,all_functions,tuple(sorted(query.items())))
-                        
+
         if canonical_request in self.page_memcache:
-            page = self.page_memcache[canonical_request]            
+            page = self.page_memcache[canonical_request]
         elif no_query and relative_url in self.page_memcache_index:
             # Get last key from of OrderedDict
             canonical_request = next(reversed(self.page_memcache_index[relative_url]))
@@ -220,7 +225,7 @@ class WebGenerator(object):
                 page.timestamp_mtime = mtime
                 page.timestamp_last_stat = now
             # Use page cache only if rendering time is after mtime
-            if page.timestamp_render > mtime: 
+            if page.timestamp_render > mtime:
                 # Move to the front
                 del self.page_memcache[canonical_request]
                 self.page_memcache[canonical_request] = page
@@ -228,46 +233,48 @@ class WebGenerator(object):
                     page.timestamp_access = now
                 return page
             else:
-                del self.page_memcache[canonical_request]                    
-            
+                del self.page_memcache[canonical_request]
+
         if allow_urls_without_ext is None:
             allow_urls_without_ext = self.allow_urls_without_ext
 
-        identity = helpers.identify(self.content_dir, relative_url,self.renderers,allow_urls_without_ext=allow_urls_without_ext)
-        
+        identity = helpers.identify(self.content_dir, relative_url,self.renderers,
+                allow_urls_without_ext=allow_urls_without_ext)
+
         page = Page()
         if relative_url not in self.page_memcache_index:
             self.page_memcache_index[relative_url] = collections.OrderedDict()
         self.page_memcache_index[relative_url][canonical_request] = True
         self.page_memcache[canonical_request] = page
-        
+
         try:
             page.absolute_filename = identity['absolute_filename']
             page.timestamp_mtime = os.path.getmtime(identity['absolute_filename'])
             page.timestamp_last_stat = now
             page.timestamp_render = now
-            self._render_page(identity['relative_filename'], identity['class'], query, page, all_functions=all_functions)
+            self._render_page(identity['relative_filename'], identity['class'],
+                    query, page, all_functions=all_functions)
         except Exception:
             del self.page_memcache[canonical_request]
             del self.page_memcache_index[relative_url][canonical_request]
             if len(self.page_memcache_index[relative_url]) == 0:
                 del self.page_memcache_index[relative_url]
             raise
-            
+
         # Make sure we only keep page_memcache_limit number of pages in cache
         if len(self.page_memcache) > self.page_memcache_limit:
             prune_key = self.page_memcache.popitem()[0]
             del self.page_memcache_index[prune_key[0]][prune_key]
             if len(self.page_memcache_index[prune_key[0]]) == 0:
                 del self.page_memcache_index[prune_key[0]]
-            
+
         return page
 
     def retrieve(self, relative_url, query=None, allow_urls_without_ext=None, all_functions=False):
 
         # Check static content
         if self.static_dir != None:
-            static_file = os.path.join(self.static_dir,relative_url) 
+            static_file = os.path.join(self.static_dir,relative_url)
             if os.path.exists(static_file):
                 mimetype = mimetypes.MimeTypes().guess_type(static_file)[0]
                 if mimetype is None:
@@ -277,5 +284,5 @@ class WebGenerator(object):
                 return {'content':f, 'mimetype':mimetype}
 
         page = self._retrieve_page(relative_url, query, allow_urls_without_ext=allow_urls_without_ext, all_functions=all_functions)
-        content = StringIO.StringIO(page.content)        
+        content = StringIO(page.content)
         return {'content':content, 'mimetype':page.mimetype, 'functions':page.functions}

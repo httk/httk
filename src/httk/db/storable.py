@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,12 +16,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #from store.trivialstore import TrivialStore
-from filteredcollection import *
 import sys
 
+from httk.db.filteredcollection import *
+from httk.core import reraise_from
 
 def storable_types(name, *keyvals, **flags):
-    index = flags.pop('index', [])    
+    index = flags.pop('index', [])
     return {'name': name, 'keys': keyvals, 'keydict': dict(keyvals), 'index': index}
 
 
@@ -48,7 +49,7 @@ class Storable(object):
 
     """
     Superclass for handling various forms of data storage, retreival, etc. Class object representing data should inherit from Storable.
-    
+
     All public variables must be initalized in a call to storable_init() inside __init__().
     Other member variables are OK, but must begin with '_', and all methods must handle these variables not being initialized.
     For private variables that needs to be preserved: let them start with '_' AND declare them in storable_init().
@@ -92,7 +93,7 @@ class Storable(object):
                 return self.__dict__[name]
             except KeyError:
                 info = sys.exc_info()
-                raise AttributeError("KeyError when accessing local dict: "+str(info[1])), None, info[2]
+                reraise_from(AttributeError, "KeyError when accessing local dict: "+str(info[1]), info)
         return self.store[name]
 
     def __setattr__(self, name, val):
@@ -106,11 +107,11 @@ class Storable(object):
                             "Offending variable name: "+name)
 
     @classmethod
-    def variable(cls, searcher, name, types, outid=None, parent=None):        
-        # The empty new triggers an e.g., create_table. I'm not sure it really should be here, but it is tricky to get the order correct when 
-        # bootstapping new tables, and by placing this here, one can just simply make a query into the non-existent table, discover 
+    def variable(cls, searcher, name, types, outid=None, parent=None):
+        # The empty new triggers an e.g., create_table. I'm not sure it really should be here, but it is tricky to get the order correct when
+        # bootstapping new tables, and by placing this here, one can just simply make a query into the non-existent table, discover
         # that some data is missing,  and insert it into the newly created table.
-        #print searcher.variable()
+        #print(searcher.variable())
         raise Exception("Internal error.")
 
         searcher.store.new(types['name'], types)
@@ -119,15 +120,15 @@ class Storable(object):
             outid = name+"_"+str(len(cls._storable_tables))
         table = TableOrColumn(searcher, types['name'], parent=parent, outid=outid, indirection=1, classref=cls)
         return table
-    
+
     @classmethod
-    def find_all(cls, obj, store, member, value, types):        
+    def find_all(cls, obj, store, member, value, types):
         """
         Convinience method to do a very simple search of type: find all entries where member = value.
         """
         search = store.searcher()
         p = search.variable(obj.__class__)
-        #print "XXXXXXXXXX",obj.__class__
+        #print("XXXXXXXXXX",obj.__class__)
         search.add(p.__getattr__(member) == value)
         search.output(p, 'object')
         results = list(search)
@@ -137,7 +138,7 @@ class Storable(object):
             return []
 
     @classmethod
-    def find_one(cls, obj, store, member, value, types):        
+    def find_one(cls, obj, store, member, value, types):
         """
         Convinience^2 method to do a very simple search of type: find one entry where member = value.
         """
@@ -148,4 +149,3 @@ class Storable(object):
 
     def _sql(self):
         return str(self.store.sid)
-

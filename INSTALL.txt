@@ -139,7 +139,7 @@ with the command "ls". Lets say you see "httk-1.1.2", then do the
 following:
 
    ln -f -s httk-1.1.2 httk-latest
-   source ~/bin/python/httk-latest/setup.shell
+   source ~/bin/python/httk-latest/init.shell
 
 If you add the very last line to your ".bashrc" and/or ".cshrc", httk
 will work in all new terminals you open. (Or alternatively, just add

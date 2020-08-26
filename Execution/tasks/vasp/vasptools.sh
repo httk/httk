@@ -543,7 +543,7 @@ function VASP_PREPARE_INCAR {
 	    fi
 	fi
     fi
-    
+
     local NEDOS=$(VASP_GET_TAG NEDOS)
     if [ -z "$NEDOS" ]; then
 	if grep "^BUMP_NEDOS$" ht.remedy.* >/dev/null 2>&1; then

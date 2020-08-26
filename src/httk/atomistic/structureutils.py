@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*- 
-# 
+# -*- coding: utf-8 -*-
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
-#    Some parts imported from cif2cell, (C) Torbjörn Björkman 
+#    Some parts imported from cif2cell, (C) Torbjörn Björkman
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,11 +19,11 @@
 import sys
 
 from httk.core import is_sequence, breath_first_idxs, FracVector, FracScalar, MutableFracVector
-from cell import Cell
-from unitcellsites import UnitcellSites
-import spacegrouputils
+from httk.atomistic.cell import Cell
+from httk.atomistic.unitcellsites import UnitcellSites
+from httk.atomistic import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
-from data import periodictable
+from httk.atomistic.data import periodictable
 from fractions import Fraction
 from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
@@ -32,7 +32,7 @@ def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]
     newcoordgroups = []
     newindividual_data = []
-    for group in range(len(counts)): 
+    for group in range(len(counts)):
         order = sorted(range(counts[group]), key=lambda x: (coordgroups[group][x][0], coordgroups[group][x][1], coordgroups[group][x][2]))
         newcoordgroups.append(coordgroups[group][order])
         if individual_data is not None:
@@ -44,7 +44,7 @@ def sort_coordgroups(coordgroups, individual_data):
         return coordgroups.stack(newcoordgroups), None
 
 
-def niggli_to_metric(niggli):    
+def niggli_to_metric(niggli):
     m = niggli.noms
     # Since the niggli matrix contains 2*the product of the off diagonal elements, we increase the denominator by cell.denom*2
     return FracVector(((2*m[0][0], m[1][2], m[1][1]), (m[1][2], 2*m[0][1], m[1][0]), (m[1][1], m[1][0], 2*m[0][2])), niggli.denom*2).simplify()
@@ -72,7 +72,7 @@ def coords_and_occupancies_to_coordgroups_and_assignments(coords, occupancies):
             coordgroups.append([])
         coordgroups[idx].append(coords[i])
     return coordgroups, group_occupancies
-        
+
 
 def coords_to_coordgroups(coords, counts):
     coordgroups = []
@@ -80,7 +80,7 @@ def coords_to_coordgroups(coords, counts):
     for count in counts:
         coordgroups.append(coords[idx:count+idx])
         idx += count
-    
+
     return coordgroups
 
 
@@ -100,7 +100,7 @@ def niggli_to_cell_old(niggli_matrix, orientation=1):
 
     s11, s22, s33 = niggli_matrix[0][0], niggli_matrix[0][1], niggli_matrix[0][2]
     s23, s13, s12 = niggli_matrix[1][0]/2.0, niggli_matrix[1][1]/2.0, niggli_matrix[1][2]/2.0
-    
+
     a, b, c = sqrt(s11), sqrt(s22), sqrt(s33)
     alpha_rad, beta_rad, gamma_rad = acos(s23/(b*c)), acos(s13/(c*a)), acos(s12/(a*b))
 
@@ -127,7 +127,7 @@ def niggli_to_cell_old(niggli_matrix, orientation=1):
     for i in range(3):
         for j in range(3):
             cell[i][j] = round(cell[i][j], 14)
-    
+
     return cell
 
 
@@ -137,7 +137,7 @@ def niggli_to_basis(niggli_matrix, orientation=1):
 
     s11, s22, s33 = niggli_matrix[0][0], niggli_matrix[0][1], niggli_matrix[0][2]
     s23, s13, s12 = niggli_matrix[1][0]/2.0, niggli_matrix[1][1]/2.0, niggli_matrix[1][2]/2.0
-    
+
     a, b, c = sqrt(s11), sqrt(s22), sqrt(s33)
     alpha_rad, beta_rad, gamma_rad = acos(s23/(b*c)), acos(s13/(c*a)), acos(s12/(a*b))
 
@@ -164,13 +164,13 @@ def niggli_to_basis(niggli_matrix, orientation=1):
     for i in range(3):
         for j in range(3):
             basis[i][j] = round(basis[i][j], 14)
-    
+
     return basis
 
 
 def basis_to_niggli(basis):
     basis = FracVector.use(basis)
-    
+
     A = basis.noms
     det = basis.det()
     if det == 0:
@@ -206,7 +206,7 @@ def basis_vol_to_scale(basis, vol):
     det = float(basis_determinant(basis))
     if abs(det) < 1e-12:
         raise Exception("basis_to_niggli: Too singular cell matrix.")
-    return (float(vol)/(abs(det)))**(1.0/3.0) 
+    return (float(vol)/(abs(det)))**(1.0/3.0)
 
 
 def basis_scale_to_vol(basis, scale):
@@ -223,7 +223,7 @@ def niggli_vol_to_scale(niggli_matrix, vol):
     if volsqr == 0:
         raise Exception("niggli_vol_to_scale: singular cell matrix.")
     det = sqrt(float(volsqr))
-    return (float(vol)/det)**(1.0/3.0) 
+    return (float(vol)/det)**(1.0/3.0)
 
 
 def niggli_scale_to_vol(niggli_matrix, scale):
@@ -239,13 +239,13 @@ def niggli_scale_to_vol(niggli_matrix, scale):
 
 
 def niggli_to_lengths_angles(niggli_matrix):
-        
+
     s11, s22, s33 = niggli_matrix[0][0], niggli_matrix[0][1], niggli_matrix[0][2]
     s23, s13, s12 = niggli_matrix[1][0]/2.0, niggli_matrix[1][1]/2.0, niggli_matrix[1][2]/2.0
-    
+
     a, b, c = sqrt(s11), sqrt(s22), sqrt(s33)
     alpha, beta, gamma = acos(s23/(b*c))*180/pi, acos(s13/(c*a))*180/pi, acos(s12/(a*b))*180/pi
-        
+
     return [a, b, c], [alpha, beta, gamma]
 
 
@@ -280,7 +280,7 @@ def structure_to_p1structure(struct, backends=['ase']):
     for backend in backends:
         if backend == 'ase':
             try:
-                from httk.external import ase_ext        
+                from httk.external import ase_ext
                 return ase_ext.structure_to_p1structure(struct)
             except ImportError:
                 raise
@@ -292,7 +292,7 @@ def structure_to_sgstructure(struct, backends=['platon']):
     for backend in backends:
         if backend == 'platon':
             try:
-                from httk.external import platon        
+                from httk.external import platon
                 return platon.structure_to_sgstructure(struct)
             except ImportError:
                 pass
@@ -311,8 +311,8 @@ def reduced_to_cartesian(cell, coordgroups):
     return newcoordgroups
 
 
-def normalized_formula_parts(assignments, ratios, counts):    
-        
+def normalized_formula_parts(assignments, ratios, counts):
+
     formula = {}
     alloccs = {}
     maxc = 0
@@ -338,14 +338,14 @@ def normalized_formula_parts(assignments, ratios, counts):
             maxc = alloccs[assignment]
 
     alloccs = FracVector.create(alloccs.values())
-    alloccs = (alloccs/maxc).simplify()        
+    alloccs = (alloccs/maxc).simplify()
 
     for symbol in formula.keys():
-        formula[symbol] = (formula[symbol]*alloccs.denom/maxc).simplify()         
+        formula[symbol] = (formula[symbol]*alloccs.denom/maxc).simplify()
     #    if abs(value-int(value))<1e-6:
-    #        formula[symbol] = int(value) 
+    #        formula[symbol] = int(value)
     #    elif int(100*(value-(int(value)))) > 1:
-    #        formula[symbol] = float("%d.%.2e" % (value, 100*(value-(int(value))))) 
+    #        formula[symbol] = float("%d.%.2e" % (value, 100*(value-(int(value)))))
     #    else:
     #        formula[symbol] = float("%d" % (value,))
 
@@ -356,7 +356,7 @@ def normalized_formula(assignments, ratios, counts):
     formula = normalized_formula_parts(assignments, ratios, counts)
 
     normalized_formula = ""
-    for key in sorted(formula.iterkeys()):
+    for key in sorted(formula.keys()):
         if is_sequence(formula[key]):
             totval = sum(formula[key])
         else:
@@ -365,14 +365,14 @@ def normalized_formula(assignments, ratios, counts):
         if totval.denom == 1:
             if totval == 1:
                 if is_sequence(key):
-                    normalized_formula += "(" 
+                    normalized_formula += "("
                     for subkey in key:
                         if is_sequence(subkey):
-#                           normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) 
-                            normalized_formula += "%s%d.%02d" % (subkey[0], subkey[1].floor(), ((subkey[1]-subkey[1].floor())*100).floor()) 
+#                           normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey])
+                            normalized_formula += "%s%d.%02d" % (subkey[0], subkey[1].floor(), ((subkey[1]-subkey[1].floor())*100).floor())
                         else:
                             normalized_formula += "%s" % (subkey,)
-                    normalized_formula += ")" 
+                    normalized_formula += ")"
                 else:
                     normalized_formula += "%s" % (key,)
             #if is_sequence(xval):
@@ -385,15 +385,15 @@ def normalized_formula(assignments, ratios, counts):
                 #    normalized_formula += "%s%d" % (key, xval[0].floor())
             else:
                 if is_sequence(key):
-                    normalized_formula += "(" 
+                    normalized_formula += "("
                     for subkey in key:
                         if is_sequence(subkey):
-#                           normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) 
+#                           normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey])
                             normalized_formula += "%s%d.%02d" % (subkey[0], subkey[1].floor(), ((subkey[1]-subkey[1].floor())*100).floor())
                         else:
                             normalized_formula += "%s" % (subkey,)
                     normalized_formula += ")%d" % (totval,)
-                                        
+
 #                    normalized_formula += "(" + "".join(["%s%d" % (x,y.floor()) for x,y in zip(key,totval)]) + ")"
                 else:
                     normalized_formula += "%s%d" % (key, totval.floor())
@@ -405,11 +405,11 @@ def normalized_formula(assignments, ratios, counts):
             #else:
             #normalized_formula += "%s%d.%02d" % (key, xval.floor(),((xval-xval.floor())*100).floor())
             if is_sequence(key):
-                normalized_formula += "(" 
+                normalized_formula += "("
                 for subkey in key:
                     if is_sequence(subkey):
-#                       normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey]) 
-                        normalized_formula += "%s%d.%02d" % (subkey[0], subkey[1].floor(), ((subkey[1]-subkey[1].floor())*100).floor()) 
+#                       normalized_formula += "".join([("%s%d.%02d"%(x[0],x[1].floor(),(x[1]-x[1].floor())*100.floor())) for x in subkey])
+                        normalized_formula += "%s%d.%02d" % (subkey[0], subkey[1].floor(), ((subkey[1]-subkey[1].floor())*100).floor())
                     else:
                         normalized_formula += "%s" % (subkey,)
                 normalized_formula += ")%d.%02d" % (totval, ((totval-totval.floor())*100).floor())
@@ -429,13 +429,13 @@ def abstract_symbol(count):
 
 
 def abstract_formula(filled_counts):
-    
+
     formula = normalized_formula_parts(range(len(filled_counts)), [1]*len(filled_counts), filled_counts)
 
     idx = 0
     abstract_formula = ""
-    
-    for val in sorted(formula.items(), key=lambda x: x[1]):        
+
+    for val in sorted(formula.items(), key=lambda x: x[1]):
         idx += 1
         c = abstract_symbol(idx)
 
@@ -447,9 +447,9 @@ def abstract_formula(filled_counts):
                 abstract_formula += "%s%d" % (c, xval.floor())
         else:
             abstract_formula += "%s%d.%02d" % (c, xval.floor(), ((xval-xval.floor())*100).floor())
-        
+
         #abstract_formula += "%s%g" % (c,val[1])
-        
+
     return abstract_formula
 
 
@@ -460,8 +460,8 @@ def prototype_formula(proto):
 
     idx = 0
     abstract_formula = ""
-    
-    for val in sorted(formula.items(), key=lambda x: x[1]):        
+
+    for val in sorted(formula.items(), key=lambda x: x[1]):
         idx += 1
         c = abstract_symbol(idx)
 
@@ -473,12 +473,12 @@ def prototype_formula(proto):
                 abstract_formula += "%s%d" % (c, xval.floor())
         else:
             abstract_formula += "%s%d.%02d" % (c, xval.floor(), ((xval-xval.floor())*100).floor())
-        
+
         #abstract_formula += "%s%g" % (c,val[1])
-        
+
     return abstract_formula
 
-# def parse_assignment(assignment):    
+# def parse_assignment(assignment):
 #     if isinstance(assignment,(tuple,list)):
 #         if len(assignment)>=3:
 #             return FracVector.use(assignment[2])
@@ -511,7 +511,7 @@ def coords_and_counts_to_coordgroups(coords, counts):
     for count in counts:
         coordgroups.append(coords[idx:count+idx])
         idx += count
-    
+
     return coordgroups
 
 
@@ -543,13 +543,13 @@ def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'fake']
                     rc_reduced_coords=struct.uc_reduced_coords,
                     rc_counts=struct.uc_counts,
                     uc_cell=struct.uc_cell,
-                    uc_reduced_coords=struct.uc_reduced_coords, 
+                    uc_reduced_coords=struct.uc_reduced_coords,
                     uc_counts=struct.uc_counts,
                     spacegroup='P 1',
                     tags=struct.get_tags(), refs=struct.get_refs(), periodicity=struct.uc_sites.pbc)
                 return newstruct
             except ImportError:
-                raise 
+                raise
                 pass
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
@@ -563,14 +563,14 @@ def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isot
                 struct = isotropy_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, basis)
                 return struct
             except ImportError:
-                raise 
+                raise
                 pass
         #if backend ==  'platon':
         #    try:
-        #        from httk.external import platon_ext        
+        #        from httk.external import platon_ext
         #        return platon_ext.coordgroups_reduced_uc_to_representative(coordgroups, basis, hall_symbol)
         #    except ImportError:
-        #        raise 
+        #        raise
         #        pass
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
@@ -604,16 +604,16 @@ def coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, bac
         if backend == 'internal':
             newcoordgroups, newcell = internal_coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol)
             return UnitcellSites.create(reduced_coordgroups=newcoordgroups), Cell.create(basis)
-                
+
         if backend == 'cif2cell':
             try:
-                from httk.external import cif2cell_ext        
+                from httk.external import cif2cell_ext
                 return cif2cell_ext.coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol)
             except ImportError:
                 pass
         if backend == 'ase':
             try:
-                from httk.external import ase_glue        
+                from httk.external import ase_glue
                 return ase_glue.coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol)
             except ImportError:
                 raise
@@ -627,10 +627,10 @@ def coordswap(fromidx, toidx, cell, coordgroups):
         coords = MutableFracVector.from_FracVector(group)
         rows = coords[:, toidx]
         coords[:, toidx] = coords[:, fromidx]
-        coords[:, fromidx] = rows        
+        coords[:, fromidx] = rows
         new_coordgroups.append(coords.to_FracVector())
     coordgroups = FracVector.create(new_coordgroups)
-    
+
     cell = MutableFracVector.from_FracVector(cell)
     row = cell[toidx]
     cell[toidx] = cell[fromidx]
@@ -651,7 +651,7 @@ def clean_coordgroups_and_assignments(coordgroups, assignments):
     for i in range(len(assignments)):
         for j in range(len(new_assignments)):
             if assignments[i] == new_assignments[j]:
-                idx = j 
+                idx = j
                 new_coordgroups[idx] = FracVector.chain_vecs([new_coordgroups[idx], coordgroups[i]])
                 break
         else:
@@ -683,7 +683,7 @@ def occupations_and_coords_to_assignments_and_coordgroups(occupationscoords, occ
 
 def coordgroups_and_assignments_to_symbols(coordgroups, assignmentobj):
     """
-    Return a list of atomic symbols, repeated as needed 
+    Return a list of atomic symbols, repeated as needed
     """
     symbols = []
     for i in range(len(coordgroups)):
@@ -697,7 +697,7 @@ def structure_tidy(struct, backends=['platon']):
     for backend in backends:
         if backend == 'platon':
             try:
-                from httk.external import platon_ext        
+                from httk.external import platon_ext
                 return platon_ext.structure_tidy(struct)
             except ImportError:
                 raise
@@ -705,12 +705,12 @@ def structure_tidy(struct, backends=['platon']):
     raise Exception("structure_tidy: None of the available backends available.")
 
 
-def get_primitive_basis_transform(hall_symbol): 
+def get_primitive_basis_transform(hall_symbol):
     """
     Transform to be applied to conventional unit cell to give the primitive unit cell
-    """   
+    """
     half = Fraction(1, 2)
-    lattice_symbol = hall_symbol.lstrip("-")[0][0]   
+    lattice_symbol = hall_symbol.lstrip("-")[0][0]
     crystal_system = crystal_system_from_hall(hall_symbol)
 
     lattrans = None
@@ -719,7 +719,7 @@ def get_primitive_basis_transform(hall_symbol):
                               [0, 0, 1]])
 
     if lattice_symbol == 'P':
-        lattrans = unit    
+        lattrans = unit
     elif crystal_system == 'cubic':
         if lattice_symbol == 'F':
             lattrans = FracVector.create([[half, half, 0],
@@ -732,13 +732,13 @@ def get_primitive_basis_transform(hall_symbol):
     elif crystal_system == 'hexagonal' or crystal_system == 'trigonal':
         if lattice_symbol == 'R':
             lattrans = unit
-        
+
     elif crystal_system == 'tetragonal':
         if lattice_symbol == 'I':
             lattrans = FracVector.create([[half, -half, half],
                                           [half, half, half],
                                           [-half, -half, half]])
-                
+
     elif crystal_system == 'orthorhombic':
         if lattice_symbol == 'A':
             lattrans = FracVector.create([[1, 0, 0],
@@ -783,20 +783,20 @@ def get_primitive_basis_transform(hall_symbol):
 
     if lattrans is None:
         raise Exception("structureutils.get_primitive_basis_transform: no match for lattice transform.")
-        
+
     return lattrans
 
 
-# def get_primitive_basis_transform(hall_symbol, niggli_matrix):    
+# def get_primitive_basis_transform(hall_symbol, niggli_matrix):
 #     half = Fraction(1, 2)
-#     lattice_symbol = hall_symbol.lstrip("-")[0][0]   
+#     lattice_symbol = hall_symbol.lstrip("-")[0][0]
 #     crystal_system = crystal_system_from_hall(hall_symbol)
-# 
+#
 #     lattrans = None
 #     unit = FracVector.create([[1, 0, 0],
 #                               [0, 1, 0],
 #                               [0, 0, 1]])
-#     
+#
 #     if crystal_system == 'cubic':
 #         if lattice_symbol == 'P':
 #             lattrans = unit
@@ -815,7 +815,7 @@ def get_primitive_basis_transform(hall_symbol):
 #         elif lattice_symbol == 'R':
 #             # Conventional cell should already be primitive rhombohedral one
 #             lattrans = unit
-#         
+#
 #     elif crystal_system == 'tetragonal':
 #         if lattice_symbol == 'P':
 #             lattrans = unit
@@ -838,7 +838,7 @@ def get_primitive_basis_transform(hall_symbol):
 #             lattrans = FracVector.create([[half, half, half],
 #                                           [-half, half, half],
 #                                           [-half, -half, half]])
-# 
+#
 #     elif crystal_system == 'monoclinic':
 #         if lattice_symbol == 'P':
 #             lattrans = unit
@@ -846,16 +846,16 @@ def get_primitive_basis_transform(hall_symbol):
 #             lattrans = FracVector.create([[half, 0, -half],
 #                                           [0, 1, 0],
 #                                           [half, 0, half]])
-# 
+#
 #     elif crystal_system == 'triclinic':
 #         lattrans = unit
-# 
+#
 #     else:
 #         raise Exception("structureutils.get_primitive_basis_transform: unknown crystal system, "+str(crystal_system))
-# 
+#
 #     if lattrans is None:
 #         raise Exception("structureutils.get_primitive_basis_transform: no match for lattice transform.")
-#         
+#
 #     return lattrans
 
 # Imported from cif2cell by Torbjörn Björkman, uctools.py and heavily modified
@@ -865,14 +865,14 @@ def get_primitive_basis_transform(hall_symbol):
 #     length, angles = niggli_to_lengths_angles(niggli)
 #     a, b, c = length
 #     alpha, beta, gamma = angles
-#     
+#
 #     zero = Fraction(0)
 #     half = Fraction(1, 2)
 #     one = Fraction(1)
 #     third = Fraction(1, 3)
-#     lattice_symbol = hall_symbol.lstrip("-")[0][0]    
+#     lattice_symbol = hall_symbol.lstrip("-")[0][0]
 #     system = crystal_system_from_hall(hall_symbol)
-#     
+#
 #     if lattice_symbol == 'I':
 #         # Body centered
 #         #transvecs = [FracVector.create([zero, zero, zero]),
@@ -951,22 +951,22 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
     transformation = FracVector.use(transformation).simplify()
     #if transformation.denom != 1:
     #    raise Exception("Structure.transform requires integer transformation matrix")
-    
+
     old_cell = structure.uc_cell
     new_cell = Cell.create(basis=transformation*old_cell.basis)
     conversion_matrix = (old_cell.basis*new_cell.inv).simplify()
 
     volume_ratio = abs((new_cell.basis.det()/abs(old_cell.basis.det()))).simplify()
     seek_counts = [int((volume_ratio*x).simplify()) for x in structure.uc_counts]
-    #print "HMM",(new_cell.basis.det()/old_cell.basis.det()).simplify()
-    #print "SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation
+    #print("HMM",(new_cell.basis.det()/old_cell.basis.det()).simplify())
+    #print("SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation)
     total_seek_counts = sum(seek_counts)
     if total_seek_counts > max_atoms:
         raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
 
     #if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
     #    raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
-         
+
     ### Collect coordinate list of all sites inside the new cell
     coordgroups = structure.uc_reduced_coordgroups
     extendedcoordgroups = [[] for x in range(len(coordgroups))]
@@ -977,20 +977,20 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
         max_search = None
 
     for offset in breath_first_idxs(dim=3, end=max_search, negative=True):
-        #print "X",offset, seek_counts
+        #print("X",offset, seek_counts)
         for idx in range(len(coordgroups)):
             coordgroup = coordgroups[idx]
             newcoordgroup = coordgroup+FracVector([offset]*len(coordgroup))
             new_reduced = newcoordgroup*conversion_matrix
-            #print "NEW:",FracVector.use(new_reduced).to_floats(),
+            #print("NEW:",FracVector.use(new_reduced).to_floats(),)
             new_reduced = [x for x in new_reduced if x[0] >= 0 and x[1] >= 0 and x[2] >= 0 and x[0] < 1 and x[1] < 1 and x[2] < 1]
             extendedcoordgroups[idx] += new_reduced
             c = len(new_reduced)
             seek_counts[idx] -= c
             total_seek_counts -= c
-            #print "ADD",str(c)
+            #print("ADD",str(c))
             if seek_counts[idx] < 0:
-                #print "X",offset, seek_counts
+                #print("X",offset, seek_counts)
                 raise Exception("Structure.transform safety check error, internal error: too many atoms in supercell.")
         if total_seek_counts == 0:
             break
@@ -1005,20 +1005,11 @@ def main():
     coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
     assignments = [2, 5]
 
-    print cell, coordgroups
+    print(cell, coordgroups)
     cell, coordgroups = coordswap(0, 2, cell, coordgroups)
-    print cell, coordgroups
-    
+    print(cell, coordgroups)
+
     pass
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-    

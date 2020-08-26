@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -23,6 +23,9 @@ from math import sqrt
 import httk
 
 
+def _write(obj, string):
+    obj.write(string.encode())
+
 def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
     """
     Converts structure into jmol format.
@@ -44,7 +47,7 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
         restrict cell={2 2 2}
         center visible
         zoom 0
-    """            
+    """
 
     if repeat is None:
         supercell = "supercell \"x, y, z\""
@@ -58,9 +61,9 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
 
     iof = httk.IoAdapterFileWriter.use(iof)
     f = iof.file
-    
+
     nl = "|"
-    
+
     if struct.has_rc_repr:
         basis = struct.rc_basis.to_floats()
         coords = struct.rc_cartesian_coords.to_floats()
@@ -84,22 +87,20 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
         else:
             symbols += [s]
 
-    f.write("load data 'model'"+nl)
-    f.write(str(len(symbols))+nl)
-    f.write("Computation1"+nl)
+    _write(f, "load data 'model'" + nl)
+    _write(f, str(len(symbols)) + nl)
+    _write(f, "Computation1" + nl)
 
     for i in range(len(symbols)):
-        f.write(symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
-        #print "XX",symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl)
-    
-    f.write("end 'model' ")
-    f.write(" "+copies+" "+supercell+" spacegroup '"+spacegroup+"' unitcell [ ")
-    for i in range(3):
-        f.write(str(basis[i][0])+" "+str(basis[i][1])+" "+str(basis[i][2])+" ")
-    f.write("];\n")
+        _write(f, symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
+        #print("XX",symbols[i]+" "+str(coords[i][0])+" "+str(coords[i][1])+" "+str(coords[i][2])+str(nl))
 
-    #f.write("show data;\n")
+    _write(f, "end 'model' ")
+    _write(f, " "+copies+" "+supercell+" spacegroup '"+spacegroup+"' unitcell [ ")
+    for i in range(3):
+        _write(f, str(basis[i][0])+" "+str(basis[i][1])+" "+str(basis[i][2])+" ")
+    _write(f, "];\n")
+
+    #_write(f, "show data;\n")
 
     iof.close()
-
-         

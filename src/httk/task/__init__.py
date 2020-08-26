@@ -15,5 +15,5 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from taskmgr import create_batch_task
-from reader import reader, submit_reader
+from httk.task.taskmgr import create_batch_task
+from httk.task.reader import reader, submit_reader

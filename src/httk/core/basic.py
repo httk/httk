@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,7 +17,15 @@
 """
 Basic help functions
 """
+import sys
 from fractions import Fraction
+
+# Import python2 and 3-specific routunes
+if sys.version_info[0] <= 2:
+    from httk.core._basic_py2 import *
+else:
+    from httk.core._basic_py3 import *
+
 
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -42,14 +50,8 @@ def anonymous_symbol_to_int(symb):
     return s-1
 
 
-def is_sequence(arg):
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
-
-
 import re, errno, os, itertools, sys, tempfile, shutil, collections
-from ioadapters import IoAdapterFileReader
+from httk.core.ioadapters import IoAdapterFileReader
 
 
 def is_unary(e):
@@ -67,7 +69,7 @@ def flatten(l):
         flattened = l.flatten()
     except Exception:
         for el in l:
-            if isinstance(el, collections.Iterable) and not isinstance(el, basestring):
+            if is_sequence(el):
                 for sub in flatten(el):
                     yield sub
             else:
@@ -96,7 +98,7 @@ def create_tmpdir():
 def destroy_tmpdir(tmpdir):
     tmpdirname = os.path.dirname(tmpdir)
     segment = os.path.basename(tmpdir)[len("httktmp."):-len(".httktmp")]
-    #print "DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp")
+    #print("DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp"))
     shutil.rmtree(os.path.join(tmpdirname, "httktmp."+segment+".httktmp"))
 
 
@@ -126,7 +128,7 @@ def mkdir_p(path):
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
     Small awk-mimicking search routine.
-       
+
     'f' is stream object to search through.
     'search' is the "search program", a list of lists/tuples with 3 elements; i.e.,
     [[regex,test,run],[regex,test,run],...]
@@ -135,18 +137,18 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
     Here regex is either as a Regex object, or a string that we compile into a Regex.
     test and run are callable objects.
 
-    This function goes through each line in filename, and if regex matches that line *and* 
-    test(results,line)==True (or test == None) we execute run(results,match), 
-    where match is the match object from running Regex.match.   
-    
-    The default results is an empty dictionary. Passing a results object let you interact 
-    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self. 
-    
+    This function goes through each line in filename, and if regex matches that line *and*
+    test(results,line)==True (or test == None) we execute run(results,match),
+    where match is the match object from running Regex.match.
+
+    The default results is an empty dictionary. Passing a results object let you interact
+    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self.
+
     Returns: results
     """
     ioa = IoAdapterFileReader.use(ioa)
     f = ioa.file
-    
+
     if results is None:
         results = {}
 
@@ -157,13 +159,13 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 entry[0] = re.compile(entry[0])
             except Exception as e:
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
-            
+
     for line in f:
-        if debug: 
+        if debug:
             sys.stdout.write("\n" + line[:-1])
         for i in range(len(search)):
             match = search[i][0].search(line)
-            if debug and match: 
+            if debug and match:
                 sys.stdout.write(": MATCH")
             if match and (search[i][1] is None or search[i][1](results, line)):
                 if debug:
@@ -173,7 +175,7 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 search[i][2](results, match)
                 if postdebugfunc is not None:
                     postdebugfunc(results, match)
-    if debug: 
+    if debug:
         sys.stdout.write("\n")
 
     ioa.close()
@@ -199,13 +201,15 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
             yield (e,)
             if end[0] is not None and e >= end[0]:
                 return
-   
+
     for e in eles:
         oeles = breath_first_idxs(dim-1, start=start[1:], end=[e]*(dim-1), perm=False)
         for oe in oeles:
             base = (e,) + oe
             if perm:
-                for p in set(itertools.permutations(base)):
+                # sorted here is not strictly necessary, but is needed to ensure we get
+                # the same order every time.
+                for p in sorted(set(itertools.permutations(base))):
                     if negative:
                         nonneg = [i for i in range(len(p)) if p[i] != 0]
                         for x in itertools.chain.from_iterable(itertools.combinations(nonneg, r) for r in range(len(nonneg)+1)):
@@ -257,12 +261,16 @@ class rewindable_iterator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    # Python 3 uses __next__
+    def __next__(self):
         if self._rewind:
             self._rewind = False
         else:
-            self._cache = self._iter.next()
+            self._cache = next(self._iter)
         return self._cache
+
+    # Python 2 uses next
+    next = __next__
 
     def rewind(self, rewindstr=None):
         if self._rewind:
@@ -272,19 +280,22 @@ class rewindable_iterator(object):
         self._rewind = True
         if rewindstr is not None:
             self._cache = rewindstr
-            
 
 def main():
-    print int_to_anonymous_symbol(0)
-    print anonymous_symbol_to_int("A")
+    asym = int_to_anonymous_symbol(42)
+    assert(asym == "Aq")
+    print("Anoymous symbol:"+asym)
+    i = anonymous_symbol_to_int(asym)
+    assert(i == 42)
+    l = list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+    ll = [[0, 0, 0], [0, 0, -1], [0, 0, 1], [0, -1, 0], [0, 1, 0], [-1, 0, 0], [1, 0, 0], [0, -1, -1]]
+    print("Length:"+str(len(l)))
+    assert(len(l)==343)
+    print("First elements:"+str(l[:8]))
+    assert(l[:8]==ll)
+    f = list(flatten([[42,"bx"],"xyz",["32",[[6],str]]]))
+    print("Flattened list:"+str(f))
+    assert(f == [42, 'bx', 'xyz', '32', 6, str])
     
-    
-    # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
-
-
 if __name__ == "__main__":
     main()
-    
-
-
-

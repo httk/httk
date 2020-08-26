@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import cgitb, sys, codecs, cgi, shutil
+import cgitb, sys, codecs, cgi, shutil, io, os
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -26,8 +26,8 @@ except ImportError:
     from urlparse import parse_qsl, urlsplit, urlunsplit
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-import helpers
-from webgenerator import WebGenerator
+from httk.httkweb import helpers
+from httk.httkweb.webgenerator import WebGenerator
 
 class WebError(Exception):
     def __init__(self, message, response_code, response_msg, longmsg=None, content_type='text/plain', encoding='utf-8'):
@@ -68,16 +68,32 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
         return debug_info
 
     def wfile_write_encoded(self, s, encoding='utf-8'):
-        
-        if isinstance(s, (str, unicode)):
-            self.wfile.write(codecs.encode(s, encoding))
+        if hasattr(s, 'read'):
+            #reader = codecs.getreader(encoding)
+            # Wrapping the reader doesn't work in 
+            # Python 3 because of a bug (?)
+            # that can be reproduced by the following short script:
+            #
+            # import encodings
+            # import io
+            # reader = encodings.utf_8.StreamReader(io.StringIO())
+            # reader.read()
+            #
+            # => TypeError: can't concat str to bytes
+            #
+            # Hence, we wrap the writer instead
+            if isinstance(s, io.StringIO):
+                writer = codecs.getwriter(encoding)
+                shutil.copyfileobj(s, writer(self.wfile))
+            else:
+                shutil.copyfileobj(s, self.wfile)
         else:
-            reader = codecs.getreader(encoding)
-            shutil.copyfileobj(reader(s),self.wfile)
+            self.wfile.write(codecs.encode(s, encoding))
+
 
     def do_GET(self):
 
-        parsed_path = urlsplit(self.path)        
+        parsed_path = urlsplit(self.path)
         query = dict(parse_qsl(parsed_path.query, keep_blank_values=True))
 
         # Figure out what part of the URL is part of netloc and basepath used for hosting, and the rest (=representation)
@@ -87,16 +103,16 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
         basepath = self.basepath
         if basepath[0] == '/':
-            basepath = basepath[1:]        
+            basepath = basepath[1:]
 
         if not parsed_path.path.startswith(self.basepath):
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")            
+            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
             return
 
-        relpath = relpath[len(basepath):]        
+        relpath = relpath[len(basepath):]
         representation = urlunsplit(('', '', relpath, parsed_path.query, ''))
 
         request = {'url': self.path,
@@ -104,7 +120,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
                    'netloc': parsed_path.netloc,
                    'path': parsed_path.path,
                    'querystr': parsed_path.query,
-                   'port': parsed_path.port,                   
+                   'port': parsed_path.port,
                    'baseurl': self.netloc+self.basepath,
                    'representation': representation,
                    'relpath': relpath,
@@ -126,12 +142,19 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile_write_encoded(e.content, e.encoding)
 
+        except IOError as e:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
+            
         except Exception as e:
             self.send_response(500)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
                 self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                raise
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
@@ -148,7 +171,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
         parsed_path = urlsplit(self.path)
         query = dict(parse_qsl(parsed_path.query, keep_blank_values=True))
-        
+
         # Figure out what part of the URL is part of netloc and basepath used for hosting, and the rest (=representation)
         relpath = parsed_path.path
         if len(relpath)>0 and relpath[0] == '/':
@@ -156,16 +179,16 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
         basepath = self.basepath
         if basepath[0] == '/':
-            basepath = basepath[1:]        
+            basepath = basepath[1:]
 
         if not parsed_path.path.startswith(self.basepath):
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")            
+            self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
             return
 
-        relpath = relpath[len(basepath):]        
+        relpath = relpath[len(basepath):]
         representation = urlunsplit(('', '', relpath, parsed_path.query, ''))
 
         request = {'url': self.path,
@@ -179,7 +202,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
                    'relpath': relpath,
                    'query': query,
                    'postvars': postvars,
-                   'headers': self.headers}                
+                   'headers': self.headers}
 
         try:
             for callback in self.post_callbacks:
@@ -207,7 +230,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
     # Redirect log messages to stdout instead of stderr
     def log_message(self, format, *args):
         print(format % args)
-                
+
 
 def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/', debug=False):
 
@@ -231,7 +254,9 @@ def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/'
         server = HTTPServer(('', port), _CallbackRequestHandler)
         print('Started httk webserver on port:', port)
         sys.stdout.flush()
-        server.serve_forever()
+        # Don't start serve_forever if we are inside automatic testing, etc.
+        if "HTTK_DONT_HOLD" not in os.environ:
+            server.serve_forever()
 
     except KeyboardInterrupt:
         print('Received keyboard interrupt, shutting down the httk web server')
@@ -241,9 +266,9 @@ def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/'
             server.socket.close()
             print('Server shutdown complete.')
 
-            
+
 def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, debug=True, config = "config", override_global_data = None):
-    setup = helpers.setup(renderers, template_engines, function_handlers) 
+    setup = helpers.setup(renderers, template_engines, function_handlers)
 
     if baseurl == None:
         if port == 80:
@@ -261,18 +286,17 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
         global_data['_functionext'] = ''
     else:
         global_data['_functionext'] = '.html'
-    global_data['_render_mode'] = 'serve'    
-    
+    global_data['_render_mode'] = 'serve'
+
     webgenerator = WebGenerator(srcdir, global_data, **setup)
 
     def httk_web_callback(request):
 
         if request['relpath'] == '':
             request['relpath'] = 'index.html'
-        
+
         out = webgenerator.retrieve(request['relpath'],request['query'])
 
         return {'response_code':200, 'content_type':out['mimetype'], 'content':out['content'], 'encoding':'utf-8' }
-    
+
     startup(httk_web_callback, port=8080, debug=True)
-    

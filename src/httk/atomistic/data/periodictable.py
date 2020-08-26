@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -122,5 +122,3 @@ def most_common_mass(parse):
     parsed = atomic_number(parse)
     raise Exception("periodictable.most_common_mass: not implemented yet")
     return most_common_masses[parsed]
-
-

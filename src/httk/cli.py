@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -24,7 +24,7 @@ from httk import cout, cerr, cli_modules
 help_text = """
 usage: httk [--version] [--help] [-C <path>] [-c name=value]
             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-            [-p | --paginate | --no-pager] 
+            [-p | --paginate | --no-pager]
             [--httk-dir=<path>] <command> [<args>]
 
 These are common httk commands used in various situations:
@@ -33,7 +33,7 @@ start a project, configuration (see also: httk help project)
    init       Create an empty httk project or reinitialize an existing one
 
 work on the current project (see also: httk help work)
-   add        Add a task file or dir to the index of tasks being worked on 
+   add        Add a task file or dir to the index of tasks being worked on
    mv         Move or rename a task file, a directory, or a symlink
    rm         Remove a task file from the working tree and from the index
 
@@ -62,18 +62,18 @@ def main():
     cout("         Many functions are not available or does not work as documented.")
     cout("         For now, you should be using the httk-* scripts instead.")
     cout("------------------------------------------------------------------------------------")
-    
+
     argv = sys.argv
-    
+
     args = lambda: None # dict-like object using attributes
 
     args.commands = []
     args.cwd = os.getcwd()
     args.configopts = {}
     no_options_mode = False
-    
+
     argi = iter(argv)
-    argi.next()
+    next(argi)
     for arg in argi:
 
         if (not arg.startswith("-") or no_options_mode):
@@ -90,12 +90,12 @@ def main():
             elif arg == '--paginate':
                 args.paginate = True
 
-            elif arg == "-C":                
-                args.cwd = argi.next()
+            elif arg == "-C":
+                args.cwd = next(argi)
 
             elif arg == '-c':
-                key,val = argi.next().partition('=')
-                args.configopts[key] = val 
+                key,val = next(argi).partition('=')
+                args.configopts[key] = val
 
             elif arg == '-p':
                 args.paginate = True
@@ -103,9 +103,9 @@ def main():
             elif arg == '--no-pager':
                 args.paginate = False
 
-            elif arg == "--httk-dir":                
-                args.httk_dir = argi.next()
-                
+            elif arg == "--httk-dir":
+                args.httk_dir = next(argi)
+
             elif arg == "--help" or arg == "-h":
                 args.commands = ["help"] + args.commands
 
@@ -115,8 +115,8 @@ def main():
 
     if len(args.commands) == 0:
         args.commands = ['help']
-        
-############## HELP ####################                
+
+############## HELP ####################
     if args.commands[0] == "help":
         cout(help_text)
         for mod in cli_modules.values():
@@ -134,7 +134,7 @@ def main():
         module = __import__(cli_modules[args.commands[0]], fromlist=[''])
         module.main(args.commands[1:],args)
         exit(0)
-        
+
 ######################################
 
     else:
@@ -144,13 +144,9 @@ def main():
                 module = __import__(cli_modules[context], fromlist=[''])
                 module.main(args.commands,args)
                 exit(0)
-                    
+
         cerr("Unknown httk command:",args.commands[0])
         exit(1)
-        
+
     cout("Nothing to do.")
     httk.dont_print_citations_at_exit()
-
-
-
-        

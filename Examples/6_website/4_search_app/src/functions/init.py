@@ -6,4 +6,4 @@ def execute(global_data,**kargs):
     store = httk.db.store.SqlStore(backend)
 
     global_data['store'] = store
-    
+
