@@ -8,9 +8,7 @@ import httk
 from httk.atomistic import *
 import httk.external.ase_glue
 import ase
-import ase.lattice
-import ase.lattice.surface
-import ase.lattice.cubic
+import ase.build
 
 # By loading the httk.external.ase_glue package *before* 'import ase' you will load the ASE version specified in your httk configuration files.
 # The below two version are going to be the same.
@@ -69,7 +67,7 @@ struct3 = struct.ase.from_Atoms(ase_atoms3)
 
 print("== FCC111 surface using ase.lattice.surface.fcc111")
 
-slab = ase.lattice.surface.fcc111('Al', size=(2, 2, 3), vacuum=10.0)
+slab = ase.build.fcc111('Al', size=(2, 2, 3), vacuum=10.0)
 struct5 = struct.ase.from_Atoms(slab)
 
 print("httk structure: formula:", struct5.formula+" ("+struct5.anonymous_formula+")", ", volume:", float(struct5.uc_volume), ", basis:",
@@ -79,7 +77,7 @@ print()
 print("==== Creating systems using ASE, converting it to httk, and find its spacegroup")
 
 print("== FCC Cu")
-ase_atoms4 = ase.lattice.bulk('Cu', 'fcc', a=3.6)
+ase_atoms4 = ase.build.bulk('Cu', 'fcc', a=3.6)
 
 struct4 = struct.ase.from_Atoms(ase_atoms4)
 

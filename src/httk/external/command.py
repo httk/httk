@@ -112,6 +112,10 @@ class Command(object):
         self.output_thread.start()
 
     def wait_finish(self, timeout=None):
+
+        if "HTTK_DONT_HOLD" in os.environ and timeout is None:
+            timeout = 5
+
         if self.process is not None:
             def target():
                 self.process.wait()

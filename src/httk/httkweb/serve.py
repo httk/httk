@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import cgitb, sys, codecs, cgi, shutil, io
+import cgitb, sys, codecs, cgi, shutil, io, os
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -254,7 +254,9 @@ def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/'
         server = HTTPServer(('', port), _CallbackRequestHandler)
         print('Started httk webserver on port:', port)
         sys.stdout.flush()
-        server.serve_forever()
+        # Don't start serve_forever if we are inside automatic testing, etc.
+        if "HTTK_DONT_HOLD" not in os.environ:
+            server.serve_forever()
 
     except KeyboardInterrupt:
         print('Received keyboard interrupt, shutting down the httk web server')

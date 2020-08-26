@@ -16,14 +16,29 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, re, cgi, pprint, unicodedata, codecs
+import os, sys, re, pprint, unicodedata, codecs
 
-if sys.version_info[0] == 3:
-    from io import StringIO
-    import configparser
-else:
+# Retain python2 compatibility without a dependency on httk.core
+if sys.version[0] == "2":
+    # Note:
+    # The "html" module is not a builtin in Python 2.
+    # If it happens to be installed, we still do not
+    # want to use it since it is old (last updated in 2011,
+    # version 1.16). Use the builtin cgi module to get the
+    # escape funtion instead.
+
+    from cgi import escape
+    unicode_type=unicode
+
     from StringIO import StringIO
     import ConfigParser as configparser
+else:
+    from html import escape
+    unicode_type=str
+
+    from io import StringIO
+    import configparser
+
 
 class RenderHttk(object):
 
@@ -118,7 +133,7 @@ class RenderHttk(object):
                         else:
                             outstr += '<span class="'+(' '.join(modifiers))+'">'
                         endtag = '</span>' + endtag
-                    outstr +=  cgi.escape(segment['content']).encode('ascii',
+                    outstr +=  escape(segment['content']).encode('ascii',
                             'xmlcharrefreplace').decode('utf-8')
                     outstr += endtag
                 outstr += end_p_tag
