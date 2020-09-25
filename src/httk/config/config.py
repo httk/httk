@@ -156,10 +156,16 @@ if version == 'unknown':
     minor_version = '0'
     patch_version = 'unknown'
 else:
-    _version_list = version.split('.')
-    major_version = int(_version_list[0])
-    minor_version = int(_version_list[1])
-    patch_version = '.'.join(_version_list[2:])
+    try:
+        _version_list = version.split('.')
+        major_version = int(_version_list[0])
+        minor_version = int(_version_list[1])
+        patch_version = '.'.join(_version_list[2:])
+    except Exception:
+        print("Warning: could not determine version numbers. Version string was:"+str(version))
+        major_version = '0'
+        minor_version = '0'
+        patch_version = 'unknown'
 version_date = _version_data['httk_version_date']
 copyright_note = _version_data['httk_copyright_note']
 
