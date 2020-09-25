@@ -67,24 +67,24 @@ where:
       * waitstep: the task is partially completed and waits for the
         next step
 
-      * waitsubtasks: the task has split into a number of subtasks
-        and is waiting for them to complete
+      * waitsubtasks: the task has split into a number of subtasks and
+        is waiting for them to complete
 
       * finished: the task has successfully run to completion
 
       * broken: the task has returned an error code that specifies
         that it wants to be set aside as 'broken'.
 
-      * stopped: the taskmanager have stopped the job for some
-        reason (timeout, too many restarts, etc.)
+      * stopped: the taskmanager have stopped the job for some reason
+        (timeout, too many restarts, etc.)
 
 The primary component of a task is a "runscript" or a "runprogram"
 (you can use any language to write these) that is responsible for
 executing your computational task. The task directory should contain
 this runscript. It can have either one of two names:
 
-   * ht_run: A 'simplified' run script that is meant for simple
-     jobs. "Just run this". If the run breaks (e.g. is stopped by the
+   * ht_run: A 'simplified' run script that is meant for simple jobs.
+     "Just run this". If the run breaks (e.g. is stopped by the
      computer cluster), it will simply be restarted the next time (you
      are responsible for necessary cleanup).
 
@@ -221,8 +221,8 @@ process:
 
    1. Create a directory called ht.tmp.task.(something)
 
-   2. Populate the directory with necessary files to run as a
-      subtask. (Primarily, a ht_run, or ht_steps)
+   2. Populate the directory with necessary files to run as a subtask.
+      (Primarily, a ht_run, or ht_steps)
 
    3. Only when the subtask is ready, *mv ht.tmp.task.<something>
       ht.task.<something>*
@@ -242,15 +242,15 @@ themselves create substasks, and so on.
 
 A couple of neat tricks:
 
-   * Use a symbolic link ('ln -s') to make your subtasks use the
-     same ht_steps script as the topmost task. This way all the run
+   * Use a symbolic link ('ln -s') to make your subtasks use the same
+     ht_steps script as the topmost task. This way all the run
      functionality can conveniently be kept inside one and the same
      script/program.
 
-   * Even if your main job uses a 'ht_steps' runscript, your
-     subtasks can use 'ht_run' scripts to decrease the overhead.  (You
-     can even make a symbolic link from the subruns 'ht_runs' to your
-     main 'ht_steps'.)
+   * Even if your main job uses a 'ht_steps' runscript, your subtasks
+     can use 'ht_run' scripts to decrease the overhead.  (You can even
+     make a symbolic link from the subruns 'ht_runs' to your main
+     'ht_steps'.)
 
 
 single_job_taskmanager.sh
@@ -260,9 +260,9 @@ There is a 'light' version of the taskmanager named
 single_job_taskmanager.sh that may be helpful in a few situations,
 e.g.,
 
-   * You are in the process of developing a run script and "just
-     want to run through this task" to debug it, with all output in
-     the console.
+   * You are in the process of developing a run script and "just want
+     to run through this task" to debug it, with all output in the
+     console.
 
    * You don't care for the parallelism, resource handling, and
      restart/continuation capability of the full httk taskmanager, and
@@ -287,8 +287,8 @@ The priority order of waiting tasks is the following:
 
    * First it handles tasks of priority 1, then 2, ... , and last 5.
 
-   * It first prioritize finishing tasks that have been started
-     before starting new ones.
+   * It first prioritize finishing tasks that have been started before
+     starting new ones.
 
    * It always runs subtasks 'depth first'.
 
@@ -344,15 +344,15 @@ script:
    1. taskmanager.sh looks in the task directory and finds a
       **.waitstart* directory
 
-   2. taskmanager.sh 'adopts' this task by renaming the directory
-      so that it includes a taskmanager-id (an id that pertains to
-      this runmanager.sh instance) This 'locks' the run from being
-      tampered with by other runmanagers.
+   2. taskmanager.sh 'adopts' this task by renaming the directory so
+      that it includes a taskmanager-id (an id that pertains to this
+      runmanager.sh instance) This 'locks' the run from being tampered
+      with by other runmanagers.
 
    3. taskmanager.sh executes the ht_run script in this directory.
 
-   4. the ht_run script does what it needs to do and simply
-      finishes as usual.
+   4. the ht_run script does what it needs to do and simply finishes
+      as usual.
 
    5. taskmanager.sh renames the task directory to both remove the
       taskmanager-id and so that it now ends with a '.finished'
@@ -368,9 +368,9 @@ outline of what happens then:
       marks an abandonded run, because an alive taskmanager.sh makes
       sure to update ctime periodically on any ongoing runs.
 
-   2. taskmanager.sh 'adopts' this task by renaming the directory
-      so that it removes the old taskmanager-id and replaces it with
-      that of the present instance.
+   2. taskmanager.sh 'adopts' this task by renaming the directory so
+      that it removes the old taskmanager-id and replaces it with that
+      of the present instance.
 
    3. taskmanager.sh simply restarts the ht_run scripts in this
       directory (expecting it to know what to do with regards to
@@ -391,8 +391,8 @@ Steps 1-2 are the same, after that, this happens:
       ht.run.<date and time-stamp>) and makes this directory the
       current working directory.
 
-   4. taskmanager.sh executes 'ht_steps <step>' where step is the
-      name of the .<step>. part of the task directory name.
+   4. taskmanager.sh executes 'ht_steps <step>' where step is the name
+      of the .<step>. part of the task directory name.
 
    5. ht_steps executes the apropriate part of the run, writes the
       ht.status file, and exits with an apropriate exit status.
@@ -428,12 +428,12 @@ outline of what happens then:
       marks an abandonded run, because an alive taskmanager.sh makes
       sure to update ctime periodically on any ongoing runs.
 
-   2. taskmanager.sh 'adopts' this task by renaming the directory
-      so that it removes the old taskmanager-id and replaces it with
-      that of the present instance.
+   2. taskmanager.sh 'adopts' this task by renaming the directory so
+      that it removes the old taskmanager-id and replaces it with that
+      of the present instance.
 
-   3. taskmanager.sh now just continues from point #4 and onwards
-      in the regular outline.
+   3. taskmanager.sh now just continues from point #4 and onwards in
+      the regular outline.
 
 The exception to #3 is if the ht.parameters file (see below) contains
 'restart=false'. In that case, the old 'run.*' directory will be

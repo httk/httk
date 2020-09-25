@@ -28,8 +28,7 @@ Short points for experienced developers
 
 * Favor unmutable classes over mutable ones
 
-* For arrays of numbers, use core/FracVector unless you have a
-  reason
+* For arrays of numbers, use core/FracVector unless you have a reason
 
 * Constructors are generally considered private, use a create(...)
   static method instead.
@@ -73,9 +72,9 @@ Overview of the python library
        results between different computers due to differences in
        floating point processing.)
 
-* Basic structural classes: we implement our own, rather than using
-  a 'structure' class of another library (e.g., 'Atoms' from ASE).
-  This way we avoid dependencies, but most importantly, our structure
+* Basic structural classes: we implement our own, rather than using a
+  'structure' class of another library (e.g., 'Atoms' from ASE).  This
+  way we avoid dependencies, but most importantly, our structure
   classes generally avoid floating point numbers (see discussion about
   FracVector above). We provide via the 'httk.iface' module
   conversions to many other structure types in other libraries.
@@ -294,8 +293,8 @@ Rule #2: Always organize your code in private sections and a public
 
       The principle of API-oriented organization is simple:
 
-         * Every piece of code is either in a private section or
-           part of the public API.
+         * Every piece of code is either in a private section or part
+           of the public API.
 
          * Changes to private sections are "easy", as they should
            never break other code
@@ -347,17 +346,16 @@ Motivations for/discussions about our digressions from pep8
   should be violated if significantly increased readability is
   obtained by a few even longer lines.
 
-* W291: trailing whitespace: Between all different editors used,
-  this simply generates too many warnings that makes more important
-  pep8 violations more difficult to see.  Once in a while we should
-  simply run the files through a tool that removes trailing
-  whitespace.
+* W291: trailing whitespace: Between all different editors used, this
+  simply generates too many warnings that makes more important pep8
+  violations more difficult to see.  Once in a while we should simply
+  run the files through a tool that removes trailing whitespace.
 
-* W293: blank line contains whitespace: I genuinely disagree with
-  this rule. It is not motivated by the pep0008 standard, but
-  something unmotivated put in by developers of the pep8 tool.  Blank
-  lines should be indented to the indentation level of the block that
-  they appear in.
+* W293: blank line contains whitespace: I genuinely disagree with this
+  rule. It is not motivated by the pep0008 standard, but something
+  unmotivated put in by developers of the pep8 tool.  Blank lines
+  should be indented to the indentation level of the block that they
+  appear in.
 
 * W391: blank line at end of file: see W291.
 

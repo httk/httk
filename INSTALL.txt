@@ -29,10 +29,10 @@ want to do a direct manual install without the Python pip installed.)
 Alternative 1: Install via pip to just access the python library
 ----------------------------------------------------------------
 
-1. You need Python 2.7 and access to pip in your terminal window.
-   (You can get Python and pip, e.g., by installing the Python 2.7
-   version of Anaconda, https://www.anaconda.com/download, which
-   should give you all you need on Linux, macOS and Windows.)
+1. You need Python 2.7 and access to pip in your terminal window. (You
+   can get Python and pip, e.g., by installing the Python 2.7 version
+   of Anaconda, https://www.anaconda.com/download, which should give
+   you all you need on Linux, macOS and Windows.)
 
 2. Issue in your terminal window:
 
@@ -50,8 +50,8 @@ programs to use the *httk* python library.
 Alternative 2: Install via pip for python library + binaries + ability to develop *httk*
 ----------------------------------------------------------------------------------------
 
-1. In addition to Python 2.7 and pip, you also need git. You can
-   get git from here: https://git-scm.com/
+1. In addition to Python 2.7 and pip, you also need git. You can get
+   git from here: https://git-scm.com/
 
 2. Issue in your terminal window:
 
