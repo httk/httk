@@ -147,7 +147,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
-            
+
         except Exception as e:
             self.send_response(500)
             self.send_header('Content-type', 'text/html')

@@ -21,9 +21,9 @@ from httk.httkweb import helpers
 from httk.httkweb.helpers import UnquotedStr
 from _ast import Or
 
-if sys.version_info[0] == 3:
+try:
     from io import StringIO
-else:
+except ImportException:
     from StringIO import StringIO
 
 class Page(object):

@@ -94,7 +94,7 @@ class HttkTemplateFormatter(string.Formatter):
         elif value==None:
             return ""
         else:
-            output = super(HttkTemplateFormatter, self).format_field(value, spec)
+            output = super(HttkTemplateFormatter, self).format_field(unicode_type(value), spec)
             if quote is None:
                 try:
                     if isinstance(value,UnquotedStr):
