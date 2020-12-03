@@ -18,7 +18,6 @@ def structure_to_inputfiles(f, struct, comment=None, primitive_cell=True):
         vol = struct.uc_volume
         counts = struct.uc_counts
 
-    # print()
     species = []
     for s, c in zip(struct.symbols, counts):
         for _ in range(c):
@@ -35,8 +34,7 @@ def structure_to_inputfiles(f, struct, comment=None, primitive_cell=True):
         basis=coords.to_floats(),
         species=species,
         coords_are_cartesian=False,
-        find_primitive=primitive_cell,
-        # find_primitive=True,
+        find_primitive=True,
         )
 
     sws_range = np.array([2.5])

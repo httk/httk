@@ -280,7 +280,8 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     #print("===="+message+"====")
 
     sig = ed25519.signature(message, sk, pk)
-    b64sig = base64.b64encode(sig)
+    # Make sure b64sig is string in both Python 2 and 3
+    b64sig = codecs.decode(base64.b64encode(sig), 'utf-8')
 
     manifestfile.write("\n")
     manifestfile.write(b64sig)

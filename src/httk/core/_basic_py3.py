@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys, collections, queue, bz2
+import io
 
 unicode_type = str
 
@@ -38,7 +39,7 @@ def is_string(s):
     return isinstance(s, str)
 
 # In Python 3 bz2 files are opened by default in binary mode.
-# This is an attempt at making bz2 files behave as ordinary files. 
+# This is an attempt at making bz2 files behave as ordinary files.
 # If mode does not contain 'b' we add 't' for text mode,
 # and open the file with the bz2.open() function (only in Python 3.3)
 def bz2open(filename, mode, *args):
@@ -47,10 +48,10 @@ def bz2open(filename, mode, *args):
 
     if sys.version_info >= (3, 3):
         return bz2.open(filename, mode, *args)
-        
-    elif not 'b' in mode: 
+
+    elif not 'b' in mode:
         return io.TextIOWrapper(bz2.BZ2File(filename, mode, *args), encoding='utf-8')
     else:
         return bz2.BZ2File(filename, mode, *args)
 
-            
+
