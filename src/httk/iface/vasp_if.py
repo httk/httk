@@ -26,6 +26,12 @@ from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
+import configparser
+import numpy as np
+import jax.numpy as jnp
+from jax import grad
+import subprocess
+from scipy.optimize import minimize
 
 
 def get_pseudopotential(species, poscarspath=None):
@@ -430,12 +436,231 @@ class OutcarReader():
         def read_energy(results, match):
             self.final_energy_with_entropy = match.group(1)
             self.final_energy = match.group(2)
+
+        def read_stress_tensor(results, match):
+            # NOTE: Stress tensor values are in a different order in OUTCAR
+            # compared to Voigt notation. In terms of Voigt notation OUTCAR
+            # stress tensor is ordered as:
+            # 1 2 3 6 4 5
+            # The unit is kB = 0.1 GPa.
+            # Also, OUTCAR gives the stress tensor with a minus sign.
+            self.stress_tensor = [match.group(1), match.group(2),
+                                  match.group(3), match.group(4),
+                                  match.group(5), match.group(6)]
+            # Due to these VASP conventions, provide also the stress tensor
+            # in the normal Voigt order and in units of GPa:
+            self.stress_tensor_voigt_gpa = [
+                str(np.round(-float(self.stress_tensor[0])/10, 5)),
+                str(np.round(-float(self.stress_tensor[1])/10, 5)),
+                str(np.round(-float(self.stress_tensor[2])/10, 5)),
+                str(np.round(-float(self.stress_tensor[4])/10, 5)),
+                str(np.round(-float(self.stress_tensor[5])/10, 5)),
+                str(np.round(-float(self.stress_tensor[3])/10, 5)),
+                ]
+
         results = micro_pyawk(self.ioa, [
-                              ["^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
+                              ["^ *energy *without *entropy= *([^ ]+) "+
+                               "*energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
                               ["FREE ENERGIE", None, set_final],
+                              ["^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
                               ], results, debug=False)
         self.parsed = True
 
 
 def read_outcar(ioa):
     return OutcarReader(ioa)
+
+def elastic_config(fn):
+    config = configparser.ConfigParser()
+    config.read(fn)
+    # The type of symmetry
+    try:
+        sym = config["elastic"]["symmetry"].lstrip()
+    except:
+        sym = "cubic"
+
+    # Use projection technique, i.e. to obtain cubic elastic
+    # constants for non-cubic crystals, such as SQS supercells.
+    try:
+        project = eval(config["elastic"]["projection"])
+    except:
+        project = False
+
+    # Delta values:
+    tmp = config["elastic"]["delta"].lstrip().split("\n")
+    deltas = []
+    for line in tmp:
+        line = line.split()
+        deltas.append([float(x) for x in line])
+
+    # Distortions in Voigt notation:
+    distortions = []
+    tmp = config["elastic"]["distortions"].lstrip().split("\n")
+    for line in tmp:
+        line = line.split()
+        distortions.append([float(x) for x in line])
+
+    # Generate the additional distortions, if projection is used:
+    # For cubic systems, the projected elastic constants are
+    # an average of elastic constants calculated along the different
+    # permutations of the xyz-axes: xyz -> yzx -> zxy.
+    # In terms of Voigt notation, the additional distortions along the two
+    # other axes are:
+    # 1 2 3 4 5 6 -> 2 3 1 5 6 4 (xyz -> yzx),
+    # 1 2 3 4 5 6 -> 3 1 2 6 4 5 (xyz -> zxy).
+    # Also, check if the new distortion was already included in the set of
+    # distortions.
+    if project:
+        if sym == "cubic":
+            new_distortions = []
+            new_deltas = []
+            for d, delta in zip(distortions, deltas):
+                new_distortions.append(d)
+                new_deltas.append(delta)
+                xyz_to_yzx = [d[1], d[2], d[0], d[4], d[5], d[3]]
+                xyz_to_zxy = [d[2], d[0], d[1], d[5], d[3], d[4]]
+                for new_d in (xyz_to_yzx, xyz_to_zxy):
+                    include_new_d = True
+                    for dd in distortions:
+                        if vectors_are_same(dd, new_d):
+                            include_new_d = False
+                            break
+                    if include_new_d:
+                        new_distortions.append(new_d)
+                        new_deltas.append(delta)
+        else:
+            raise NotImplementedError("Projection technique only implemented for cubic systems!")
+
+        distortions = new_distortions
+        deltas = new_deltas
+
+    return sym, deltas, distortions, project
+
+def vectors_are_same(v1, v2):
+    """Check whether all elements of two vectors are the same,
+    within some tolerance."""
+    tol = 1e-5
+    max_diff = np.max(np.abs(np.array(v1) - np.array(v2)))
+    if max_diff > tol:
+        return False
+    else:
+        return True
+
+def get_elastic_constants(path):
+    sym, delta, distortions, project = elastic_config(
+        os.path.join(path, '../settings.elastic'))
+
+    # Initial guess for the elastic constants:
+    if sym == "cubic":
+        # cij = [c11, c12, c44]
+        cij = jnp.zeros(3)
+        cij_full = jnp.array([
+            [cij[0], cij[1], cij[1], 0, 0, 0],
+            [cij[1], cij[0], cij[1], 0, 0, 0],
+            [cij[1], cij[1], cij[0], 0, 0, 0],
+            [0, 0, 0, cij[2], 0, 0],
+            [0, 0, 0, 0, cij[2], 0],
+            [0, 0, 0, 0, 0, cij[2]]
+            ])
+
+    stress_target = []
+    epsilon = []
+    for i, dist in enumerate(distortions):
+        for j, d in enumerate(delta[i]):
+            # Collect stress components:
+            outcar = read_outcar(os.path.join(path,
+                'OUTCAR.cleaned.elastic{}_{}'.format(i+1, j+1)))
+            # Check if the stress tensor was found in the OUTCAR.
+            # If not, we can still continue and try to solve elastic
+            # constants from the set of linear equations.
+            try:
+                st = outcar.stress_tensor_voigt_gpa
+                eps = np.array(dist) * d
+                epsilon.append(eps)
+                tmp = []
+                for val in st:
+                    tmp.append(float(val))
+                stress_target.append(tmp)
+            except:
+                continue
+
+    epsilon = jnp.array(epsilon).T
+    # Convert to numpy array, negate the OUTCAR minus, and convert to GPa
+    stress_target = jnp.array(stress_target).T
+
+    def predict(cij, epsilon):
+        cij_full = get_full_cij_matrix(cij, sym)
+        return jnp.dot(cij_full, epsilon)
+
+    def loss(cij, epsilon, stress_target):
+        preds = predict(cij, epsilon)
+        return jnp.sum((preds - stress_target)**2)
+
+    def get_full_cij_matrix(cij, sym="cubic"):
+        if sym == "cubic":
+            return jnp.array([
+                [cij[0], cij[1], cij[1], 0, 0, 0],
+                [cij[1], cij[0], cij[1], 0, 0, 0],
+                [cij[1], cij[1], cij[0], 0, 0, 0],
+                [0, 0, 0, cij[2], 0, 0],
+                [0, 0, 0, 0, cij[2], 0],
+                [0, 0, 0, 0, 0, cij[2]],
+                ])
+
+
+    grad_loss = grad(loss)
+    res = minimize(loss, cij, args=(epsilon, stress_target), jac=grad_loss,
+                   method="BFGS", options={"gtol": 1e-5})
+
+    cij = np.array(get_full_cij_matrix(res.x, sym))
+
+    # Compute compliance tensor, which is the matrix inverse of cij
+    sij = np.linalg.inv(cij)
+
+    elas_dict = {}
+    # Compute bulk and shear moduli
+    # Voigt
+    K_V = (cij[0,0] + cij[1,1] + cij[2,2] + 2*(cij[0,1] + cij[1,2] + cij[2,0])) / 9.
+    G_V = (cij[0,0] + cij[1,1] + cij[2,2] - (cij[0,1] + cij[1,2] + cij[2,0])
+          + 3*(cij[3,3] + cij[4,4] + cij[5,5]))/15.
+    elas_dict['K_V'] = K_V
+    elas_dict['G_V'] = G_V
+
+    # Reuss
+    K_R = 1. / (sij[0,0] + sij[1,1] + sij[2,2] + 2*(sij[0,1] + sij[1,2] + sij[2,0]))
+    G_R = 15. / (4*(sij[0,0] + sij[1,1] + sij[2,2]) -
+                4*(sij[0,1] + sij[1,2] + sij[2,0]) +
+                3*(sij[3,3] + sij[4,4] + sij[5,5]))
+    elas_dict['K_R'] = G_R
+    elas_dict['G_R'] = G_R
+
+    # Hill
+    K_VRH = (K_V + K_R)/2
+    G_VRH = (G_V + G_R)/2
+    elas_dict['K_VRH'] = K_VRH
+    elas_dict['G_VRH'] = G_VRH
+
+    # Poisson ratio and Young modulus
+    mu_VRH = (3*K_VRH - 2*G_VRH) / (6*K_VRH + 2*G_VRH)
+    E_VRH = 2*G_VRH * (1 + mu_VRH)
+    elas_dict['mu_VRH'] = mu_VRH
+    elas_dict['E_VRH'] = E_VRH
+
+    # Round most quantities to integers, except compliance tensor and Poisson' ratio
+    # Convert the tensors first to Python lists and only then round the numbers.
+    # Otherwise the rounding doesnt
+    cij = cij.tolist()
+    sij = sij.tolist()
+    for i in range(len(cij)):
+        for j in range(len(cij[i])):
+            cij[i][j] = int(np.round(cij[i][j], 0))
+            sij[i][j] = float(np.round(sij[i][j], 8))
+
+    #
+    for key, val in elas_dict.items():
+        if key == 'mu_VRH':
+            elas_dict[key] = float(np.round(val, decimals=4))
+        else:
+            elas_dict[key] = int(np.round(val, decimals=0))
+
+    return cij, sij, elas_dict
