@@ -83,7 +83,7 @@ def validate_optimade_request(request, version):
 
         potential_optimade_version, _sep, rest = endpoint.partition('/')
 
-        if len(potential_optimade_version) > 2 and potential_optimade_version[0] == 'v' and potential_optimade_version[1] in "0123456789":
+        if len(potential_optimade_version) >= 2 and potential_optimade_version[0] == 'v' and potential_optimade_version[1] in "0123456789":
             if potential_optimade_version in optimade_supported_versions:
                 validated_request['version'] = optimade_supported_versions[potential_optimade_version]
                 endpoint = rest
