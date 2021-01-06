@@ -919,6 +919,8 @@ class TableOrColumn(Expression):
             self._parent._declare_as_table()
 
     def __getattr__(self, name):
+        if name[0] == '_':
+            return self.__getattribute__(name)
         if self._classref is not None:
             typedict = dict(self._classref.types()['keys']+self._classref.types()['derived'])
             try:

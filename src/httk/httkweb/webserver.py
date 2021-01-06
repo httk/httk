@@ -41,6 +41,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
     get_callbacks = []
     post_callbacks = []
+    error_callbacks = []
     debug = False
     netloc = 'http://localhost'
     basepath = '/'
@@ -137,12 +138,37 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.wfile_write_encoded(e.content, e.encoding)
 
         except IOError as e:
+            if len(self.error_callbacks) > 0:
+                try:
+                    for callback in self.error_callbacks:
+                        output = callback(request,e)
+                    self.send_response(output['response_code'])
+                    self.send_header('Content-type', output['content_type'])
+                    self.end_headers()
+                    self.wfile_write_encoded(output['content'], output['encoding'])
+                    return
+                except Exception:
+                    pass
+
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile_write_encoded("<html><body>Requested URL not found.</body></html>")
 
         except Exception as e:
+            if len(self.error_callbacks) > 0:
+                try:
+                    for callback in self.error_callbacks:
+                        output = callback(request, e)
+                    self.send_response(output['response_code'])
+                    self.send_header('Content-type', output['content_type'])
+                    self.end_headers()
+                    self.wfile_write_encoded(output['content'], output['encoding'])
+                    return
+                except Exception as e2:
+                    print("HUH",e2)
+                    pass
+
             self.send_response(500)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -212,6 +238,18 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.wfile_write_encoded(e.content, e.encoding)
 
         except Exception as e:
+            if len(self.error_callbacks) > 0:
+                try:
+                    for callback in self.error_callbacks:
+                        output = callback(request, e)
+                    self.send_response(output['response_code'])
+                    self.send_header('Content-type', output['content_type'])
+                    self.end_headers()
+                    self.wfile_write_encoded(output['content'], output['encoding'])
+                    return
+                except Exception:
+                    pass
+
             self.send_response(500)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -225,7 +263,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
         print(format % args)
 
 
-def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/', debug=False):
+def startup(get_callback, post_callback=None, error_callback=None, port=80, netloc=None, basepath='/', debug=False):
 
     if post_callback is None:
         post_callback = get_callback
@@ -241,6 +279,8 @@ def startup(get_callback, post_callback=None, port=80, netloc=None, basepath='/'
     _CallbackRequestHandler.basepath = basepath
     _CallbackRequestHandler.get_callbacks += [get_callback]
     _CallbackRequestHandler.post_callbacks += [post_callback]
+    if error_callback is not None:
+        _CallbackRequestHandler.error_callbacks += [error_callback]
 
     server = None
     try:
