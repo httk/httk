@@ -33,7 +33,7 @@ def format_output(output):
         output['content'] = _json_format(output['json_response'])
     return output
 
-def serve(store, config=None, port=80, baseurl = None, debug=True):
+def serve(store, config=None, port=80, baseurl = None, debug=False):
 
     if config is None:
         config = {}
@@ -44,14 +44,10 @@ def serve(store, config=None, port=80, baseurl = None, debug=True):
     def query_function(entries, response_fields, response_limit, response_offset, filter_ast=None, debug=False):
         return httk_execute_query(store, entries, response_fields, response_limit, response_offset, filter_ast, debug)
 
-    if baseurl == None:
-        if port == 80:
-            baseurl="http://localhost/"
-        else:
-            baseurl="http://localhost:"+str(port)+"/"
-
-
-    def httk_error_callback(request, ex):
+    def httk_error_callback(request, ex, baseurl=baseurl):
+        # If the user has configured a baseurl, use it and ignore what the server thinks it serves from
+        if baseurl is not None:
+            request['baseurl'] = baseurl
         try:
             version = determine_optimade_version(request)
         except Exception as e:
@@ -64,8 +60,10 @@ def serve(store, config=None, port=80, baseurl = None, debug=True):
             output = format_optimade_error(ex, request['representation'], version=optimade_default_version)
             return format_output(output)
 
-    def httk_web_callback(request):
-
+    def httk_web_callback(request, baseurl=baseurl):
+        # If the user has configured a baseurl, use it and ignore what the server thinks it serves from
+        if baseurl is not None:
+            request['baseurl'] = baseurl
         if request['relpath'] == '':
             request['relpath'] = 'index.html'
 
@@ -74,6 +72,12 @@ def serve(store, config=None, port=80, baseurl = None, debug=True):
         version = determine_optimade_version(request)
         output = process(request, query_function, version, config, debug=True)
         return format_output(output)
+
+    if baseurl == None:
+        if port == 80:
+            baseurl="http://localhost/"
+        else:
+            baseurl="http://localhost:"+str(port)+"/"
 
     if not debug:
         webserver.startup(httk_web_callback, port=8080, error_callback=httk_error_callback, debug=False)
