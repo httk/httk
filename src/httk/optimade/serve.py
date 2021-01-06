@@ -41,6 +41,10 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
     if "links" not in config:
         config["links"] = []
 
+    if baseurl is not None:
+        if not baseurl.endswith("/"):
+            baseurl += "/"
+
     def query_function(entries, response_fields, response_limit, response_offset, filter_ast=None, debug=False):
         return httk_execute_query(store, entries, response_fields, response_limit, response_offset, filter_ast, debug)
 
@@ -70,7 +74,7 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
         print("REQUEST:",request)
 
         version = determine_optimade_version(request)
-        output = process(request, query_function, version, config, debug=True)
+        output = process(request, query_function, version, config, debug=debug)
         return format_output(output)
 
     if baseurl == None:
