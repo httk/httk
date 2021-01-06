@@ -41,6 +41,13 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
     if "links" not in config:
         config["links"] = []
 
+    if "provider" not in config:
+        config["provider"] = {
+            "name": "httk",
+            "description": "This is a database hosted with the High-Throughput Toolkit (httk), for which the hoster has not specifically configured the provider.",
+            "prefix": "httk"
+        }
+
     if baseurl is not None:
         if not baseurl.endswith("/"):
             baseurl += "/"

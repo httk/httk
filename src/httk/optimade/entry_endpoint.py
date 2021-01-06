@@ -25,7 +25,7 @@ import datetime
 
 from .meta import generate_meta
 
-def generate_entry_endpoint_reply(request, data, ndata_returned = None):
+def generate_entry_endpoint_reply(request, config, data, ndata_returned = None):
     data_part = []
     for d in data:
         attributes = dict(d)
@@ -47,7 +47,7 @@ def generate_entry_endpoint_reply(request, data, ndata_returned = None):
     response = {
         "links": links,
         "data": data_part,
-        "meta": generate_meta(request, data_count=ndata_returned, more_data_available = data.more_data_available)
+        "meta": generate_meta(request, config, data_count=ndata_returned, more_data_available = data.more_data_available)
     }
 
     # TODO: Add 'next' element in links for pagination, via info propagated in data

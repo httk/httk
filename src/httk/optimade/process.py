@@ -74,18 +74,18 @@ def process(request, query_function, version, config, debug=False):
         print("====")
 
     if endpoint == '':
-        response = generate_base_endpoint_reply(validated_request)
+        response = generate_base_endpoint_reply(validated_request, config)
         return {'content': response, 'content_type':'text/html', 'response_code':200, 'response_msg':'OK', 'encoding':'utf-8'}
 
     elif endpoint == 'versions':
-        response = generate_versions_endpoint_reply(validated_request)
+        response = generate_versions_endpoint_reply(validated_request, config)
         return {'content': response, 'content_type':'text/csv; header=present', 'response_code':200, 'response_msg':'OK', 'encoding':'utf-8'}
 
     elif endpoint == 'links':
-        response = generate_links_endpoint_reply(validated_request, config['links'])
+        response = generate_links_endpoint_reply(validated_request, config)
 
     elif endpoint == 'info':
-        response = generate_info_endpoint_reply(validated_request)
+        response = generate_info_endpoint_reply(validated_request, config)
 
     elif endpoint in httk_all_entries:
 
@@ -120,11 +120,11 @@ def process(request, query_function, version, config, debug=False):
             except TranslatorError as e:
                 raise OptimadeError(str(e), e.response_code, e.response_msg)
 
-            response = generate_entry_endpoint_reply(validated_request, results)
+            response = generate_entry_endpoint_reply(validated_request, config, results)
         else:
             results = query_function(entries, response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], debug=debug)
 
-            response = generate_entry_endpoint_reply(validated_request, results)
+            response = generate_entry_endpoint_reply(validated_request, config, results)
 
         if debug:
             print("==== END RESULT")
@@ -135,7 +135,7 @@ def process(request, query_function, version, config, debug=False):
         info, _sep, base = endpoint.partition("/")
         assert(info == "info")
         if base in httk_all_entries:
-            response = generate_entry_info_endpoint_reply(validated_request, base)
+            response = generate_entry_info_endpoint_reply(validated_request, config, base)
         else:
             raise OptimadeError("Internal error: unexpected endpoint.", 500, "Internal server error")
 

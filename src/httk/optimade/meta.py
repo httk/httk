@@ -22,7 +22,7 @@ from httk import __version__ as httk_version
 from .httk_entries import httk_entry_info, httk_all_entries
 from .versions import optimade_supported_versions
 
-def generate_meta(request, data_count=1, more_data_available=False):
+def generate_meta(request, config, data_count=1, more_data_available=False):
 
     return {
         "query": {
@@ -36,5 +36,6 @@ def generate_meta(request, data_count=1, more_data_available=False):
             "name": "httk",
             "version": httk_version,
             "homepage": "https://httk.org/",
-        }
+        },
+        "provider": config["provider"]
     }

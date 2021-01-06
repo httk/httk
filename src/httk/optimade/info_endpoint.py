@@ -23,7 +23,7 @@ from .httk_entries import httk_entry_info, httk_all_entries
 from .versions import optimade_supported_versions
 from .meta import generate_meta
 
-def generate_info_endpoint_reply(request):
+def generate_info_endpoint_reply(request, config):
     """
     This just returns a hardcoded introspection string.
     """
@@ -56,12 +56,12 @@ def generate_info_endpoint_reply(request):
                 }
             }
         ],
-        "meta": generate_meta(request, 1)
+        "meta": generate_meta(request, config)
     }
     return response
 
 
-def generate_entry_info_endpoint_reply(request, entry):
+def generate_entry_info_endpoint_reply(request, config, entry):
 
     return {
         "data": {
@@ -75,11 +75,11 @@ def generate_entry_info_endpoint_reply(request, entry):
                 "json": [x for x in httk_entry_info[entry]["properties"]]
             }
         },
-        "meta": generate_meta(request, 1)
+        "meta": generate_meta(request, config)
     }
 
 
-def generate_base_endpoint_reply(request):
+def generate_base_endpoint_reply(request, config):
 
     return """<!DOCTYPE html>
 <html lang="en">
@@ -95,13 +95,13 @@ def generate_base_endpoint_reply(request):
 """
 
 
-def generate_versions_endpoint_reply(request):
+def generate_versions_endpoint_reply(request, config):
 
     return """version
 1
 """
 
-def generate_links_endpoint_reply(request, links):
+def generate_links_endpoint_reply(request, config, links):
     #TODO: Fix invalid json example in optimade specification
     return {
         "data": [
@@ -123,5 +123,6 @@ def generate_links_endpoint_reply(request, links):
                             "link_type": "providers"
                         }
                     }
-                  ]
+                  ],
+        "meta": generate_meta(request, config)
     }
