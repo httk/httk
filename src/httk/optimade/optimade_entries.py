@@ -17,6 +17,7 @@ entry_info = {
         'properties': {
             'id': {
                 'description': "The ID for the structures entry.",
+                'filter_type': 'String',
                 'type': 'string',
                 'fulltype': 'string',
                 'required_support': True,
@@ -58,7 +59,7 @@ entry_info = {
             'elements': {
                 'description': "Names of the different elements present in the structure.",
                 'type': 'list',
-                'fulltype': 'list of strings',
+                'fulltype': 'list of string',
                 'required_support': False,
                 'should_support': True,
                 'required_query': True,
@@ -78,7 +79,7 @@ entry_info = {
             'elements_ratios': {
                 'description': "Relative proportions of different elements in the structure.",
                 'type': 'list',
-                'fulltype': 'list of floats',
+                'fulltype': 'list of float',
                 'required_support': False,
                 'should_support': True,
                 'required_query': True,
@@ -128,7 +129,7 @@ entry_info = {
             'dimension_types': {
                 'description': "List of three integers. For each of the three directions indicated by the three lattice vectors (see property lattice_vectors), this list indicates if the direction is periodic (value 1) or non-periodic (value 0). Note: the elements in this list each refer to the direction of the corresponding entry in lattice_vectors and not the Cartesian x, y, z directions.",
                 'type': 'list',
-                'fulltype': 'list of integers',
+                'fulltype': 'list of integer',
                 'required_support': False,
                 'should_support': True,
                 'required_query': False,
@@ -148,7 +149,7 @@ entry_info = {
             'lattice_vectors': {
                 'description': "The three lattice vectors in Cartesian coordinates, in ångström (Å).",
                 'type': 'integer',
-                'fulltype': 'list of list of floats',
+                'fulltype': 'list of list of float',
                 'required_support': False,
                 'should_support': True,
                 'required_query': False,
@@ -158,7 +159,7 @@ entry_info = {
             'cartesian_site_positions': {
                 'description': "Cartesian positions of each site in the structure. A site is usually used to describe positions of atoms; what atoms can be encountered at a given site is conveyed by the species_at_sites property, and the species themselves are described in the species property.",
                 'type': 'list',
-                'fulltype': 'list of list of floats',
+                'fulltype': 'list of list of float',
                 'required_support': False,
                 'should_support': True,
                 'required_query': False,
@@ -178,7 +179,7 @@ entry_info = {
             'species_at_sites': {
                 'description': "Name of the species at each site (where values for sites are specified with the same order of the property cartesian_site_positions). The properties of the species are found in the property species.",
                 'type': 'list',
-                'fulltype': 'list of strings',
+                'fulltype': 'list of string',
                 'required_support': False,
                 'should_support': True,
                 'required_query': False,

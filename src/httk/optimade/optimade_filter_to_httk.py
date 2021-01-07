@@ -25,33 +25,41 @@ import re
 from pprint import pprint
 
 from .error import TranslatorError
+from .httk_entries import httk_entry_info
 
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
 
-constant_types = ['String','Number']
+def format_value(fulltype, val, allow_null=False):
+    if fulltype.startswith('list of '):
+        if not isinstance(val[0], tuple):
+            raise TranslatorError("Type mismatch in filter, query had single value when list of values was expected.", 400, "Bad request")
+        inner_fulltype = fulltype[len('list of '):]
+        outvals = []
+        for v in val:
+            outvals += [format_value(inner_fulltype, v, allow_null=allow_null)]
+        return outvals
+    elif allow_null and val[0] == 'Null':
+        return None
+    elif fulltype == 'integer':
+        if val[0] in ['Number']:
+            return int(val[1])
+    elif fulltype == 'float':
+        if val[0] in ['Number']:
+            return float(val[1])
+    elif fulltype == 'string':
+        if val[0] in ['String']:
+            return val[1]
+    raise TranslatorError("Type mismatch in filter, expected:"+fulltype+", query has:"+val[0], 400, "Bad request")
 
-columns_mapper = {
-    'structures': {
-        'id': 'id',
-        'local_id': 'local_id',
-        'modification_date': 'modification_date',
-        'elements': 'formula_symbols',
-        'nelements': 'number_of_elements',
-        'chemical_formula_descriptive': 'chemical_formula',
-        'formula_prototype': 'formula_prototype'
-    },
-    'calculations': {
-        'id': 'id',
-        'local_id': 'local_id',
-        'modification_date': 'modification_date',
-    }
-}
+constant_types = ['String','Number']
 
 table_mapper = {
     'structures': Structure,
-    'calculations': Result_TotalEnergyResult
 }
+
+invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
+_python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__'}
 
 def optimade_filter_to_httk(filter_ast, entries, searcher):
 
@@ -63,48 +71,47 @@ def optimade_filter_to_httk(filter_ast, entries, searcher):
         search_variables += [search_variable]
 
         if filter_ast is not None:
-            search_expr = optimade_filter_to_httk_recurse(filter_ast, search_variable, columns_mapper[entry], optimade_valid_columns_per_entry[entry])
+            search_expr = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry)
             searcher.add(search_expr)
 
     return searcher
 
 
-def optimade_filter_to_httk_recurse(node, search_variable, columns_mapper, columns_handlers, recursion=0):
+def optimade_filter_to_httk_recurse(node, search_variable, entry, recursion=0):
 
     search_expr = None
+    handlers = optimade_field_handlers[entry]
+    entry_info = httk_entry_info[entry]['properties']
 
     if node[0] in ['AND']:
-        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, columns_mapper, columns_handlers, recursion=recursion+1)
-        search_expr = search_expr and optimade_filter_to_httk_recurse(node[2], search_variable, columns_mapper, columns_handlers, recursion=recursion+1)
-    if node[0] in ['OR']:
-        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, columns_mapper, columns_handlers, recursion=recursion+1)
-        search_expr = search_expr or optimade_filter_to_httk_recurse(node[2], search_variable, columns_mapper, columns_handlers, recursion=recursion+1)
+        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
+        search_expr = search_expr & optimade_filter_to_httk_recurse(node[2], search_variable, entry, recursion=recursion+1)
+    elif node[0] in ['OR']:
+        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
+        search_expr = search_expr | optimade_filter_to_httk_recurse(node[2], search_variable, entry, recursion=recursion+1)
     elif node[0] in ['NOT']:
-        search_expr = not optimade_filter_to_httk_recurse(node[1], search_variable, columns_mapper, columns_mapper, columns_handlers, recursion=recursion+1)
+        search_expr = ~ optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
+    #TODO: Bug: NOT-inverted HAS operators do NOT WORK AS EXPECTED
     elif node[0] in ['HAS_ALL', 'HAS_ANY', 'HAS_ONLY']:
         ops = node[1]
         left = node[2]
         right = node[3]
         assert(left[0] == 'Identifier')
-        column = columns_mapper[left[1]]
-        argtype, handler = columns_handlers[left[1]]
-        values = []
-        for el in right:
-            assert(el[0] in constant_types)
-            assert(argtype[0] == 'List')
-            assert(el[0] == argtype[1])
-            if argtype == "Number":
-                try:
-                    values += [int(el[1])]
-                except ValueError:
-                    values += [float(el[1])]
-            else:
-                values += [el[1]]
+        values = format_value(entry_info[left[1]]['fulltype'],right)
+        handler = handlers[left[1]][node[0]]
         if ops != tuple(['=']*len(values)):
             raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented.")
-        search_expr = handler(column, ops, values, search_variable, node[0])
+        search_expr = handler(left[1], ops, values, search_variable, node[0])
     elif node[0] in ['LENGTH']:
-        raise TranslatorError("LENGTH queries not implemented yet.", 501, "Not implemented.")
+        left = node[1]
+        op = node[2]
+        right = node[3]
+        assert(left[0] == 'Identifier')
+        assert(right[0] == 'Number')
+        handler = handlers[left[1]]['length']
+        assert(entry_info[left[1]]['fulltype'].startswith("list of "))
+        value = format_value("integer",right)
+        search_expr = handler(left[1], op, value, search_variable)
     elif node[0] in ['>', '>=', '<', '<=', '=', '!=']:
         op = node[0]
         left = node[1]
@@ -116,87 +123,78 @@ def optimade_filter_to_httk_recurse(node, search_variable, columns_mapper, colum
         else:
             if right[0] == 'Identifier' and left[0] in constant_types:
                 left, right = right, left
+                op = invert_op[op]
             assert(left[0] == 'Identifier')
-            column = columns_mapper[left[1]]
-            argtype, handler = columns_handlers[left[1]]
-            assert(right[0] in constant_types)
-            assert(right[0] == argtype)
-            if right[0] == "Number":
-                try:
-                    value = int(right[1])
-                except ValueError:
-                    value = float(right[1])
-            else:
-                value = right[1]
-            search_expr = handler(column, op, value, search_variable)
+            handler = handlers[left[1]]['comparison']
+            value = format_value(entry_info[left[1]]['fulltype'],right)
+            search_expr = handler(left[1], op, value, search_variable)
     else:
         pprint(node)
         raise TranslatorError("Unexpected translation error", 500, "Internal server error.")
     return search_expr
 
-
-_httk_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__'}
-
-
 def string_handler(entry, op, value, search_variable):
-    httk_op = _httk_opmap[op]
+    httk_op = _python_opmap[op]
     return getattr(getattr(search_variable,entry),httk_op)(value)
 
+def constant_comparison_handler(val1, op, val2, search_variable):
+    op = _python_opmap[op]
+    # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
+    if getattr(val1,op)(val2):
+        return getattr(getattr(search_variable,'hexhash'),'__eq__')(getattr(search_variable,'hexhash'))
+    else:
+        return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
+
 def number_handler(entry, op, value, search_variable):
-    httk_op = _httk_opmap[op]
+    httk_op = _python_opmap[op]
     return getattr(getattr(search_variable,entry),httk_op)(value)
 
 def timestamp_handler(entry, op, value, search_variable):
     raise TranslatorError("Timestamp comparison not yet implemented.", 501, "Not implemented.")
 
-def elements_handler(entry, ops, values, search_variable, has_type):
-    if has_type == 'HAS_ALL':
-        search = getattr(getattr(search_variable,entry),'is_in')(values[0])
-        for value in values[1:]:
-            search = search & (getattr(getattr(search_variable,entry),'is_in')(value))
-    elif has_type == 'HAS_ANY':
-        search = getattr(getattr(search_variable,entry),'is_in')(*values)
-    elif has_type == 'HAS_ONLY':
-        raise TranslatorError("HAS ONLY queries not implemented yet.", 501, "Not implemented.")
-
+def set_all_handler(entry, ops, values, search_variable):
+    search = getattr(getattr(search_variable,entry),'is_in')(values[0])
+    for value in values[1:]:
+        search = search & (getattr(getattr(search_variable,entry),'is_in')(value))
     return search
 
-def elements_ratios_handler(entry, op, value, search_variable):
-    raise TranslatorError("Elements ratios comparison not yet implemented.", 501, "Not implemented.")
+def set_any_handler(entry, ops, values, search_variable):
+    return getattr(getattr(search_variable,entry),'is_in')(*values)
 
-def structure_features_handler(entry, op, value, search_variable):
+def set_only_handler(entry, ops, values, search_variable):
+    raise TranslatorError("HAS ONLY queries not implemented yet.", 501, "Not implemented.")
+
+def structure_features_set_handler(op, value, search_variable, has_type):
     raise TranslatorError("Structure features comparison not yet implemented.", 501, "Not implemented.")
 
-optimade_valid_columns_per_entry = {
+def structure_features_length_handler(op, value, search_variable):
+    raise TranslatorError("Structure features length comparison not yet implemented.", 501, "Not implemented.")
+
+optimade_field_handlers = {
     'structures': {
-        'id': ('String', lambda entry, op, value, search_variable: string_handler('hexhash', op, value[1:-1], search_variable)),
-        'type': ('String', string_handler),
-        'immutable_id': ('String', string_handler),
-        'last_modified': ('String', timestamp_handler),
-        'elements': (('List','String'), elements_handler),
-        'nelements': ('Number', number_handler),
-        'elements_ratios': (('List','Numbers'), elements_ratios_handler),
-        'chemical_formula_descriptive': ('String', string_handler),
-        'chemical_formula_reduced': ('String', string_handler),
-        'chemical_formula_anonymous': ('String', string_handler),
-        'formula_prototype': ('String', string_handler),
-        'nelements': ('Number', number_handler),
-        'nsites': ('Number', number_handler),
-        'structure_features': (('List','String'), structure_features_handler),
+        'id': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('hexhash', op, value, search_variable)
+        },
+        'type': {
+            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'structures', search_variable)
+        },
+        'elements': {
+            'HAS_ALL': lambda entry, ops, values, search_variable, has_type: set_all_handler('formula_symbols', ops, values, search_variable),
+            'HAS_ANY': lambda entry, ops, values, search_variable, has_type: set_any_handler('formula_symbols', ops, values, search_variable),
+            'HAS_ONLY': lambda entry, ops, values, search_variable, has_type: set_only_handler('formula_symbols', ops, values, search_variable),
+            'length': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable)
+        },
+        'nelements': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable)
+        },
+        'chemical_formula_descriptive': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('chemical_formula', op, value, search_variable)
+        },
+        'structure_features': {
+            'HAS': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS'),
+            'HAS_ALL': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS_ALL'),
+            'HAS_ANY': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS_ANY'),
+            'length': lambda entry, ops, values, search_variable, has_type: structure_features_length_handler(value, op, search_variable)
+        }
     },
-    'calculations': {
-        'id': ('String', string_handler),
-        'modification_date': ('String', timestamp_handler),
-    },
-    'references': {
-        'id': ('String', string_handler),
-        'modification_date': ('String', timestamp_handler),
-    }
 }
-
-optimade_valid_response_fields = {
-    'structures': ['id', 'modification_date', 'elements',
-                   'nelements', 'chemical_formula', 'formula_prototype'],
-    'calculations': ['id', 'modification_date']
-}
-

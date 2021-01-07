@@ -262,21 +262,36 @@ def optimade_parse_tree_to_ojf_recurse(node, recursion=0):
             else:
                 raise Exception("Internal error: filter simplify on invalid ast, unexpected number of components in set op: "+str(node[2]))
             arg = None
+        elif node[2][0] == "LengthOpRhs":
+            assert(node[2][1][0] == 'LENGTH')
+            assert(node[2][2][0] == 'Value' or (node[2][2][0] == 'Operator' and node[2][3][0] == 'Value'))
+            if node[2][2][0] == 'Value':
+                right = _fix_const(node[2][2][1])
+                op = '='
+            else:
+                op = node[2][2][1]
+                right = _fix_const(node[2][3][1])
+            pos[arg] = ("LENGTH", left, op, right)
+            #left = ('Identifier',) + tuple([x[1] for x in node[1][1:] if x[0] != 'Dot'])
+            #assert(node[2][2][0] == 'Value' or (node[2][2][0] == 'Operator' and node[3][2][0] == 'Value'))
+            #right = _fix_const(node[2][2][1])
+            #pos[arg] = ("LENGTH", op, left, right)
+            #arg = None
         else:
             raise Exception("Internal error: filter simplify on invalid ast, unrecognized comparison: "+str(node[2][0]))
-    elif node[0] == 'PredicateComparison':
-        if node[1][0] == "LengthComparison":
-            assert(node[1][1][0]=="LENGTH")
-            assert(node[1][2][0]=="Identifier")
-            assert(node[1][3][0]=="Operator")
-            assert(node[1][4][0]=="Value")
-            left = node[1][2]
-            right = _fix_const(node[1][4][1])
-            op = node[1][3][1]
-            pos[arg] = ("LENGTH", op, left, right)
-            arg = None
-        else:
-            raise Exception("Internal error: filter simplify on invalid ast, unrecognized predicate comparison: "+str(node[1][0]))
+    #elif node[0] == 'PredicateComparison':
+    #    if node[1][0] == "LengthComparison":
+    #        assert(node[1][1][0]=="LENGTH")
+    #        assert(node[1][2][0]=="Identifier")
+    #        assert(node[1][3][0]=="Operator")
+    #        assert(node[1][4][0]=="Value")
+    #        left = node[1][2]
+    #        right = _fix_const(node[1][4][1])
+    #        op = node[1][3][1]
+    #        pos[arg] = ("LENGTH", op, left, right)
+    #        arg = None
+    #    else:
+    #        raise Exception("Internal error: filter simplify on invalid ast, unrecognized predicate comparison: "+str(node[1][0]))
     else:
         raise Exception("Internal error: filter simplify on invalid ast, unrecognized node: "+str(node[0]))
 

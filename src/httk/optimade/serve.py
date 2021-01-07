@@ -115,4 +115,4 @@ if __name__ == "__main__":
       ]
     }
 
-    serve(store, config)
+    serve(store, config, debug=True)
