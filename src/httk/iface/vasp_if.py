@@ -28,10 +28,10 @@ from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
 import configparser
 import numpy as np
-import jax.numpy as jnp
-from jax import grad
+# import jax.numpy as jnp
+# from jax import grad
 import subprocess
-from scipy.optimize import minimize
+# from scipy.optimize import minimize
 
 
 def get_pseudopotential(species, poscarspath=None):
@@ -551,17 +551,19 @@ def get_elastic_constants(path):
         os.path.join(path, '../settings.elastic'))
 
     # Initial guess for the elastic constants:
-    if sym == "cubic":
-        # cij = [c11, c12, c44]
-        cij = jnp.zeros(3)
-        cij_full = jnp.array([
-            [cij[0], cij[1], cij[1], 0, 0, 0],
-            [cij[1], cij[0], cij[1], 0, 0, 0],
-            [cij[1], cij[1], cij[0], 0, 0, 0],
-            [0, 0, 0, cij[2], 0, 0],
-            [0, 0, 0, 0, cij[2], 0],
-            [0, 0, 0, 0, 0, cij[2]]
-            ])
+    # if sym == "cubic":
+        # # cij = [c11, c12, c44]
+        # # cij = jnp.zeros(3)
+        # cij = np.zeros(3)
+        # # cij_full = jnp.array([
+        # cij_full = np.array([
+            # [cij[0], cij[1], cij[1], 0, 0, 0],
+            # [cij[1], cij[0], cij[1], 0, 0, 0],
+            # [cij[1], cij[1], cij[0], 0, 0, 0],
+            # [0, 0, 0, cij[2], 0, 0],
+            # [0, 0, 0, 0, cij[2], 0],
+            # [0, 0, 0, 0, 0, cij[2]]
+            # ])
 
     stress_target = []
     epsilon = []
@@ -584,21 +586,26 @@ def get_elastic_constants(path):
             except:
                 continue
 
-    epsilon = jnp.array(epsilon).T
+    # epsilon = jnp.array(epsilon).T
+    epsilon = np.array(epsilon)
     # Convert to numpy array, negate the OUTCAR minus, and convert to GPa
-    stress_target = jnp.array(stress_target).T
+    # stress_target = jnp.array(stress_target).T
+    stress_target = np.array(stress_target)
 
     def predict(cij, epsilon):
         cij_full = get_full_cij_matrix(cij, sym)
-        return jnp.dot(cij_full, epsilon)
+        # return jnp.dot(cij_full, epsilon)
+        return np.dot(cij_full, epsilon)
 
     def loss(cij, epsilon, stress_target):
         preds = predict(cij, epsilon)
-        return jnp.sum((preds - stress_target)**2)
+        # return jnp.sum((preds - stress_target)**2)
+        return np.sum((preds - stress_target)**2)
 
     def get_full_cij_matrix(cij, sym="cubic"):
         if sym == "cubic":
-            return jnp.array([
+            # return jnp.array([
+            return np.array([
                 [cij[0], cij[1], cij[1], 0, 0, 0],
                 [cij[1], cij[0], cij[1], 0, 0, 0],
                 [cij[1], cij[1], cij[0], 0, 0, 0],
@@ -607,12 +614,51 @@ def get_elastic_constants(path):
                 [0, 0, 0, 0, 0, cij[2]],
                 ])
 
+    def setup_linear_system(epsilon, stress_target, sym="cubic"):
+        """Create matrices A and B for a over-determined linear system
+        A @ cij = B, where A=epsilon and B=stress_target.
+        This system can then be solved by np.linalg.lstsq to obtain
+        the symmetry-wise non-zero elastic constants cij.
+        """
+        if sym == "cubic":
+            cij_len = 3
+            symmetric_cij_index = [
+                [0, 1, 1, None, None, None],
+                [1, 0, 1, None, None, None],
+                [1, 1, 0, None, None, None],
+                [None, None, None, 2, None, None],
+                [None, None, None, None, 2, None],
+                [None, None, None, None, None, 2]
+            ]
 
-    grad_loss = grad(loss)
-    res = minimize(loss, cij, args=(epsilon, stress_target), jac=grad_loss,
-                   method="BFGS", options={"gtol": 1e-5})
+        A = []
+        B = []
+        for eq_ind in range(epsilon.shape[0]):
+            for j in range(6):
+                epsilon_tmp = np.zeros(cij_len)
+                for i in range(6):
+                    index = symmetric_cij_index[i][j]
+                    if index is None:
+                        continue
+                    epsilon_tmp[index] += epsilon[eq_ind,i]
+                A.append(epsilon_tmp)
+                B.append([stress_target[eq_ind,j]])
+        A = np.array(A)
+        B = np.array(B)
+        return A, B
 
-    cij = np.array(get_full_cij_matrix(res.x, sym))
+    # Jax solution:
+    # grad_loss = grad(loss)
+    # res = minimize(loss, cij, args=(epsilon, stress_target), jac=grad_loss,
+                   # method="BFGS", options={"gtol": 1e-5})
+
+    # cij = np.array(get_full_cij_matrix(res.x, sym))
+
+    # Pure numpy solution:
+    A, B = setup_linear_system(epsilon, stress_target, sym)
+    x, residuals, rank, singular_values = np.linalg.lstsq(A,
+        B, rcond=None)
+    cij = np.array(get_full_cij_matrix(x.flatten(), sym))
 
     # Compute compliance tensor, which is the matrix inverse of cij
     sij = np.linalg.inv(cij)

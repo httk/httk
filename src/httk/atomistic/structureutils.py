@@ -356,7 +356,9 @@ def normalized_formula(assignments, ratios, counts):
     formula = normalized_formula_parts(assignments, ratios, counts)
 
     normalized_formula = ""
-    for key in sorted(formula.keys()):
+    # sorted doesn't work with disordered structures.
+    # for key in sorted(formula.keys()):
+    for key in formula.keys():
         if is_sequence(formula[key]):
             totval = sum(formula[key])
         else:

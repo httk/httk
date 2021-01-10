@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import configparser
 import httk
 from httk.core import *
 from pyemto.examples.emto_input_generator import EMTO
@@ -18,10 +19,29 @@ def structure_to_inputfiles(f, struct, comment=None, primitive_cell=True):
         vol = struct.uc_volume
         counts = struct.uc_counts
 
+    # Set up EMTO input parameters
+    config = configparser.ConfigParser()
+    config.read('emto.settings')
+    emto_settings = config['settings']
+
     species = []
-    for s, c in zip(struct.symbols, counts):
-        for _ in range(c):
-            species.append(s)
+    concs = []
+    for a, count in zip(struct.assignments, counts):
+        ratios = a.ratios
+        for i in range(len(ratios)):
+            ratios[i] = ratios[i].to_floats()
+        for _ in range(count):
+            species.append(a.symbols)
+            concs.append(ratios)
+
+
+    # Handle known exceptions:
+    # Hf doesn't work if basis set contains higher orbitals than s, p, d.
+    flat_species = [item for sublist in species for item in sublist]
+    for s in flat_species:
+        if s in ('Hf', 'HF'):
+            kstr_nl = 3
+            break
 
     emtopath = os.getcwd()
     latpath = emtopath
@@ -33,11 +53,14 @@ def structure_to_inputfiles(f, struct, comment=None, primitive_cell=True):
         prims=basis.to_floats(),
         basis=coords.to_floats(),
         species=species,
+        concs=concs,
         coords_are_cartesian=False,
         find_primitive=True,
         )
 
-    sws_range = np.array([2.5])
+    sws_range = np.linspace(float(emto_settings['sws_min']),
+                            float(emto_settings['sws_max']),
+                            int(emto_settings['sws_steps']))
     input_creator.write_bmdl_kstr_shape_input()
     input_creator.write_kgrn_kfcd_swsrange(sws=sws_range)
 
