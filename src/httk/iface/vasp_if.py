@@ -486,6 +486,11 @@ def elastic_config(fn):
     except:
         project = False
 
+    try:
+        force_sym = config["elastic"]["symmetry"].lstrip()
+    except:
+        force_sym = None
+
     # Delta values:
     tmp = config["elastic"]["delta"].lstrip().split("\n")
     deltas = []
@@ -534,7 +539,7 @@ def elastic_config(fn):
         distortions = new_distortions
         deltas = new_deltas
 
-    return sym, deltas, distortions, project
+    return sym, deltas, distortions, project, force_sym
 
 def vectors_are_same(v1, v2):
     """Check whether all elements of two vectors are the same,
@@ -547,7 +552,7 @@ def vectors_are_same(v1, v2):
         return True
 
 def get_elastic_constants(path):
-    sym, delta, distortions, project = elastic_config(
+    sym, delta, distortions, project, force_sym = elastic_config(
         os.path.join(path, '../settings.elastic'))
 
     stress_target = []
@@ -577,37 +582,10 @@ def get_elastic_constants(path):
     # stress_target = jnp.array(stress_target).T
     stress_target = np.array(stress_target)
 
-    def predict(cij, epsilon):
-        cij_full = get_full_cij_matrix(cij, sym)
-        # return jnp.dot(cij_full, epsilon)
-        return np.dot(cij_full, epsilon)
-
-    def loss(cij, epsilon, stress_target):
-        preds = predict(cij, epsilon)
-        # return jnp.sum((preds - stress_target)**2)
-        return np.sum((preds - stress_target)**2)
-
     def get_full_cij_matrix(cij):
-        # if sym == "cubic":
-            # return np.array([
-                # [cij[0], cij[1], cij[1], 0, 0, 0],
-                # [cij[1], cij[0], cij[1], 0, 0, 0],
-                # [cij[1], cij[1], cij[0], 0, 0, 0],
-                # [0, 0, 0, cij[2], 0, 0],
-                # [0, 0, 0, 0, cij[2], 0],
-                # [0, 0, 0, 0, 0, cij[2]],
-                # ])
-
-        # elif sym == "hexagonal":
-            # return np.array([
-                # [cij[0], cij[1], cij[2], 0, 0, 0],
-                # [cij[1], cij[0], cij[2], 0, 0, 0],
-                # [cij[2], cij[2], cij[3], 0, 0, 0],
-                # [0, 0, 0, cij[4], 0, 0],
-                # [0, 0, 0, 0, cij[4], 0],
-                # [0, 0, 0, 0, 0, (cij[0]-cij[1])/2],
-            # ])
-
+        """Construct the full elastic matrix from the C-vector
+        as defined in Tasnadi PRB (2012)
+        """
         return np.array([
             [cij[ 0], cij[ 5], cij[ 4], cij[ 9], cij[13], cij[17]],
             [cij[ 5], cij[ 1], cij[ 3], cij[15], cij[10], cij[14]],
@@ -617,8 +595,7 @@ def get_elastic_constants(path):
             [cij[17], cij[14], cij[11], cij[19], cij[18], cij[ 8]]
             ])
 
-
-    def setup_linear_system(epsilon, stress_target, sym="cubic"):
+    def setup_linear_system(epsilon, stress_target, force_sym=None):
         """Create matrices A and B for a over-determined linear system
         A @ cij = B, where A=epsilon and B=stress_target.
         This system can then be solved by np.linalg.lstsq to obtain
@@ -626,7 +603,7 @@ def get_elastic_constants(path):
         """
 
         cij_len = 21
-        symmetric_cij_index = [
+        full_cij_index = [
             [  0,  5,  4,  9, 13, 17],
             [  5,  1,  3, 15, 10, 14],
             [  4,  3,  2, 12, 16, 11],
@@ -635,13 +612,30 @@ def get_elastic_constants(path):
             [ 17, 14, 11, 19, 18,  8]
         ]
 
+        # In case we are using some "efficient" set of distortions,
+        # we end up here with an under-determined set of equations, unless
+        # we force further symmetries to the equations.
+        # E.g. for a cubic system we only need to do one distortion
+        # to get all three independent elastic constants, but one distortion
+        # alone would give an under-determined set of eqs.
+        reduce_cij = False
+        if force_sym == "cubic":
+            reduce_cij = True
+            equiv_cij = [
+                [0,1,2],
+                [3,4,5],
+                [6,7,8]
+            ]
+            zero_cij = [ 9, 10, 11, 12, 13, 14,
+                        15, 16, 17, 18, 19, 20]
+
         A = []
         B = []
         for eq_ind in range(epsilon.shape[0]):
             for j in range(6):
                 epsilon_tmp = np.zeros(cij_len)
                 for i in range(6):
-                    index = symmetric_cij_index[i][j]
+                    index = full_cij_index[i][j]
                     if index is None:
                         continue
                     elif isinstance(index, int):
@@ -649,6 +643,32 @@ def get_elastic_constants(path):
                     elif isinstance(index, dict):
                         for key, val in index.items():
                             epsilon_tmp[key] += val * epsilon[eq_ind,i]
+
+                # Force optional symmetry
+                if reduce_cij:
+                    # Find non-zero values and calculate their average.
+                    # E.g. if for a cubic system we have calculated
+                    # c11 and c22, their values should be equivalent,
+                    # but they can be slightly different
+                    # due to numerical noise, so taking the average
+                    # is a way to remove the effect of noise.
+                    # The average value is used to fill the symmetrically
+                    # equivalent sites in the C-vector.
+                    for index_set in equiv_cij:
+                        tmp = epsilon_tmp[index_set]
+                        nonzero_epsilons = tmp[np.abs(tmp) > 1e-6]
+                        # Make sure the average value is set to zero in the
+                        # case that all symmetrically equivalent epsilons
+                        # are zero:
+                        if len(nonzero_epsilons) == 0:
+                            average_value = 0.0
+                        else:
+                            average_value = np.mean(nonzero_epsilons)
+                        epsilon_tmp[index_set[0]] = average_value
+                        for index in index_set[1:]:
+                            epsilon_tmp[index] = 0.0
+                    for index in zero_cij:
+                        epsilon_tmp[index] = 0.0
 
                 A.append(epsilon_tmp)
                 B.append([stress_target[eq_ind,j]])
@@ -688,7 +708,9 @@ def get_elastic_constants(path):
         Csym = np.dot(Psym, C)
         return Csym
 
-    A, B = setup_linear_system(epsilon, stress_target, sym)
+    A, B = setup_linear_system(epsilon, stress_target, force_sym)
+    for row in A:
+        print(A)
     # Solve the 21-component C-vector Tasnadi2012, PRB 85, 144112
     Cvector, residuals, rank, singular_values = np.linalg.lstsq(A,
         B, rcond=None)
