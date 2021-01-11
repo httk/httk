@@ -550,21 +550,6 @@ def get_elastic_constants(path):
     sym, delta, distortions, project = elastic_config(
         os.path.join(path, '../settings.elastic'))
 
-    # Initial guess for the elastic constants:
-    # if sym == "cubic":
-        # # cij = [c11, c12, c44]
-        # # cij = jnp.zeros(3)
-        # cij = np.zeros(3)
-        # # cij_full = jnp.array([
-        # cij_full = np.array([
-            # [cij[0], cij[1], cij[1], 0, 0, 0],
-            # [cij[1], cij[0], cij[1], 0, 0, 0],
-            # [cij[1], cij[1], cij[0], 0, 0, 0],
-            # [0, 0, 0, cij[2], 0, 0],
-            # [0, 0, 0, 0, cij[2], 0],
-            # [0, 0, 0, 0, 0, cij[2]]
-            # ])
-
     stress_target = []
     epsilon = []
     for i, dist in enumerate(distortions):
@@ -602,17 +587,36 @@ def get_elastic_constants(path):
         # return jnp.sum((preds - stress_target)**2)
         return np.sum((preds - stress_target)**2)
 
-    def get_full_cij_matrix(cij, sym="cubic"):
-        if sym == "cubic":
-            # return jnp.array([
-            return np.array([
-                [cij[0], cij[1], cij[1], 0, 0, 0],
-                [cij[1], cij[0], cij[1], 0, 0, 0],
-                [cij[1], cij[1], cij[0], 0, 0, 0],
-                [0, 0, 0, cij[2], 0, 0],
-                [0, 0, 0, 0, cij[2], 0],
-                [0, 0, 0, 0, 0, cij[2]],
-                ])
+    def get_full_cij_matrix(cij):
+        # if sym == "cubic":
+            # return np.array([
+                # [cij[0], cij[1], cij[1], 0, 0, 0],
+                # [cij[1], cij[0], cij[1], 0, 0, 0],
+                # [cij[1], cij[1], cij[0], 0, 0, 0],
+                # [0, 0, 0, cij[2], 0, 0],
+                # [0, 0, 0, 0, cij[2], 0],
+                # [0, 0, 0, 0, 0, cij[2]],
+                # ])
+
+        # elif sym == "hexagonal":
+            # return np.array([
+                # [cij[0], cij[1], cij[2], 0, 0, 0],
+                # [cij[1], cij[0], cij[2], 0, 0, 0],
+                # [cij[2], cij[2], cij[3], 0, 0, 0],
+                # [0, 0, 0, cij[4], 0, 0],
+                # [0, 0, 0, 0, cij[4], 0],
+                # [0, 0, 0, 0, 0, (cij[0]-cij[1])/2],
+            # ])
+
+        return np.array([
+            [cij[ 0], cij[ 5], cij[ 4], cij[ 9], cij[13], cij[17]],
+            [cij[ 5], cij[ 1], cij[ 3], cij[15], cij[10], cij[14]],
+            [cij[ 4], cij[ 3], cij[ 2], cij[12], cij[16], cij[11]],
+            [cij[ 9], cij[15], cij[12], cij[ 6], cij[20], cij[19]],
+            [cij[13], cij[10], cij[16], cij[20], cij[ 7], cij[18]],
+            [cij[17], cij[14], cij[11], cij[19], cij[18], cij[ 8]]
+            ])
+
 
     def setup_linear_system(epsilon, stress_target, sym="cubic"):
         """Create matrices A and B for a over-determined linear system
@@ -620,16 +624,16 @@ def get_elastic_constants(path):
         This system can then be solved by np.linalg.lstsq to obtain
         the symmetry-wise non-zero elastic constants cij.
         """
-        if sym == "cubic":
-            cij_len = 3
-            symmetric_cij_index = [
-                [0, 1, 1, None, None, None],
-                [1, 0, 1, None, None, None],
-                [1, 1, 0, None, None, None],
-                [None, None, None, 2, None, None],
-                [None, None, None, None, 2, None],
-                [None, None, None, None, None, 2]
-            ]
+
+        cij_len = 21
+        symmetric_cij_index = [
+            [  0,  5,  4,  9, 13, 17],
+            [  5,  1,  3, 15, 10, 14],
+            [  4,  3,  2, 12, 16, 11],
+            [  9, 15, 12,  6, 20, 19],
+            [ 13, 10, 16, 20,  7, 18],
+            [ 17, 14, 11, 19, 18,  8]
+        ]
 
         A = []
         B = []
@@ -640,25 +644,62 @@ def get_elastic_constants(path):
                     index = symmetric_cij_index[i][j]
                     if index is None:
                         continue
-                    epsilon_tmp[index] += epsilon[eq_ind,i]
+                    elif isinstance(index, int):
+                        epsilon_tmp[index] += epsilon[eq_ind,i]
+                    elif isinstance(index, dict):
+                        for key, val in index.items():
+                            epsilon_tmp[key] += val * epsilon[eq_ind,i]
+
                 A.append(epsilon_tmp)
                 B.append([stress_target[eq_ind,j]])
+
         A = np.array(A)
         B = np.array(B)
         return A, B
 
-    # Jax solution:
-    # grad_loss = grad(loss)
-    # res = minimize(loss, cij, args=(epsilon, stress_target), jac=grad_loss,
-                   # method="BFGS", options={"gtol": 1e-5})
+    def get_symmetrized_C_vector(C, sym="cubic"):
+        """We follow the notation of Tasnadi2012, PRB 85, 144112
+           and Refs [31], [32] of that paper."""
 
-    # cij = np.array(get_full_cij_matrix(res.x, sym))
+        if sym == "cubic":
+            Psym = np.zeros((21,21))
+            Psym[0:3,0:3] = 1./3
+            Psym[3:6,3:6] = 1./3
+            Psym[6:9,6:9] = 1./3
 
-    # Pure numpy solution:
+        if sym == "hexagonal":
+            Psym = np.zeros((21,21))
+            Psym[0:2, 0:2] = 3./8
+            Psym[0:2,5] = 1./(4*np.sqrt(2))
+            Psym[0:2,8] = 1./4
+            Psym[2,2] = 1.0
+            Psym[3:5,3:5] = 1./2
+            Psym[5,0:2] = 1./(4*np.sqrt(2))
+            Psym[5,5] = 3./4
+            Psym[5,8] = -1/(2*np.sqrt(2))
+            Psym[6:8,6:8] = 1./2
+            Psym[8,0:2] = 1./4
+            Psym[8,5] = -1/(2*np.sqrt(2))
+            Psym[8,8] = 1./2
+
+        else:
+            sys.exit(f"Symmetrized cij matrix not implemented for sym = \"{sym}\"!")
+
+        Csym = np.dot(Psym, C)
+        return Csym
+
     A, B = setup_linear_system(epsilon, stress_target, sym)
-    x, residuals, rank, singular_values = np.linalg.lstsq(A,
+    # Solve the 21-component C-vector Tasnadi2012, PRB 85, 144112
+    Cvector, residuals, rank, singular_values = np.linalg.lstsq(A,
         B, rcond=None)
-    cij = np.array(get_full_cij_matrix(x.flatten(), sym))
+
+    # if 1: #project:
+        # Cvector = get_symmetrized_C_vector(Cvector, sym)
+
+    cij = np.array(get_full_cij_matrix(Cvector.flatten()))
+
+    for row in cij:
+        print(row)
 
     # Compute compliance tensor, which is the matrix inverse of cij
     sij = np.linalg.inv(cij)
