@@ -28,10 +28,8 @@ from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
 import configparser
 import numpy as np
-# import jax.numpy as jnp
-# from jax import grad
 import subprocess
-# from scipy.optimize import minimize
+import inspect
 
 
 def get_pseudopotential(species, poscarspath=None):
@@ -582,6 +580,23 @@ def get_elastic_constants(path):
     # stress_target = jnp.array(stress_target).T
     stress_target = np.array(stress_target)
 
+    def get_full_C_vector(C, sym="cubic"):
+        if sym == "cubic":
+            full_C = np.array([C[0], C[0], C[0], C[1], C[1], C[1],
+                C[2], C[2], C[2], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ])
+
+        elif sym == "hexagonal":
+            full_C = np.array([C[0], C[0], C[1], C[2], C[2], C[3], C[4],
+                C[4], (C[0]-C[3])/2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ])
+
+        else:
+            sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
+                f"Full cij matrix not implemented for sym = \"{sym}\"!")
+
+        return full_C
+
     def get_full_cij_matrix(cij):
         """Construct the full elastic matrix from the C-vector
         as defined in Tasnadi PRB (2012)
@@ -595,11 +610,21 @@ def get_elastic_constants(path):
             [cij[17], cij[14], cij[11], cij[19], cij[18], cij[ 8]]
             ])
 
-    def setup_linear_system(epsilon, stress_target, force_sym=None):
+    def setup_linear_system(epsilon, stress_target, sym="cubic"):
         """Create matrices A and B for a over-determined linear system
         A @ cij = B, where A=epsilon and B=stress_target.
         This system can then be solved by np.linalg.lstsq to obtain
         the symmetry-wise non-zero elastic constants cij.
+
+        Perform a check for the rank of the linear system coefficient matrix,
+        because depending on whether we have under-, well- or over-determined
+        linear system, the solution strategy should be a little different
+        for each of these cases:
+            1) Well- and over-determined systems can be solved normally.
+            2) Under-determined system means that we have to apply symmetry
+               to eliminate some of the cij variables from the linear system
+               in order to make the linear system solvable (well- or over-
+               determined).
         """
 
         cij_len = 21
@@ -611,23 +636,6 @@ def get_elastic_constants(path):
             [ 13, 10, 16, 20,  7, 18],
             [ 17, 14, 11, 19, 18,  8]
         ]
-
-        # In case we are using some "efficient" set of distortions,
-        # we end up here with an under-determined set of equations, unless
-        # we force further symmetries to the equations.
-        # E.g. for a cubic system we only need to do one distortion
-        # to get all three independent elastic constants, but one distortion
-        # alone would give an under-determined set of eqs.
-        reduce_cij = False
-        if force_sym == "cubic":
-            reduce_cij = True
-            equiv_cij = [
-                [0,1,2],
-                [3,4,5],
-                [6,7,8]
-            ]
-            zero_cij = [ 9, 10, 11, 12, 13, 14,
-                        15, 16, 17, 18, 19, 20]
 
         A = []
         B = []
@@ -644,38 +652,68 @@ def get_elastic_constants(path):
                         for key, val in index.items():
                             epsilon_tmp[key] += val * epsilon[eq_ind,i]
 
-                # Force optional symmetry
-                if reduce_cij:
-                    # Find non-zero values and calculate their average.
-                    # E.g. if for a cubic system we have calculated
-                    # c11 and c22, their values should be equivalent,
-                    # but they can be slightly different
-                    # due to numerical noise, so taking the average
-                    # is a way to remove the effect of noise.
-                    # The average value is used to fill the symmetrically
-                    # equivalent sites in the C-vector.
-                    for index_set in equiv_cij:
-                        tmp = epsilon_tmp[index_set]
-                        nonzero_epsilons = tmp[np.abs(tmp) > 1e-6]
-                        # Make sure the average value is set to zero in the
-                        # case that all symmetrically equivalent epsilons
-                        # are zero:
-                        if len(nonzero_epsilons) == 0:
-                            average_value = 0.0
-                        else:
-                            average_value = np.mean(nonzero_epsilons)
-                        epsilon_tmp[index_set[0]] = average_value
-                        for index in index_set[1:]:
-                            epsilon_tmp[index] = 0.0
-                    for index in zero_cij:
-                        epsilon_tmp[index] = 0.0
-
                 A.append(epsilon_tmp)
                 B.append([stress_target[eq_ind,j]])
 
         A = np.array(A)
         B = np.array(B)
-        return A, B
+
+        Arank = np.linalg.matrix_rank(A)
+        # There are enough independent equations to solve all variables:
+        if Arank >= cij_len:
+            symmetry_reduction = False
+            return A, B, symmetry_reduction
+
+        else:
+            symmetry_reduction = True
+            # Symmetry based elimination of variables required:
+            if sym == "cubic":
+                cij_len = 3
+                full_cij_index = [
+                    [   0,    1,    1, None, None, None],
+                    [   1,    0,    1, None, None, None],
+                    [   1,    1,    0, None, None, None],
+                    [None, None, None,    2, None, None],
+                    [None, None, None, None,    2, None],
+                    [None, None, None, None, None,    2]
+                ]
+
+            elif sym == "hexagonal":
+                cij_len = 5
+                full_cij_index = [
+                    [   0,    3,    2, None, None, None],
+                    [   3,    0,    2, None, None, None],
+                    [   2,    2,    1, None, None, None],
+                    [None, None, None,    4, None, None],
+                    [None, None, None, None,    4, None],
+                    [None, None, None, None, None, {0: 0.5, 1:-0.5}]
+                ]
+
+            else:
+                sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
+                    f"Symmetry reduction not implemented for sym = \"{sym}\"!")
+
+            A = []
+            B = []
+            for eq_ind in range(epsilon.shape[0]):
+                for j in range(6):
+                    epsilon_tmp = np.zeros(cij_len)
+                    for i in range(6):
+                        index = full_cij_index[i][j]
+                        if index is None:
+                            continue
+                        elif isinstance(index, int):
+                            epsilon_tmp[index] += epsilon[eq_ind,i]
+                        elif isinstance(index, dict):
+                            for key, val in index.items():
+                                epsilon_tmp[key] += val * epsilon[eq_ind,i]
+
+                    A.append(epsilon_tmp)
+                    B.append([stress_target[eq_ind,j]])
+
+            A = np.array(A)
+            B = np.array(B)
+            return A, B, symmetry_reduction
 
     def get_symmetrized_C_vector(C, sym="cubic"):
         """We follow the notation of Tasnadi2012, PRB 85, 144112
@@ -703,23 +741,26 @@ def get_elastic_constants(path):
             Psym[8,8] = 1./2
 
         else:
-            sys.exit(f"Symmetrized cij matrix not implemented for sym = \"{sym}\"!")
+            sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
+            f"Symmetrized cij matrix not implemented for sym = \"{sym}\"!")
 
         Csym = np.dot(Psym, C)
         return Csym
 
-    print(force_sym)
-    A, B = setup_linear_system(epsilon, stress_target, force_sym)
-    for row in A:
-        print(A)
+    A, B, symmetry_reduction = setup_linear_system(epsilon,
+            stress_target, sym)
+    print(sym, symmetry_reduction)
     # Solve the 21-component C-vector Tasnadi2012, PRB 85, 144112
     Cvector, residuals, rank, singular_values = np.linalg.lstsq(A,
         B, rcond=None)
+    Cvector = Cvector.flatten()
 
+    if symmetry_reduction:
+        Cvector = get_full_C_vector(Cvector, sym)
     # if 1: #project:
         # Cvector = get_symmetrized_C_vector(Cvector, sym)
 
-    cij = np.array(get_full_cij_matrix(Cvector.flatten()))
+    cij = np.array(get_full_cij_matrix(Cvector))
 
     for row in cij:
         print(row)
