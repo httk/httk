@@ -487,7 +487,7 @@ def elastic_config(fn):
         project = False
 
     try:
-        force_sym = config["elastic"]["symmetry"].lstrip()
+        force_sym = config["elastic"]["force_symmetry"].lstrip()
     except:
         force_sym = None
 
@@ -708,6 +708,7 @@ def get_elastic_constants(path):
         Csym = np.dot(Psym, C)
         return Csym
 
+    print(force_sym)
     A, B = setup_linear_system(epsilon, stress_target, force_sym)
     for row in A:
         print(A)
