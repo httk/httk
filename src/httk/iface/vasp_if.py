@@ -574,10 +574,7 @@ def get_elastic_constants(path):
             except:
                 continue
 
-    # epsilon = jnp.array(epsilon).T
     epsilon = np.array(epsilon)
-    # Convert to numpy array, negate the OUTCAR minus, and convert to GPa
-    # stress_target = jnp.array(stress_target).T
     stress_target = np.array(stress_target)
 
     def get_full_C_vector(C, sym="cubic"):
@@ -725,7 +722,7 @@ def get_elastic_constants(path):
             Psym[3:6,3:6] = 1./3
             Psym[6:9,6:9] = 1./3
 
-        if sym == "hexagonal":
+        elif sym == "hexagonal":
             Psym = np.zeros((21,21))
             Psym[0:2, 0:2] = 3./8
             Psym[0:2,5] = 1./(4*np.sqrt(2))
@@ -744,26 +741,32 @@ def get_elastic_constants(path):
             sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
             f"Symmetrized cij matrix not implemented for sym = \"{sym}\"!")
 
-        Csym = np.dot(Psym, C)
+        # Include the normalization factors, because Psym matrix
+        # in get_symmetrized_C_vector includes them:
+        sq2 = np.sqrt(2.0)
+        norm_factors = np.array([1, 1, 1, sq2, sq2, sq2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2*sq2, 2*sq2, 2*sq2])
+
+        Csym = np.dot(Psym, C*norm_factors) / norm_factors
         return Csym
 
     A, B, symmetry_reduction = setup_linear_system(epsilon,
             stress_target, sym)
-    print(sym, symmetry_reduction)
     # Solve the 21-component C-vector Tasnadi2012, PRB 85, 144112
-    Cvector, residuals, rank, singular_values = np.linalg.lstsq(A,
+    Cvector_nosym, residuals, rank, singular_values = np.linalg.lstsq(A,
         B, rcond=None)
-    Cvector = Cvector.flatten()
+    Cvector_nosym = Cvector_nosym.flatten()
+
 
     if symmetry_reduction:
-        Cvector = get_full_C_vector(Cvector, sym)
-    # if 1: #project:
-        # Cvector = get_symmetrized_C_vector(Cvector, sym)
+        Cvector_nosym = get_full_C_vector(Cvector_nosym, sym)
+
+    # Symmetrize based on the symmetry that the user has defined
+    # in settings.elastic:
+    Cvector = get_symmetrized_C_vector(Cvector_nosym, sym)
 
     cij = np.array(get_full_cij_matrix(Cvector))
-
-    for row in cij:
-        print(row)
+    cij_nosym = np.array(get_full_cij_matrix(Cvector_nosym))
 
     # Compute compliance tensor, which is the matrix inverse of cij
     sij = np.linalg.inv(cij)
@@ -799,12 +802,15 @@ def get_elastic_constants(path):
 
     # Round most quantities to integers, except compliance tensor and Poisson' ratio
     # Convert the tensors first to Python lists and only then round the numbers.
-    # Otherwise the rounding doesnt
+    # Otherwise the rounding might be destroyed in the process of transforming
+    # numpy floats to Python floats.
     cij = cij.tolist()
+    cij_nosym = cij_nosym.tolist()
     sij = sij.tolist()
     for i in range(len(cij)):
         for j in range(len(cij[i])):
             cij[i][j] = int(np.round(cij[i][j], 0))
+            cij_nosym[i][j] = int(np.round(cij_nosym[i][j], 0))
             sij[i][j] = float(np.round(sij[i][j], 8))
 
     #
@@ -814,4 +820,4 @@ def get_elastic_constants(path):
         else:
             elas_dict[key] = int(np.round(val, decimals=0))
 
-    return cij, sij, elas_dict
+    return cij, sij, elas_dict, cij_nosym
