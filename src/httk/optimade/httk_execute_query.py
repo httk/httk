@@ -21,7 +21,7 @@ from httk.optimade.optimade_filter_to_httk import optimade_filter_to_httk
 _field_map = {
     'Structure': {
         'type': lambda x,y: "structures",
-        'id': lambda x,y: x.hexhash,
+        'id': lambda x,y: x.db.sid,
         'structure_features': lambda x,y: [],
         'lattice_vectors': lambda x,y: x.uc_basis.to_floats(),
         'elements': lambda x,y: sorted(list(set(x.formula_symbols))),
@@ -34,10 +34,11 @@ _field_map = {
 }
 
 class HttkResults(object):
-    def __init__(self, searcher, response_fields, limit, offset):
+    def __init__(self, searcher, response_fields, unknown_response_fields, limit, offset):
         self.cur = iter(searcher)
         self.limit = limit
         self.response_fields = response_fields
+        self.unknown_response_fields = unknown_response_fields
         self.count = 0
         self.offset = offset
         self.more_data_available = True
@@ -52,11 +53,19 @@ class HttkResults(object):
                 self.offset -= 1
             row = next(self.cur)[0][0]
             result = dict()
+            for field in self.unknown_response_fields:
+                result[field] = None
             for field in self.response_fields:
                 if field in _field_map[type(row).__name__]:
                     result[field] = _field_map[type(row).__name__][field](row, field)
-                else:
+                elif field.startswith(httk_recognized_prefixes):
+                    for prefix in httk_recognized_prefixes:
+                        if field.startswith(prefix):
+                            field = field[len(prefix):]
+                            break
                     result[field]=getattr(row,field)
+                else:
+                    raise Exception("Unexpected field requested:"+str(field))
         except StopIteration:
             self.more_data_available = False
             self.cur.close()
@@ -81,13 +90,13 @@ class HttkResults(object):
     def next(self):
         return self.__next__()
 
-def httk_execute_query(store, entries, response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
+def httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
 
     searcher = store.searcher()
 
     searcher =  optimade_filter_to_httk(optimade_filter_ast, entries, searcher)
 
-    return HttkResults(searcher, response_fields, response_limit, response_offset)
+    return HttkResults(searcher, response_fields, unknown_response_fields, response_limit, response_offset)
 
 if __name__ == "__main__":
 

@@ -986,6 +986,8 @@ class TableOrColumn(Expression):
             self._parent._declare_as_table()
 
     def __getattr__(self, name):
+        if name == '__id':
+            return self
         if name[0] == '_':
             return self.__getattribute__(name)
         if self._classref is not None:

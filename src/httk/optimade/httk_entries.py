@@ -62,16 +62,30 @@ httk_entry_info['structures']['properties']['nperiodic_dimensions']['default_res
 
 #dict([(x,optimade_entries.entry_info[x]) for x in optimade_entries.entry_info if x in httk_all_entries])
 httk_valid_endpoints = list(['info', 'versions', 'links'] + httk_all_entries + ["info/"+x for x in httk_all_entries] + [''])
-httk_properties_by_entry = dict([(x, httk_entry_info[x]['properties'].keys()) for x in httk_entry_info])
+httk_properties_by_entry = dict([(x, list(httk_entry_info[x]['properties'].keys())) for x in httk_entry_info])
 httk_valid_response_fields =  httk_properties_by_entry
 
+required_response_fields = {}
+
 default_response_fields = {}
+
+httk_unknown_response_fields = {}
 
 # Set everyting to not be sortable
 for entry in httk_all_entries:
     entry_default_response_fields = []
+    entry_required_response_fields = []
     for p in httk_entry_info[entry]['properties']:
         httk_entry_info[entry]['properties'][p]['sortable'] = False
         if httk_entry_info[entry]['properties'][p]['default_response']:
             entry_default_response_fields += [p]
-    default_response_fields[entry] =  entry_default_response_fields
+        if httk_entry_info[entry]['properties'][p]['required_response']:
+            entry_required_response_fields += [p]
+    default_response_fields[entry] = entry_default_response_fields
+    required_response_fields[entry] = entry_required_response_fields
+    entry_unknown_response_fields = []
+    for prop in optimade_entries.properties_by_entry[entry]:
+        if prop not in httk_entry_info[entry]['properties']:
+            entry_unknown_response_fields += [prop]
+    httk_unknown_response_fields[entry] = entry_unknown_response_fields
+

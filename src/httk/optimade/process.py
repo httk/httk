@@ -23,7 +23,7 @@ from pprint import pprint
 from httk.optimade.validate import validate_optimade_request
 from httk.optimade.info_endpoint import generate_info_endpoint_reply, generate_entry_info_endpoint_reply, generate_base_endpoint_reply, generate_versions_endpoint_reply, generate_links_endpoint_reply
 from httk.optimade.entry_endpoint import generate_entry_endpoint_reply
-from httk.optimade.httk_entries import default_response_fields, httk_all_entries
+from httk.optimade.httk_entries import default_response_fields, required_response_fields, httk_all_entries, httk_valid_response_fields
 from httk.optimade.error import OptimadeError, TranslatorError
 from httk.optimade.parse_optimade_filter import ParserSyntaxError, parse_optimade_filter
 
@@ -90,10 +90,15 @@ def process(request, query_function, version, config, debug=False):
     elif endpoint in httk_all_entries:
 
         response_fields = validated_parameters['response_fields']
+        unknown_response_fields = validated_parameters['unknown_response_fields']
         entries = [endpoint]
 
         if response_fields is None:
             response_fields = default_response_fields[endpoint]
+
+        for response_field in required_response_fields[endpoint]:
+            if response_field not in response_fields:
+                response_fields += [response_field]
 
         input_string = None
         filter_ast = None
@@ -116,13 +121,13 @@ def process(request, query_function, version, config, debug=False):
                 print("====")
 
             try:
-                results = query_function(entries, response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], filter_ast, debug=debug)
+                results = query_function(entries, response_fields, unknown_response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], filter_ast, debug=debug)
             except TranslatorError as e:
                 raise OptimadeError(str(e), e.response_code, e.response_msg)
 
             response = generate_entry_endpoint_reply(validated_request, config, results)
         else:
-            results = query_function(entries, response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], debug=debug)
+            results = query_function(entries, response_fields, unknown_response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], debug=debug)
 
             response = generate_entry_endpoint_reply(validated_request, config, results)
 

@@ -280,7 +280,7 @@ def structure_features_length_handler(op, value, search_variable):
 optimade_field_handlers = {
     'structures': {
         'id': {
-            'comparison': lambda entry, op, value, search_variable: string_handler('hexhash', op, value, search_variable),
+            'comparison': lambda entry, op, value, search_variable: string_handler('__id', op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'type': {

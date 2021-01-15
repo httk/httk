@@ -52,8 +52,8 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
         if not baseurl.endswith("/"):
             baseurl += "/"
 
-    def query_function(entries, response_fields, response_limit, response_offset, filter_ast=None, debug=False):
-        return httk_execute_query(store, entries, response_fields, response_limit, response_offset, filter_ast, debug)
+    def query_function(entries, response_fields, unknown_response_fields, response_limit, response_offset, filter_ast=None, debug=False):
+        return httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, filter_ast, debug)
 
     def httk_error_callback(request, ex, baseurl=baseurl):
         # If the user has configured a baseurl, use it and ignore what the server thinks it serves from

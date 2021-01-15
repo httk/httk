@@ -43,7 +43,7 @@ def generate_info_endpoint_reply(request, config):
                     ],
                     "entry_types_by_format": {
                         "json": [
-                            "structure",
+                            "structures",
                         ],
                     },
                     "available_endpoints": [
@@ -99,8 +99,9 @@ def generate_versions_endpoint_reply(request, config):
 1
 """
 
-def generate_links_endpoint_reply(request, config, links):
+def generate_links_endpoint_reply(request, config):
     #TODO: Fix invalid json example in optimade specification
+    links = config["links"]
     return {
         "data": [
                   {
