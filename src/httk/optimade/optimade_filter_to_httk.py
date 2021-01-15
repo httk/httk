@@ -116,11 +116,11 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
         else:
             values = format_value(entry_info[left[1]]['fulltype'],right)
             handler = handlers[left[1]][node[0]]
+            if inv_toggle or node[0] == 'HAS_ONLY':
+                needs_post = True
         if ops != tuple(['=']*len(values)):
             raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented")
         search_expr = handler(left[1], ops, values, search_variable, node[0], inv_toggle)
-        if inv_toggle or node[0] == 'HAS_ONLY':
-            needs_post = True
     elif node[0] in ['LENGTH']:
         left = node[1]
         op = node[2]
