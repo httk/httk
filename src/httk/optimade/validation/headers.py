@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .request import request, RequestError
+from httk.optimade.validation.request import request, RequestError
 
 def validate_headers(base_url, relurl='/info'):
     result = {'error':[], 'warning':[], 'note':[]}

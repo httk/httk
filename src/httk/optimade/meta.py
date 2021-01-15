@@ -19,8 +19,8 @@
 import datetime
 
 from httk import __version__ as httk_version
-from .httk_entries import httk_entry_info, httk_all_entries
-from .versions import optimade_supported_versions
+from httk.optimade.httk_entries import httk_entry_info, httk_all_entries
+from httk.optimade.versions import optimade_supported_versions
 
 def generate_meta(request, config, data_count=1, more_data_available=False):
 

@@ -421,7 +421,7 @@ class FCSqlite(FilteredCollection):
         if len(self.columns) == 0:
             sqlstr += " *\n"
         else:
-            sqlstr += "  "+", \n  ".join([c[1]._sql()+" "+c[0] for c in self.columns])+" \n"
+            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] for c in self.columns])+" \n"
         sqlstr += "FROM\n"
         tablelist = []
         groupset = set()
@@ -434,18 +434,19 @@ class FCSqlite(FilteredCollection):
         sqlstr += "  "+" LEFT OUTER JOIN \n  ".join(tablelist)+"\n"
         if len(self.filterexprs) > 0:
             sqlstr += "WHERE\n"
-            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql() for x in self.filterexprs]) + "\n  )\n"
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(False) for x in self.filterexprs]) + "\n  )\n"
         if len(groupset) > 0:
             sqlstr += "GROUP BY\n  "
             sqlstr += ",\n  ".join(groupset) + "\n"
 
         if len(self.postfilterexprs) > 0:
             sqlstr += "HAVING\n"
-            sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sql() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(True) for x in self.postfilterexprs]) + "\n  )\n"
+            #sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sqlpost() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
 
         if len(self.sorts) > 0:
             sqlstr += "ORDER BY\n  "
-            sqlstr += ",\n  ".join([s[0]._sql()+" "+s[1] for s in self.sorts]) + "\n"
+            sqlstr += ",\n  ".join([s[0]._sql(False)+" "+s[1] for s in self.sorts]) + "\n"
 
         sqlstr += ";\n"
         return sqlstr
@@ -520,13 +521,14 @@ def fc_eval(expr, data):
         return expr
 
 
-def fc_sql(expr):
+def fc_sql(post, expr):
     if hasattr(expr, '_sql'):
         #print("HERE",expr._sql(), expr.__class__)
-        return expr._sql()
+        return expr._sql(post)
     elif isinstance(expr, string_types):
         # TODO: Fix quoting system
-        return "\""+str(expr).replace("'", "''")+"\""
+        return "'"+str(expr).replace("'", "''")+"'"
+        #return "\""+str(expr).replace("'", "''")+"\""
 
 #    try:
 #        return "\""+str(expr.hexhash)+"\""
@@ -652,6 +654,47 @@ class Expression(object):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
         return BinaryBooleanOp(self._context, "IN", self, args)
 
+    # TODO: This mess with inv vs non-inv any, all, only operators has to be fixed in the
+    # next version of httk, where the operators should more closely follow the optimade
+    # query language.
+    def has_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ANY", self, args)
+
+    def has_inv_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ANY", self, args)
+
+    # Note: this doesn't work, because the operators are created on the same variable
+    # but new variables for each of the AND contexts would need to be established.
+    #def has_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_ANY", self, [arg])
+    #    return expr
+
+    #def has_inv_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [arg])
+    #    return expr
+
+    def has_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ONLY", self, args)
+
+    def has_inv_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ONLY", self, args)
+
     def like(self, *args):
         if not self._exprtype in ('value', 'unknown'):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
@@ -677,6 +720,8 @@ class Expression(object):
             raise Exception("Syntax error: invert with expression of wrong type.")
         return UnaryBooleanOp(self._context, "not", self)
 
+    def _sql(self, post):
+        raise Exception("Requesting SQL on expression that does not implement it.")
 
 class Function(Expression):
 
@@ -691,8 +736,8 @@ class Function(Expression):
     def _get_srctable_context(self, data):
         return self._srctable
 
-    def _sql(self):
-        return self._name+"(" + ",".join([fc_sql(x) for x in self._args]) + ")"
+    def _sql(self, post):
+        return self._name+"(" + ",".join([fc_sql(post, x) for x in self._args]) + ")"
 
 
 class UnaryBooleanOp(Expression):
@@ -709,9 +754,9 @@ class UnaryBooleanOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('not'):
-            return self._operator + fc_sql(self._args[0])
+            return self._operator + fc_sql(post, self._args[0])
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -740,15 +785,37 @@ class BinaryBooleanOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('and', 'or', 'xor'):
-            return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
-        elif self._operator in ('IN'):
-            return "("+fc_sql(self._args[0]) + " IN (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"
-        elif self._operator in ('LIKE'):
-            return "("+fc_sql(self._args[0]) + " LIKE (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"
+            return "("+fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1])+")"
+
+        elif not post:
+            if self._operator in ('IN',):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ANY'):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ONLY'):
+                return "(1=1)"
+            elif self._operator in ('HAS_INV_ANY'):
+                return "(1<>1)"
+            elif self._operator in ('HAS_INV_ONLY'):
+                return "(1<>1)"
+            elif self._operator in ('LIKE'):
+                return "("+fc_sql(post, self._args[0]) + " LIKE (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
         else:
-            raise Exception("Syntax Error generating SQL for operator: " + self._operator)
+
+            if self._operator == 'IN':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            elif self._operator == 'HAS_ANY':
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator == 'HAS_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            if self._operator == 'HAS_INV_ANY':
+                return "(SUM("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))>0)"
+            elif self._operator == 'HAS_INV_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+
+        raise Exception("Syntax Error generating SQL for operator: " + self._operator)
 
 
 class BinaryComparison(Expression):
@@ -774,7 +841,7 @@ class BinaryComparison(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         op = self._operator
         leftarg = None
         rightarg = None
@@ -785,7 +852,7 @@ class BinaryComparison(Expression):
         elif self._args[0] is False:
             leftarg = '0'
         else:
-            leftarg = fc_sql(self._args[0])
+            leftarg = fc_sql(post, self._args[0])
         if self._args[1] is None:
             rightarg = 'NULL'
         elif self._args[1] is True:
@@ -793,7 +860,7 @@ class BinaryComparison(Expression):
         elif self._args[1] is False:
             rightarg = '0'
         else:
-            rightarg = fc_sql(self._args[1])
+            rightarg = fc_sql(post, self._args[1])
         if leftarg == 'NULL' or rightarg == 'NULL':
             if self._operator == '=':
                 op = 'IS'
@@ -846,9 +913,9 @@ class BinaryOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('+', '-', '*', '/', '||'):
-            return "(" + fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1]) + ")"
+            return "(" + fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1]) + ")"
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -1005,7 +1072,7 @@ class TableOrColumn(Expression):
         else:
             return data[self._outid+"."+self._subkey] == data[self._parent._outid+"."+self._key]
 
-    def _sql(self):
+    def _sql(self, post):
         if not self._iscolumn:
             #print("HUH",self._outid, ".", self._name, "_id")
             return self._outid + "." + self._name+"_id"

@@ -29,7 +29,7 @@ sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
 #database_debug = True
-database_debug_slow = True
+database_debug_slow = False
 if 'DATABASE_DEBUG_SLOW' in os.environ:
     database_debug_slow = True
 if 'DATABASE_DEBUG' in os.environ:
@@ -88,9 +88,9 @@ class Sqlite(object):
                 # print("sql = ", sql)
                 # print("values = ", values)
                 self.cursor.execute(sql, values)
-            except Exception:
+            except Exception as e:
                 info = sys.exc_info()
-                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), info)
+                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), e)
             if database_debug_slow:
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):

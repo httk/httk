@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .optimade_filter_to_httk import optimade_filter_to_httk
+from httk.optimade.optimade_filter_to_httk import optimade_filter_to_httk
 
 _field_map = {
     'Structure': {
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     # This represents the query being received (later to be received via a web URL query)
     tables = ["structures"]
-    response_fields = ["id", "chemical_formula", "elements"]
+    response_fields = ["id", "formula", "elements"]
 
     if len(sys.argv) >= 2:
         input_string = sys.argv[1]
@@ -119,8 +119,9 @@ if __name__ == "__main__":
     filter_ast = parse_optimade_filter(input_string)
 
     response_limit = 50
+    response_offset = 0
 
-    result = httk_execute_query(store, tables, response_fields, response_limit, filter_ast, debug=True)
+    result = httk_execute_query(store, tables, response_fields, response_limit, response_offset, filter_ast, debug=True)
 
     print("==== END RESULT")
     for l in result:

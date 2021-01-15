@@ -27,7 +27,7 @@
 
 import json
 
-from .serve import WebError
+from httk.httkweb.webserver import WebError
 
 _jsonapi_response_codes = {
     '200': 'OK',

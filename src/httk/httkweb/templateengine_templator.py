@@ -29,6 +29,9 @@ class TemplateEngineTemplator(object):
     def __init__(self, template_dir, template_filename, base_template_filename = None):
         try:
             from web.template import render
+            # Hotfix for the web.template engine for more recent versions of Python
+            from web.template import ALLOWED_AST_NODES
+            ALLOWED_AST_NODES.append('Constant')
         except ImportError:
             raise Exception("Missing web.py module.")
         self.render = render

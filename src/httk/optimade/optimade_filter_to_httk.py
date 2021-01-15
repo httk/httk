@@ -24,8 +24,8 @@ from __future__ import print_function
 import re
 from pprint import pprint
 
-from .error import TranslatorError
-from .httk_entries import httk_entry_info
+from httk.optimade.error import TranslatorError
+from httk.optimade.httk_entries import httk_entry_info
 
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
@@ -71,27 +71,34 @@ def optimade_filter_to_httk(filter_ast, entries, searcher):
         search_variables += [search_variable]
 
         if filter_ast is not None:
-            search_expr = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry)
+            search_expr, needs_post = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry, False)
             searcher.add(search_expr)
+            if needs_post:
+                searcher.add_all(search_expr)
 
     return searcher
 
 
-def optimade_filter_to_httk_recurse(node, search_variable, entry, recursion=0):
+def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, recursion=0):
 
     search_expr = None
+    needs_post = False
     handlers = optimade_field_handlers[entry]
     entry_info = httk_entry_info[entry]['properties']
 
     if node[0] in ['AND']:
-        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
-        search_expr = search_expr & optimade_filter_to_httk_recurse(node[2], search_variable, entry, recursion=recursion+1)
+        search_expr, needs_post = optimade_filter_to_httk_recurse(node[1], search_variable, entry, inv_toggle, recursion=recursion+1)
+        rhs_search_expr, rhs_needs_post = optimade_filter_to_httk_recurse(node[2], search_variable, entry, inv_toggle, recursion=recursion+1)
+        needs_post = needs_post or rhs_needs_post
+        search_expr = search_expr & rhs_search_expr
     elif node[0] in ['OR']:
-        search_expr = optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
-        search_expr = search_expr | optimade_filter_to_httk_recurse(node[2], search_variable, entry, recursion=recursion+1)
+        search_expr, needs_post = optimade_filter_to_httk_recurse(node[1], search_variable, entry, inv_toggle, recursion=recursion+1)
+        rhs_search_expr, rhs_needs_post = optimade_filter_to_httk_recurse(node[2], search_variable, entry, inv_toggle, recursion=recursion+1)
+        needs_post = needs_post or rhs_needs_post
+        search_expr = search_expr | rhs_search_expr
     elif node[0] in ['NOT']:
-        search_expr = ~ optimade_filter_to_httk_recurse(node[1], search_variable, entry, recursion=recursion+1)
-    #TODO: Bug: NOT-inverted HAS operators do NOT WORK AS EXPECTED
+        search_expr, needs_post = optimade_filter_to_httk_recurse(node[1], search_variable, entry, not inv_toggle, recursion=recursion+1)
+        search_expr = ~ search_expr
     elif node[0] in ['HAS_ALL', 'HAS_ANY', 'HAS_ONLY']:
         ops = node[1]
         left = node[2]
@@ -101,13 +108,18 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, recursion=0):
         handler = handlers[left[1]][node[0]]
         if ops != tuple(['=']*len(values)):
             raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented.")
-        search_expr = handler(left[1], ops, values, search_variable, node[0])
+        search_expr = handler(left[1], ops, values, search_variable, node[0], inv_toggle)
+        if inv_toggle or node[0] == 'HAS_ONLY':
+            needs_post = True
     elif node[0] in ['LENGTH']:
         left = node[1]
         op = node[2]
         right = node[3]
         assert(left[0] == 'Identifier')
-        assert(right[0] == 'Number')
+        if right[0] == 'Identifier':
+            raise TranslatorError("LENGTH comparisons with non-constant right hand side not implemented.", 501, "Not implemented")
+        if right[0] != 'Number':
+            raise TranslatorError("LENGTH comparison can only be done with Numbers. Unexpected right hand side type:"+right[0], 501, "Not implemented")
         handler = handlers[left[1]]['length']
         assert(entry_info[left[1]]['fulltype'].startswith("list of "))
         value = format_value("integer",right)
@@ -131,7 +143,8 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, recursion=0):
     else:
         pprint(node)
         raise TranslatorError("Unexpected translation error", 500, "Internal server error.")
-    return search_expr
+    assert(search_expr is not None)
+    return search_expr, needs_post
 
 def string_handler(entry, op, value, search_variable):
     httk_op = _python_opmap[op]
@@ -152,23 +165,52 @@ def number_handler(entry, op, value, search_variable):
 def timestamp_handler(entry, op, value, search_variable):
     raise TranslatorError("Timestamp comparison not yet implemented.", 501, "Not implemented.")
 
-def set_all_handler(entry, ops, values, search_variable):
-    search = getattr(getattr(search_variable,entry),'is_in')(values[0])
-    for value in values[1:]:
-        search = search & (getattr(getattr(search_variable,entry),'is_in')(value))
-    return search
+def set_all_handler(entry, ops, values, inv, search_variable):
+    #if not inv:
+    #    return getattr(getattr(search_variable,entry),'has_all')(*values)
+    #else:
+    #    return getattr(getattr(search_variable,entry),'has_inv_all')(*values)
+    if not inv:
+        search = getattr(getattr(search_variable,entry),'has_any')(values[0])
+        for value in values[1:]:
+            search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
+        return search
+    else:
+        search = getattr(getattr(search_variable,entry),'has_any')(values[0])
+        for value in values[1:]:
+            search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
+        return search
 
-def set_any_handler(entry, ops, values, search_variable):
-    return getattr(getattr(search_variable,entry),'is_in')(*values)
+    #search = getattr(getattr(search_variable,entry),'is_in')(values[0])
+    #for value in values[1:]:
+    #    search = search & (getattr(getattr(search_variable,entry),'is_in')(value))
+    #return search
 
-def set_only_handler(entry, ops, values, search_variable):
-    raise TranslatorError("HAS ONLY queries not implemented yet.", 501, "Not implemented.")
+def set_any_handler(entry, ops, values, inv, search_variable):
+    if not inv:
+        return getattr(getattr(search_variable,entry),'has_any')(*values)
+    else:
+        return getattr(getattr(search_variable,entry),'has_inv_any')(*values)
+    #return getattr(getattr(search_variable,entry),'is_in')(*values)
 
-def structure_features_set_handler(op, value, search_variable, has_type):
-    raise TranslatorError("Structure features comparison not yet implemented.", 501, "Not implemented.")
+def set_only_handler(entry, ops, values, inv, search_variable):
+    if not inv:
+        return getattr(getattr(search_variable,entry),'has_only')(*values)
+    else:
+        return getattr(getattr(search_variable,entry),'has_inv_only')(*values)
+
+def structure_features_set_handler(op, value, inv, search_variable, has_type):
+    # Any HAS ANY, HAS ALL, HAS ONLY operation will check for precense of an identifier in structure_features.
+    # For now we don't support any structure features, hence, all such comparisons return False
+    return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
 
 def structure_features_length_handler(op, value, search_variable):
-    raise TranslatorError("Structure features length comparison not yet implemented.", 501, "Not implemented.")
+    # structure_features is assumed to always be empty
+    print("HXXXERE",value)
+    if value == 0:
+        return getattr(getattr(search_variable,'hexhash'),'__eq__')(getattr(search_variable,'hexhash'))
+    else:
+        return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
 
 optimade_field_handlers = {
     'structures': {
@@ -179,9 +221,9 @@ optimade_field_handlers = {
             'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'structures', search_variable)
         },
         'elements': {
-            'HAS_ALL': lambda entry, ops, values, search_variable, has_type: set_all_handler('formula_symbols', ops, values, search_variable),
-            'HAS_ANY': lambda entry, ops, values, search_variable, has_type: set_any_handler('formula_symbols', ops, values, search_variable),
-            'HAS_ONLY': lambda entry, ops, values, search_variable, has_type: set_only_handler('formula_symbols', ops, values, search_variable),
+            'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: set_all_handler('formula_symbols', ops, values, inv, search_variable),
+            'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: set_any_handler('formula_symbols', ops, values, inv, search_variable),
+            'HAS_ONLY': lambda entry, ops, values, search_variable, has_type, inv: set_only_handler('formula_symbols', ops, values, inv, search_variable),
             'length': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable)
         },
         'nelements': {
@@ -191,10 +233,10 @@ optimade_field_handlers = {
             'comparison': lambda entry, op, value, search_variable: string_handler('chemical_formula', op, value, search_variable)
         },
         'structure_features': {
-            'HAS': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS'),
-            'HAS_ALL': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS_ALL'),
-            'HAS_ANY': lambda entry, ops, values, search_variable, has_type: structure_features_set_handler(values, ops, search_variable, 'HAS_ANY'),
-            'length': lambda entry, ops, values, search_variable, has_type: structure_features_length_handler(value, op, search_variable)
+            'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS'),
+            'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ALL'),
+            'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ANY'),
+            'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable)
         }
     },
 }

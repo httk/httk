@@ -20,12 +20,12 @@ from __future__ import print_function
 
 from pprint import pprint
 
-from .validate import validate_optimade_request
-from .info_endpoint import generate_info_endpoint_reply, generate_entry_info_endpoint_reply, generate_base_endpoint_reply, generate_versions_endpoint_reply, generate_links_endpoint_reply
-from .entry_endpoint import generate_entry_endpoint_reply
-from .httk_entries import default_response_fields, httk_all_entries
-from .error import OptimadeError, TranslatorError
-from .parse_optimade_filter import ParserSyntaxError, parse_optimade_filter
+from httk.optimade.validate import validate_optimade_request
+from httk.optimade.info_endpoint import generate_info_endpoint_reply, generate_entry_info_endpoint_reply, generate_base_endpoint_reply, generate_versions_endpoint_reply, generate_links_endpoint_reply
+from httk.optimade.entry_endpoint import generate_entry_endpoint_reply
+from httk.optimade.httk_entries import default_response_fields, httk_all_entries
+from httk.optimade.error import OptimadeError, TranslatorError
+from httk.optimade.parse_optimade_filter import ParserSyntaxError, parse_optimade_filter
 
 def process(request, query_function, version, config, debug=False):
     """
@@ -99,7 +99,7 @@ def process(request, query_function, version, config, debug=False):
         filter_ast = None
         if request_id is not None:
             input_string = 'filter=id="'+request_id+'"'
-            filter_ast = ('=', ('Identifier', 'id'), ('String', '"'+request_id+'"'))
+            filter_ast = ('=', ('Identifier', 'id'), ('String', request_id))
         elif 'filter' in validated_parameters:
             input_string = validated_parameters['filter']
 

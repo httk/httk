@@ -17,10 +17,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from .response import *
-from .base_info import *
-from .entry import *
-from .headers import *
+from httk.optimade.validation.response import *
+from httk.optimade.validation.base_info import *
+from httk.optimade.validation.entry import *
+from httk.optimade.validation.headers import *
 
 all_tests = [
     {'name':'base_info', 'relurl':'/info', 'test':validate_base_info_request, 'validation':validate_base_info},

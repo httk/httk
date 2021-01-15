@@ -17,8 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # TODO: This should be replaced with json schema validation when we have a proper schema for the json output
-from .response import validate_response
-from .request import request, RequestError
+from httk.optimade.validation.response import validate_response
+from httk.optimade.validation.request import request, RequestError
 
 def validate_base_info(json):
 

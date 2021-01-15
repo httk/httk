@@ -212,12 +212,14 @@ def get_hall(hall):
         return hall
     return None
 
+_cache_symops_per_hall = {}
 
 def get_symops(hall):
-    if hall in spacegroupdata:
-        return [symopsmatrix(x) for x in spacegroupdata[hall]['symops_mtrx']]
-    return None
-
+    if hall not in spacegroupdata:
+        return None
+    if hall not in _cache_symops_per_hall:
+        _cache_symops_per_hall[hall] = [symopsmatrix(x) for x in spacegroupdata[hall]['symops_mtrx']]
+    return _cache_symops_per_hall[hall]
 
 def get_symopshash(hall):
     if hall in spacegroupdata:

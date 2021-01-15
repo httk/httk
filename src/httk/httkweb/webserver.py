@@ -293,6 +293,7 @@ def startup(get_callback, post_callback=None, error_callback=None, port=80, netl
 
     except KeyboardInterrupt:
         print('Received keyboard interrupt, shutting down the httk web server')
+        raise
 
     finally:
         if server is not None:

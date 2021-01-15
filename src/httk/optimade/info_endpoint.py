@@ -19,9 +19,9 @@
 import datetime
 
 from httk import __version__ as httk_version
-from .httk_entries import httk_entry_info, httk_all_entries
-from .versions import optimade_supported_versions
-from .meta import generate_meta
+from httk.optimade.httk_entries import httk_entry_info, httk_all_entries
+from httk.optimade.versions import optimade_supported_versions
+from httk.optimade.meta import generate_meta
 
 def generate_info_endpoint_reply(request, config):
     """
@@ -32,8 +32,7 @@ def generate_info_endpoint_reply(request, config):
         available_api_versions += [{'url': optimade_supported_versions[ver], 'version': request['baseurl'] + ver }]
 
     response = {
-        "data": [
-            {
+        "data": {
                 "id": "/",
                 "type": "info",
                 "attributes": {
@@ -54,8 +53,7 @@ def generate_info_endpoint_reply(request, config):
                     ],
                     "is_index": False,
                 }
-            }
-        ],
+            },
         "meta": generate_meta(request, config)
     }
     return response
@@ -124,5 +122,5 @@ def generate_links_endpoint_reply(request, config, links):
                         }
                     }
                   ],
-        "meta": generate_meta(request, config)
+        "meta": generate_meta(request, config, data_count=len(links), more_data_available=False)
     }

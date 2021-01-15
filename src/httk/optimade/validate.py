@@ -21,9 +21,9 @@ try:
 except ImportError:
     from urlparse import parse_qsl, urlparse
 
-from .httk_entries import httk_all_entries, httk_valid_endpoints, httk_valid_response_fields
-from .error import OptimadeError
-from .versions import optimade_supported_versions, optimade_default_version
+from httk.optimade.httk_entries import httk_all_entries, httk_valid_endpoints, httk_valid_response_fields
+from httk.optimade.error import OptimadeError
+from httk.optimade.versions import optimade_supported_versions, optimade_default_version
 
 
 def _validate_query(endpoint, query):

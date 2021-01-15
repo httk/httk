@@ -23,7 +23,7 @@ except ImportError:
 
 import datetime
 
-from .meta import generate_meta
+from httk.optimade.meta import generate_meta
 
 def generate_entry_endpoint_reply(request, config, data, ndata_returned = None):
     data_part = []
