@@ -166,8 +166,8 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
                     self.wfile_write_encoded(output['content'], output['encoding'])
                     return
                 except Exception as e2:
-                    print("HUH",e2)
-                    pass
+                    print("Exception while trying to handle exception when serving webserver response page:",str(e2))
+                    raise
 
             self.send_response(500)
             self.send_header('Content-type', 'text/html')

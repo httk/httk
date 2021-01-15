@@ -19,8 +19,9 @@
 import datetime
 
 from httk.optimade.versions import optimade_default_version
+from httk.optimade.meta import generate_meta
 
-def format_optimade_error(ex, representation, version=optimade_default_version):
+def format_optimade_error(ex, request, config, version=optimade_default_version):
 
     if isinstance(ex, OptimadeError):
         response_code = ex.response_code
@@ -31,6 +32,9 @@ def format_optimade_error(ex, representation, version=optimade_default_version):
         title = "Internal Server Error"
         detail = str(ex)
 
+    modified_request = dict(request)
+    modified_request['version']=version
+
     response = {
         "errors": [
             {
@@ -39,16 +43,7 @@ def format_optimade_error(ex, representation, version=optimade_default_version):
                 "detail": detail
             }
         ],
-        "meta": {
-            "query": {
-                "representation": representation
-            },
-            "api_version": version,
-            "more_data_available": False,
-            # TODO: ADD "schema":
-            "time_stamp": datetime.datetime.now().isoformat(),
-            "data_returned": 0,
-        }
+        "meta": generate_meta(modified_request, config, data_count=1, more_data_available=False)
     }
 
     return {'json_response': response, 'content_type':'application/vnd.api+json', 'response_code':response_code, 'response_msg':title, 'encoding':'utf-8'}

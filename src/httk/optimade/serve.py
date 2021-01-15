@@ -62,13 +62,13 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
         try:
             version = determine_optimade_version(request)
         except Exception as e:
-            output = format_optimade_error(ex, request['representation'], version=optimade_default_version)
+            output = format_optimade_error(ex, request, config, version=optimade_default_version)
             return format_output(output)
         try:
-            output = format_optimade_error(ex, request['representation'], version=version)
+            output = format_optimade_error(ex, request, config, version=version)
             return format_output(output)
         except Exception as e:
-            output = format_optimade_error(ex, request['representation'], version=optimade_default_version)
+            output = format_optimade_error(ex, request, config, version=optimade_default_version)
             return format_output(output)
 
     def httk_web_callback(request, baseurl=baseurl):
