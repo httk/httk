@@ -176,9 +176,9 @@ def set_all_handler(entry, ops, values, inv, search_variable):
             search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
         return search
     else:
-        search = getattr(getattr(search_variable,entry),'has_any')(values[0])
+        search = getattr(getattr(search_variable,entry),'has_inv_any')(values[0])
         for value in values[1:]:
-            search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
+            search = search & (getattr(getattr(search_variable,entry),'has_inv_any')(value))
         return search
 
     #search = getattr(getattr(search_variable,entry),'is_in')(values[0])
