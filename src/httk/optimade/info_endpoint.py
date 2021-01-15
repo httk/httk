@@ -29,7 +29,7 @@ def generate_info_endpoint_reply(request, config):
     """
     available_api_versions = []
     for ver in optimade_supported_versions:
-        available_api_versions += [{'url': optimade_supported_versions[ver], 'version': request['baseurl'] + ver }]
+        available_api_versions += [{'version': optimade_supported_versions[ver], 'url': request['baseurl'] + ver }]
 
     response = {
         "data": {
