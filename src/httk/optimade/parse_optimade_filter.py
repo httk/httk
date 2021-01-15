@@ -58,7 +58,7 @@ def initialize_optimade_parser():
     # Token definitions from Appendix 3
     tokens = {
         "Operator": r'<|<=|>|>=|=|!=',
-        "Identifier": "[a-z][a-z_0-9]*",
+        "Identifier": "[a-z_][a-z_0-9]*",
         "String": r'"[^"\\]*(?:\\.[^"\\]*)*"',
         "Number": r"[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?",
         "OpeningBrace": r"\(",
@@ -160,7 +160,8 @@ def optimade_parse_tree_to_ojf_recurse(node, recursion=0):
             op = node[2][1][1]
             assert(node[2][2][0] in ['KNOWN','UNKNOWN'])
             op += "_" + node[2][2][0]
-            operand = node[1]
+            assert(node[1][0] == 'Property')
+            operand = ('Identifier',) + tuple([x[1] for x in node[1][1:] if x[0] != 'Dot'])
             pos[arg] = (op, operand)
             arg = None
         elif node[2][0] == "SetOpRhs":

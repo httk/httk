@@ -25,7 +25,7 @@ import re
 from pprint import pprint
 
 from httk.optimade.error import TranslatorError
-from httk.optimade.httk_entries import httk_entry_info
+from httk.optimade.httk_entries import httk_entry_info, httk_recognized_prefixes
 
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
@@ -50,6 +50,8 @@ def format_value(fulltype, val, allow_null=False):
     elif fulltype == 'string':
         if val[0] in ['String']:
             return val[1]
+    elif fulltype == 'unknown':
+        return val[1]
     raise TranslatorError("Type mismatch in filter, expected:"+fulltype+", query has:"+val[0], 400, "Bad request")
 
 constant_types = ['String','Number']
@@ -104,10 +106,18 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
         left = node[2]
         right = node[3]
         assert(left[0] == 'Identifier')
-        values = format_value(entry_info[left[1]]['fulltype'],right)
-        handler = handlers[left[1]][node[0]]
+        if left[1] not in entry_info:
+            if left[1].startswith(httk_recognized_prefixes):
+                raise TranslatorError("Filter invokes unrecognized property name: "+left[1], 400, "Bad request")
+            else:
+                #TODO: this should warn
+                handler = unknown_has_handler
+                values = format_value('list of unknown',right)
+        else:
+            values = format_value(entry_info[left[1]]['fulltype'],right)
+            handler = handlers[left[1]][node[0]]
         if ops != tuple(['=']*len(values)):
-            raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented.")
+            raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented")
         search_expr = handler(left[1], ops, values, search_variable, node[0], inv_toggle)
         if inv_toggle or node[0] == 'HAS_ONLY':
             needs_post = True
@@ -120,9 +130,17 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
             raise TranslatorError("LENGTH comparisons with non-constant right hand side not implemented.", 501, "Not implemented")
         if right[0] != 'Number':
             raise TranslatorError("LENGTH comparison can only be done with Numbers. Unexpected right hand side type:"+right[0], 501, "Not implemented")
-        handler = handlers[left[1]]['length']
-        assert(entry_info[left[1]]['fulltype'].startswith("list of "))
-        value = format_value("integer",right)
+        if left[1] not in entry_info:
+            if left[1].startswith(httk_recognized_prefixes):
+                raise TranslatorError("Filter invokes unrecognized property name: "+left[1], 400, "Bad request")
+            else:
+                #TODO: this should warn
+                handler = unknown_length_handler
+                values = format_value('list of unknown',right)
+        else:
+            handler = handlers[left[1]]['length']
+            assert(entry_info[left[1]]['fulltype'].startswith("list of "))
+            value = format_value("integer",right)
         search_expr = handler(left[1], op, value, search_variable)
     elif node[0] in ['>', '>=', '<', '<=', '=', '!=']:
         op = node[0]
@@ -137,14 +155,62 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
                 left, right = right, left
                 op = invert_op[op]
             assert(left[0] == 'Identifier')
+            if left[1] not in entry_info:
+                if left[1].startswith(httk_recognized_prefixes):
+                    raise TranslatorError("Filter invokes unrecognized property name: "+left[1], 400, "Bad request")
+                else:
+                    #TODO: this should warn
+                    handler = unknown_comparison_handler
+                    values = format_value('unknown',right)
             handler = handlers[left[1]]['comparison']
             value = format_value(entry_info[left[1]]['fulltype'],right)
             search_expr = handler(left[1], op, value, search_variable)
+    elif node[0] in ['IS_UNKNOWN', 'IS_KNOWN']:
+        left = node[1]
+        assert(left[0] == 'Identifier')
+        if left[1] not in entry_info:
+            if left[1].startswith(httk_recognized_prefixes):
+                raise TranslatorError("Filter invokes unrecognized property name: "+left[1], 400, "Bad request")
+            else:
+                #TODO: this should warn
+                handler = unknown_unknown_handler
+        else:
+            handler = handlers[left[1]]['unknown']
+        search_expr = handler(left[1], search_variable, node[0])
     else:
         pprint(node)
-        raise TranslatorError("Unexpected translation error", 500, "Internal server error.")
+        raise TranslatorError("Unexpected translation error at: "+str(node[0]), 500, "Internal server error.")
     assert(search_expr is not None)
     return search_expr, needs_post
+
+def true_handler(search_variable):
+    return getattr(getattr(search_variable,'hexhash'),'__eq__')(getattr(search_variable,'hexhash'))
+
+def false_handler(search_variable):
+    return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
+
+def unknown_unknown_handler(entry, search_variable, unknown_type):
+    if unknown_type=='IS_UNKNOWN':
+        return true_handler(search_variable)
+    elif unknown_type=='IS_KNOWN':
+        return false_handler(search_variable)
+    raise TranslatorError("Unexpected unknown operator type", 500, "Internal server error.")
+
+def known_unknown_handler(entry, search_variable, unknown_type):
+    if unknown_type=='IS_UNKNOWN':
+        return false_handler(search_variable)
+    elif unknown_type=='IS_KNOWN':
+        return true_handler(search_variable)
+    raise TranslatorError("Unexpected unknown operator type", 500, "Internal server error.")
+
+def unknown_comparison_handler(entry, ops, values, search_variable):
+    return false_handler(search_variable)
+
+def unknown_has_handler(entry, op, value, search_variable, has_type, inv_toggle):
+    return false_handler(search_variable)
+
+def unknown_length_handler(entry, op, value, search_variable):
+    return false_handler(search_variable)
 
 def string_handler(entry, op, value, search_variable):
     httk_op = _python_opmap[op]
@@ -154,9 +220,9 @@ def constant_comparison_handler(val1, op, val2, search_variable):
     op = _python_opmap[op]
     # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
     if getattr(val1,op)(val2):
-        return getattr(getattr(search_variable,'hexhash'),'__eq__')(getattr(search_variable,'hexhash'))
+        return true_handler(search_variable)
     else:
-        return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
+        return false_handler(search_variable)
 
 def number_handler(entry, op, value, search_variable):
     httk_op = _python_opmap[op]
@@ -206,7 +272,6 @@ def structure_features_set_handler(op, value, inv, search_variable, has_type):
 
 def structure_features_length_handler(op, value, search_variable):
     # structure_features is assumed to always be empty
-    print("HXXXERE",value)
     if value == 0:
         return getattr(getattr(search_variable,'hexhash'),'__eq__')(getattr(search_variable,'hexhash'))
     else:
@@ -215,28 +280,34 @@ def structure_features_length_handler(op, value, search_variable):
 optimade_field_handlers = {
     'structures': {
         'id': {
-            'comparison': lambda entry, op, value, search_variable: string_handler('hexhash', op, value, search_variable)
+            'comparison': lambda entry, op, value, search_variable: string_handler('hexhash', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'type': {
-            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'structures', search_variable)
+            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'structures', search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'elements': {
             'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: set_all_handler('formula_symbols', ops, values, inv, search_variable),
             'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: set_any_handler('formula_symbols', ops, values, inv, search_variable),
             'HAS_ONLY': lambda entry, ops, values, search_variable, has_type, inv: set_only_handler('formula_symbols', ops, values, inv, search_variable),
-            'length': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable)
+            'length': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'nelements': {
-            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable)
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'chemical_formula_descriptive': {
-            'comparison': lambda entry, op, value, search_variable: string_handler('chemical_formula', op, value, search_variable)
+            'comparison': lambda entry, op, value, search_variable: string_handler('chemical_formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         'structure_features': {
             'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS'),
             'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ALL'),
             'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ANY'),
-            'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable)
+            'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         }
     },
 }

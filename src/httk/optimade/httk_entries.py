@@ -18,6 +18,8 @@
 
 from httk.optimade import optimade_entries
 
+httk_recognized_prefixes = ('_httk_', '_omdb_')
+
 httk_all_entries = ['structures','calculations']
 httk_entry_info = {
   'structures': {
