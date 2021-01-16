@@ -22,7 +22,7 @@ from pprint import pprint
 
 from httk.optimade.validate import validate_optimade_request
 from httk.optimade.info_endpoint import generate_info_endpoint_reply, generate_entry_info_endpoint_reply, generate_base_endpoint_reply, generate_versions_endpoint_reply, generate_links_endpoint_reply
-from httk.optimade.entry_endpoint import generate_entry_endpoint_reply
+from httk.optimade.entry_endpoint import generate_entry_endpoint_reply, generate_single_entry_endpoint_reply
 from httk.optimade.httk_entries import default_response_fields, required_response_fields, httk_all_entries, httk_valid_response_fields
 from httk.optimade.error import OptimadeError, TranslatorError
 from httk.optimade.parse_optimade_filter import ParserSyntaxError, parse_optimade_filter
@@ -125,10 +125,12 @@ def process(request, query_function, version, config, debug=False):
             except TranslatorError as e:
                 raise OptimadeError(str(e), e.response_code, e.response_msg)
 
-            response = generate_entry_endpoint_reply(validated_request, config, results)
         else:
             results = query_function(entries, response_fields, unknown_response_fields, validated_parameters['page_limit'], validated_parameters['page_offset'], debug=debug)
 
+        if request_id is not None:
+            response = generate_single_entry_endpoint_reply(validated_request, config, results)
+        else:
             response = generate_entry_endpoint_reply(validated_request, config, results)
 
         if debug:

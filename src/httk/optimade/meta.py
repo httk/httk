@@ -22,9 +22,9 @@ from httk import __version__ as httk_version
 from httk.optimade.httk_entries import httk_entry_info, httk_all_entries
 from httk.optimade.versions import optimade_supported_versions
 
-def generate_meta(request, config, data_count=1, more_data_available=False):
+def generate_meta(request, config, data_count=None, more_data_available=False):
 
-    return {
+    meta = {
         "query": {
             "representation": request['representation']
         },
@@ -39,3 +39,6 @@ def generate_meta(request, config, data_count=1, more_data_available=False):
         },
         "provider": config["provider"]
     }
+    if data_count is not None:
+        meta['data_returned'] = data_count
+    return meta

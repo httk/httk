@@ -55,3 +55,39 @@ def generate_entry_endpoint_reply(request, config, data, ndata_returned = None):
     #   Fix more_data_available
 
     return response
+
+def generate_single_entry_endpoint_reply(request, config, data):
+    data_part = []
+    for d in data:
+        attributes = dict(d)
+        del attributes['id']
+        del attributes['type']
+        data_part += [{
+            'attributes': attributes,
+            'id': d['id'],
+            'type': d['type'],
+        }]
+
+    if len(data_part) > 1:
+        raise Exception("Unexpectedly received a data object with lenth > 1 for a single entry endpoint repsonse")
+    elif len(data_part) == 0:
+        data_part = None
+        ndata = 0
+    else:
+        data_part = data_part[0]
+        ndata = 1
+
+    if data.more_data_available:
+        raise Exception("Unexpectedly received a data object with more data available for a single entry endpoint repsonse")
+
+    response = {
+        "links": { "next": None },
+        "data": data_part,
+        "meta": generate_meta(request, config, data_count=ndata, more_data_available = False)
+    }
+
+    # TODO: Add 'next' element in links for pagination, via info propagated in data
+    #   Add "data_available" if available in data
+    #   Fix more_data_available
+
+    return response
