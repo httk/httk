@@ -88,7 +88,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="Example tests")
     args, leftovers = ap.parse_known_args()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestHttkSrcInline)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestExamples)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 

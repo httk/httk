@@ -58,14 +58,14 @@ def _read_cif_loop(f, pragmatic=True, use_types=False):
             f.rewind()
             break
 
-    while True:
-        for i in range(len(loop_data)):
+    while True and len(header)>0:
+        for i in range(len(header)):
             try:
                 row = next(f)
+                while row.isspace():
+                    row = next(f)
             except StopIteration:
                 break
-            if row.isspace():
-                continue
             striprow = row.strip()
             lowrow = striprow.lower()
             if not row or row.startswith("_") or lowrow.startswith("data_") or lowrow.startswith("loop_"):
