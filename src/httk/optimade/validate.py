@@ -21,13 +21,13 @@ try:
 except ImportError:
     from urlparse import parse_qsl, urlparse
 
-from httk.optimade.httk_entries import httk_all_entries, httk_valid_endpoints, httk_valid_response_fields, httk_unknown_response_fields, httk_recognized_prefixes
+from httk.optimade.httk_entries import httk_all_entries, httk_valid_endpoints, httk_valid_response_fields, httk_unknown_response_fields, httk_recognized_prefixes, default_response_fields, required_response_fields
 from httk.optimade.error import OptimadeError
 from httk.optimade.versions import optimade_supported_versions, optimade_default_version
 
 
 def _validate_query(endpoint, query):
-    validated_parameters = {'page_limit': 50, 'page_offset': 0, 'response_fields': None, 'unknown_response_fields': []}
+    validated_parameters = {'page_limit': 50, 'page_offset': 0, 'response_fields': None}
 
     if ('response_format' in query and query['response_format'] is not None) and query['response_format'] != 'json':
         raise OptimadeError("Requested response_format not supported.", 400, "Bad request")
@@ -51,17 +51,18 @@ def _validate_query(endpoint, query):
             validated_parameters['page_offset'] = 0
 
     if 'response_fields' in query and query['response_fields'] is not None:
-        validated_parameters['response_fields'] = []
+        validated_response_fields = []
         response_fields = [x.strip() for x in query['response_fields'].split(",")]
         for response_field in response_fields:
             if response_field in httk_valid_response_fields[endpoint]:
-                validated_parameters['response_fields'] += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
+                validated_response_fields += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
             elif response_field in httk_unknown_response_fields[endpoint]:
-                validated_parameters['unknown_response_fields'] += [response_field]
+                validated_response_fields += [response_field]
             elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
                 raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
             else:
-                validated_parameters['unknown_response_fields'] += [response_field]
+                validated_response_fields += [response_field]
+        validated_parameters['response_fields'] = ",".join(validated_response_fields)
 
     # Validating the filter string is deferred to its parser
     if 'filter' in query and query['filter'] is not None:
@@ -71,7 +72,7 @@ def _validate_query(endpoint, query):
 
 
 def validate_optimade_request(request, version):
-    validated_request = {'baseurl': request['baseurl'], 'representation': request['representation'], 'endpoint': None, 'version': optimade_default_version, 'request_id': None, 'query': None}
+    validated_request = {'baseurl': request['baseurl'], 'representation': request['representation'], 'endpoint': None, 'version': optimade_default_version, 'request_id': None, 'query': None, 'recognized_response_fields': [], 'unrecognized_response_fields': []}
 
     if 'endpoint' in request:
         validated_request['endpoint'] = request['endpoint']
@@ -127,6 +128,29 @@ def validate_optimade_request(request, version):
         query = dict(parse_qsl(querystr, keep_blank_values=True))
 
     validated_request['query'] = _validate_query(validated_request['endpoint'], query)
+
+    if 'response_fields' in query and query['response_fields'] is not None:
+        response_fields = [x.strip() for x in query['response_fields'].split(",")]
+        for response_field in response_fields:
+            if response_field in httk_valid_response_fields[endpoint]:
+                validated_request['recognized_response_fields'] += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
+            elif response_field in httk_unknown_response_fields[endpoint]:
+                validated_request['unrecognized_response_fields'] += [response_field]
+            elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
+                raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
+            else:
+                validated_request['unrecognized_response_fields'] += [response_field]
+
+    else:
+        if endpoint in default_response_fields:
+            validated_request['recognized_response_fields'] = default_response_fields[endpoint]
+        else:
+            validated_request['recognized_response_fields'] = []
+
+    if endpoint in required_response_fields:
+        for response_field in required_response_fields[endpoint]:
+            if response_field not in validated_request['recognized_response_fields']:
+                validated_request['recognized_response_fields'] += [response_field]
 
     if validated_request['version'] != version:
         raise Exception("validate_optimade_request: unexpected version")

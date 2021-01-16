@@ -89,8 +89,8 @@ def process(request, query_function, version, config, debug=False):
 
     elif endpoint in httk_all_entries:
 
-        response_fields = validated_parameters['response_fields']
-        unknown_response_fields = validated_parameters['unknown_response_fields']
+        response_fields = validated_request['recognized_response_fields']
+        unknown_response_fields = validated_request['unrecognized_response_fields']
         entries = [endpoint]
 
         if response_fields is None:
