@@ -21,7 +21,7 @@ This file provides functions to translate an OPTIMaDe filter string into an SQL 
 '''
 
 from __future__ import print_function
-import re
+import re, operator
 from pprint import pprint
 
 from httk.optimade.error import TranslatorError
@@ -250,15 +250,13 @@ def stringmatching_handler(entry, value, stringmatching_type, search_variable):
 
 def constant_comparison_handler(val1, op, val2, search_variable):
     op = _python_opmap[op]
-    # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
-    if getattr(val1,op)(val2):
+    if getattr(operator,op)(val1,val2):
         return true_handler(search_variable)
     else:
         return false_handler(search_variable)
 
 def constant_stringmatching_handler(val1, op, val2, stringmatching_type, search_variable):
     op = _python_opmap[op]
-    # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
     if getattr(val1,op)(val2):
         return true_handler(search_variable)
     else:
