@@ -19,7 +19,7 @@
 import json
 
 from httk.httkweb import webserver
-from httk.optimade.process import process
+from httk.optimade.process import process, process_init
 from httk.optimade.httk_execute_query import httk_execute_query
 from httk.optimade.error import format_optimade_error
 from httk.optimade.validate import determine_optimade_version
@@ -89,6 +89,8 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
             baseurl="http://localhost/"
         else:
             baseurl="http://localhost:"+str(port)+"/"
+
+    process_init(config, query_function, debug=debug)
 
     if not debug:
         webserver.startup(httk_web_callback, port=8080, error_callback=httk_error_callback, debug=False)

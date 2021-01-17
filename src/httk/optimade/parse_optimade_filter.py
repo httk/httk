@@ -87,11 +87,15 @@ def initialize_optimade_parser():
 def optimade_parse_tree_to_ojf(ast):
 
     assert(ast[0] == 'Filter')
+    print("FILTER INPUT:",ast[1])
     return optimade_parse_tree_to_ojf_recurse(ast[1])
 
 
 def _fix_const(node):
-    if node[0] == 'String':
+    if node[0] == 'Property':
+        assert(node[1][0]=='Identifier')
+        return node[1]
+    elif node[0] == 'String':
         assert(node[1][-1]=='"')
         assert(node[1][0]=='"')
         return ('String', node[1][1:-1])
@@ -137,7 +141,8 @@ def optimade_parse_tree_to_ojf_recurse(node, recursion=0):
         elif node[0] == 'ConstantFirstComparison':
             assert(node[1][0] == 'Constant')
             left = _fix_const(node[1][1])
-
+        else:
+            raise Exception("Internal error: filter simplify on invalid ast, unrecognized comparison: "+str(node[0]))
         if node[2][0] == "ValueOpRhs":
             assert(node[2][1][0] == 'Operator')
             op = node[2][1][1]
@@ -151,8 +156,10 @@ def optimade_parse_tree_to_ojf_recurse(node, recursion=0):
             if node[2][1][0] in ['STARTS', 'ENDS'] and node[2][2][0] == "WITH":
                 right = node[2][3]
             else:
-                assert(node[2][2][0] == 'String')
                 right = node[2][2]
+            assert(right[0] == 'Value' or right[0] == 'Property')
+            if right[0] == 'Value':
+                right = _fix_const(right[1])
             pos[arg] = (op, left, right)
             arg = None
         elif node[2][0] == "KnownOpRhs":

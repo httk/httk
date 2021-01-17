@@ -25,7 +25,8 @@ import datetime
 
 from httk.optimade.meta import generate_meta
 
-def generate_entry_endpoint_reply(request, config, data, ndata_returned = None):
+def generate_entry_endpoint_reply(request, config, data):
+    ndata_returned = data.count()
     data_part = []
     for d in data:
         attributes = dict(d)
@@ -47,7 +48,7 @@ def generate_entry_endpoint_reply(request, config, data, ndata_returned = None):
     response = {
         "links": links,
         "data": data_part,
-        "meta": generate_meta(request, config, data_count=ndata_returned, more_data_available = data.more_data_available)
+        "meta": generate_meta(request, config, data_count=ndata_returned, more_data_available = data.more_data_available, data_available=config['data_available'][request['endpoint']])
     }
 
     # TODO: Add 'next' element in links for pagination, via info propagated in data
@@ -83,7 +84,7 @@ def generate_single_entry_endpoint_reply(request, config, data):
     response = {
         "links": { "next": None },
         "data": data_part,
-        "meta": generate_meta(request, config, data_count=ndata, more_data_available = False)
+        "meta": generate_meta(request, config, data_count=ndata, more_data_available = False, data_available=config['data_available'][request['endpoint']])
     }
 
     # TODO: Add 'next' element in links for pagination, via info propagated in data

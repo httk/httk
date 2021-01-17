@@ -35,13 +35,17 @@ _field_map = {
 
 class HttkResults(object):
     def __init__(self, searcher, response_fields, unknown_response_fields, limit, offset):
+        self.searcher = searcher
         self.cur = iter(searcher)
         self.limit = limit
         self.response_fields = response_fields
         self.unknown_response_fields = unknown_response_fields
-        self.count = 0
+        self._count = 0
         self.offset = offset
         self.more_data_available = True
+
+    def count(self):
+        return self.searcher.count()
 
     def __iter__(self):
         return self
@@ -72,13 +76,13 @@ class HttkResults(object):
             self.cur = None
             raise StopIteration
 
-        if self.limit is not None and self.count == self.limit:
+        if self.limit is not None and self._count == self.limit:
             self.more_data_available = True
             self.cur.close()
             self.cur = None
             raise StopIteration
 
-        self.count += 1
+        self._count += 1
 
         return result
 

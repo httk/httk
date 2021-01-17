@@ -415,14 +415,8 @@ class FCSqlite(FilteredCollection):
         #sqlstr = self.sql()
         cursor.execute(sql)
 
-    def sql(self):
+    def sql_query(self):
         sqlstr = ""
-        sqlstr += "SELECT\n"
-        if len(self.columns) == 0:
-            sqlstr += " *\n"
-        else:
-            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] for c in self.columns])+" \n"
-        sqlstr += "FROM\n"
         tablelist = []
         groupset = set()
         for table in self.tables:
@@ -448,8 +442,61 @@ class FCSqlite(FilteredCollection):
             sqlstr += "ORDER BY\n  "
             sqlstr += ",\n  ".join([s[0]._sql(False)+" "+s[1] for s in self.sorts]) + "\n"
 
+        return sqlstr
+
+    def sql(self):
+        sqlstr = ""
+        sqlstr += "SELECT\n"
+        if len(self.columns) == 0:
+            sqlstr += " *\n"
+        else:
+            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] for c in self.columns])+" \n"
+        sqlstr += "FROM\n"
+        sqlstr += self.sql_query()
         sqlstr += ";\n"
         return sqlstr
+
+    def sql_count(self):
+        tablelist = []
+        groupset = set()
+        for table in self.tables:
+            tablelist.append(table._declare())
+            groupby = table._groupby()
+            if groupby is not None:
+                groupset.add(groupby)
+        if len(groupset) > 0:
+            sqlstr = "SELECT COUNT(__count__) FROM ( SELECT\n"
+            sqlstr += "  COUNT(*) as __count__\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += " );\n"
+            return sqlstr
+        else:
+            sqlstr = "SELECT\n"
+            sqlstr += "  COUNT(*)\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += ";\n"
+            return sqlstr
+
+    def count(self):
+        sql = self.sql_count()
+        cursor = self.sqliteconnection.cursor()
+        cursor.execute(sql)
+
+        data = []
+        for entry in cursor:
+            data += [list(entry)]
+
+        cursor.close()
+
+        if len(data)!=1:
+            raise Exception("Unexpected length of count query: "+str(sql))
+
+        try:
+            return int(data[0][0])
+        except Exception as e:
+            raise Exception("Unexpected format on count query: "+str(data[0]))
 
     def __iter__(self):
         sql = self.sql()
@@ -801,7 +848,7 @@ class BinaryBooleanOp(Expression):
             elif self._operator in ('HAS_INV_ONLY'):
                 return "(1<>1)"
             elif self._operator in ('LIKE'):
-                return "("+fc_sql(post, self._args[0]) + " LIKE (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+                return "("+fc_sql(post, self._args[0]) + " LIKE (" + ",".join([fc_sql(post, a) for a in self._args[1]])+") ESCAPE '\\')"
         else:
 
             if self._operator == 'IN':

@@ -58,10 +58,11 @@ constant_types = ['String','Number']
 
 table_mapper = {
     'structures': Structure,
+    'calculations': Result_TotalEnergyResult,
 }
 
 invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
-_python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__'}
+_python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__', 'STARTS':'startswith','ENDS':'endswith'}
 
 def optimade_filter_to_httk(filter_ast, entries, searcher):
 
@@ -115,12 +116,10 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
                 values = format_value('list of unknown',right)
         else:
             values = format_value(entry_info[left[1]]['fulltype'],right)
-            handler = handlers[left[1]][node[0]]
-            if inv_toggle or node[0] == 'HAS_ONLY':
-                needs_post = True
+            handler = handlers[left[1]]['HAS']
         if ops != tuple(['=']*len(values)):
             raise TranslatorError("HAS queries with non-equal operators not implemented yet.", 501, "Not implemented")
-        search_expr = handler(left[1], ops, values, search_variable, node[0], inv_toggle)
+        search_expr, needs_post = handler(left[1], ops, values, search_variable, node[0], inv_toggle)
     elif node[0] in ['LENGTH']:
         left = node[1]
         op = node[2]
@@ -161,10 +160,29 @@ def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, re
                 else:
                     #TODO: this should warn
                     handler = unknown_comparison_handler
-                    values = format_value('unknown',right)
-            handler = handlers[left[1]]['comparison']
-            value = format_value(entry_info[left[1]]['fulltype'],right)
+                    value = format_value('unknown',right)
+            else:
+                handler = handlers[left[1]]['comparison']
+                value = format_value(entry_info[left[1]]['fulltype'],right)
             search_expr = handler(left[1], op, value, search_variable)
+    elif node[0] in ['ENDS', 'STARTS', 'CONTAINS']:
+        op = node[0]
+        left = node[1]
+        right = node[2]
+        assert(left[0] == 'Identifier')
+        if right[0] == 'Identifier':
+            raise TranslatorError("Identifier vs. Identifier string comparisons not implemented.", 501, "Not implemented")
+        if left[1] not in entry_info:
+            if left[1].startswith(httk_recognized_prefixes):
+                raise TranslatorError("Filter invokes unrecognized property name: "+left[1], 400, "Bad request")
+            else:
+                #TODO: this should warn
+                handler = unknown_stringmatching_handler
+                values = format_value('unknown',right)
+        else:
+            handler = handlers[left[1]]['stringmatching']
+            value = format_value(entry_info[left[1]]['fulltype'],right)
+        search_expr = handler(left[1], value, node[0], search_variable)
     elif node[0] in ['IS_UNKNOWN', 'IS_KNOWN']:
         left = node[1]
         assert(left[0] == 'Identifier')
@@ -206,6 +224,9 @@ def known_unknown_handler(entry, search_variable, unknown_type):
 def unknown_comparison_handler(entry, ops, values, search_variable):
     return false_handler(search_variable)
 
+def unknown_stringmatching_handler(entry, values, stringmatching_type, search_variable):
+    return false_handler(search_variable)
+
 def unknown_has_handler(entry, op, value, search_variable, has_type, inv_toggle):
     return false_handler(search_variable)
 
@@ -216,7 +237,26 @@ def string_handler(entry, op, value, search_variable):
     httk_op = _python_opmap[op]
     return getattr(getattr(search_variable,entry),httk_op)(value)
 
+def stringmatching_handler(entry, value, stringmatching_type, search_variable):
+    escaped_value = value.replace("\\","\\\\").replace("%","\\%").replace("_","\\_")
+    if stringmatching_type == 'ENDS':
+        return getattr(getattr(search_variable,entry),'like')('%'+escaped_value)
+    elif stringmatching_type == 'STARTS':
+        return getattr(getattr(search_variable,entry),'like')(escaped_value+'%')
+    elif stringmatching_type == 'CONTAINS':
+        return getattr(getattr(search_variable,entry),'like')('%'+escaped_value+'%')
+    else:
+        raise TranslatorError("Unexpected stringmatching operator type", 500, "Internal server error.")
+
 def constant_comparison_handler(val1, op, val2, search_variable):
+    op = _python_opmap[op]
+    # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
+    if getattr(val1,op)(val2):
+        return true_handler(search_variable)
+    else:
+        return false_handler(search_variable)
+
+def constant_stringmatching_handler(val1, op, val2, stringmatching_type, search_variable):
     op = _python_opmap[op]
     # This is an ugly hack to handle the fact that (I think?) httk isn't capable of doing constant comparisons in a search
     if getattr(val1,op)(val2):
@@ -231,39 +271,45 @@ def number_handler(entry, op, value, search_variable):
 def timestamp_handler(entry, op, value, search_variable):
     raise TranslatorError("Timestamp comparison not yet implemented.", 501, "Not implemented.")
 
-def set_all_handler(entry, ops, values, inv, search_variable):
-    #if not inv:
-    #    return getattr(getattr(search_variable,entry),'has_all')(*values)
-    #else:
-    #    return getattr(getattr(search_variable,entry),'has_inv_all')(*values)
-    if not inv:
-        search = getattr(getattr(search_variable,entry),'has_any')(values[0])
-        for value in values[1:]:
-            search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
-        return search
-    else:
-        search = getattr(getattr(search_variable,entry),'has_inv_any')(values[0])
-        for value in values[1:]:
-            search = search & (getattr(getattr(search_variable,entry),'has_inv_any')(value))
-        return search
+def set_handler(entry, ops, values, inv, has_type, search_variable):
+    if has_type == 'HAS_ALL':
+        if not inv:
+            search = getattr(getattr(search_variable,entry),'has_any')(values[0])
+            for value in values[1:]:
+                search = search & (getattr(getattr(search_variable,entry),'has_any')(value))
+            return search, False
+        else:
+            search = getattr(getattr(search_variable,entry),'has_inv_any')(values[0])
+            for value in values[1:]:
+                search = search & (getattr(getattr(search_variable,entry),'has_inv_any')(value))
+            return search, True
+    elif has_type == 'HAS_ANY':
+        if not inv:
+            return getattr(getattr(search_variable,entry),'has_any')(*values), False
+        else:
+            return getattr(getattr(search_variable,entry),'has_inv_any')(*values), True
+    elif has_type == 'HAS_ONLY':
+        if not inv:
+            return getattr(getattr(search_variable,entry),'has_only')(*values), True
+        else:
+            return getattr(getattr(search_variable,entry),'has_inv_only')(*values), True
 
-    #search = getattr(getattr(search_variable,entry),'is_in')(values[0])
-    #for value in values[1:]:
-    #    search = search & (getattr(getattr(search_variable,entry),'is_in')(value))
-    #return search
-
-def set_any_handler(entry, ops, values, inv, search_variable):
-    if not inv:
-        return getattr(getattr(search_variable,entry),'has_any')(*values)
-    else:
-        return getattr(getattr(search_variable,entry),'has_inv_any')(*values)
-    #return getattr(getattr(search_variable,entry),'is_in')(*values)
-
-def set_only_handler(entry, ops, values, inv, search_variable):
-    if not inv:
-        return getattr(getattr(search_variable,entry),'has_only')(*values)
-    else:
-        return getattr(getattr(search_variable,entry),'has_inv_only')(*values)
+def constant_set_handler(val1, ops, val2, has_type, inv, search_variable):
+    if has_type == 'HAS_ALL':
+        if (set(val2) <= set(val1)):
+            return true_handler(search_variable), False
+        else:
+            return false_handler(search_variable), False
+    elif has_type == 'HAS_ANY':
+        if set(val2).isdisjoint(val1):
+            return false_handler(search_variable), False
+        else:
+            return true_handler(search_variable), False
+    elif has_type == 'HAS_ONLY':
+        if (set(val1) <= set(val2)):
+            return true_handler(search_variable), False
+        else:
+            return false_handler(search_variable), False
 
 def structure_features_set_handler(op, value, inv, search_variable, has_type):
     # Any HAS ANY, HAS ALL, HAS ONLY operation will check for precense of an identifier in structure_features.
@@ -282,15 +328,15 @@ optimade_field_handlers = {
         'id': {
             'comparison': lambda entry, op, value, search_variable: string_handler('__id', op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('__id', value, stringmatching_type, search_variable)
         },
         'type': {
             'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'structures', search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: constant_stringmatching_handler(value, 'structures', stringmatching_type, search_variable)
         },
         'elements': {
-            'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: set_all_handler('formula_symbols', ops, values, inv, search_variable),
-            'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: set_any_handler('formula_symbols', ops, values, inv, search_variable),
-            'HAS_ONLY': lambda entry, ops, values, search_variable, has_type, inv: set_only_handler('formula_symbols', ops, values, inv, search_variable),
+            'HAS': lambda entry, ops, values, search_variable, has_type, inv: set_handler('formula_symbols', ops, values, inv, has_type, search_variable),
             'length': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
@@ -298,14 +344,22 @@ optimade_field_handlers = {
             'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
-        'chemical_formula_descriptive': {
-            'comparison': lambda entry, op, value, search_variable: string_handler('chemical_formula', op, value, search_variable),
+        'nperiodic_dimensions': {
+            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 3, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
+        'dimension_types': {
+            'HAS': lambda entry, ops, values, search_variable, has_type, inv: constant_set_handler(values, ops, [1, 1, 1], has_type, inv, search_variable),
+            'length': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 3, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'chemical_formula_descriptive': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('formula', value, stringmatching_type, search_variable)
+        },
         'structure_features': {
-            'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS'),
-            'HAS_ALL': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ALL'),
-            'HAS_ANY': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, search_variable, 'HAS_ANY'),
+            'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, has_type, search_variable),
             'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         }

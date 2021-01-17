@@ -150,3 +150,10 @@ def process(request, query_function, version, config, debug=False):
         raise OptimadeError("Internal error: unexpected endpoint.", 500, "Internal server error")
 
     return {'json_response': response, 'content_type':'application/vnd.api+json', 'response_code':200, 'response_msg':'OK', 'encoding':'utf-8'}
+
+def process_init(config, query_function, debug=False):
+
+    config['data_available'] = {}
+    for endpoint in httk_all_entries:
+        results = query_function([endpoint], [], [], 0, 0, debug=debug)
+        config['data_available'][endpoint] = results.count()
