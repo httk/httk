@@ -78,8 +78,6 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
         if request['relpath'] == '':
             request['relpath'] = 'index.html'
 
-        print("REQUEST:",request)
-
         version = determine_optimade_version(request)
         output = process(request, query_function, version, config, debug=debug)
         return format_output(output)

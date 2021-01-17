@@ -87,7 +87,6 @@ def initialize_optimade_parser():
 def optimade_parse_tree_to_ojf(ast):
 
     assert(ast[0] == 'Filter')
-    print("FILTER INPUT:",ast[1])
     return optimade_parse_tree_to_ojf_recurse(ast[1])
 
 
