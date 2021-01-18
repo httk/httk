@@ -41,6 +41,8 @@ class FilteredCollection(object):
         self.sorts = []
         self.indirection = 1
         self._storable_tables = 0
+        self.offset = 0
+        self.limit = None
 
     def add(self, filterexpr):
         """
@@ -55,6 +57,12 @@ class FilteredCollection(object):
         FilteredCollection, a result is only included if it matches all the filters.
         """
         self.postfilterexprs.append(filterexpr)
+
+    def add_offset(self, offset):
+        self.offset += offset
+
+    def set_limit(self, limit):
+        self.limit = limit
 
     def output(self, expression, name=None):
         """
@@ -453,6 +461,10 @@ class FCSqlite(FilteredCollection):
             sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] for c in self.columns])+" \n"
         sqlstr += "FROM\n"
         sqlstr += self.sql_query()
+        if self.limit is not None:
+            sqlstr += "LIMIT "+str(self.limit)+"\n"
+        if self.offset > 0:
+            sqlstr += "OFFSET "+str(self.offset)+"\n"
         sqlstr += ";\n"
         return sqlstr
 

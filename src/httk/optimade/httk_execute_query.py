@@ -100,8 +100,14 @@ def httk_execute_query(store, entries, response_fields, unknown_response_fields,
     searcher = store.searcher()
 
     searcher =  optimade_filter_to_httk(optimade_filter_ast, entries, searcher)
+    if response_limit is not None:
+        # We need one more than asked for to know if there is more data.
+        searcher.set_limit(response_limit+1)
+    if response_offset is not None:
+        searcher.add_offset(response_offset)
 
-    return HttkResults(searcher, response_fields, unknown_response_fields, response_limit, response_offset)
+    # Offset (and limit, but it doesn't matter) is already handled by the searcher.
+    return HttkResults(searcher, response_fields, unknown_response_fields, response_limit, 0)
 
 if __name__ == "__main__":
 

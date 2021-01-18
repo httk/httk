@@ -53,16 +53,19 @@ def _validate_query(endpoint, query):
     if 'response_fields' in query and query['response_fields'] is not None:
         validated_response_fields = []
         response_fields = [x.strip() for x in query['response_fields'].split(",")]
-        for response_field in response_fields:
-            if response_field in httk_valid_response_fields[endpoint]:
-                validated_response_fields += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
-            elif response_field in httk_unknown_response_fields[endpoint]:
-                validated_response_fields += [response_field]
-            elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
-                raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
-            else:
-                validated_response_fields += [response_field]
-        validated_parameters['response_fields'] = ",".join(validated_response_fields)
+        if endpoint in httk_valid_response_fields:
+            for response_field in response_fields:
+                if response_field in httk_valid_response_fields[endpoint]:
+                    validated_response_fields += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
+                elif response_field in httk_unknown_response_fields[endpoint]:
+                    validated_response_fields += [response_field]
+                elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
+                    raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
+                else:
+                    validated_response_fields += [response_field]
+            validated_parameters['response_fields'] = ",".join(validated_response_fields)
+        else:
+            validated_parameters['response_fields'] = ""
 
     # Validating the filter string is deferred to its parser
     if 'filter' in query and query['filter'] is not None:
@@ -147,20 +150,26 @@ def validate_optimade_request(request, version):
     if 'response_fields' in query and query['response_fields'] is not None:
         response_fields = [x.strip() for x in query['response_fields'].split(",")]
         for response_field in response_fields:
-            if response_field in httk_valid_response_fields[endpoint]:
-                validated_request['recognized_response_fields'] += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
-            elif response_field in httk_unknown_response_fields[endpoint]:
-                validated_request['unrecognized_response_fields'] += [response_field]
-            elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
-                raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
+            if endpoint in httk_valid_response_fields:
+                if response_field in httk_valid_response_fields[endpoint]:
+                    validated_request['recognized_response_fields'] += [httk_valid_response_fields[endpoint][httk_valid_response_fields[endpoint].index(response_field)]]
+                elif response_field in httk_unknown_response_fields[endpoint]:
+                    validated_request['unrecognized_response_fields'] += [response_field]
+                elif response_field.startswith(httk_recognized_prefixes) or (len(response_field)>0 and response_field[0] != '_'):
+                    raise OptimadeError("Response_fields contains unrecognized property name: "+response_field, 400, "Bad request")
+                else:
+                    validated_request['unrecognized_response_fields'] += [response_field]
             else:
-                validated_request['unrecognized_response_fields'] += [response_field]
+                validated_request['recognized_response_fields'] = []
+                validated_request['unrecognized_response_fields'] = []
 
     else:
         if endpoint in default_response_fields:
             validated_request['recognized_response_fields'] = default_response_fields[endpoint]
+            validated_request['unrecognized_response_fields'] = []
         else:
             validated_request['recognized_response_fields'] = []
+            validated_request['unrecognized_response_fields'] = []
 
     if endpoint in required_response_fields:
         for response_field in required_response_fields[endpoint]:
