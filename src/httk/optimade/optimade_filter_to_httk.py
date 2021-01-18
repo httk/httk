@@ -309,10 +309,10 @@ def constant_set_handler(val1, ops, val2, has_type, inv, search_variable):
         else:
             return false_handler(search_variable), False
 
-def structure_features_set_handler(op, value, inv, search_variable, has_type):
+def structure_features_set_handler(values, ops, inv, has_type, search_variable):
     # Any HAS ANY, HAS ALL, HAS ONLY operation will check for precense of an identifier in structure_features.
     # For now we don't support any structure features, hence, all such comparisons return False
-    return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash'))
+    return getattr(getattr(search_variable,'hexhash'),'__ne__')(getattr(search_variable,'hexhash')), False
 
 def structure_features_length_handler(op, value, search_variable):
     # structure_features is assumed to always be empty
