@@ -72,7 +72,7 @@ def _validate_query(endpoint, query):
 
 
 def validate_optimade_request(request, version):
-    validated_request = {'baseurl': request['baseurl'], 'representation': request['representation'], 'endpoint': None, 'version': optimade_default_version, 'request_id': None, 'query': None, 'recognized_response_fields': [], 'unrecognized_response_fields': []}
+    validated_request = {'baseurl': request['baseurl'], 'representation': request['representation'], 'endpoint': None, 'version': optimade_default_version, 'url_version':None, 'request_id': None, 'query': None, 'recognized_response_fields': [], 'unrecognized_response_fields': []}
 
     if 'endpoint' in request:
         validated_request['endpoint'] = request['endpoint']
@@ -94,26 +94,41 @@ def validate_optimade_request(request, version):
         if len(potential_optimade_version) >= 2 and potential_optimade_version[0] == 'v' and potential_optimade_version[1] in "0123456789":
             if potential_optimade_version in optimade_supported_versions:
                 validated_request['version'] = optimade_supported_versions[potential_optimade_version]
+                validated_request['url_version'] = potential_optimade_version
                 endpoint = rest
             else:
                 raise OptimadeError("Unsupported version requested. Supported versioned base URLs are: "+(", ".join(["/"+str(x) for x in optimade_supported_versions.keys()])), 553, "Bad request")
 
+        first_level_endpoint, _sep, request_id = endpoint.partition('/')
+
+        # First check fixed endpoints
         if endpoint in httk_valid_endpoints:
             # Defensive programming; don't trust '=='/in to be byte-for-byte equivalent,
             # so don't use the insecure string from the user
             validated_request['endpoint'] = httk_valid_endpoints[httk_valid_endpoints.index(endpoint)]
-        else:
-            endpoint, _sep, request_id = endpoint.rpartition('/')
-            if endpoint in httk_all_entries:
-                # Defensive programming; don't trust '=='/in to be byte-for-byte equivalent,
-                # so don't use the insecure string from the user
-                validated_request['endpoint'] = httk_valid_endpoints[httk_valid_endpoints.index(endpoint)]
-                # Only allow printable ascii characters in id; this is not in the standard, but your
-                # database really should adhere to it or you are doing weird things.
+
+        # Then check "entries" endpoint with a request_id
+        elif first_level_endpoint in httk_all_entries:
+            endpoint = first_level_endpoint
+            # Defensive programming; don't trust '=='/in to be byte-for-byte equivalent,
+            # so don't use the insecure string from the user
+            validated_request['endpoint'] = httk_valid_endpoints[httk_valid_endpoints.index(endpoint)]
+            # Only allow printable ascii characters in id; this is not in the standard, but your
+            # database really should adhere to it or you are doing weird things.
+            if request_id is not None and len(request_id)>0:
                 if all(ord(c) >= 32 and ord(c) <= 126 for c in request_id):
                     validated_request['request_id'] = request_id
                 else:
                     raise OptimadeError("Unexpected characters in entry id.", 400, "Bad request")
+            else:
+                validated_request['request_id'] = None
+
+        # Finally check the special versions endpoint
+        elif endpoint == 'versions':
+            if validated_request['url_version'] is not None:
+                raise OptimadeError("Request for invalid endpoint. The 'versions' endpoint is only available on the unversioned URL.", 400, "Bad request")
+            validated_request['endpoint'] = 'versions'
+            validated_request['request_id'] = None
 
         if validated_request['endpoint'] is None:
             raise OptimadeError("Request for invalid endpoint.", 400, "Bad request")

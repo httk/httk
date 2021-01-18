@@ -61,7 +61,7 @@ httk_entry_info['structures']['properties']['dimension_types']['default_response
 httk_entry_info['structures']['properties']['nperiodic_dimensions']['default_response']=True
 
 #dict([(x,optimade_entries.entry_info[x]) for x in optimade_entries.entry_info if x in httk_all_entries])
-httk_valid_endpoints = list(['info', 'versions', 'links'] + httk_all_entries + ["info/"+x for x in httk_all_entries] + [''])
+httk_valid_endpoints = list(['info', 'links'] + httk_all_entries + ["info/"+x for x in httk_all_entries] + [''])
 httk_properties_by_entry = dict([(x, list(httk_entry_info[x]['properties'].keys())) for x in httk_entry_info])
 httk_valid_response_fields =  httk_properties_by_entry
 

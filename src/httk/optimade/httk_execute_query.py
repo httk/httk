@@ -17,6 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.optimade.optimade_filter_to_httk import optimade_filter_to_httk
+from httk.optimade.httk_entries import httk_recognized_prefixes
 
 _field_map = {
     'Structure': {
@@ -115,7 +116,7 @@ if __name__ == "__main__":
 
     # This represents the query being received (later to be received via a web URL query)
     tables = ["structures"]
-    response_fields = ["id", "formula", "elements"]
+    response_fields = ["id", "chemical_formula_descriptive", "_httk_formula", "elements"]
 
     if len(sys.argv) >= 2:
         input_string = sys.argv[1]
@@ -133,8 +134,7 @@ if __name__ == "__main__":
 
     response_limit = 50
     response_offset = 0
-
-    result = httk_execute_query(store, tables, response_fields, response_limit, response_offset, filter_ast, debug=True)
+    result = httk_execute_query(store, tables, response_fields, [], response_limit, response_offset, filter_ast, debug=True)
 
     print("==== END RESULT")
     for l in result:
