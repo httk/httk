@@ -129,12 +129,12 @@ def validate_optimade_request(request, version):
         # Finally check the special versions endpoint
         elif endpoint == 'versions':
             if validated_request['url_version'] is not None:
-                raise OptimadeError("Request for invalid endpoint. The 'versions' endpoint is only available on the unversioned URL.", 400, "Bad request")
+                raise OptimadeError("Request for non-existing endpoint. The 'versions' endpoint is only available on the unversioned URL.", 404, "Not Found")
             validated_request['endpoint'] = 'versions'
             validated_request['request_id'] = None
 
         if validated_request['endpoint'] is None:
-            raise OptimadeError("Request for invalid endpoint.", 400, "Bad request")
+            raise OptimadeError("Request for non-existing endpoint.", 404, "Bad request")
 
     if 'query' in request:
         query = request['query']
