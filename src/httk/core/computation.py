@@ -23,7 +23,6 @@ from httk.core.reference import Reference
 
 
 class Computation(HttkObject):
-
     """
     Object for keeping track of httk data about a specific computation run
     """

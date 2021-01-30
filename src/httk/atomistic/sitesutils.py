@@ -17,7 +17,7 @@
 
 import fractions
 
-from httk.core import FracVector, MutableFracVector
+from httk.core.vectors import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
 from httk.atomistic import spacegrouputils
 

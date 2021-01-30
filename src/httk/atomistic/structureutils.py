@@ -18,7 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 
-from httk.core import is_sequence, breath_first_idxs, FracVector, FracScalar, MutableFracVector
+from httk.core import is_sequence, breath_first_idxs
+from httk.core.vectors import FracVector, FracScalar, MutableFracVector
 from httk.atomistic.cell import Cell
 from httk.atomistic.unitcellsites import UnitcellSites
 from httk.atomistic import spacegrouputils
