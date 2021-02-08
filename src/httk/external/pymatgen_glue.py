@@ -70,3 +70,16 @@ mp_key = ""
 def set_mp_key(key):
     global mp_key
     mp_key = key
+
+def structure_to_pmg_struct(struct):
+    """Converts an httk structure to Pymatgen structure"""
+    basis = struct.pc.uc_basis.to_floats()
+    coords = struct.pc.uc_reduced_coords.to_floats()
+    counts = struct.pc.uc_counts
+
+    species = []
+    for a, count in zip(struct.assignments, counts):
+        for _ in range(count):
+           species.append(a.symbols[0])
+
+    return pymatgen.Structure(basis, species, coords)

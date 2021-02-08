@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -18,12 +18,11 @@
 from httk.atomistic.data import periodictable
 from httk.atomistic import Structure
 from httk.core import *
-    
+
 
 def spglib_out_to_struct(out):
     cell = FracVector.from_floats(out[0].tolist())
-    coords = FracVector.from_floats(out[1].tolist()) 
+    coords = FracVector.from_floats(out[1].tolist())
     occupations = out[2]
     print("OCCUPATIONS:", occupations)
     return Structure.create(cell=cell, coords=coords, occupations=occupations)
-

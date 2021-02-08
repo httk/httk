@@ -36,10 +36,16 @@ isotropy_path = None
 
 def ensure_has_isotropy():
     if isotropy_path is None or isotropy_path == "":
+        if 'HTTK_ISOTROPY_PATH' in os.environ:
+            if os.path.isfile(os.path.join(os.environ['HTTK_ISOTROPY_PATH'], 'findsym')):
+                return
         raise ImportError("httk.external.isotropy_ext imported with no access to isotropy binary")
 
 try:
-    isotropy_path = config.get('paths', 'isotropy')
+    if 'HTTK_ISOTROPY_PATH' in os.environ:
+        isotropy_path = os.environ['HTTK_ISOTROPY_PATH']
+    else:
+        isotropy_path = config.get('paths', 'isotropy')
 except Exception:
     pass
 
