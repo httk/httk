@@ -484,11 +484,6 @@ def elastic_config(fn):
     except:
         project = False
 
-    try:
-        force_sym = config["elastic"]["force_symmetry"].lstrip()
-    except:
-        force_sym = None
-
     # Delta values:
     tmp = config["elastic"]["delta"].lstrip().split("\n")
     deltas = []
@@ -537,7 +532,7 @@ def elastic_config(fn):
         distortions = new_distortions
         deltas = new_deltas
 
-    return sym, deltas, distortions, project, force_sym
+    return sym, deltas, distortions, project
 
 def vectors_are_same(v1, v2):
     """Check whether all elements of two vectors are the same,
@@ -550,7 +545,7 @@ def vectors_are_same(v1, v2):
         return True
 
 def get_elastic_constants(path):
-    sym, delta, distortions, project, force_sym = elastic_config(
+    sym, delta, distortions, project = elastic_config(
         os.path.join(path, '../settings.elastic'))
 
     stress_target = []
