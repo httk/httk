@@ -66,7 +66,7 @@ try:
         if external == 'yes':
             # Note: this type of import will miss the spglib 'fake' atom object which is a problem. Probably should
             # not use this type of import
-            from pyspglib import spglib
+            import spglib
             sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
             pyspg_major_version = spglib.__version__.split('.')[0]
             pyspg_minor_version = spglib.__version__.split('.')[1]
@@ -118,4 +118,21 @@ def primitive(struct, symprec=1e-5):
     return struct
 
 
+def struct_process_with_isotropy(struct):
+    ensure_pyspg_is_imported()
+
+    basis = struct.pc.uc_basis.to_floats()
+    coords = struct.pc.uc_reduced_coords.to_floats()
+    counts = struct.pc.uc_counts
+
+    species_int = []
+    index = 0
+    for a, count in zip(struct.assignments, counts):
+        species_int += [index]*count
+        index += 1
+
+    cell = (basis, coords, species_int)
+    prim_cell = spglib.find_primitive(cell)
+    print(prim_cell)
+    pass
 
