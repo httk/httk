@@ -240,7 +240,8 @@ def pbc_to_nonperiodic_vecs(pbc):
     return nonperiodic_vecs
 
 
-def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegroup, backends=['isotropy']):
+def structure_reduced_coordgroups_to_representative(coordgroups, cell,
+        spacegroup, backends=['isotropy', 'spglib']):
     for backend in backends:
         if backend == 'isotropy':
             try:
@@ -249,6 +250,15 @@ def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegrou
             except ImportError:
                 raise
                 pass
+
+        if backend == 'spglib':
+            try:
+                from httk.external import pyspglib_ext
+                return pyspglib_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True)
+            except ImportError:
+                raise
+                pass
+
     raise Exception("structure_reduced_coordgroups_to_representative: None of the available backends available.")
 
 
