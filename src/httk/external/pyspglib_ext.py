@@ -201,3 +201,13 @@ def struct_process_with_spglig(struct, symprec=1e-5):
     newstruct.add_refs(struct.get_refs())
 
     return newstruct
+
+def uc_reduced_coordgroups_process_with_spglib_TODO(coordgroup, cell, get_wyckoff=False):
+    """
+    siteutils.py calls this function as
+        uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True),
+    while structureutils.py calls it as
+        uc_reduced_coordgroups_process_with_isotropy(coordgroups, basis).
+    Mismatch between number of required arguments, not sure what to do.
+    """
+    pass

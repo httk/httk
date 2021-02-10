@@ -562,7 +562,8 @@ def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'spglib
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
 
-def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isotropy']):
+def coordgroups_reduced_uc_to_representative(coordgroups, basis,
+                                             backends=['isotropy', 'spglib']):
     sys.stderr.write("WARNING: coordgroups_reduced_uc_to_representative: running untested code...\n")
     for backend in backends:
         if backend == 'isotropy':
@@ -573,6 +574,16 @@ def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isot
             except ImportError:
                 raise
                 pass
+
+        if backend == 'spglib':
+            try:
+                from httk.external import isotropy_ext
+                struct = pyspglib_ext.uc_reduced_coordgroups_process_with_spglib(coordgroups, basis)
+                return struct
+            except ImportError:
+                raise
+                pass
+
         #if backend ==  'platon':
         #    try:
         #        from httk.external import platon_ext
