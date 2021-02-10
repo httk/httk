@@ -523,24 +523,21 @@ def coordgroups_and_assignments_to_coords_and_occupancies(coordgroups, assignmen
     return coords, occupancies
 
 
-def structure_reduced_uc_to_representative(struct,
-        backends=['spglib', 'isotropy', 'fake']):
+def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'spglib', 'fake']):
     for backend in backends:
-        if backend == 'spglib':
-            try:
-                from httk.external import pyspglib_ext
-                sys.stderr.write("Warning: need to run 'spglib' symmetry finder. This may take a while.\n")
-                struct = pyspglib_ext.struct_process_with_isotropy(struct)
-                return struct
-            except ImportError:
-                pass
-            pass
-
         if backend == 'isotropy':
             try:
                 from httk.external import isotropy_ext
                 sys.stderr.write("Warning: need to run 'findsym' symmetry finder. This may take a while.\n")
                 struct = isotropy_ext.struct_process_with_isotropy(struct)
+                return struct
+            except ImportError:
+                pass
+        if backend == 'spglib':
+            try:
+                from httk.external import pyspglib_ext
+                sys.stderr.write("Warning: need to run 'spglib' symmetry finder. This may take a while.\n")
+                struct = pyspglib_ext.struct_process_with_spglig(struct)
                 return struct
             except ImportError:
                 pass
