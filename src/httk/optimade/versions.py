@@ -1,6 +1,7 @@
-# 
+#!/usr/bin/env python
+#
 #    The high-throughput toolkit (httk)
-#    Copyright (C) 2012-2015 Rickard Armiento
+#    Copyright (C) 2012-2020 Rickard Armiento
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -15,19 +16,5 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-
-
-class TrivialStore(object):
-
-    """
-    Very simple storage class that just stores everything into an individual dictionary, just like regular python objects work
-    """
-
-    def new(self, table, types, keyvals):
-        d = dict(keyvals)
-        d['sid'] = 0
-        return d
-
-    def retrieve(self, table, sid):
-        raise Exception("TrivialStore.instance: You cannot load data from TrivialStore, sid must be = None.")
+optimade_supported_versions = {'v1': '1.0.0', 'v1.0': '1.0.0', 'v1.0.0': '1.0.0'}
+optimade_default_version = '1.0.0'

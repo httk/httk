@@ -17,7 +17,7 @@
 """
 Basic help functions
 """
-import sys
+import sys, signal
 from fractions import Fraction
 
 # Import python2 and 3-specific routunes
@@ -280,6 +280,25 @@ class rewindable_iterator(object):
         self._rewind = True
         if rewindstr is not None:
             self._cache = rewindstr
+
+# Inspired by https://stackoverflow.com/questions/132058/showing-the-stack-trace-from-a-running-python-application
+#def sigquit_handler(sig, frame):
+#    import code, traceback
+#
+#    d={'_frame':frame}         # Allow access to frame object.
+#    d.update(frame.f_globals)  # Unless shadowed by global
+#    d.update(frame.f_locals)
+#
+#    if(sig == signal.SIGQUIT):
+#        message  = "Sigquit received.\nTraceback:\n"
+#        message += ''.join(traceback.format_stack(frame))
+#        print(message)
+#        exit(131)
+#
+#try:
+#    signal.signal(signal.SIGQUIT, sigquit_handler)  # Register handler
+#except Exception:
+#    pass
 
 def main():
     asym = int_to_anonymous_symbol(42)

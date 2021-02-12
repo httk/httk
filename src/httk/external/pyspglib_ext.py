@@ -27,6 +27,9 @@ citation.add_ext_citation('spglib / pyspglib', "(Author list to be added)")
 from httk import config
 from httk.external.command import Command
 from httk.external.subimport import submodule_import_external
+from httk.core.vectors import FracVector
+from httk.atomistic import Structure, Spacegroup
+from httk.atomistic.data.periodictable import atomic_symbol
 import httk
 
 try:
@@ -66,7 +69,7 @@ try:
         if external == 'yes':
             # Note: this type of import will miss the spglib 'fake' atom object which is a problem. Probably should
             # not use this type of import
-            from pyspglib import spglib
+            import spglib
             sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
             pyspg_major_version = spglib.__version__.split('.')[0]
             pyspg_minor_version = spglib.__version__.split('.')[1]
@@ -118,4 +121,93 @@ def primitive(struct, symprec=1e-5):
     return struct
 
 
+def struct_process_with_spglig(struct, symprec=1e-5):
+    ensure_pyspg_is_imported()
 
+    basis = struct.pc.uc_basis.to_floats()
+    coords = struct.pc.uc_reduced_coords.to_floats()
+    counts = struct.pc.uc_counts
+
+    symbols_int = []
+    index = 0
+    for a, count in zip(struct.assignments, counts):
+        symbols_int += [a.atomic_number]*count
+        index += 1
+
+    cell = (basis, coords, symbols_int)
+    dataset = spglib.get_symmetry_dataset(cell, symprec=symprec)
+
+    hall_symbol = dataset['hall']
+    spacegroupnumber = dataset['number']
+    spacegroup = Spacegroup.create(hall_symbol=hall_symbol,
+                                   spacegroupnumber=spacegroupnumber)
+
+    rc_basis = dataset['std_lattice'].tolist()
+
+    # If atom type and Wyckoff symbol is the same between two sites, simplify
+    std_mapping_to_primitive_simplified = []
+    equivalent_sites = {}
+    for i in range(len(dataset['std_mapping_to_primitive'])):
+        prim_index = int(dataset['std_mapping_to_primitive'][i])
+        wc = dataset['wyckoffs'][prim_index]
+        atom = int(dataset['std_types'][i])
+        hashkey = str(atom) + '_' + wc
+        if hashkey not in equivalent_sites.keys():
+            prim_index = int(dataset['std_mapping_to_primitive'][i])
+            equivalent_sites[hashkey] = prim_index
+        else:
+            prim_index = equivalent_sites[hashkey]
+        std_mapping_to_primitive_simplified.append(prim_index)
+
+    rc_reduced_occupationscoords_dict = {}
+    rc_occupancies_dict = {}
+    wyckoff_symbols_dict = {}
+    multiplicities_dict = {}
+    for i in range(len(dataset['std_mapping_to_primitive'])):
+        atom = int(dataset['std_types'][i])
+        prim_index = int(std_mapping_to_primitive_simplified[i])
+        wc = dataset['wyckoffs'][prim_index]
+        if prim_index not in rc_reduced_occupationscoords_dict.keys():
+            rc_reduced_occupationscoords_dict[prim_index] = dataset['std_positions'].tolist()[i]
+        if prim_index not in rc_occupancies_dict.keys():
+            rc_occupancies_dict[prim_index] = {'atom': atom, 'ratio': FracVector(1,1)}
+        if prim_index not in multiplicities_dict.keys():
+            multiplicities_dict[prim_index] = 0
+        multiplicities_dict[prim_index] += 1
+        if prim_index not in wyckoff_symbols_dict.keys():
+            wyckoff_symbols_dict[prim_index] = wc
+
+    rc_reduced_occupationscoords = []
+    rc_occupancies = []
+    multiplicities = []
+    wyckoff_symbols = []
+    for key in rc_reduced_occupationscoords_dict.keys():
+        tmp = rc_reduced_occupationscoords_dict[key]
+        rc_reduced_occupationscoords.append([str(round(tmp[0], 8)), str(round(tmp[1], 8)), str(round(tmp[2], 8))])
+        rc_occupancies.append(rc_occupancies_dict[key])
+        multiplicities.append(multiplicities_dict[key])
+        wyckoff_symbols.append(wyckoff_symbols_dict[key])
+
+    newstruct = Structure.create(
+        spacegroup=spacegroup,
+        rc_basis=rc_basis,
+        rc_reduced_occupationscoords=rc_reduced_occupationscoords,
+        rc_occupancies=rc_occupancies,
+        wyckoff_symbols=wyckoff_symbols,
+        multiplicities=multiplicities,
+        )
+
+    newstruct.add_tags(struct.get_tags())
+    newstruct.add_refs(struct.get_refs())
+
+    return newstruct
+
+def uc_reduced_coordgroups_process_with_spglib_TODO(coordgroup, cell, get_wyckoff=False):
+    """
+    siteutils.py calls this function as
+        uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True),
+    while structureutils.py calls it as
+        uc_reduced_coordgroups_process_with_isotropy(coordgroups, basis).
+    Mismatch between number of required arguments, not sure what to do.
+    """
+    pass

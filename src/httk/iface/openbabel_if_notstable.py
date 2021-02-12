@@ -15,8 +15,6 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from numpy import *
-from numpy.linalg import norm, inv
 #from external.spacegroup import Spacegroup
 from httk.core import ioadapters, reraise_from
 from httk.atomistic import Structure

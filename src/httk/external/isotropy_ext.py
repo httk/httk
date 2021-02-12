@@ -49,6 +49,7 @@ try:
 except Exception:
     pass
 
+
 def isotropy(cwd, args, inputstr, timeout=30):
     ensure_has_isotropy()
 
