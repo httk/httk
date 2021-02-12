@@ -71,8 +71,9 @@ def set_mp_key(key):
     global mp_key
     mp_key = key
 
+
 def structure_to_pmg_struct(struct):
-    """Converts an httk structure to Pymatgen structure"""
+    """Converts httk structures to Pymatgen structures."""
     basis = struct.pc.uc_basis.to_floats()
     coords = struct.pc.uc_reduced_coords.to_floats()
     counts = struct.pc.uc_counts
@@ -80,6 +81,27 @@ def structure_to_pmg_struct(struct):
     species = []
     for a, count in zip(struct.assignments, counts):
         for _ in range(count):
-           species.append(a.symbols[0])
+            species.append(a.symbols[0])
 
     return pymatgen.Structure(basis, species, coords)
+
+
+def pmg_struct_to_structure(pmg_struct, hall_symbol=None):
+    """Converts Pymatgen structures to httk structures."""
+    cell = pmg_struct.lattice.matrix.tolist()
+    coords = pmg_struct.frac_coords.tolist()
+    # There is no direct method to get a list of symbols?
+    atomic_symbols = []
+    for s in pmg_struct.species:
+        atomic_symbols.append(s.value)
+
+    if hall_symbol is None:
+        struct = Structure.create(uc_basis=cell, uc_occupancies=atomic_symbols,
+                                  uc_reduced_occupationscoords=coords,
+                                  periodicity=[1,1,1])
+    else:
+        struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols,
+                                  rc_reduced_occupationscoords=coords,
+                                  periodicity=[1,1,1],
+                                  hall_symbol=hall_symbol)
+    return struct
