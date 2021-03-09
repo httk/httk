@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -36,13 +36,17 @@ class Result_ElasticResult(httk.Result):
         'K_V': float, 'K_R': float, 'K_VRH': float,
         'G_V': float, 'G_R': float, 'G_VRH': float,
         'mu_VRH': float, 'E_VRH': float,
-        'atomic_relaxations': bool})
+        'atomic_relaxations': bool,
+        'jobid': str,
+        })
     def __init__(self, computation, initial_structure, structure, total_energy,
             elastic_tensor, elastic_tensor_nosym, compliance_tensor,
             K_V, K_R, K_VRH,
             G_V, G_R, G_VRH,
             mu_VRH, E_VRH,
-            atomic_relaxations):
+            atomic_relaxations,
+            jobid,
+            ):
         self.computation = computation
         self.initial_structure = initial_structure
         self.structure = structure
@@ -59,3 +63,4 @@ class Result_ElasticResult(httk.Result):
         self.mu_VRH = mu_VRH
         self.E_VRH = E_VRH
         self.atomic_relaxations = atomic_relaxations
+        self.jobid = jobid
