@@ -26,11 +26,14 @@ from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
-import configparser
 import numpy as np
 import subprocess
 import inspect
 
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 def get_pseudopotential(species, poscarspath=None):
     if poscarspath is None:
@@ -585,8 +588,8 @@ def get_elastic_constants(path):
             ])
 
         else:
-            sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
-                f"Full cij matrix not implemented for sym = \"{sym}\"!")
+            sys.exit("{}(): ".format(inspect.currentframe().f_code.co_name) +
+                "Full cij matrix not implemented for sym = \"{}\"!".format(sym))
 
         return full_C
 
@@ -683,8 +686,8 @@ def get_elastic_constants(path):
                 ]
 
             else:
-                sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
-                    f"Symmetry reduction not implemented for sym = \"{sym}\"!")
+                sys.exit("{}(): ".format(inspect.currentframe().f_code.co_name) +
+                    "Symmetry reduction not implemented for sym = \"{}\"!".format(sym))
 
             A = []
             B = []
@@ -734,8 +737,8 @@ def get_elastic_constants(path):
             Psym[8,8] = 1./2
 
         else:
-            sys.exit(f"{inspect.currentframe().f_code.co_name}(): " +
-            f"Symmetrized cij matrix not implemented for sym = \"{sym}\"!")
+            sys.exit("{}(): ".format(inspect.currentframe().f_code.co_name) +
+            "Symmetrized cij matrix not implemented for sym = \"{}\"!".format(sym))
 
         # Include the normalization factors, because Psym matrix
         # in get_symmetrized_C_vector includes them:
