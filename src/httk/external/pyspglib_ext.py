@@ -68,9 +68,11 @@ try:
             external = 'yes'
         if external == 'yes':
             # Note: this type of import will miss the spglib 'fake' atom object which is a problem. Probably should
-            # not use this type of import
+            # not use this type of import.
+            # NOTE: The 'fake' spglib Atoms object has become obsolete, so I have disabled
+            # the warning below, because the warning causes tests to fail.
             import spglib
-            sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
+            # sys.stderr.write('WARNING: spglib imported in httk.external without any path given in httk.cfg, this means no spglib.Atoms object exists.\n')
             pyspg_major_version = spglib.__version__.split('.')[0]
             pyspg_minor_version = spglib.__version__.split('.')[1]
         else:
@@ -183,7 +185,8 @@ def struct_process_with_spglig(struct, symprec=1e-5):
     wyckoff_symbols = []
     for key in rc_reduced_occupationscoords_dict.keys():
         tmp = rc_reduced_occupationscoords_dict[key]
-        rc_reduced_occupationscoords.append([str(round(tmp[0], 8)), str(round(tmp[1], 8)), str(round(tmp[2], 8))])
+        rc_reduced_occupationscoords.append(
+            [str(round(tmp[0], 8)), str(round(tmp[1], 8)), str(round(tmp[2], 8))])
         rc_occupancies.append(rc_occupancies_dict[key])
         multiplicities.append(multiplicities_dict[key])
         wyckoff_symbols.append(wyckoff_symbols_dict[key])

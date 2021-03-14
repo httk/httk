@@ -58,8 +58,15 @@ if pymatgen_path != "False":
     try:
         import pymatgen
 
-        pymatgen_major_version = pymatgen.__version__.split('.')[0]
-        pymatgen_minor_version = pymatgen.__version__.split('.')[1]
+        try:
+            pymatgen_major_version = pymatgen.__version__.split('.')[0]
+            pymatgen_minor_version = pymatgen.__version__.split('.')[1]
+        # New 2022.X.X version have moved the __version__ attribute:
+        except AttributeError:
+            import pymatgen.core
+            pymatgen_major_version = pymatgen.core.__version__.split('.')[0]
+            pymatgen_minor_version = pymatgen.core.__version__.split('.')[1]
+
 
     except ImportError:
         pass

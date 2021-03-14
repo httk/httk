@@ -3,3 +3,5 @@ matplotlib
 numpy
 ase
 pymatgen
+docutils
+web.py

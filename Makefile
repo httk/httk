@@ -6,6 +6,7 @@ httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
 tox:
+	rm -rf .tox
 	tox
 
 tests: unittests2 unittests3
@@ -66,6 +67,9 @@ clean:
 	rm -f httk_*.md5
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
+	rm -rf .tox
+	rm src/httk/core/database.sqlite
+	rm -rf .pytest_cache
 
 version:
 	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION

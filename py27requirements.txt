@@ -1,3 +1,7 @@
 pytest
 matplotlib
 numpy
+docutils
+ase==3.17.0
+pymatgen==2018.12.12
+web.py

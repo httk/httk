@@ -1,0 +1,44 @@
+LWAVE=.FALSE.
+LCHARG=.TRUE.
+ISTART=1
+ICHARG=1
+LORBIT=11
+LMAXMIX=6
+
+ISPIN=2
+
+ALGO=Normal
+PREC=Accurate
+ENCUT=700
+ENAUG=900
+LREAL=Auto
+LASPH=.TRUE.
+SYMPREC=1e-5
+
+# EDIFF AND EDIFFG IS SET BY VASP_PREPARE_INCAR
+NELMIN=5
+MAXMIX=80
+NELM=40
+NFREE=10
+
+ISMEAR=0
+SIGMA=0.05
+
+#######################################
+# Settings for accurate stress tensor:
+#######################################
+# Adding the fine grid should improve the accuracy of the stress tensor
+ADDGRID=.TRUE.
+
+# Do a static calculation, i.e. zero outer loop iterations (NSW=0):
+NSW=0
+IBRION=1
+ISIF=6
+
+# Parallelization options:
+# On a laptop/desktop: NCORE ~ 1
+# On a supercomputer: NCORE ~ number of cores per node
+# For medium sized systems (20-100) atoms,
+# KPAR should be ~ number of nodes.
+NCORE=32
+KPAR=3
