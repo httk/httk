@@ -90,7 +90,10 @@ def structure_to_pmg_struct(struct):
         for _ in range(count):
             species.append(a.symbols[0])
 
-    return pymatgen.Structure(basis, species, coords)
+    try:
+        return pymatgen.Structure(basis, species, coords)
+    except AttributeError:
+        return pymatgen.core.Structure(basis, species, coords)
 
 
 def pmg_struct_to_structure(pmg_struct, hall_symbol=None):
