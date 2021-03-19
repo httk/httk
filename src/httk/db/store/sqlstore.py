@@ -55,7 +55,7 @@ class SqlStore(object):
 
         def puts(self, **args):
             self.store.puts(self.table, self.sid, **args)
-
+    
     def new(self, table, types, keyvals=None, updatesid=None):
         if not self.db.table_exists(table):
             self.create_table(table, types)
@@ -186,7 +186,7 @@ class SqlStore(object):
 
         #self.columns[table] = columns
         #self.column_types[table] = column_types
-
+    
     def insert(self, table, types, keyvals, cursor=None, updatesid=None):
         #sid=self.sids[table]
         #types=self.types[table]

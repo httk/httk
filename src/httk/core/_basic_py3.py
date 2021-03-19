@@ -18,6 +18,11 @@
 import sys, collections, queue, bz2
 import io
 
+try:
+    import pyzstd
+except:
+    pass
+
 unicode_type = str
 
 # Exception backtrace is automatically saved in e.__backtrace__ in Python 3
@@ -41,7 +46,7 @@ def is_string(s):
 # In Python 3 bz2 files are opened by default in binary mode.
 # This is an attempt at making bz2 files behave as ordinary files.
 # If mode does not contain 'b' we add 't' for text mode,
-# and open the file with the bz2.open() function (only in Python 3.3)
+# and open the file with the bz2.open() function (>= Python 3.3)
 def bz2open(filename, mode, *args):
     if not 'b' in mode and not 't' in mode:
         mode += 't'
@@ -54,4 +59,8 @@ def bz2open(filename, mode, *args):
     else:
         return bz2.BZ2File(filename, mode, *args)
 
+def zstdopen(filename, mode, *args):
+    if not 'b' in mode and not 't' in mode:
+        mode += 't'
 
+    return pyzstd.open(filename, mode, *args)

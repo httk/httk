@@ -127,9 +127,9 @@ def primitive(struct, symprec=1e-5):
 def struct_process_with_spglig(struct, symprec=1e-5):
     ensure_pyspg_is_imported()
 
-    basis = struct.pc.uc_basis.to_floats()
-    coords = struct.pc.uc_reduced_coords.to_floats()
-    counts = struct.pc.uc_counts
+    basis = struct.uc_basis.to_floats()
+    coords = struct.uc_reduced_coords.to_floats()
+    counts = struct.uc_counts
 
     symbols_int = []
     index = 0
@@ -139,10 +139,7 @@ def struct_process_with_spglig(struct, symprec=1e-5):
 
     cell = (basis, coords, symbols_int)
     dataset = spglib.get_symmetry_dataset(cell, symprec=symprec)
-    # for tmp in cell:
-        # print(tmp)
-    # print(dataset['primitive_lattice'])
-    # print(spglib.standardize_cell(cell, to_primitive=True))
+    print(dataset)
 
     hall_symbol = dataset['hall']
     spacegroupnumber = dataset['number']
@@ -151,52 +148,6 @@ def struct_process_with_spglig(struct, symprec=1e-5):
 
     rc_basis = dataset['std_lattice'].tolist()
     rc_pos = dataset['std_positions'].tolist()
-
-    # # If atom type and Wyckoff symbol is the same between two sites, simplify
-    # std_mapping_to_primitive_simplified = []
-    # equivalent_sites = {}
-    # for i in range(len(dataset['std_mapping_to_primitive'])):
-        # prim_index = int(dataset['std_mapping_to_primitive'][i])
-        # wc = dataset['wyckoffs'][prim_index]
-        # atom = int(dataset['std_types'][i])
-        # hashkey = str(atom) + '_' + wc
-        # # hashkey = str(atom) + '_' + wc + str(dataset['equivalent_atoms'])
-        # if hashkey not in equivalent_sites.keys():
-            # prim_index = int(dataset['std_mapping_to_primitive'][i])
-            # equivalent_sites[hashkey] = prim_index
-        # else:
-            # prim_index = equivalent_sites[hashkey]
-        # std_mapping_to_primitive_simplified.append(prim_index)
-
-    # rc_reduced_occupationscoords_dict = {}
-    # rc_occupancies_dict = {}
-    # wyckoff_symbols_dict = {}
-    # multiplicities_dict = {}
-    # for i in range(len(dataset['std_mapping_to_primitive'])):
-        # atom = int(dataset['std_types'][i])
-        # prim_index = int(std_mapping_to_primitive_simplified[i])
-        # wc = dataset['wyckoffs'][prim_index]
-        # if prim_index not in rc_reduced_occupationscoords_dict.keys():
-            # rc_reduced_occupationscoords_dict[prim_index] = rc_pos[i]
-        # if prim_index not in rc_occupancies_dict.keys():
-            # rc_occupancies_dict[prim_index] = {'atom': atom, 'ratio': FracVector(1,1)}
-        # if prim_index not in multiplicities_dict.keys():
-            # multiplicities_dict[prim_index] = 0
-        # multiplicities_dict[prim_index] += 1
-        # if prim_index not in wyckoff_symbols_dict.keys():
-            # wyckoff_symbols_dict[prim_index] = wc
-
-    # rc_reduced_occupationscoords = []
-    # rc_occupancies = []
-    # multiplicities = []
-    # wyckoff_symbols = []
-    # for key in rc_reduced_occupationscoords_dict.keys():
-        # tmp = rc_reduced_occupationscoords_dict[key]
-        # rc_reduced_occupationscoords.append(
-            # [str(round(tmp[0], 8)), str(round(tmp[1], 8)), str(round(tmp[2], 8))])
-        # rc_occupancies.append(rc_occupancies_dict[key])
-        # multiplicities.append(multiplicities_dict[key])
-        # wyckoff_symbols.append(wyckoff_symbols_dict[key])
 
     rc_reduced_occupationscoords = []
     rc_occupancies = []
@@ -211,25 +162,21 @@ def struct_process_with_spglig(struct, symprec=1e-5):
         rc_occupancies.append({'atom': atom, 'ratio': FracVector(1,1)})
         multiplicities.append(len(equiv_orbs_where))
         wyckoff_symbols.append(dataset['wyckoffs'][ind])
-
-    # rc_reduced_occupationscoords = []
-    # rc_occupancies = []
-    # multiplicities = []
-    # wyckoff_symbols = []
-    # for unique_site in set(dataset['std_mapping_to_primitive']):
-        # std_where = np.argwhere(dataset['std_mapping_to_primitive'] == unique_site).flatten()
-        # input_where = np.argwhere(dataset['mapping_to_primitive'] == unique_site).flatten()
-        # std_index = int(std_where[0])
-        # input_index = int(input_where[0])
-        # orbit_where = np.argwhere(dataset['equivalent_atoms'] == int(dataset['equivalent_atoms'][input_index])).flatten()
-        # atom = int(dataset['std_types'][std_index])
-        # rc_occupancies.append({'atom': atom, 'ratio': FracVector(1,1)})
-        # multiplicities.append(len(orbit_where))
-        # rc_reduced_occupationscoords.append(
-            # [str(round(rc_pos[std_index][0], 8)), str(round(rc_pos[std_index][1], 8)),
-             # str(round(rc_pos[std_index][2], 8))])
-    # print(multiplicities)
-
+    # Multiplicities have to be "normalized" if the input cell was a supercell
+    # containing multiple primitive/standard conventional cells, or if
+    # the input cell was the primitive unit cell, i.e. smaller than the
+    # conventional cell.
+    if sum(multiplicities) > len(dataset['std_mapping_to_primitive']):
+        assert sum(multiplicities) % len(dataset['std_mapping_to_primitive']) == 0
+        multiplier = sum(multiplicities) // len(dataset['std_mapping_to_primitive'])
+        for i in range(len(multiplicities)):
+            multiplicities[i] //= multiplier
+    elif sum(multiplicities) < len(dataset['std_mapping_to_primitive']):
+        assert len(dataset['std_mapping_to_primitive']) % sum(multiplicities) == 0
+        multiplier = len(dataset['std_mapping_to_primitive']) // sum(multiplicities)
+        for i in range(len(multiplicities)):
+            multiplicities[i] *= multiplier
+    assert sum(multiplicities) == len(dataset['std_mapping_to_primitive'])
 
     newstruct = Structure.create(
         spacegroup=spacegroup,

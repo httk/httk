@@ -176,7 +176,7 @@ class HttkObject(object):
                 keys += [(param, val)]
 
         keys = tuple(keys)
-        #print("TUPLE:",keys)
+        # print("TUPLE:",keys)
         return keys
 
     @httk_typed_property(str)

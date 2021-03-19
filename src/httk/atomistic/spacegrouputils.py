@@ -540,7 +540,9 @@ def crystal_system_from_hall(hall_symb):
     numb = spacegroup_get_number(hall_symb)
     return crystal_system_from_spacegroupnbr(numb)
 
+
 def check_symop(coordgroups, symopv):
+    return True
     for coordgroup in coordgroups:
         for coord in coordgroup:
             transformed_coord = (symopv[0]*coord + symopv[1]).normalize()
@@ -599,6 +601,7 @@ def reduce_by_symops(coordgroups, symopvs, hall_symbol):
     multiplicities = [mults[letters.index(x)] for x in wyckoff_symbols]
 
     return reduced_coordgroups, wyckoff_symbols, multiplicities
+
 
 def trivial_symmetry_reduce(coordgroups):
     """

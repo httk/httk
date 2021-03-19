@@ -15,8 +15,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, fractions
+import sys
 from functools import reduce
+import quicktions as fractions
 
 PY3 = sys.version_info[0] == 3
 
@@ -98,7 +99,6 @@ def string_to_val_and_delta(arg, min_accuracy=fractions.Fraction(1, 10000)):
         delta = min_accuracy
     val = fractions.Fraction(val)
     return val, delta
-
 
 def any_to_fraction(arg, min_accuracy=fractions.Fraction(1, 10000)):
     """

@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import fractions
+import quicktions as fractions
 import operator
 import itertools
 from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce

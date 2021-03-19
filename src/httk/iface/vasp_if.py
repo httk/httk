@@ -16,19 +16,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, shutil, math
+import numpy as np
+import re
+import inspect
 
 import httk
 from httk import config
 from httk.core.template import apply_templates
 from httk.atomistic.data import periodictable
-from httk.core.ioadapters import cleveropen
+from httk.core.ioadapters import cleveropen, IoAdapterFileReader
 from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
-import numpy as np
-import subprocess
-import inspect
 
 if sys.version_info[0] == 3:
     import configparser
@@ -464,7 +464,7 @@ class OutcarReader():
                               ["^ *energy *without *entropy= *([^ ]+) "+
                                "*energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
                               ["FREE ENERGIE", None, set_final],
-                              ["^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
+                              # ["^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
                               ], results, debug=False)
         self.parsed = True
 
@@ -538,6 +538,7 @@ def elastic_config(fn):
 
     return sym, deltas, distortions, project
 
+
 def vectors_are_same(v1, v2):
     """Check whether all elements of two vectors are the same,
     within some tolerance."""
@@ -548,6 +549,7 @@ def vectors_are_same(v1, v2):
     else:
         return True
 
+# @profile
 def get_elastic_constants(path):
     sym, delta, distortions, project = elastic_config(
         os.path.join(path, '../settings.elastic'))
@@ -557,19 +559,44 @@ def get_elastic_constants(path):
     for i, dist in enumerate(distortions):
         for j, d in enumerate(delta[i]):
             # Collect stress components:
-            outcar = read_outcar(os.path.join(path,
+            # outcar = read_outcar(os.path.join(path,
+                # 'OUTCAR.cleaned.elastic{}_{}'.format(i+1, j+1)))
+            ioa = IoAdapterFileReader.use(os.path.join(path,
                 'OUTCAR.cleaned.elastic{}_{}'.format(i+1, j+1)))
-            # Check if the stress tensor was found in the OUTCAR.
-            # If not, we can still continue and try to solve elastic
-            # constants from the set of linear equations.
+            file_lines = ioa.file.read()
+            match = re.search("in kB" + "\s*([^ \n]+)"*6, file_lines)
+
+            # NOTE: Stress tensor values are in a different order in OUTCAR
+            # compared to Voigt notation. In terms of Voigt notation OUTCAR
+            # stress tensor is ordered as:
+            # 1 2 3 6 4 5
+            # The unit is kB = 0.1 GPa.
+            # Also, OUTCAR gives the stress tensor with a minus sign.
             try:
-                st = outcar.stress_tensor_voigt_gpa
+                stress_tensor = [match.group(1), match.group(2),
+                                 match.group(3), match.group(4),
+                                 match.group(5), match.group(6)]
+                # Due to these VASP conventions, provide also the stress tensor
+                # in the normal Voigt order and in units of GPa:
+                stress_tensor_voigt_gpa = [
+                    str(np.round(-float(stress_tensor[0])/10, 5)),
+                    str(np.round(-float(stress_tensor[1])/10, 5)),
+                    str(np.round(-float(stress_tensor[2])/10, 5)),
+                    str(np.round(-float(stress_tensor[4])/10, 5)),
+                    str(np.round(-float(stress_tensor[5])/10, 5)),
+                    str(np.round(-float(stress_tensor[3])/10, 5)),
+                    ]
+
+                # st = outcar.stress_tensor_voigt_gpa
+                st = stress_tensor_voigt_gpa
+
                 eps = np.array(dist) * d
                 epsilon.append(eps)
                 tmp = []
                 for val in st:
                     tmp.append(float(val))
                 stress_target.append(tmp)
+
             except:
                 continue
 
@@ -752,10 +779,12 @@ def get_elastic_constants(path):
     A, B, symmetry_reduction = setup_linear_system(epsilon,
             stress_target, sym)
     # Solve the 21-component C-vector Tasnadi2012, PRB 85, 144112
-    Cvector_nosym, residuals, rank, singular_values = np.linalg.lstsq(A,
-        B, rcond=None)
+    try:
+        Cvector_nosym, residuals, rank, singular_values = np.linalg.lstsq(A,
+            B, rcond=None)
+    except:
+        Cvector_nosym = np.zeros(21)
     Cvector_nosym = Cvector_nosym.flatten()
-
 
     if symmetry_reduction:
         Cvector_nosym = get_full_C_vector(Cvector_nosym, sym)
@@ -768,7 +797,10 @@ def get_elastic_constants(path):
     cij_nosym = np.array(get_full_cij_matrix(Cvector_nosym))
 
     # Compute compliance tensor, which is the matrix inverse of cij
-    sij = np.linalg.inv(cij)
+    try:
+        sij = np.linalg.inv(cij)
+    except:
+        sij = np.zeros_like(cij)
 
     elas_dict = {}
     # Compute bulk and shear moduli
@@ -817,6 +849,9 @@ def get_elastic_constants(path):
         if key == 'mu_VRH':
             elas_dict[key] = float(np.round(val, decimals=4))
         else:
-            elas_dict[key] = int(np.round(val, decimals=0))
+            try:
+                elas_dict[key] = int(np.round(val, decimals=0))
+            except:
+                elas_dict[key] = 0
 
     return cij, sij, elas_dict, cij_nosym

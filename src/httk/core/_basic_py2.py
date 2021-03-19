@@ -19,7 +19,10 @@ from __future__ import print_function
 
 import sys, collections, traceback, bz2
 
-import Queue as queue
+try:
+    import pyzstd
+except:
+    pass
 
 unicode_type=unicode
 
@@ -51,3 +54,6 @@ def is_string(s):
 
 def bz2open(filename, mode, *args):
     return bz2.BZ2File(filename, mode, *args)
+
+def zstdopen(filename, mode, *args):
+    raise Exception("Cannot open .zstd file, because pyzstd is a Python 3 only module!")
