@@ -16,19 +16,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
+This provides a thin abstraction layer for SQL queries, implemented on top of duckdb,3 to make it easier to exchange between SQL databases.
 """
 from __future__ import print_function
 import os, sys, time
-import sqlite3 as sqlite
+import duckdb
 import atexit
 from httk.core import FracScalar
 from httk.core import reraise_from
 
-sqliteconnections = set()
+duckdbconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
-#database_debug = True
+# database_debug = True
 database_debug_slow = False
 if 'DATABASE_DEBUG_SLOW' in os.environ:
     database_debug_slow = True
@@ -37,31 +37,32 @@ if 'DATABASE_DEBUG' in os.environ:
 
 
 def db_open(filename):
-    global sqliteconnections
-    connection = sqlite.connect(filename)
-    sqliteconnections.add(connection)
+    global duckdbconnections
+    connection = duckdb.connect(filename)
+    duckdbconnections.add(connection)
     return connection
 
 
 def db_close(connection):
-    global sqliteconnections
-    sqliteconnections.remove(connection)
+    global duckdbconnections
+    duckdbconnections.remove(connection)
     connection.close()
 
 
-def db_sqlite_close_all():
-    global sqliteconnections
-    for connection in sqliteconnections:
+def db_duckdb_close_all():
+    global duckdbconnections
+    for connection in duckdbconnections:
         connection.close()
 
-atexit.register(db_sqlite_close_all)
+atexit.register(db_duckdb_close_all)
 
 
-class Sqlite(object):
+class Duckdb(object):
 
     def __init__(self, filename):
         self.connection = db_open(filename)
         #self._block_commit = False
+        self.primary_key_index = {}
 
     def close(self):
         db_close(self.connection)
@@ -72,7 +73,10 @@ class Sqlite(object):
     def commit(self):
         self.connection.commit()
 
-    class SqliteCursor(object):
+    class DuckdbCursor(object):
+        """It should be noted that in DuckDB the cursor is frivolous,
+        meaning creating a cursor returns a duplicate of the connection object.
+        """
 
         def __init__(self, db):
             self.cursor = db.connection.cursor()
@@ -85,23 +89,30 @@ class Sqlite(object):
             if database_debug_slow:
                 time1 = time.time()
             try:
+                # DuckDB gives "syntax error near object" and the only way
+                # I have found to fix that is to remove the "object" keyword
+                # from the SQL query.:
+                sql = sql.replace("object", "")
+                # DuckDB uses "ON" instead of WHERE when doing a JOIN operation:
+                if "JOIN" in sql:
+                    sql = sql.replace("WHERE", "ON")
                 # print("sql = ", sql)
                 # print("values = ", values)
                 self.cursor.execute(sql, values)
             except Exception as e:
                 info = sys.exc_info()
-                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), e)
+                reraise_from(Exception, "backend.Duckdb: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), e)
             if database_debug_slow:
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):
                     debug_cursor = self.db.connection.cursor()
                     print("SLOW DATABASE DEBUG: EXECUTING SQL:"+sql+" :: "+str(values), end="", file=sys.stderr)
-                    print("sqlite execute finished in " + str((time2-time1)*1000.0) + " ms", end="", file=sys.stderr)
+                    print("duckdb execute finished in " + str((time2-time1)*1000.0) + " ms", end="", file=sys.stderr)
                     try:
                         debug_cursor.execute("EXPLAIN QUERY PLAN "+sql, values)
                         queryplan = "### QUERY PLAN ####\n"+"\n".join([str(x) for x in debug_cursor.fetchall()]) + "\n########"
                         print(queryplan, end="", file=sys.stderr)
-                    except sqlite.OperationalError:
+                    except duckdb.OperationalError:
                         print("(Could not retrieve query plan)", end="", file=sys.stderr)
                         pass
                     debug_cursor.close()
@@ -120,11 +131,11 @@ class Sqlite(object):
             return self.cursor.description
 
         def __iter__(self):
-            for row in self.cursor:
+            for row in self.cursor.fetchall():
                 yield row
 
     def cursor(self):
-        return self.SqliteCursor(self)
+        return self.DuckdbCursor(self)
 
     def table_exists(self, name, cursor=None):
         result = self.query("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (name,), cursor=cursor)
@@ -134,23 +145,34 @@ class Sqlite(object):
 
     def create_table(self, name, primkey, columnnames, columntypes, cursor=None, index=None):
         sql = primkey+" INTEGER PRIMARY KEY"
+        # Data types have been modified to correspond to the
+        # types that DuckDB expects.
+        # Optimize by making certain columns INTEGER, where there is no
+        # danger of values being bigger than what INTEGER allows.
         for i in range(len(columnnames)):
-            if columntypes[i] == int:
+            column_name = columnnames[i]
+            if column_name.endswith('_id'):
                 typestr = "INTEGER"
+            elif 'orientation' in column_name:
+                typestr = "INTEGER"
+            elif "_sid" in column_name:
+                typestr = "INTEGER"
+            elif columntypes[i] == int:
+                typestr = "BIGINT"
             elif columntypes[i] == float:
-                typestr = "REAL"
+                typestr = "DOUBLE"
             elif columntypes[i] == str:
                 typestr = "TEXT"
             elif columntypes[i] == FracScalar:
-                typestr = "INTEGER"
+                typestr = "BIGINT"
             elif columntypes[i] == bool:
                 typestr = "INTEGER"
             else:
-                raise Exception("backend.Sqlite.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")
+                raise Exception("backend.Duckdb.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")
 
             sql += ", "+columnnames[i]+" "+typestr
 
-        self.modify_structure("CREATE TABLE "+name+" ("+sql+")", (), cursor=cursor)
+        self.modify_structure("CREATE TABLE \""+name+"\" ("+sql+")", (), cursor=cursor)
         if index is not None:
             for ind in index:
                 if isinstance(ind, tuple):
@@ -160,9 +182,17 @@ class Sqlite(object):
                 else:
                     self.modify_structure("CREATE INDEX "+name+"_"+ind+"_index"+" ON "+name+"("+ind+")", (), cursor=cursor)
 
+    # DuckDB does not support auto-incrementing the primary key.
+    # Fix this by keeping track of different tables primary keys manually.
+    # TODO: handle auto-incrementing internally using sequences:
+    # "CREATE SEQUENCE serial START 1;"
     def insert_row(self, name, columnnames, columnvalues, cursor=None):
         if len(columnvalues) > 0:
-            return self.insert("INSERT INTO "+name+" ("+(",".join(columnnames))+") VALUES ("+(",".join(["?"]*len(columnvalues)))+" )", columnvalues, cursor=cursor)
+            if name not in self.primary_key_index.keys():
+                self.primary_key_index[name] = 1
+            tmp = self.insert("INSERT INTO "+name+" ("+(",".join([name+"_id"]+columnnames))+") VALUES ("+(",".join(["?"]*(len(columnvalues)+1)))+" )", [self.primary_key_index[name]] + columnvalues, cursor=cursor)
+            self.primary_key_index[name] += 1
+            return tmp
         else:
             return self.insert("INSERT INTO "+name + " DEFAULT VALUES", (), cursor=cursor)
 
@@ -173,6 +203,7 @@ class Sqlite(object):
 
     def get_val(self, table, primkeyname, primkey, columnname, cursor=None):
         result = self.query("SELECT "+columnname+" FROM "+table+" WHERE "+primkeyname+" = ?", [primkey], cursor=cursor)
+        # print(result)
         val = result[0][0]
         return val
 
