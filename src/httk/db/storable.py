@@ -62,7 +62,7 @@ class Storable(object):
         self.__dict__['types'] = types
         self.__dict__['index'] = index
 
-    
+
     def storable_init(self, store, updatesid=None, **keyvals):
         """
         All Storable objects need to call this method in __init__(). Name should be a 'somewhat qualified' class name.

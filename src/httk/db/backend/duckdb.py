@@ -59,10 +59,19 @@ atexit.register(db_duckdb_close_all)
 
 class Duckdb(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, insert_batch_size=1):
+        """
+        insert_batch_size defines how many rows of values
+        are processed by a single INSERT SQL command.
+        Larger batch size should improve performance.
+        """
         self.connection = db_open(filename)
+        self.connection.begin()
         #self._block_commit = False
         self.primary_key_index = {}
+        self.insert_batch_size = insert_batch_size
+        self.batch_columnnames = {}
+        self.batch_columnvalues = {}
 
     def close(self):
         db_close(self.connection)
@@ -89,15 +98,15 @@ class Duckdb(object):
             if database_debug_slow:
                 time1 = time.time()
             try:
-                # DuckDB gives "syntax error near object" and the only way
+                # DuckDB gives "syntax error near object" and one way
                 # I have found to fix that is to remove the "object" keyword
                 # from the SQL query.:
-                sql = sql.replace("object", "")
+                sql = sql.replace("object \n", " \n")
+                # Also "header" should be removed:
+                sql = sql.replace("header \n", " \n")
                 # DuckDB uses "ON" instead of WHERE when doing a JOIN operation:
                 if "JOIN" in sql:
                     sql = sql.replace("WHERE", "ON")
-                # print("sql = ", sql)
-                # print("values = ", values)
                 self.cursor.execute(sql, values)
             except Exception as e:
                 info = sys.exc_info()
@@ -185,18 +194,28 @@ class Duckdb(object):
     # DuckDB does not support auto-incrementing the primary key.
     # Fix this by keeping track of different tables primary keys manually.
     # TODO: handle auto-incrementing internally using sequences:
-    # "CREATE SEQUENCE serial START 1;"
+    # "CREATE SEQUENCE seq START 1;"
+    # CREATE TABLE table (i INTEGER DEFAULT NEXTVAL('seq'), b INTEGER);
     def insert_row(self, name, columnnames, columnvalues, cursor=None):
         if len(columnvalues) > 0:
+            columnnames = [name+"_id"]+columnnames
             if name not in self.primary_key_index.keys():
                 self.primary_key_index[name] = 1
-            tmp = self.insert("INSERT INTO "+name+" ("+(",".join(
-                [name+"_id"]+columnnames))+") VALUES ("+(",".join(
-                ["?"]*(len(columnvalues)+1)))+" )",
-                [self.primary_key_index[name]] + columnvalues,
-                cursor=cursor, key_index=self.primary_key_index[name])
+            columnvalues = [self.primary_key_index[name]] + columnvalues
+            # if self.insert_batch_size > 1:
+                # cn_hash = hash(tuple(columnnames))
+                # if cn_hash not in self.batch_columnnames.keys():
+                    # self.batch_columnnames[cn_hash] = columnnames
+                    # self.batch_columnvalues[cn_hash] = [columnvalues]
+                # else:
+                    # self.batch_columnvalues[cn_hash].append(columnvalues)
+
+            lid = self.insert(
+                "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
+                "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+" )",
+                columnvalues, cursor=cursor, key_index=self.primary_key_index[name])
             self.primary_key_index[name] += 1
-            return tmp
+            return lid
         else:
             return self.insert("INSERT INTO "+name + " DEFAULT VALUES", (), cursor=cursor)
 

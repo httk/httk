@@ -139,7 +139,7 @@ def struct_process_with_spglig(struct, symprec=1e-5):
 
     cell = (basis, coords, symbols_int)
     dataset = spglib.get_symmetry_dataset(cell, symprec=symprec)
-    print(dataset)
+    # print(dataset)
 
     hall_symbol = dataset['hall']
     spacegroupnumber = dataset['number']

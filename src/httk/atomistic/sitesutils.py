@@ -16,7 +16,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import quicktions as fractions
+try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
 
 from httk.core.vectors import FracVector, MutableFracVector
 from httk.core.basic import is_sequence

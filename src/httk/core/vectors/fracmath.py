@@ -17,7 +17,11 @@
 
 import sys
 from functools import reduce
-import quicktions as fractions
+
+try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
 
 PY3 = sys.version_info[0] == 3
 

@@ -186,11 +186,8 @@ class SqlStore(object):
 
         #self.columns[table] = columns
         #self.column_types[table] = column_types
-
+    
     def insert(self, table, types, keyvals, cursor=None, updatesid=None):
-        print('Inserting...')
-        print(keyvals)
-        print()
         #sid=self.sids[table]
         #types=self.types[table]
         #self.store[table][sid]={}
@@ -339,7 +336,6 @@ class SqlStore(object):
         return sid
 
     def get(self, table, sid, types, name):
-        print("X"*100)
         #types=self.types[table]
 
         if name in types['keydict']:

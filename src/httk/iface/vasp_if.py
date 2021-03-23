@@ -549,7 +549,7 @@ def vectors_are_same(v1, v2):
     else:
         return True
 
-# @profile
+
 def get_elastic_constants(path):
     sym, delta, distortions, project = elastic_config(
         os.path.join(path, '../settings.elastic'))

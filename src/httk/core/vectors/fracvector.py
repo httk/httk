@@ -19,7 +19,11 @@ import sys, random, operator, itertools, decimal
 from functools import reduce
 from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector, string_types, integer_types
-import quicktions as fractions
+
+try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
 
 try:
     from math import gcd as calc_gcd

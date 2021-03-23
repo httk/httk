@@ -48,7 +48,7 @@ class HttkObjDbPlugin(HttkPlugin):
                 results = list(search)
                 if len(results) > 0:
                     getattr(self.obj, c['add_method'])([x[0][0] for x in results])
-    # @profile
+
     def store(self, store, avoid_duplicate=True):
         self.storable.storable_init(store)
         if avoid_duplicate:
@@ -80,10 +80,7 @@ class HttkObjDbPlugin(HttkPlugin):
                     else:
                         search.add(p.__getattr__(variables[0]) == shouldbe)
                 search.output(p, 'object')
-                print('search = ', search)
-                # results = list(search)
-                results = []
-                print('results = ', results)
+                results = list(search)
                 if len(results) > 0:
                     p = results[0][0][0]
                     self.sid = p.db.sid

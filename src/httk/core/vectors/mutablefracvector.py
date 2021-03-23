@@ -15,17 +15,21 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import quicktions as fractions
 import operator
 import itertools
 from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
 from httk.core.vectors.vector import MutableVector, integer_types
 
 try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
+
+try:
     from math import gcd as calc_gcd
 except ImportError:
     from fractions import gcd as calc_gcd
-    
+
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
