@@ -98,7 +98,6 @@ def structure_to_pmg_struct(struct):
     except AttributeError:
         return pymatgen.core.Structure(basis, species, coords)
 
-
 def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
                             find_primitive=False):
     """Converts Pymatgen structures to httk structures.
@@ -185,11 +184,10 @@ def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
                                   spacegroup=spacegroup)
 
     elif hall_symbol is None:
-        spacegroup = Spacegroup.create(hall_symbol="P 1",
-                                       spacegroupnumber=1)
+        spacegroup = Spacegroup.create(hall_symbol="P 1", spacegroupnumber=1)
         struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols,
-                                  rc_reduced_occupationscoords=coords,
-                                  periodicity=[1, 1, 1], spacegroup=spacegroup)
+                    rc_reduced_occupationscoords=coords, periodicity=[1, 1, 1],
+                    spacegroup=spacegroup)
 
     else:
         struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols,

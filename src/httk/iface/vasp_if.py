@@ -564,7 +564,7 @@ def get_elastic_constants(path):
             ioa = IoAdapterFileReader.use(os.path.join(path,
                 'OUTCAR.cleaned.elastic{}_{}'.format(i+1, j+1)))
             file_lines = ioa.file.read()
-            match = re.search("in kB" + "\s*([^ \n]+)"*6, file_lines)
+            matches = re.findall("in kB" + "\s*([^ \n]+)"*6, file_lines)
 
             # NOTE: Stress tensor values are in a different order in OUTCAR
             # compared to Voigt notation. In terms of Voigt notation OUTCAR
@@ -573,9 +573,7 @@ def get_elastic_constants(path):
             # The unit is kB = 0.1 GPa.
             # Also, OUTCAR gives the stress tensor with a minus sign.
             try:
-                stress_tensor = [match.group(1), match.group(2),
-                                 match.group(3), match.group(4),
-                                 match.group(5), match.group(6)]
+                stress_tensor = matches[-1]
                 # Due to these VASP conventions, provide also the stress tensor
                 # in the normal Voigt order and in units of GPa:
                 stress_tensor_voigt_gpa = [

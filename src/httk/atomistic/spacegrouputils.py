@@ -542,7 +542,6 @@ def crystal_system_from_hall(hall_symb):
 
 
 def check_symop(coordgroups, symopv):
-    return True
     for coordgroup in coordgroups:
         for coord in coordgroup:
             transformed_coord = (symopv[0]*coord + symopv[1]).normalize()
