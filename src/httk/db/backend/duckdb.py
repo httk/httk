@@ -190,7 +190,11 @@ class Duckdb(object):
         if len(columnvalues) > 0:
             if name not in self.primary_key_index.keys():
                 self.primary_key_index[name] = 1
-            tmp = self.insert("INSERT INTO "+name+" ("+(",".join([name+"_id"]+columnnames))+") VALUES ("+(",".join(["?"]*(len(columnvalues)+1)))+" )", [self.primary_key_index[name]] + columnvalues, cursor=cursor)
+            tmp = self.insert("INSERT INTO "+name+" ("+(",".join(
+                [name+"_id"]+columnnames))+") VALUES ("+(",".join(
+                ["?"]*(len(columnvalues)+1)))+" )",
+                [self.primary_key_index[name]] + columnvalues,
+                cursor=cursor, key_index=self.primary_key_index[name])
             self.primary_key_index[name] += 1
             return tmp
         else:
@@ -226,16 +230,18 @@ class Duckdb(object):
             cursor.execute(sql, values)
             return cursor.fetchall()
 
-    def insert(self, sql, values, cursor=None):
+    def insert(self, sql, values, cursor=None, key_index=None):
         if cursor is None:
             cursor = self.cursor()
             cursor.execute(sql, values)
             cursor.commit()
-            lid = cursor.cursor.lastrowid
+            # lid = cursor.cursor.lastrowid
             cursor.close()
         else:
             cursor.execute(sql, values)
-            lid = cursor.cursor.lastrowid
+            # lid = cursor.cursor.lastrowid
+        if key_index is not None:
+            lid = key_index
         return lid
 
     def update(self, sql, values, cursor=None):

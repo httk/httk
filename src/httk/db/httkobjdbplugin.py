@@ -80,7 +80,10 @@ class HttkObjDbPlugin(HttkPlugin):
                     else:
                         search.add(p.__getattr__(variables[0]) == shouldbe)
                 search.output(p, 'object')
-                results = list(search)
+                print('search = ', search)
+                # results = list(search)
+                results = []
+                print('results = ', results)
                 if len(results) > 0:
                     p = results[0][0][0]
                     self.sid = p.db.sid
