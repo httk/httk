@@ -2,6 +2,7 @@ import os, sys
 import shutil
 import subprocess
 import json
+import zipfile
 try:
     from pymatgen import MPRester
 except:
@@ -27,7 +28,10 @@ relax_flag = 'True'
 symmetry = 'hexagonal'
 
 shutil.rmtree('Runs', ignore_errors=True)
-shutil.unpack_archive('Runs_finished.zip')
+zip = zipfile.ZipFile('Runs_finished.zip')
+zip.extractall()
+zip = zipfile.ZipFile('template.zip')
+zip.extractall()
 
 for entry in data:
     struct_pmg = entry.get("structure")
@@ -42,27 +46,27 @@ for entry in data:
         dir = httk.task.create_batch_task("Runs/", "template",
                 {"structure": struct},
                 name=struct.hexhash, overwrite_head_dir=True)
-        print(f"Generated run for: {struct.formula} in {dir}")
+        print("Generated run for: {struct.formula} in {}".format(dir))
 
         # Put in symmetry and projection flags
-        cmd = f"sed -i 's/SYMMETRY_PLACEHOLDER/{symmetry}/' {dir}/settings.elastic"
+        cmd = "sed -i 's/SYMMETRY_PLACEHOLDER/{}/' {}/settings.elastic".format(symmetry, dir)
         p = subprocess.Popen(cmd, shell=True,
                 stdout=subprocess.PIPE).stdout.read().decode()
-        cmd = f"sed -i 's/PROJECTION_PLACEHOLDER/False/' {dir}/settings.elastic"
+        cmd = "sed -i 's/PROJECTION_PLACEHOLDER/False/' {}/settings.elastic".format(dir)
         p = subprocess.Popen(cmd, shell=True,
                 stdout=subprocess.PIPE).stdout.read().decode()
         # Edit VASP INCAR settings depending on the relax_flag:
         if relax_flag == 'True':
-            cmd = f"sed -i 's/ISIF=6/ISIF=3/' {dir}/INCAR.prerelax"
+            cmd = "sed -i 's/ISIF=6/ISIF=3/' {}/INCAR.prerelax".format(dir)
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE).stdout.read().decode()
-            cmd = f"sed -i 's/ISIF=6/ISIF=3/' {dir}/INCAR.relax"
+            cmd = "sed -i 's/ISIF=6/ISIF=3/' {}/INCAR.relax".format(dir)
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE).stdout.read().decode()
-            cmd = f"sed -i 's/ISIF=6/ISIF=2/' {dir}/INCAR.elastic"
+            cmd = "sed -i 's/ISIF=6/ISIF=2/' {}/INCAR.elastic".format(dir)
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE).stdout.read().decode()
-            cmd = f"sed -i 's/NSW=0/NSW=40/' {dir}/INCAR.elastic"
+            cmd = "sed -i 's/NSW=0/NSW=40/' {}/INCAR.elastic".format(dir)
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE).stdout.read().decode()
 

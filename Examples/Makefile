@@ -8,7 +8,9 @@ clean:
 	rm -rf 8_elastic_constants/elastic_constants.sqlite
 	rm -rf 8_elastic_constants/Runs
 	rm -rf 8_elastic_constants/Runs_finished
+	rm -rf 8_elastic_constants/template
 	rm -rf 9_duckdb/sample.duckdb
 	rm -rf 9_duckdb/duckdb
 	rm -rf 9_duckdb/Runs_finished
+	rm -rf 9_duckdb/Runs_finished.zip
 

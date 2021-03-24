@@ -15,9 +15,11 @@ import glob
 import bz2
 import json
 import shutil
+import zipfile
 
 shutil.copyfile('../8_elastic_constants/Runs_finished.zip', 'Runs_finished.zip')
-shutil.unpack_archive('Runs_finished.zip')
+zip = zipfile.ZipFile('Runs_finished.zip')
+zip.extractall()
 os.remove('Runs_finished.zip')
 
 def make_database(db_name):

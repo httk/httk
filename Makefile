@@ -70,6 +70,7 @@ clean:
 	rm -rf .tox
 	rm src/httk/core/database.sqlite
 	rm -rf .pytest_cache
+	find . -name "__pycache__" -print0 | xargs -0 rm -rf
 
 version:
 	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION

@@ -50,6 +50,10 @@ pyenv install -s $version
 pyenv virtualenv $version httk_test_$version
 pyenv activate httk_test_$version
 pip install -r $HTTK_DIR/py${pyver}7requirements.txt
+# Optional dependencies:
+if [ $version == "3.7.10" ]; then
+    pip install duckdb
+fi
 
 CURRENT_VERSION="$(python -V 2>&1)"
 echo "Current Python version: $CURRENT_VERSION" |& tee -a $SCRIPT_DIR/$OUT_FILE

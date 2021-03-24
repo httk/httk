@@ -18,11 +18,7 @@
 from __future__ import print_function
 
 import sys, collections, traceback, bz2
-
-try:
-    import pyzstd
-except:
-    pass
+import Queue as queue
 
 unicode_type=unicode
 

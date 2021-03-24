@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This provides a thin abstraction layer for SQL queries, implemented on top of duckdb,3 to make it easier to exchange between SQL databases.
+This provides a thin abstraction layer for SQL queries, implemented on top of DuckDB.
 """
 from __future__ import print_function
 import os, sys, time

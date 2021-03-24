@@ -18,7 +18,6 @@
 Basic help functions
 """
 import sys, signal
-from fractions import Fraction
 
 # Import python2 and 3-specific routunes
 if sys.version_info[0] <= 2:
