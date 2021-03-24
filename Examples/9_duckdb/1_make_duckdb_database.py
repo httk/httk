@@ -14,6 +14,11 @@ import subprocess
 import glob
 import bz2
 import json
+import shutil
+
+shutil.copyfile('../8_elastic_constants/Runs_finished.zip', 'Runs_finished.zip')
+shutil.unpack_archive('Runs_finished.zip')
+os.remove('Runs_finished.zip')
 
 def make_database(db_name):
     try:

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# This script is used to run httk's all tests, examples and tutorials to make sure
+# This script can be used used to run all examples, tutorials and tests to make sure
 # everything works on both Python 2 and 3.
 
 # pyenv is used to switch between python 2 and 3 versions, so
@@ -67,6 +67,10 @@ cp -r Examples tmp_Examples
 cp -r Tutorial tmp_Tutorial
 cp $SCRIPT_DIR/required_files/example.sqlite tmp_Tutorial/Step6
 #cp -r $SCRIPT_DIR/required_files/poscar tmp_Tutorial/
+
+##################################################################################################
+# Examples
+##################################################################################################
 
 cd $HTTK_DIR/tmp_Examples/0_import_httk
 echo "############ Python $pyver: Examples/0_import_httk/0_import_httk.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
@@ -193,6 +197,27 @@ sed -i 's/Tutorial/tmp_Tutorial/' 2_ht_vasp.py
 python 2_ht_vasp.py |& tee -a $SCRIPT_DIR/$OUT_FILE
 
 echo "############ Python $pyver: Examples/6_website NOT IMPLEMENTED YET! ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+
+cd $HTTK_DIR/tmp_Examples/8_elastic_constants
+echo "############ Python $pyver: Examples/8_elastic_constants/1_generate_Runs.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+python 1_generate_Runs.py |& tee -a $SCRIPT_DIR/$OUT_FILE
+
+echo "############ Python $pyver: Examples/8_elastic_constants/4_make_database.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+python 4_make_database.py |& tee -a $SCRIPT_DIR/$OUT_FILE
+
+cd $HTTK_DIR/tmp_Examples/9_duckdb
+echo "############ Python $pyver: Examples/9_duckdb/1_make_duckdb_database.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+python 1_make_duckdb_database.py |& tee -a $SCRIPT_DIR/$OUT_FILE
+
+echo "############ Python $pyver: Examples/9_duckdb/4_analyze_database_using_python.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+python 4_analyze_database_using_python.py |& tee -a $SCRIPT_DIR/$OUT_FILE
+
+
+
+
+##################################################################################################
+# Tutorials
+##################################################################################################
 
 cd $HTTK_DIR/tmp_Tutorial/Step1
 echo "############ Python $pyver: Tutorial/Step1/step1.py ############" |& tee -a $SCRIPT_DIR/$OUT_FILE

@@ -27,6 +27,7 @@ relax_flag = 'True'
 symmetry = 'hexagonal'
 
 shutil.rmtree('Runs', ignore_errors=True)
+shutil.unpack_archive('Runs_finished.zip')
 
 for entry in data:
     struct_pmg = entry.get("structure")
