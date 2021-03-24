@@ -21,7 +21,7 @@ def make_database(db_name):
     except:
         pass
 
-    backend = httk.db.backend.Sqlite(db_name)
+    backend = httk.db.backend.Duckdb(db_name)
     store = httk.db.store.SqlStore(backend)
     reader = httk.task.reader('./', 'Runs_finished/', 'Total energy and elastic constants')
 
@@ -106,5 +106,5 @@ def make_database(db_name):
     store.commit()
 
 if __name__ == '__main__':
-    db_name = 'elastic_constants.sqlite'
+    db_name = 'sample.duckdb'
     make_database(db_name)

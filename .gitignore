@@ -39,4 +39,4 @@ Tests/python_versions/ver2
 Tests/python_versions/ver3
 
 .vscode
-test_everything.out
+Examples/9_duckdb/duckdb

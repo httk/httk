@@ -1,0 +1,10 @@
+DuckDB is an SQLite-type database specifically designed for data science
+type of usage cases. See https://duckdb.org/ for more information.
+
+1) Open the database in DuckDB CLI by typing `./duckdb sample.duckdb`
+
+2) Much of SQL and SQLite is supported, so we can try commands like:
+
+  * `.tables`
+  * `pragma table_info('structure');`
+  * select total_energy, k_vrh, g_vrh from result_elasticresult;

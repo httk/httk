@@ -564,6 +564,9 @@ def get_elastic_constants(path):
             ioa = IoAdapterFileReader.use(os.path.join(path,
                 'OUTCAR.cleaned.elastic{}_{}'.format(i+1, j+1)))
             file_lines = ioa.file.read()
+            # If atoms were relaxed, there might be multiple "in kB"
+            # lines. Use re.findall to get them all and then just take
+            # the last match.
             matches = re.findall("in kB" + "\s*([^ \n]+)"*6, file_lines)
 
             # NOTE: Stress tensor values are in a different order in OUTCAR

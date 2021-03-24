@@ -1,4 +1,5 @@
 import os, sys
+import shutil
 import subprocess
 import json
 try:
@@ -25,21 +26,16 @@ with MPRester(api_key) as m:
 relax_flag = 'True'
 symmetry = 'hexagonal'
 
-info_dict = {}
+shutil.rmtree('Runs', ignore_errors=True)
+
 for entry in data:
     struct_pmg = entry.get("structure")
     struct = pmg_struct_to_structure(struct_pmg)
-    # Find primitive cell using spglib:
+    # Find primitive cell using FINDSYM or spglib:
     struct = struct.find_symmetry()
 
     struct.add_tag('atomic_relaxations', relax_flag)
     struct.add_tag('symmetry', symmetry)
-
-    print(struct)
-
-    info_dict['atomic_relaxations'] = relax_flag
-    info_dict['symmetry'] = symmetry
-    info_dict['struct_hash'] = struct.hexhash
 
     try:
         dir = httk.task.create_batch_task("Runs/", "template",
@@ -68,10 +64,6 @@ for entry in data:
             cmd = f"sed -i 's/NSW=0/NSW=40/' {dir}/INCAR.elastic"
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE).stdout.read().decode()
-
-        # Store some extra information about the job
-        with open(f"{dir}/job_info.json", "w") as f:
-            json.dump(info_dict, f, indent=4)
 
     except Exception as e:
         raise

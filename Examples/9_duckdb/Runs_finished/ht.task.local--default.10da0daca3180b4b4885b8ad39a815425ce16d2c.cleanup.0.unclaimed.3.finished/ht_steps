@@ -1,0 +1,326 @@
+#!/bin/bash
+# Tutorial run, relax until converged
+# 1.0
+#
+# The second row of your ht_steps script should be the 'name' of
+# your run script program, and the third the version number.
+# When your run is being processed, these are picked out automatically.
+#
+. "$HTTK_DIR"/Execution/tasks/ht_tasks_api.sh
+. "$HTTK_DIR"/Execution/tasks/vasp/vasptools.sh
+
+#. /opt/runexample-files/ht_tasks_api.sh
+#. /opt/runexample-files/vasptools2.sh
+
+# For now we want to rely on the taskmanager timeout, so just
+# keep the timeout of our RUN_CONTROLLED somewhat larger
+TIMEOUT=$((HT_TASKMGR_TIMEOUT + 3600))
+
+HT_TASK_INIT "$@"
+
+echo "== ht_steps for preinit run, step: $STEP"
+
+####################### start ############################
+if [ "$STEP" == "start" ]; then
+
+
+    cp ../POSCAR POSCAR
+    VASP_PREPARE_POTCAR ./POSCAR
+    VASP_POTCAR_SUMMARY
+
+    HT_TASK_ATOMIC_SECTION_START
+    HT_TASK_ATOMIC_RUNLOG_HEADLINE "START INPUT"
+    HT_TASK_ATOMIC_RUNLOG_APPEND ../POSCAR ../POTCAR.summary
+
+    HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+fi
+
+####################### prerelax ############################
+if [ "$STEP" == "prerelax" ]; then
+
+    VASP_PRECLEAN
+    cp ../INCAR.prerelax INCAR
+    VASP_PREPARE_CALC
+    # Fix for removing the NPAR parameter from INCAR:
+    sed -i '/NPAR/d' INCAR
+    VASP_PREPARE_KPOINTS 10
+    #cp ../KPOINTS_elastic KPOINTS
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    echo "RETURN CODE: $RETURNCODE"
+
+    VASP_CLEAN_OUTCAR
+
+    # We keep going if all went well, OR, if we run out of nsw steps, other errors
+    # we try to fix.
+    if [ "$RETURNCODE" == "0" -o "$RETURNCODE" == "4" ]; then
+	HT_TASK_ATOMIC_SECTION_START
+	# Prerelaxation step successfull
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END PRERELAX"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "PRERELAX ENERGY: $NEWENERGY"
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.prerelax
+	mv ../XDATCAR XDATCAR.prerelax
+	mv ../OSZICAR OSZICAR.prerelax
+	mv ../vasp.out vasp.out.prerelax
+	mv ../CHGCAR CHGCAR.last
+	mv ../CONTCAR CONTCAR.last
+	cp ../POSCAR POSCAR.prerelax
+	cp CONTCAR.last CONTCAR.prerelax
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+    fi
+    # Prerelaxation step unsuccessfull, prioritize down
+    # this run, and try to fix the problem
+    HT_TASK_SET_PRIORITY 5
+
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT prerelax
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN
+    fi
+fi
+
+####################### relax1 ############################
+if [ "$STEP" == "relax1" ]; then
+
+    VASP_PRECLEAN
+    VASP_CONTCAR_TO_POSCAR CONTCAR.last ../POSCAR
+    cp POSCAR POSCAR.relax1
+    cp ../INCAR.relax INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+    # Fix for removing the NPAR parameter from INCAR:
+    sed -i '/NPAR/d' INCAR
+    #VASP_PREPARE_KPOINTS 10
+    cp ../KPOINTS_elastic KPOINTS
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    VASP_CLEAN_OUTCAR
+
+    if [ "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: 1"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "RELAX1 ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax1
+	mv ../XDATCAR XDATCAR.relax1
+	mv ../OSZICAR OSZICAR.relax1
+	mv ../vasp.out vasp.out.relax1
+	cp CONTCAR.last CONTCAR.relax1
+
+	HT_TASK_STORE_VAR RELAXSTEP 2
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    fi
+
+    # Relaxation step unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax1
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN
+    fi
+fi
+
+####################### relax2 ############################
+if [ "$STEP" == "relax2" ]; then
+
+    echo "== RELAXATION STEP: $((RELAXSTEP))"
+
+    VASP_PRECLEAN
+    VASP_CONTCAR_TO_POSCAR CONTCAR.last ../POSCAR
+    cp POSCAR POSCAR.relax$RELAXSTEP
+
+    cp ../INCAR.relax INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+    # Fix for removing the NPAR parameter from INCAR:
+    sed -i '/NPAR/d' INCAR
+    #VASP_PREPARE_KPOINTS 10
+    cp ../KPOINTS_elastic KPOINTS
+
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    BADCONV=$(grep "^BADCONV" ht.controlled.msgs)
+
+    VASP_CLEAN_OUTCAR
+
+    if [ -z "$BADCONV" -a "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END RELAX STEP: $RELAXSTEP"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	HT_TASK_ATOMIC_RUNLOG_NOTE "RELAX2 ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.relax$RELAXSTEP
+	mv ../XDATCAR XDATCAR.relax$RELAXSTEP
+	mv ../OSZICAR OSZICAR.relax$RELAXSTEP
+	mv ../vasp.out vasp.out.relax$RELAXSTEP
+	cp CONTCAR.last CONTCAR.relax$RELAXSTEP
+
+	OLDENERGY=$(VASP_GET_ENERGY ../OSZICAR.last)
+	EDIFFG=$(VASP_GET_TAG EDIFFG ../INCAR)
+	EDIFFG10=$(HT_FCALC "abs(($EDIFFG)*(10))")
+	CHANGE=$(HT_FCALC "abs(($OLDENERGY)-($NEWENERGY))")
+	echo "ENERGY DIFFERENCE: $CHANGE, abs(EDIFFG*10): $EDIFFG10"
+	if HT_FTEST "$CHANGE > $EDIFFG10"; then
+	    if [ "$RELAXSTEP" -gt 5 ]; then
+		echo "Tried too many relaxations, structure refuses to converge, giving up."
+		HT_TASK_BROKEN
+	    fi
+	    echo "Energy change too large, doing another relaxation run."
+	    HT_TASK_STORE_VAR RELAXSTEP $((RELAXSTEP+1))
+	    HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+	fi
+
+	mv OUTCAR.cleaned.relax$RELAXSTEP OUTCAR.cleaned.relax-final
+	mv XDATCAR.relax$RELAXSTEP XDATCAR.relax-final
+	mv OSZICAR.relax$RELAXSTEP OSZICAR.relax-final
+	mv vasp.out.relax$RELAXSTEP vasp.out.relax-final
+	cp CONTCAR.last CONTCAR.relax-final
+
+	HT_TASK_ATOMIC_SECTION_END_NEXT elastic
+    fi
+
+    # Relaxation step unsuccessfull
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT relax2
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN
+    fi
+fi
+
+####################### elastic ############################
+if [ "$STEP" == "elastic" ]; then
+
+    # Initial values for elasticity calculations:
+    if [ -z $ELASTICSTEP ]; then
+	ELASTICSTEP=1
+        ELASTICMAXSTEP=`python ../get_elastic_max_step.py`
+	DELTASTEP=1
+	DELTAMAXSTEP=`python ../get_delta_max_step.py $ELASTICSTEP`
+	# Whether or not to use the projection technique.
+	# 0 = no, 1 = yes
+	USEPROJECTION=`python ../get_projection.py`
+    fi
+
+    echo "== ELASTIC STEP: $((ELASTICSTEP))_$((DELTASTEP))"
+
+    VASP_PRECLEAN
+    VASP_CONTCAR_TO_POSCAR CONTCAR.relax-final ../POSCAR
+    # Edit POSCAR file to apply the distortion
+    python ../apply_dist.py $ELASTICSTEP $DELTASTEP
+    cp POSCAR POSCAR.elastic$((ELASTICSTEP))_$((DELTASTEP))
+
+    cp ../INCAR.elastic INCAR
+    cp CHGCAR.last CHGCAR
+    VASP_PREPARE_CALC
+    # Fix for removing the NPAR parameter from INCAR:
+    sed -i '/NPAR/d' INCAR
+    # Sometimes VASP_PREPARE_KPOINTS gives slightly different k-meshes
+    # as a function of distortion. Overwrite with a user-defined KPOINTS file:
+    cp ../KPOINTS_elastic KPOINTS
+    #VASP_PREPARE_KPOINTS 10
+
+    VASP_RUN_CONTROLLED "$TIMEOUT" $VASP_EXECUTE
+    RETURNCODE="$?"
+
+    VASP_CLEAN_OUTCAR
+
+    if [ "$RETURNCODE" == "0" ]; then
+	# Relaxation step successfull
+	HT_TASK_ATOMIC_SECTION_START
+
+	NEWENERGY=$(VASP_GET_ENERGY ../OSZICAR)
+	HT_TASK_ATOMIC_RUNLOG_HEADLINE "END ELASTIC STEP: $((ELASTICSTEP))_$((DELTASTEP))"
+	HT_TASK_ATOMIC_RUNLOG_APPEND ../INCAR ../KPOINTS ../CONTCAR ../ht.controlled.msgs ../ht.remedy.*
+	# HT_TASK_ATOMIC_RUNLOG_NOTE "ELASTIC STEP $ELASTICSTEP ENERGY: $NEWENERGY"
+
+	cp ../OSZICAR OSZICAR.last
+	cp ../CONTCAR CONTCAR.last
+	mv ../CHGCAR CHGCAR.last
+
+	mv ../OUTCAR.cleaned OUTCAR.cleaned.elastic$((ELASTICSTEP))_$((DELTASTEP))
+	mv ../XDATCAR XDATCAR.elastic$((ELASTICSTEP))_$((DELTASTEP))
+	mv ../OSZICAR OSZICAR.elastic$((ELASTICSTEP))_$((DELTASTEP))
+	mv ../vasp.out vasp.out.elastic$((ELASTICSTEP))_$((DELTASTEP))
+	cp CONTCAR.last CONTCAR.elastic$((ELASTICSTEP))_$((DELTASTEP))
+
+	if [ $DELTASTEP -lt $DELTAMAXSTEP ]; then
+	    HT_TASK_STORE_VAR ELASTICSTEP $((ELASTICSTEP))
+	    HT_TASK_STORE_VAR ELASTICMAXSTEP $((ELASTICMAXSTEP))
+	    HT_TASK_STORE_VAR DELTASTEP $((DELTASTEP+1))
+	    HT_TASK_STORE_VAR DELTAMAXSTEP $((DELTAMAXSTEP))
+	    HT_TASK_STORE_VAR USEPROJECTION $((USEPROJECTION))
+	    HT_TASK_ATOMIC_SECTION_END_NEXT elastic
+	else
+	    if [ $ELASTICSTEP -lt $ELASTICMAXSTEP ]; then
+	        HT_TASK_STORE_VAR ELASTICSTEP $((ELASTICSTEP+1))
+	        HT_TASK_STORE_VAR ELASTICMAXSTEP $((ELASTICMAXSTEP))
+	        HT_TASK_STORE_VAR DELTASTEP 1
+	        HT_TASK_STORE_VAR DELTAMAXSTEP $((DELTAMAXSTEP))
+	        HT_TASK_STORE_VAR USEPROJECTION $((USEPROJECTION))
+	        HT_TASK_ATOMIC_SECTION_END_NEXT elastic
+	    else
+	        HT_TASK_ATOMIC_SECTION_END_NEXT cleanup
+	    fi
+	fi
+    fi
+
+    HT_TASK_ATOMIC_SECTION_START
+    VASP_INPUTS_FIX_ERROR
+    RESULT="$?"
+    if [ "$RESULT" == "0" ]; then
+	HT_TASK_ATOMIC_SECTION_END_NEXT elastic
+    else
+	HT_TASK_ATOMIC_SECTION_END_BROKEN
+    fi
+fi
+
+####################### cleanup ############################
+if [ "$STEP" == "cleanup" ]; then
+
+    HT_TASK_ATOMIC_RUNLOG_NOTE "Cleanup"
+    rm -f ../OSZICAR OSZICAR.last
+    rm -f ../CONTCAR CONTCAR.last
+    rm -f ../CHGCAR CHGCAR.last
+
+    HT_TASK_CLEANUP
+    rm -f CHG EIGENVAL ht.controlled.msgs IBZKPT vasprun.xml POSCAR POTCAR WAVECAR PCDAT OUTCAR
+
+    HT_TASK_COMPRESS
+    HT_TASK_FINISHED
+fi
