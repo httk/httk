@@ -3,5 +3,6 @@ matplotlib
 numpy
 docutils
 ase==3.17.0
+monty==2.0.7
 pymatgen==2018.12.12
 web.py

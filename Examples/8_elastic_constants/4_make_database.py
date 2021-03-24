@@ -14,12 +14,22 @@ import subprocess
 import glob
 import bz2
 import json
+import zipfile
+import shutil
+import atexit
+import signal
+
+def handle_exit():
+    shutil.rmtree('Runs_finished', ignore_errors=True)
 
 def make_database(db_name):
     try:
         os.remove(db_name)
     except:
         pass
+
+    zip = zipfile.ZipFile('Runs_finished.zip')
+    zip.extractall()
 
     backend = httk.db.backend.Sqlite(db_name)
     store = httk.db.store.SqlStore(backend)
@@ -66,22 +76,22 @@ def make_database(db_name):
         elif atomic_relaxations == 'True':
             atomic_relaxations = True
 
-        # Get walltime of the job
-        outcars = glob.glob(os.path.join(rundir, "OUTCAR.cleaned.*"))
-        for o in outcars:
-            # Matches only when the file extension is nothing of ".bz2":
-            oname = re.search("^OUTCAR\.cleaned\.([a-zA-Z0-9_-]*)(?:$|\.bz2)", os.path.basename(o))
-            if oname is not None:
-                oname = "elapsed_time_" + oname.groups()[0]
-            if o.endswith('.bz2'):
-                o = bz2.open(o).read().decode()
-            else:
-                o = open(o, "r").read()
+        # # Get walltime of the job
+        # outcars = glob.glob(os.path.join(rundir, "OUTCAR.cleaned.*"))
+        # for o in outcars:
+            # # Matches only when the file extension is nothing of ".bz2":
+            # oname = re.search("^OUTCAR\.cleaned\.([a-zA-Z0-9_-]*)(?:$|\.bz2)", os.path.basename(o))
+            # if oname is not None:
+                # oname = "elapsed_time_" + oname.groups()[0]
+            # if o.endswith('.bz2'):
+                # o = bz2.open(o).read().decode()
+            # else:
+                # o = open(o, "r").read()
 
-            etime = re.search("Elapsed time \(sec\):\s*(.*)", o)
+            # etime = re.search("Elapsed time \(sec\):\s*(.*)", o)
 
-            if oname is not None and etime is not None:
-                computation.add_tag(oname, etime.groups()[0])
+            # if oname is not None and etime is not None:
+                # computation.add_tag(oname, etime.groups()[0])
 
         outcar = httk.iface.vasp_if.read_outcar(os.path.join(rundir, "OUTCAR.cleaned.relax-final"))
         result = Result_ElasticResult(
@@ -106,5 +116,10 @@ def make_database(db_name):
     store.commit()
 
 if __name__ == '__main__':
+    atexit.register(handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)
+
     db_name = 'elastic_constants.sqlite'
     make_database(db_name)
+    shutil.rmtree('Runs_finished', ignore_errors=True)

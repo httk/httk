@@ -7,6 +7,12 @@
 # pyenv and the pyenv-virtualenv plugin must be installed
 # in order to this script to work.
 
+if ! command -v pyenv &> /dev/null
+then
+    echo "pyenv needs to be installed before running this script!"
+    exit
+fi
+
 # NOTE: Starting with bash version 4, both stdout and stderr can be redirected
 # to the same file using `cmd &>> file.txt` construct.
 
@@ -25,7 +31,7 @@ done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 HTTK_DIR=${HOME}/httk
-OUT_FILE=test_everything.out
+OUT_FILE=${HTTK_DIR}/Tests/TEST.out
 
 echo "############ Testing starts ############" |& tee $SCRIPT_DIR/$OUT_FILE
 
@@ -35,6 +41,8 @@ for version in "2.7.18" "3.7.10"
 do
 
 cd $HTTK_DIR
+# Make sure pytest doesn't pick up unwanted .py files for testing:
+make clean
 
 if [ $version == "2.7.18" ]; then
     export TEST_EXPECT_PYVER=2
@@ -64,8 +72,8 @@ make unittests |& tee -a $SCRIPT_DIR/$OUT_FILE
 echo "############ Python $pyver: pytest ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
 make pytest |& tee -a $SCRIPT_DIR/$OUT_FILE
 
-echo "############ Python $pyver: tox ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
-rm -r .tox; make tox |& tee -a $SCRIPT_DIR/$OUT_FILE
+#echo "############ Python $pyver: tox ############" |& tee -a $SCRIPT_DIR/$OUT_FILE
+#rm -r .tox; make tox |& tee -a $SCRIPT_DIR/$OUT_FILE
 
 cp -r Examples tmp_Examples
 cp -r Tutorial tmp_Tutorial

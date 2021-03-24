@@ -477,19 +477,19 @@ def elastic_config(fn):
     config.read(fn)
     # The type of symmetry
     try:
-        sym = config["elastic"]["symmetry"].lstrip()
+        sym = config.get("elastic", "symmetry").lstrip()
     except:
         sym = "cubic"
 
     # Use projection technique, i.e. to obtain cubic elastic
     # constants for non-cubic crystals, such as SQS supercells.
     try:
-        project = eval(config["elastic"]["projection"])
+        project = eval(config.get("elastic", "projection"))
     except:
         project = False
 
     # Delta values:
-    tmp = config["elastic"]["delta"].lstrip().split("\n")
+    tmp = config.get("elastic", "delta").lstrip().split("\n")
     deltas = []
     for line in tmp:
         line = line.split()
@@ -497,7 +497,7 @@ def elastic_config(fn):
 
     # Distortions in Voigt notation:
     distortions = []
-    tmp = config["elastic"]["distortions"].lstrip().split("\n")
+    tmp = config.get("elastic", "distortions").lstrip().split("\n")
     for line in tmp:
         line = line.split()
         distortions.append([float(x) for x in line])

@@ -16,11 +16,11 @@ import bz2
 import json
 import shutil
 import zipfile
+import atexit
+import signal
 
-shutil.copyfile('../8_elastic_constants/Runs_finished.zip', 'Runs_finished.zip')
-zip = zipfile.ZipFile('Runs_finished.zip')
-zip.extractall()
-os.remove('Runs_finished.zip')
+def handle_exit():
+    shutil.rmtree('Runs_finished', ignore_errors=True)
 
 def make_database(db_name):
     try:
@@ -113,5 +113,15 @@ def make_database(db_name):
     store.commit()
 
 if __name__ == '__main__':
+    atexit.register(handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)
+
+    shutil.copyfile('../8_elastic_constants/Runs_finished.zip', 'Runs_finished.zip')
+    zip = zipfile.ZipFile('Runs_finished.zip')
+    zip.extractall()
+    os.remove('Runs_finished.zip')
+
     db_name = 'sample.duckdb'
     make_database(db_name)
+    shutil.rmtree('Runs_finished', ignore_errors=True)
