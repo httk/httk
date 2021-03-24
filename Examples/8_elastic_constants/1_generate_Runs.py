@@ -14,25 +14,24 @@ import httk.task
 import httk.external.pymatgen_glue
 from httk.external.pymatgen_glue import pmg_struct_to_structure
 
+# NOTE: Delete directories or otherwise unittests/py.test try to run
+# the Python scripts that are inside.
+# Comment out the atexit/signal lines below to keep the folders.
+
 def handle_exit():
     shutil.rmtree('template', ignore_errors=True)
+    shutil.rmtree('Runs', ignore_errors=True)
 
 atexit.register(handle_exit)
 signal.signal(signal.SIGTERM, handle_exit)
 signal.signal(signal.SIGINT, handle_exit)
 
-relax_flag = 'True'
-symmetry = 'hexagonal'
-properties=[
-    "material_id", "unit_cell_formula", "final_energy",
-    "icsd_id", "structure", "volume", "elasticity",
-    "spacegroup", "formula", "pretty_formula",
-    "formula_anonymous", "composition"
-]
-
 shutil.rmtree('Runs', ignore_errors=True)
 zip = zipfile.ZipFile('template.zip')
 zip.extractall()
+
+relax_flag = 'True'
+symmetry = 'hexagonal'
 
 try:
     api_key = os.environ['MATPROJ_API_KEY']
@@ -45,7 +44,7 @@ except KeyError:
 if api_key is not None:
     with MPRester(api_key) as m:
         data = m.query(criteria={"task_id": "mp-46"},
-                properties=properties
+                properties=["structure"]
                 )
 
     for entry in data:

@@ -9,7 +9,7 @@
 
 if ! command -v pyenv &> /dev/null
 then
-    echo "pyenv needs to be installed before running this script!"
+    echo "pyenv and the pyenv-virtualenv plugin have to be installed before running this script!"
     exit
 fi
 
@@ -31,7 +31,7 @@ done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 HTTK_DIR=${HOME}/httk
-OUT_FILE=${HTTK_DIR}/Tests/TEST.out
+OUT_FILE=TEST.out
 
 echo "############ Testing starts ############" |& tee $SCRIPT_DIR/$OUT_FILE
 
