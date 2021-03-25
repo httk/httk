@@ -197,6 +197,15 @@ class SqlStore(object):
         else:
             mycursor = False
 
+        # Early exit based on the value of updatesid. Speeds up processing
+        # of duplicate values. Should be safe?
+        if not ((isinstance(updatesid, int) and updatesid >= 0) or updatesid is None):
+            if mycursor:
+                if not self._delay_commit:
+                    self.db.commit()
+                cursor.close()
+            return -updatesid
+
         columns = []
         columndata = []
         subinserts = []

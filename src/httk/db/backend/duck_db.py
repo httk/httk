@@ -59,19 +59,17 @@ atexit.register(db_duckdb_close_all)
 
 class Duckdb(object):
 
-    def __init__(self, filename, insert_batch_size=1):
-        """
-        insert_batch_size defines how many rows of values
-        are processed by a single INSERT SQL command.
-        Larger batch size should improve performance.
-        """
+    def __init__(self, filename):
         self.connection = db_open(filename)
         self.connection.begin()
         #self._block_commit = False
-        self.primary_key_index = {}
-        self.insert_batch_size = insert_batch_size
-        self.batch_columnnames = {}
-        self.batch_columnvalues = {}
+        self.primary_keys = {}
+        self.connection.execute("create table if not exists primary_keys(name varchar, value integer)")
+        self.connection.execute("select * from primary_keys")
+        res = self.connection.fetchall()
+        if len(res) > 0:
+            for (name, value) in res:
+                self.primary_keys[name] = value
 
     def close(self):
         db_close(self.connection)
@@ -80,6 +78,14 @@ class Duckdb(object):
         self.connection.rollback()
 
     def commit(self):
+        # Save primary keys:
+        self.connection.execute("create table if not exists primary_keys(name varchar, value integer)")
+        for name, value in self.primary_keys.items():
+            self.connection.execute("select name from primary_keys where name='{}'".format(name))
+            res = self.connection.fetchone()
+            if res is not None:
+                self.connection.execute("delete from primary_keys where name='{}'".format(name))
+            self.connection.execute("insert into primary_keys values ('{}', {})".format(name, value))
         self.connection.commit()
 
     class DuckdbCursor(object):
@@ -160,7 +166,7 @@ class Duckdb(object):
         # danger of values being bigger than what INTEGER allows.
         for i in range(len(columnnames)):
             column_name = columnnames[i]
-            if column_name.endswith('_id'):
+            if column_name.endswith('_id') and not column_name == 'material_id':
                 typestr = "INTEGER"
             elif 'orientation' in column_name:
                 typestr = "INTEGER"
@@ -180,6 +186,10 @@ class Duckdb(object):
                 raise Exception("backend.Duckdb.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")
 
             sql += ", "+columnnames[i]+" "+typestr
+        
+        # Check if "main table" and if so, record a unique material ID
+        if name.startswith("Result_"):
+            sql += ", " + "material_id" + " " + "TEXT"
 
         self.modify_structure("CREATE TABLE \""+name+"\" ("+sql+")", (), cursor=cursor)
         if index is not None:
@@ -196,25 +206,23 @@ class Duckdb(object):
     # TODO: handle auto-incrementing internally using sequences:
     # "CREATE SEQUENCE seq START 1;"
     # CREATE TABLE table (i INTEGER DEFAULT NEXTVAL('seq'), b INTEGER);
+    # Also, extra code is needed to make the primary keys persistent.
     def insert_row(self, name, columnnames, columnvalues, cursor=None):
         if len(columnvalues) > 0:
             columnnames = [name+"_id"]+columnnames
-            if name not in self.primary_key_index.keys():
-                self.primary_key_index[name] = 1
-            columnvalues = [self.primary_key_index[name]] + columnvalues
-            # if self.insert_batch_size > 1:
-                # cn_hash = hash(tuple(columnnames))
-                # if cn_hash not in self.batch_columnnames.keys():
-                    # self.batch_columnnames[cn_hash] = columnnames
-                    # self.batch_columnvalues[cn_hash] = [columnvalues]
-                # else:
-                    # self.batch_columnvalues[cn_hash].append(columnvalues)
+            if name not in self.primary_keys.keys():
+                self.primary_keys[name] = 1
+            columnvalues = [self.primary_keys[name]] + columnvalues
 
+            # Record unique material-id
+            if name.startswith("Result_"):
+                columnnames.append("material_id")
+                columnvalues.append("httk-{}".format(self.primary_keys[name]))
             lid = self.insert(
                 "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
                 "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+" )",
-                columnvalues, cursor=cursor, key_index=self.primary_key_index[name])
-            self.primary_key_index[name] += 1
+                columnvalues, cursor=cursor, key_index=self.primary_keys[name])
+            self.primary_keys[name] += 1
             return lid
         else:
             return self.insert("INSERT INTO "+name + " DEFAULT VALUES", (), cursor=cursor)
