@@ -188,8 +188,8 @@ class Duckdb(object):
             sql += ", "+columnnames[i]+" "+typestr
         
         # Check if "main table" and if so, record a unique material ID
-        if name.startswith("Result_"):
-            sql += ", " + "material_id" + " " + "TEXT"
+        # if name.startswith("Result_"):
+            # sql += ", " + "material_id" + " " + "TEXT"
 
         self.modify_structure("CREATE TABLE \""+name+"\" ("+sql+")", (), cursor=cursor)
         if index is not None:
@@ -216,8 +216,9 @@ class Duckdb(object):
 
             # Record unique material-id
             if name.startswith("Result_"):
-                columnnames.append("material_id")
-                columnvalues.append("httk-{}".format(self.primary_keys[name]))
+                for i in range(len(columnnames)):
+                    if columnnames[i] == 'material_id':
+                        columnvalues[i] = "httk-{}".format(self.primary_keys[name])
             lid = self.insert(
                 "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
                 "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+" )",
