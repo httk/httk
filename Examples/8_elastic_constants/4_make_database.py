@@ -102,7 +102,9 @@ def make_database(db_name):
                 elas_dict['G_V'], elas_dict['G_R'],
                 elas_dict['G_VRH'], elas_dict['mu_VRH'],
                 elas_dict['E_VRH'], atomic_relaxations,
-                computation.manifest_hash)
+                "", # walltimes
+                "", # material_id
+                )
 
         print("{0:3} Processed outcar: {1:10}".format(index, initial_struct.formula))
 
