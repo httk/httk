@@ -47,6 +47,7 @@ class Result_ElasticResult(httk.Result):
         'E_VRH': float,
         'atomic_relaxations': bool,
         'walltimes': str,
+        'rundir': str,
         'material_id': str,
         })
     def __init__(self,
@@ -67,6 +68,7 @@ class Result_ElasticResult(httk.Result):
             E_VRH,
             atomic_relaxations,
             walltimes,
+            rundir,
             material_id,
             ):
         self.total_energy = total_energy
@@ -86,4 +88,5 @@ class Result_ElasticResult(httk.Result):
         self.E_VRH = E_VRH
         self.atomic_relaxations = atomic_relaxations
         self.walltimes = walltimes
+        self.rundir = rundir
         self.material_id = material_id
