@@ -18,7 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys, pickle, re
 import subprocess
-from fractions import Fraction
+try:
+    from quicktions import Fraction
+except:
+    from fractions import Fraction
 
 import httk.core.citation as citation
 from httk.core.vectors import FracVector

@@ -25,9 +25,12 @@ from httk.atomistic.unitcellsites import UnitcellSites
 from httk.atomistic import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
 from httk.atomistic.data import periodictable
-from fractions import Fraction
 from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
+try:
+    from quicktions import Fraction
+except:
+    from fractions import Fraction
 
 def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]

@@ -16,13 +16,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
-from fractions import Fraction
 
 from httk.atomistic.data import periodictable
 from httk.core import FracVector
-import httk  
+import httk
 from httk.atomistic import *
 
+try:
+    from quicktions import Fraction
+except:
+    from fractions import Fraction
 
 def out_to_struct(ioa):
     """
