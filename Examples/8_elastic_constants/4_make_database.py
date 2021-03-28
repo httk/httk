@@ -103,6 +103,7 @@ def make_database(db_name):
                 elas_dict['G_VRH'], elas_dict['mu_VRH'],
                 elas_dict['E_VRH'], atomic_relaxations,
                 "", # walltimes
+                "", # rundir
                 "", # material_id
                 )
 
