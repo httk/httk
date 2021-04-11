@@ -326,7 +326,7 @@ def cleveropen(filename, mode, *args):
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
         return gzip.GzipFile(filename, mode, *args)
-    elif ext.lower() == '.zstd':
+    elif ext.lower() == '.zst':
         return zstdopen(filename, mode, *args)
     else:
         try:
@@ -358,7 +358,7 @@ def cleveropen(filename, mode, *args):
         except (IOError, NameError):
             pass
         try:
-            return zstdopen(filename+".zstd", mode, *args)
+            return zstdopen(filename+".zst", mode, *args)
         except (IOError, NameError):
             pass
         if not os.path.exists(filename):

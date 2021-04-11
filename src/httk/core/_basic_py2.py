@@ -52,4 +52,4 @@ def bz2open(filename, mode, *args):
     return bz2.BZ2File(filename, mode, *args)
 
 def zstdopen(filename, mode, *args):
-    raise Exception("Cannot open .zstd file, because pyzstd is a Python 3 only module!")
+    raise Exception("Cannot open .zst file, because pyzstd is a Python 3 only module!")
