@@ -51,7 +51,7 @@ if api_key is not None:
         struct_pmg = entry.get("structure")
         struct = pmg_struct_to_structure(struct_pmg)
         # Find primitive cell using FINDSYM or spglib:
-        struct = struct.find_symmetry()
+        # struct = struct.find_symmetry()
 
         struct.add_tag('atomic_relaxations', relax_flag)
         struct.add_tag('symmetry', symmetry)
