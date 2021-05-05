@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from httk.core import FracVector
+from httk.core.vectors import FracVector
 from httk.core.basic import is_sequence
 from httk.atomistic.cellshape import CellShape
 from httk.atomistic.spacegroup import Spacegroup

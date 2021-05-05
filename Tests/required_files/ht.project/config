@@ -1,0 +1,3 @@
+[main]
+project_name=test
+excludes=[POSCAR],[POSCAR\.*],[.*~]

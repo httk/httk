@@ -547,6 +547,10 @@ class FCSqlite(FilteredCollection):
                 yield (entry, headers)
         else:
             for entry in cursor:
+                # DuckDB's cursor does not (yet) implement __iter__,
+                # so we have to work around that:
+                if entry[0] is None:
+                    continue
                 entry = list(entry)
                 for replace in mustreplace:
                     entry[replace[0]] = instantiate_from_store(replace[1], self.store, entry[replace[0]])

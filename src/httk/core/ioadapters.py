@@ -43,6 +43,10 @@ try:
 except ImportError:
     pass
 
+try:
+    from httk.core.basic import zstdopen
+except ImportError:
+    pass
 
 def universal_opener(other):
     #if isinstance(other, file):
@@ -322,6 +326,8 @@ def cleveropen(filename, mode, *args):
         return gzip.GzipFile(filename, mode, *args)
     elif ext.lower() == '.z':
         return gzip.GzipFile(filename, mode, *args)
+    elif ext.lower() == '.zst':
+        return zstdopen(filename, mode, *args)
     else:
         try:
             return open(filename, mode, *args)
@@ -349,6 +355,10 @@ def cleveropen(filename, mode, *args):
             pass
         try:
             return zdecompressor(filename+".Z", mode, *args)
+        except (IOError, NameError):
+            pass
+        try:
+            return zstdopen(filename+".zst", mode, *args)
         except (IOError, NameError):
             pass
         if not os.path.exists(filename):

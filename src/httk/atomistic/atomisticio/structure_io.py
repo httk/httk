@@ -18,7 +18,6 @@ import os
 
 from httk.core import IoAdapterFilename
 
-
 def load_struct(ioa, ext=None, filename=None):
     """
     Load structure data from a file into a Structure

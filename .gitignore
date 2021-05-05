@@ -8,6 +8,7 @@
 httk.cfg
 httk.old
 External
+build
 #Docs/full/_static/generated/**
 Docs/full/_build/**
 # Docs/full/generated/**
@@ -36,3 +37,6 @@ src/httk.egg-info
 Tests/structreading.tmp
 Tests/python_versions/ver2
 Tests/python_versions/ver3
+
+.vscode
+Examples/9_duckdb/duckdb
