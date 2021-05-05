@@ -15,7 +15,7 @@ import httk.external.pymatgen_glue
 from httk.external.pymatgen_glue import pmg_struct_to_structure
 
 # NOTE: Runs and template directories are deleted at exit, or otherwise
-# unittests/py.test try to run the Python scripts that are inside.
+# unittests and py.test try to run the Python scripts that are inside.
 # Comment out the atexit/signal lines below to keep the folders.
 
 def handle_exit():

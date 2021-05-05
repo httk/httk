@@ -76,23 +76,6 @@ def make_database(db_name):
         elif atomic_relaxations == 'True':
             atomic_relaxations = True
 
-        # # Get walltime of the job
-        # outcars = glob.glob(os.path.join(rundir, "OUTCAR.cleaned.*"))
-        # for o in outcars:
-            # # Matches only when the file extension is nothing of ".bz2":
-            # oname = re.search("^OUTCAR\.cleaned\.([a-zA-Z0-9_-]*)(?:$|\.bz2)", os.path.basename(o))
-            # if oname is not None:
-                # oname = "elapsed_time_" + oname.groups()[0]
-            # if o.endswith('.bz2'):
-                # o = bz2.open(o).read().decode()
-            # else:
-                # o = open(o, "r").read()
-
-            # etime = re.search("Elapsed time \(sec\):\s*(.*)", o)
-
-            # if oname is not None and etime is not None:
-                # computation.add_tag(oname, etime.groups()[0])
-
         outcar = httk.iface.vasp_if.read_outcar(os.path.join(rundir, "OUTCAR.cleaned.relax-final"))
         result = Result_ElasticResult(
                 float(outcar.final_energy),
