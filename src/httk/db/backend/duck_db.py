@@ -59,12 +59,26 @@ atexit.register(db_duckdb_close_all)
 
 class Duckdb(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, existing_db=None):
         self.connection = db_open(filename)
         self.connection.begin()
-        #self._block_commit = False
+        self.batch_insert = {}
         self.primary_keys = {}
-        self.connection.execute("create table if not exists primary_keys(name varchar, value integer)")
+        # Check if we are opening an existing database
+        if existing_db is not None:
+            # IMPORT DATABASE can only import a folder from the current
+            # directory (absolute path is ignored), so we have to work around
+            # that.
+            parent_dir, db_folder = os.path.split(existing_db)
+            cwd = os.getcwd()
+            os.chdir(parent_dir)
+            self.connection.execute("IMPORT DATABASE '{}'".format(db_folder))
+            os.chdir(cwd)
+            # A commit is needed so that new cursors can see the imported tables.
+            self.connection.commit()
+        else:
+            self.connection.execute("create table if not exists " +
+                                    "primary_keys(name varchar, value integer)")
         self.connection.execute("select * from primary_keys")
         res = self.connection.fetchall()
         if len(res) > 0:
@@ -78,6 +92,17 @@ class Duckdb(object):
         self.connection.rollback()
 
     def commit(self):
+        # Batch insert
+        for table in list(self.batch_insert.keys()):
+            sql = self.batch_insert[table]['sql']
+            values = self.batch_insert[table]['values']
+            self.connection.executemany(sql, values)
+            # print()
+            # print(sql)
+            # print(f"inserted {len(values)} into table {table} in {toc-tic:.6f}s.")
+            # print()
+            del self.batch_insert[table]
+
         # Save primary keys:
         self.connection.execute("create table if not exists primary_keys(name varchar, value integer)")
         for name, value in self.primary_keys.items():
@@ -186,10 +211,6 @@ class Duckdb(object):
                 raise Exception("backend.Duckdb.create_table: column of unrecognized type: "+str(columntypes[i])+" ("+str(columntypes[i].__class__)+")")
 
             sql += ", "+columnnames[i]+" "+typestr
-        
-        # Check if "main table" and if so, record a unique material ID
-        # if name.startswith("Result_"):
-            # sql += ", " + "material_id" + " " + "TEXT"
 
         self.modify_structure("CREATE TABLE \""+name+"\" ("+sql+")", (), cursor=cursor)
         if index is not None:
@@ -215,14 +236,29 @@ class Duckdb(object):
             columnvalues = [self.primary_keys[name]] + columnvalues
 
             # Record unique material-id
-            if name.startswith("Result_"):
-                for i in range(len(columnnames)):
-                    if columnnames[i] == 'material_id':
-                        columnvalues[i] = "httk-{}".format(self.primary_keys[name])
-            lid = self.insert(
-                "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
-                "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+" )",
-                columnvalues, cursor=cursor, key_index=self.primary_keys[name])
+            # if name.startswith("Result_"):
+                # for i in range(len(columnnames)):
+                    # if columnnames[i] == 'material_id':
+                        # columnvalues[i] = "httk-{}".format(self.primary_keys[name])
+
+            # Batch insert tables that have many rows
+            if 0:
+            # if name in ("RepresentativeSites_reduced_coords",
+            #             "RepresentativeSites_coords_groupnumber",
+            #             "UnitcellSites_reduced_coords",
+            #             "UnitcellSites_coords_groupnumber"):
+                if name not in self.batch_insert.keys():
+                    sql_string = "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
+                                 "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+")"
+                    self.batch_insert[name] = {'sql': sql_string, 'values': []}
+                self.batch_insert[name]['values'].append(columnvalues)
+                lid = self.primary_keys[name]
+            else:
+                lid = self.insert(
+                    "INSERT INTO " + name + " (" + (",".join(columnnames)) + ") " + \
+                    "VALUES" + " ("+(",".join(["?"]*(len(columnvalues))))+")",
+                    columnvalues, cursor=cursor, key_index=self.primary_keys[name])
+
             self.primary_keys[name] += 1
             return lid
         else:
