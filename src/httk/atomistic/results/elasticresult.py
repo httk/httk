@@ -45,6 +45,8 @@ class Result_ElasticResult(httk.Result):
         'G_VRH': int,
         'mu_VRH': float,
         'E_VRH': int,
+        'mechanically_stable': bool,
+        'mechanically_stable_with_tolerance': bool,
         'atomic_relaxations': bool,
         'walltimes': str,
         'rundir': str,
@@ -66,6 +68,8 @@ class Result_ElasticResult(httk.Result):
             G_VRH,
             mu_VRH,
             E_VRH,
+            mechanically_stable,
+            mechanically_stable_with_tolerance,
             atomic_relaxations,
             walltimes,
             rundir,
@@ -86,6 +90,8 @@ class Result_ElasticResult(httk.Result):
         self.G_VRH = G_VRH
         self.mu_VRH = mu_VRH
         self.E_VRH = E_VRH
+        self.mechanically_stable = mechanically_stable
+        self.mechanically_stable_with_tolerance = mechanically_stable_with_tolerance
         self.atomic_relaxations = atomic_relaxations
         self.walltimes = walltimes
         self.rundir = rundir

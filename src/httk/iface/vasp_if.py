@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, shutil, math
+import os, sys, shutil, math
 import numpy as np
 import re
 import inspect
@@ -831,6 +831,44 @@ def get_elastic_constants(path):
     E_VRH = 2*G_VRH * (1 + mu_VRH)
     elas_dict['mu_VRH'] = mu_VRH
     elas_dict['E_VRH'] = E_VRH
+
+    # Flag mechanically unstable structures.
+    # The equations can be found in Phys. Rev. B 90, 224104 (2014).
+    # We also check whether the mechanical stability holds within a
+    # tolerance of 10%: de Jong et. al. "Charting the complete elastic properties of
+    # inorganic crystalline compounds"
+    # Failing the tolerance check can indicate that the DFT calculation didn't
+    # properly converge.
+    elas_dict['mechanically_stable'] = True
+    elas_dict['mechanically_stable_with_tolerance'] = True
+    tolerance = 1.1
+    if sym == 'cubic':
+        if not ((cij[0,0] > abs(cij[0,1])) and
+                (cij[0,0] + 2*cij[0,1] > 0) and
+                (cij[3,3] > 0)
+               ):
+            elas_dict['mechanically_stable'] = False
+        if not ((cij[0,0] > tolerance*abs(cij[0,1])) and
+                (cij[0,0] + 2*cij[0,1] > 0) and
+                (cij[3,3] > 0)
+               ):
+            elas_dict['mechanically_stable_with_tolerance'] = False
+    elif sym == 'hexagonal':
+        if not ((cij[0,0] > abs(cij[0,1])) and
+                (2*cij[0,2]**2 < cij[2,2]*(cij[0,0] + cij[0,1])) and
+                (cij[3,3] > 0) and
+                (cij[5,5] > 0)
+               ):
+            elas_dict['mechanically_stable'] = False
+        if not ((cij[0,0] > tolerance*abs(cij[0,1])) and
+                (tolerance*2*cij[0,2]**2 < cij[2,2]*(cij[0,0] + cij[0,1])) and
+                (cij[3,3] > 0) and
+                (cij[5,5] > 0)
+               ):
+            elas_dict['mechanically_stable_with_tolerance'] = False
+    else:
+        sys.exit("{}(): ".format(inspect.currentframe().f_code.co_name) +
+            "Mechanical instability check not implemented for sym = \"{}\"!".format(sym))
 
     # Round most quantities to integers, except compliance tensor and Poisson' ratio
     # Convert the tensors first to Python lists and only then round the numbers.
