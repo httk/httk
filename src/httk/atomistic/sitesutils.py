@@ -15,9 +15,13 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import fractions, time
+import time
+try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
 
-from httk.core import FracVector, MutableFracVector
+from httk.core.vectors import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
 from httk.atomistic import spacegrouputils
 
@@ -240,7 +244,8 @@ def pbc_to_nonperiodic_vecs(pbc):
     return nonperiodic_vecs
 
 
-def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegroup, backends=['isotropy']):
+def structure_reduced_coordgroups_to_representative(coordgroups, cell,
+        spacegroup, backends=['isotropy', 'spglib']):
     for backend in backends:
         if backend == 'isotropy':
             try:
@@ -249,6 +254,15 @@ def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegrou
             except ImportError:
                 raise
                 pass
+
+        if backend == 'spglib':
+            try:
+                from httk.external import pyspglib_ext
+                return pyspglib_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True)
+            except ImportError:
+                raise
+                pass
+
     raise Exception("structure_reduced_coordgroups_to_representative: None of the available backends available.")
 
 

@@ -1,5 +1,8 @@
+setuptools==54.2.0
 pytest
 matplotlib
 numpy
 ase
 pymatgen
+docutils
+web.py

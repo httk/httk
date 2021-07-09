@@ -19,9 +19,12 @@
 
 from httk.core.vectors import FracVector, vectormath
 #from math import sqrt, acos, cos, sin, pi
-from fractions import Fraction
 from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
+try:
+    from quicktions import Fraction
+except:
+    from fractions import Fraction
 
 def lattice_system_from_lengths_and_cosangles(lengths, cosangles, eps=0):
     """

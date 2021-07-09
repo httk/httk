@@ -18,7 +18,6 @@
 Basic help functions
 """
 import sys, signal
-from fractions import Fraction
 
 # Import python2 and 3-specific routunes
 if sys.version_info[0] <= 2:
@@ -124,7 +123,6 @@ def mkdir_p(path):
         else:
             raise
 
-
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
     Small awk-mimicking search routine.
@@ -160,23 +158,33 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
             except Exception as e:
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
 
-    for line in f:
-        if debug:
-            sys.stdout.write("\n" + line[:-1])
-        for i in range(len(search)):
-            match = search[i][0].search(line)
-            if debug and match:
-                sys.stdout.write(": MATCH")
-            if match and (search[i][1] is None or search[i][1](results, line)):
-                if debug:
-                    sys.stdout.write(": TRIGGER")
-                if debugfunc is not None:
-                    debugfunc(results, match)
-                search[i][2](results, match)
-                if postdebugfunc is not None:
-                    postdebugfunc(results, match)
+    # Moved if debug checking out of the for loops for performance reasons.
     if debug:
+        for line in f:
+            sys.stdout.write("\n" + line[:-1])
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match:
+                    sys.stdout.write(": MATCH")
+                if match and (search[i][1] is None or search[i][1](results, line)):
+                    sys.stdout.write(": TRIGGER")
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
         sys.stdout.write("\n")
+
+    else:
+        for line in f:
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match and (search[i][1] is None or search[i][1](results, line)):
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
 
     ioa.close()
     return results

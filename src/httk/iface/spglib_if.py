@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,15 +15,27 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.atomistic.data import periodictable
 from httk.atomistic import Structure
-from httk.core import *
-    
+from httk.core.vectors import FracVector
+from httk.atomistic.data.periodictable import atomic_symbol
 
-def spglib_out_to_struct(out):
+
+def spglib_out_to_struct(out, hall_symbol=None):
+    """Convert spglib output to httk Structure"""
     cell = FracVector.from_floats(out[0].tolist())
-    coords = FracVector.from_floats(out[1].tolist()) 
-    occupations = out[2]
-    print("OCCUPATIONS:", occupations)
-    return Structure.create(cell=cell, coords=coords, occupations=occupations)
+    coords = FracVector.from_floats(out[1].tolist())
+    symbols_int = out[2]
+    atomic_symbols = []
+    for i in range(len(coords)):
+        atomic_symbols.append(atomic_symbol(int(symbols_int[i])))
 
+    if hall_symbol is None:
+        struct = Structure.create(uc_basis=cell, uc_occupancies=atomic_symbols,
+                                  uc_reduced_occupationscoords=coords,
+                                  periodicity=[1,1,1])
+    else:
+        struct = Structure.create(rc_basis=cell, rc_occupancies=atomic_symbols,
+                                  rc_reduced_occupationscoords=coords,
+                                  periodicity=[1,1,1],
+                                  hall_symbol=hall_symbol)
+    return struct

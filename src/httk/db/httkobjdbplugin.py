@@ -48,7 +48,7 @@ class HttkObjDbPlugin(HttkPlugin):
                 results = list(search)
                 if len(results) > 0:
                     getattr(self.obj, c['add_method'])([x[0][0] for x in results])
-        
+
     def store(self, store, avoid_duplicate=True):
         self.storable.storable_init(store)
         if avoid_duplicate:
@@ -88,14 +88,14 @@ class HttkObjDbPlugin(HttkPlugin):
         
         data = {}
         for key in dict(self.keydict):
-            data[key] = getattr(self.obj, key) 
+            data[key] = getattr(self.obj, key)
         for key in self.derived_keydict:
-            data[key] = getattr(self.obj, key) 
+            data[key] = getattr(self.obj, key)
 
         if self.sid is not None:
-            self.storable.storable_init(store, updatesid=-self.sid, **data) 
+            self.storable.storable_init(store, updatesid=-self.sid, **data)
         else:
-            self.storable.storable_init(store, **data) 
+            self.storable.storable_init(store, **data)
         self.sid = self.storable.store.sid
 
         self.store_codependent_data(store)

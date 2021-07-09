@@ -55,7 +55,7 @@ class SqlStore(object):
 
         def puts(self, **args):
             self.store.puts(self.table, self.sid, **args)
-
+    
     def new(self, table, types, keyvals=None, updatesid=None):
         if not self.db.table_exists(table):
             self.create_table(table, types)
@@ -186,7 +186,7 @@ class SqlStore(object):
 
         #self.columns[table] = columns
         #self.column_types[table] = column_types
-
+    
     def insert(self, table, types, keyvals, cursor=None, updatesid=None):
         #sid=self.sids[table]
         #types=self.types[table]
@@ -196,6 +196,15 @@ class SqlStore(object):
             mycursor = True
         else:
             mycursor = False
+
+        # Early exit based on the value of updatesid. Speeds up processing
+        # of duplicate values. Should be safe?
+        if not ((isinstance(updatesid, int) and updatesid >= 0) or updatesid is None):
+            if mycursor:
+                if not self._delay_commit:
+                    self.db.commit()
+                cursor.close()
+            return -updatesid
 
         columns = []
         columndata = []

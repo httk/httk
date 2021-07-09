@@ -15,16 +15,21 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, fractions, random, operator, itertools, decimal
+import sys, random, operator, itertools, decimal
 from functools import reduce
 from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector, string_types, integer_types
 
 try:
+    import quicktions as fractions
+except ImportError:
+    import fractions
+
+try:
     from math import gcd as calc_gcd
 except ImportError:
     from fractions import gcd as calc_gcd
-    
+
 if sys.version_info[0] == 3:
     long = int
 # Utility functions needed before defining the class (due to some of them being statically assigned)
@@ -39,7 +44,6 @@ def nested_map_tuple(op, *ls):
             return tuple(map(op, *ls))
         return tuple(map(lambda *items: nested_map_tuple(op, *items), *ls))
     return op(*ls)
-
 
 def nested_map_fractions_tuple(op, *ls):
     """

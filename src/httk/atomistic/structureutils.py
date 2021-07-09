@@ -18,15 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 
-from httk.core import is_sequence, breath_first_idxs, FracVector, FracScalar, MutableFracVector
+from httk.core import is_sequence, breath_first_idxs
+from httk.core.vectors import FracVector, FracScalar, MutableFracVector
 from httk.atomistic.cell import Cell
 from httk.atomistic.unitcellsites import UnitcellSites
 from httk.atomistic import spacegrouputils
 from math import sqrt, acos, cos, sin, pi
 from httk.atomistic.data import periodictable
-from fractions import Fraction
 from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
+try:
+    from quicktions import Fraction
+except:
+    from fractions import Fraction
 
 def sort_coordgroups(coordgroups, individual_data):
     counts = [len(x) for x in coordgroups]
@@ -523,13 +527,21 @@ def coordgroups_and_assignments_to_coords_and_occupancies(coordgroups, assignmen
     return coords, occupancies
 
 
-def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'fake']):
+def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'spglib', 'fake']):
     for backend in backends:
         if backend == 'isotropy':
             try:
                 from httk.external import isotropy_ext
-                sys.stderr.write("Warning: need to run symmetry finder. This may take a while.\n")
+                sys.stderr.write("Warning: need to run 'findsym' symmetry finder. This may take a while.\n")
                 struct = isotropy_ext.struct_process_with_isotropy(struct)
+                return struct
+            except ImportError:
+                pass
+        if backend == 'spglib':
+            try:
+                from httk.external import pyspglib_ext
+                sys.stderr.write("Warning: need to run 'spglib' symmetry finder. This may take a while.\n")
+                struct = pyspglib_ext.struct_process_with_spglig(struct)
                 return struct
             except ImportError:
                 pass
@@ -554,7 +566,8 @@ def structure_reduced_uc_to_representative(struct, backends=['isotropy', 'fake']
     raise Exception("structure_to_sgstructure: None of the available backends available.")
 
 
-def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isotropy']):
+def coordgroups_reduced_uc_to_representative(coordgroups, basis,
+                                             backends=['isotropy', 'spglib']):
     sys.stderr.write("WARNING: coordgroups_reduced_uc_to_representative: running untested code...\n")
     for backend in backends:
         if backend == 'isotropy':
@@ -565,6 +578,16 @@ def coordgroups_reduced_uc_to_representative(coordgroups, basis, backends=['isot
             except ImportError:
                 raise
                 pass
+
+        if backend == 'spglib':
+            try:
+                from httk.external import isotropy_ext
+                struct = pyspglib_ext.uc_reduced_coordgroups_process_with_spglib(coordgroups, basis)
+                return struct
+            except ImportError:
+                raise
+                pass
+
         #if backend ==  'platon':
         #    try:
         #        from httk.external import platon_ext

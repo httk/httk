@@ -81,7 +81,7 @@ class Sqlite(object):
         def execute(self, sql, values=[]):
             global database_debug
             if database_debug:
-                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values), end="", file=sys.stderr)
+                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values) + "\n", end="", file=sys.stderr)
             if database_debug_slow:
                 time1 = time.time()
             try:
@@ -131,7 +131,7 @@ class Sqlite(object):
         if result == []:
             return False
         return True
-
+    
     def create_table(self, name, primkey, columnnames, columntypes, cursor=None, index=None):
         sql = primkey+" INTEGER PRIMARY KEY"
         for i in range(len(columnnames)):
