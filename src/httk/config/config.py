@@ -66,7 +66,10 @@ else:
     from StringIO import StringIO
     import ConfigParser as configparser
 
-python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..'))
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    python_root = os.path.abspath(sys._MEIPASS) + "/httk"
+else:
+    python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..'))
 httk_root = None
 _config = configparser.ConfigParser()
 
