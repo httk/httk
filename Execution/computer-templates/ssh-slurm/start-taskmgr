@@ -17,16 +17,48 @@ else
     NUMBER="1"
 fi
 
+# We need a better way to calculate HT_NBR_NODES.
+# SLURM_TASKS_PER_NODE gives the number of tasks per node
+# as a string like "32(x2),3,16(x5)", where the "x" gives
+# the number of consecutive nodes that have the same number of tasks.
+# Otherwise, the nodes are separated by commas.
+
+# The previous way to compute HT_NBR_NODES:
+# export HT_NBR_NODES="\$((SLURM_JOB_NUM_NODES*SLURM_TASKS_PER_NODE))"
+
 (cat - <<EOF
 #!/bin/bash
 #SBATCH -A $SLURM_PROJECT
 #SBATCH -N $SLURM_NODES
 #SBATCH -t $SLURM_TIMEOUT
+$(if [ -n "$SLURM_RESERVATION" ]; then
+    echo "#SBATCH --reservation=$SLURM_RESERVATION"
+fi)
+
+function parse_slurm_tasks_per_node {
+    total_num_tasks=0
+    # Split on comma
+    IFS=',' read -r -a array <<< "\$SLURM_TASKS_PER_NODE"
+    for x in "\${array[@]}"; do
+        # Parse the number of nodes
+        cpus=\`echo \$x | grep -oP "[0-9]+(?=\()"\`
+        if [ -z "\$cpus" ]; then
+            cpus=\`echo \$x | grep -oP "[0-9]+"\`
+        fi
+        num_nodes=\`echo \$x | grep -oP "(?<=x)[0-9]+"\`
+        if [ -z "\$num_nodes" ]; then
+            num_nodes=1
+        fi
+        this_node_num_tasks=\$((cpus*num_nodes))
+        total_num_tasks=\$((total_num_tasks+this_node_num_tasks))
+    done
+    echo \$total_num_tasks
+}
 
 VASP_PSEUDO_PATH="$VASP_PSEUDO_PATH"
 REMOTE_HTTK_DIR="$REMOTE_HTTK_DIR"
 
-export HT_NBR_NODES="\$((SLURM_JOB_NUM_NODES*SLURM_TASKS_PER_NODE))"
+export HT_NBR_NODES="\$(parse_slurm_tasks_per_node)"
 export VASP_PSEUDOLIB=\${VASP_PSEUDO_PATH/#\~/\$HOME}
 export HTTK_BASE_DIR=\${REMOTE_HTTK_DIR/#\~/\$HOME}
 export HTTK_DIR=\$HTTK_BASE_DIR/httk
