@@ -84,7 +84,10 @@ def make_database(db_name):
                 elas_dict['K_R'], elas_dict['K_VRH'],
                 elas_dict['G_V'], elas_dict['G_R'],
                 elas_dict['G_VRH'], elas_dict['mu_VRH'],
-                elas_dict['E_VRH'], atomic_relaxations,
+                elas_dict['E_VRH'],
+                True, # mechanically_stable
+                True, # mechanically_stable_with_tolerance
+                atomic_relaxations,
                 "", # walltimes
                 "", # rundir
                 "", # material_id
