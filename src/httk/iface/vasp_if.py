@@ -472,6 +472,63 @@ class OutcarReader():
 def read_outcar(ioa):
     return OutcarReader(ioa)
 
+
+def get_dist_matrix(array):
+    return np.array([
+        [1+array[0], array[5]/2, array[4]/2],
+        [array[5]/2, 1+array[1], array[3]/2],
+        [array[4]/2, array[3]/2, 1+array[2]]
+    ])
+
+
+def distort(dist_mat, mat):
+    """Apply distortion matrix"""
+    array = np.array(mat)
+    for i in range(len(mat)):
+        array[i, :] = np.array([np.sum(dist_mat[0, :]*mat[i, :]),
+                                np.sum(dist_mat[1, :]*mat[i, :]),
+                                np.sum(dist_mat[2, :]*mat[i, :])])
+    return array
+
+
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+
+    :param axis:
+    :type axis:
+    :param theta:
+    :type theta:
+    """
+    axis = np.asarray(axis)
+    theta = np.asarray(theta)
+    axis = axis/np.linalg.norm(axis)
+    a = np.cos(theta/2.0)
+    b, c, d = -axis*np.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
+    dist_ind = ELASTICSTEP - 1
+    delta_ind = DELTASTEP - 1
+    d = deltas[dist_ind][delta_ind]
+
+    # epsilon_array is the distortion in Voigt notation
+    epsilon_array = np.array(distortions[dist_ind]) * d
+    dist_matrix = get_dist_matrix(epsilon_array)
+
+    struct = Structure.from_file("POSCAR")
+    struct.lattice = Lattice(distort(dist_matrix, struct._lattice.matrix))
+
+    poscar = Poscar(struct)
+    poscar.write_file("POSCAR", significant_figures=8)
+
+
 def elastic_config(fn):
     config = configparser.ConfigParser()
     config.read(fn)
@@ -524,7 +581,7 @@ def elastic_config(fn):
                 for new_d in (xyz_to_yzx, xyz_to_zxy):
                     include_new_d = True
                     for dd in distortions:
-                        if vectors_are_same(dd, new_d):
+                        if np.allclose(dd, new_d):
                             include_new_d = False
                             break
                     if include_new_d:
@@ -537,17 +594,6 @@ def elastic_config(fn):
         deltas = new_deltas
 
     return sym, deltas, distortions, project
-
-
-def vectors_are_same(v1, v2):
-    """Check whether all elements of two vectors are the same,
-    within some tolerance."""
-    tol = 1e-5
-    max_diff = np.max(np.abs(np.array(v1) - np.array(v2)))
-    if max_diff > tol:
-        return False
-    else:
-        return True
 
 
 def get_elastic_constants(path):
