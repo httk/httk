@@ -13,7 +13,32 @@ import multiprocessing as mp
 import types
 
 
-# Code from https://gist.github.com/kinverarity1/6038316
+def print_python_info():
+    header = "=" * 32 + " Python environment information: " + "=" * 32
+    print(header, flush=True)
+    print("Are we inside a Singularity container: ",
+          "SINGULARITY_CONTAINER" in os.environ, flush=True)
+    print("Python version: ", re.sub("\n", " ", sys.version), flush=True)
+    print("Imported modules:", flush=True)
+    loaded_modules = find_loaded_modules(only_versioned_modules=False)
+    loaded_modules.insert(0, ["Name", "Version"])
+    column_max_lens = []
+    for i in range(len(loaded_modules[0])):
+        len_sorted_list = sorted(loaded_modules, key=lambda x: len(x[i]))
+        column_max_lens.append(int(len(len_sorted_list[-1][i])))
+    print("-" * (sum(column_max_lens) + 3 * (len(column_max_lens) - 1)), flush=True)
+    print("Name".ljust(column_max_lens[0]) + " | " + "Version".ljust(column_max_lens[1]), flush=True)
+    print("-" * (sum(column_max_lens) + 3 * (len(column_max_lens) - 1)), flush=True)
+    for x in loaded_modules[1:]:
+        string = ""
+        for i in range(len(x)):
+            string += x[i].ljust(column_max_lens[i]) + " | "
+        string = string[:-3]
+        print(string, flush=True)
+    print("=" * len(header), flush=True)
+    print("", flush=True)
+
+
 def module_version(mod):
     '''Return version string for module *mod*, or nothing if
     it doesn't have a "version" or "__version__" attribute.'''
@@ -42,7 +67,7 @@ def find_loaded_modules(only_versioned_modules=True):
     which has an HTML property for pretty display in IPython Notebooks.
     '''
     objs = []
-    for i, mod in enumerate(globals().values()):
+    for mod in globals().values():
         if isinstance(mod, types.ModuleType):
             if hasattr(mod, '__name__'):
                 name = mod.__name__
@@ -592,10 +617,9 @@ def HT_TASK_RUN_CONTROLLED(TIMEOUT, STDOUTCHECKER, *args):
             sys.exit(TIMEOUT_EARLY_STOP)
 
     def checker_process(CHECKER, i, timeout_pid):
-        checker_func = eval("{}".format(CHECKER))
-        returncode = checker_func("ht.tmp.msgs.{}".format(i), timeout_pid)
+        returncode = CHECKER("ht.tmp.msgs.{}".format(i), timeout_pid)
         if returncode == 2:
-            print("HT_TASK_RUN_CONTROLLED - CHECKER {} EXITED WITH ERROR, STOPPING RUN.".format(CHECKER), flush=True)
+            print("HT_TASK_RUN_CONTROLLED - CHECKER {} EXITED WITH ERROR, STOPPING RUN.".format(CHECKER.__name__), flush=True)
             os.kill(int(os.environ["HT_SIGNAL_PID"]), signal.SIGUSR1)
             sys.exit(signal.SIGUSR1)
         else:
@@ -617,9 +641,8 @@ def HT_TASK_RUN_CONTROLLED(TIMEOUT, STDOUTCHECKER, *args):
         signal.signal(signal.SIGTERM, stdout_sigterm_handler)
         signal.signal(signal.SIGINT, stdout_sigint_handler)
 
-        if len(STDOUTCHECKER) > 0:
-            stdout_func = eval("{}".format(STDOUTCHECKER))
-            returncode = stdout_func("ht.tmp.msgs.stdout", timeout_pid, p)
+        if isinstance(STDOUTCHECKER, types.FunctionType):
+            returncode = STDOUTCHECKER("ht.tmp.msgs.stdout", timeout_pid, p)
             if returncode == 2:
                 print("HT_TASK_RUN_CONTROLLED - STDOUTCHECKER EXITED WITH ERROR, STOPPING RUN.", flush=True)
                 os.kill(int(os.environ["HT_SIGNAL_PID"]), signal.SIGUSR1)

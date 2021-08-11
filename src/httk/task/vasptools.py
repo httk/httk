@@ -610,9 +610,9 @@ def VASP_NBANDSLINE():
 
 # Timeouts: 1 year=31536000, 1 week=604800, 1 day=86400, 6h=21600
 def VASP_RUN_CONTROLLED(timeout, command, *args):
-    RETURNCODE = ht.HT_TASK_RUN_CONTROLLED(timeout, "VASP_STDOUT_CHECKER",
-                                           "VASP_OSZICAR_CHECKER",
-                                           "VASP_OUTCAR_CHECKER",
+    RETURNCODE = ht.HT_TASK_RUN_CONTROLLED(timeout, VASP_STDOUT_CHECKER,
+                                           VASP_OSZICAR_CHECKER,
+                                           VASP_OUTCAR_CHECKER,
                                            "--", command, *args)
     print("{} EXIT STATUS={}".format(ht.get_bashlike_date(), RETURNCODE))
     if RETURNCODE == 100:
