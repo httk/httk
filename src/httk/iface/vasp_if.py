@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, shutil, math
-import numpy as np
 import re
 import inspect
 
@@ -29,6 +28,11 @@ from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
+
+import numpy as np
+from pymatgen.core import Structure as pmg_Structure
+from pymatgen.io.vasp import Poscar as pmg_Poscar
+from pymatgen.core.lattice import Lattice as pmg_Lattice
 
 if sys.version_info[0] == 3:
     import configparser
@@ -522,10 +526,10 @@ def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
     epsilon_array = np.array(distortions[dist_ind]) * d
     dist_matrix = get_dist_matrix(epsilon_array)
 
-    struct = Structure.from_file("POSCAR")
-    struct.lattice = Lattice(distort(dist_matrix, struct._lattice.matrix))
+    struct = pmg_Structure.from_file("POSCAR")
+    struct.lattice = pmg_Lattice(distort(dist_matrix, struct._lattice.matrix))
 
-    poscar = Poscar(struct)
+    poscar = pmg_Poscar(struct)
     poscar.write_file("POSCAR", significant_figures=8)
 
 
