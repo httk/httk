@@ -439,10 +439,10 @@ def HT_TASK_ATOMIC_SECTION_START():
 
 
 def HT_TASK_ATOMIC_SECTION_END():
-    # ATOMDIR = os.path.basename(os.getcwd())
+    ATOMDIR = os.path.basename(os.getcwd())
     os.chdir("..")
     # This is the atomic step, before this, all gets ignored, after this, we are at the next step.
-    # OUTDIR = HT_PATH_PREFIX(ATOMDIR, "ht.atomic.")
+    OUTDIR = HT_PATH_PREFIX(ATOMDIR, "ht.atomic.")
 
 
 def HT_TASK_ATOMIC_SECTION_END_NEXT(nextstate):
