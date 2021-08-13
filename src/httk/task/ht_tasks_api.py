@@ -19,6 +19,7 @@ def print_python_info():
     print("Are we inside a Singularity container: ",
           "SINGULARITY_CONTAINER" in os.environ, flush=True)
     print("Python version: ", re.sub("\n", " ", sys.version), flush=True)
+    print("Python path: ", sys.executable, flush=True)
     print("Imported modules:", flush=True)
     loaded_modules = find_loaded_modules(only_versioned_modules=False)
     loaded_modules.insert(0, ["Name", "Version"])
