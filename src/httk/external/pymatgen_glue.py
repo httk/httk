@@ -98,7 +98,7 @@ def structure_to_pmg_struct(struct):
     except AttributeError:
         return pymatgen.core.Structure(basis, species, coords)
 
-def pmg_struct_to_spglib_tuple(pmg_struct):
+def pmg_struct_to_spglib_tuple(pmg_struct, return_atomic_symbols=False):
     cell = pmg_struct.lattice.matrix.tolist()
     coords = pmg_struct.frac_coords.tolist()
     # There is no direct way to get a list of symbols?
@@ -107,7 +107,10 @@ def pmg_struct_to_spglib_tuple(pmg_struct):
     for s in pmg_struct.species:
         atomic_symbols.append(s.value)
         symbols_int.append(s.number)
-    return cell, coords, symbols_int, atomic_symbols
+    if return_atomic_symbols:
+        return (cell, coords, symbols_int), atomic_symbols
+    else:
+        return (cell, coords, symbols_int)
 
 def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
                             find_primitive=False):
@@ -120,7 +123,8 @@ def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
     # Does not import spglib
     # ensure_pyspg_is_imported()
 
-    cell, coords, symbols_int, atomic_symbols = pmg_struct_to_spglib_tuple(pmg_struct)
+    (cell, coords, symbols_int), atomic_symbols = pmg_struct_to_spglib_tuple(pmg_struct,
+            return_atomic_symbols=True)
 
     if find_primitive:
         import spglib
