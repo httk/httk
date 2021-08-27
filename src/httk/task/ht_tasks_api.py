@@ -119,7 +119,7 @@ def find_in_file(pattern, file):
     return pattern_found
 
 
-def follow_file(fn, immediate_stop=False):
+def follow_file(fn, timeout=None, immediate_stop=False):
     time_to_stop = False
     time_to_immediately_stop = False
 
@@ -138,13 +138,23 @@ def follow_file(fn, immediate_stop=False):
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigint_handler)
 
+    # Do not try to follow a file before there is a file to follow.
+    timer_start = time.time()
+    while not os.path.exists(fn):
+        time.sleep(1)
+        if timeout is not None:
+            if time.time() - timer_start > timeout:
+                yield "HT_TIMEOUT (NO FILE)\n"
+                return
+
+    timer_start = time.time()
     with open(fn, "r") as file:
         line = ''
         while True:
             # tmp = '' means EOL.
             # In file following mode we don't care if
             # we hit the EOL, because we know that there
-            # is more text coming.
+            # should be more text coming.
             #
             # When it is time to stop, keep
             # scanning until we hit the EOL
@@ -157,12 +167,17 @@ def follow_file(fn, immediate_stop=False):
                 if line.endswith("\n"):
                     yield line
                     line = ''
+                    timer_start = time.time()
             else:
                 if time_to_stop:
                     return
                 if not os.path.exists(fn):
                     return
-                time.sleep(0.001)
+                time.sleep(1)
+                if timeout is not None:
+                    if time.time() - timer_start > timeout:
+                        yield "HT_TIMEOUT\n"
+                        time_to_stop = True
 
 
 def find_type_conversion(value):

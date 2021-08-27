@@ -894,8 +894,8 @@ def VASP_OUTCAR_CHECKER(MSGFILE, EXITPID):
         f.write("OUTCAR_CHECKER ACTIVE\n")
 
     # Do not try to follow a file before there is a file to follow.
-    while not os.path.exists("OUTCAR"):
-        time.sleep(0.1)
+    # while not os.path.exists("OUTCAR"):
+    #     time.sleep(0.1)
 
     RETURNCODE = 0
     for line in ht.follow_file("OUTCAR"):
@@ -922,14 +922,14 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
     TIMEOUT = 3600
 
     # Do not try to follow a file before there is a file to follow.
-    while not os.path.exists("OUTCAR"):
-        time.sleep(0.1)
+    # while not os.path.exists("OUTCAR"):
+    #     time.sleep(0.1)
 
     OUTCARPARAMS_STOP = True
     OUTCARPARAMS = {}
     gotNELM = False
     gotNSW = False
-    for line in ht.follow_file("OUTCAR", immediate_stop=True):
+    for line in ht.follow_file("OUTCAR", timeout=TIMEOUT, immediate_stop=True):
         line = line.rstrip()
         if "NELM   =" in line:
             nelm = int(line.split()[2].rstrip(";"))
@@ -952,8 +952,8 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
         f.write("OSZICAR_CHECKER ACTIVE WITH PARAMS: {}\n".format(OUTCARPARAMS))
 
     # Do not try to follow a file before there is a file to follow.
-    while not os.path.exists("OSZICAR"):
-        time.sleep(0.1)
+    # while not os.path.exists("OSZICAR"):
+    #     time.sleep(0.1)
 
     RETURNCODE = 0
     istep = 0
@@ -961,8 +961,7 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
     lastep = False
     lastebad = False
     lastibad = False
-    timer_start = time.time()
-    for line in ht.follow_file("OSZICAR"):
+    for line in ht.follow_file("OSZICAR", timeout=TIMEOUT):
         line = line.rstrip()
         # Changed the regex so that it matches numbers that have no whitespace between them.
         # E.g. the second line below does not match without the fix:
@@ -1008,12 +1007,12 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
                 with open(MSGFILE, "a") as f:
                     f.write("RECOVERED CONV ION\n")
                     lastibad = False
-            if time.time() - timer_start > TIMEOUT:
-                with open(MSGFILE, "a") as f:
-                    f.write("OSZICAR_TIMEOUT\n")
-                    RETURNCODE = 2
-                    break
             continue
+        if "HT_TIMEOUT" in line:
+            with open(MSGFILE, "a") as f:
+                f.write("OSZICAR_TIMEOUT\n")
+                RETURNCODE = 2
+                break
 
     # awk END rules:
     if lastebad:
