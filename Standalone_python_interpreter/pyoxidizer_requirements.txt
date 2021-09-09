@@ -1,0 +1,5 @@
+numpy
+pyzstd
+matplotlib==3.4.2
+spglib
+pymatgen

@@ -1,0 +1,53 @@
+#!/usr/bin/bash
+
+ht_steps_version="0.8"
+ht_steps_description="elastic constants"
+container=centos7_glibc2_14
+httk_repo_owner=hpleva
+httk_branch=VASPelastic
+python_version="3.9.6"
+pyoxidizer_target="x86_64-unknown-linux-gnu"
+
+# At exit:
+function cleanup {
+    rm -rf ${container}.def dist build __pycache__ .cache .config .cargo
+}
+trap cleanup EXIT
+
+###############################################################################
+# Build the container and install dependencies in it:
+###############################################################################
+cp template_${container}.def ${container}.def
+sed -i "s/HTTK_REPO_OWNER/$httk_repo_owner/g" ${container}.def
+sed -i "s/HTTK_BRANCH/$httk_branch/g" ${container}.def
+sed -i "s/PYTHON_VERSION/$python_version/g" ${container}.def
+sed -i "s/PYOXIDIZER_TARGET/$pyoxidizer_target/g" ${container}.def
+sudo singularity build -F ${container}.sif ${container}.def
+build_exit=$?
+if [ ${build_exit} -ne 0 ]; then
+    echo "Singularity build failed!!!"
+    exit 1
+fi
+
+###############################################################################
+# Build the standalone with pyoxidizer.
+###############################################################################
+rm -rf lib python
+singularity exec --containall -B $PWD:/home/$USER -B /tmp:/tmp ${container}.sif pyoxidizer build
+pyox_build_exit=$?
+if [ ${pyox_build_exit} -ne 0 ]; then
+    echo "pyoxidizer build failed!!!"
+    exit 1
+fi
+mv build/x86_64-unknown-linux-gnu/debug/install/* .
+
+###############################################################################
+# Analyze the portability of the interpreter
+###############################################################################
+singularity exec --containall -B $PWD:/home/$USER ${container}.sif pyoxidizer analyze python
+pyoxidizer_exit=$?
+if [ ${pyoxidizer_exit} -ne 0 ]; then
+    echo "pyoxidizer analyze failed!!!"
+fi
+
+exit 0

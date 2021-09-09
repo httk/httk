@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: centos:centos7
+
+Stage: build
+
+%post
+    yum update -y
+    # Python build dependencies:
+    yum install -y git gcc make zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel awk vim clang
+    git clone https://github.com/pyenv/pyenv.git /usr/.pyenv
+    export PYENV_ROOT=/usr/.pyenv
+    export PATH=$PYENV_ROOT/bin:$PATH
+    eval "$(pyenv init --path)"
+    pyver="PYTHON_VERSION"
+    # Pyinstaller requires the --enable-shared option, because pyinstaller
+    # depends on libpython.so.
+    env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install $pyver
+    pyenv global $pyver
+    pip install --upgrade pip setuptools wheel
+    pip install pyoxidizer
+    # Download httk:
+    cd /usr && git clone https://www.github.com/HTTK_REPO_OWNER/httk.git
+    cd httk && git checkout HTTK_BRANCH
+
+
+%environment
+    export LC_ALL=C
+    export PYENV_ROOT=/usr/.pyenv
+    export PATH=$PYENV_ROOT/bin:$PATH
+    eval "$(pyenv init --path)"
