@@ -44,4 +44,4 @@ else
     exit 1
 fi
 
-"$PIPEPATH/install" "$QUEUE" "${@:2:1}"
+"$PIPEPATH/install" "$QUEUE" "${@:2}"
