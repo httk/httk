@@ -25,7 +25,7 @@
 #
 #   ht.source : A source directory from which tasks can be created
 #   ht.running : A directory for ongoing tasks
-#   ht.finshed : A directory collecting finished tasks
+#   ht.finished : A directory collecting finished tasks
 #   ht.broken : A directory collecting broken tasks
 #
 #   Statues of waiting, ongoing, etc, tasks:
