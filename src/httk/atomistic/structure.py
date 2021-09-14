@@ -436,7 +436,8 @@ class Structure(HttkObject):
         if 'uc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_cell=self.rc_cell, uc_sites=self.rc_sites.get_uc_sites())
             self._other_reps['uc'] = cc_struct
-            self._other_reps['cc'] = cc_struct
+            if 'cc' not in self._other_reps:
+                self._other_reps['cc'] = cc_struct
         return self._other_reps['uc']
 
     @property
@@ -458,7 +459,8 @@ class Structure(HttkObject):
     def cc(self):
         if 'cc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_sites=self.rc_sites.get_uc_sites(), uc_cell=self.rc_cell)
-            self._other_reps['uc'] = cc_struct
+            if 'uc' not in self._other_reps:
+                self._other_reps['uc'] = cc_struct
             self._other_reps['cc'] = cc_struct
         return self._other_reps['cc']
 
