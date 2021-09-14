@@ -1263,8 +1263,8 @@ def VASP_INPUTS_ADJUST():
 
     ANYREMEDY = 0
     if ht.find_in_file("^KPTSCLASS.*", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("KPOINT CLASS WARNING DETECTED")
+        REMEDY = ""
         PROBLEM = "kptsclass"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1303,8 +1303,8 @@ def VASP_INPUTS_ADJUST():
             f.write("{}\n{}\n".format(REMEDYSTEP, REMEDY))
 
     if ht.find_in_file("^DENTET.*", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("DENTET WARNING DETECTED", flush=True)
+        REMEDY = ""
         PROBLEM = "dentet"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1333,8 +1333,8 @@ def VASP_INPUTS_ADJUST():
             f.write("{}\n{}\n".format(REMEDYSTEP, REMEDY))
 
     if ht.find_in_file("^SHIFTS.*", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("COULD NOT GET CORRECT SHIFTS WARNING")
+        REMEDY = ""
         PROBLEM = "shifts"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1354,8 +1354,8 @@ def VASP_INPUTS_ADJUST():
             f.write("{}\n{}\n".format(REMEDYSTEP, REMEDY))
 
     if ht.find_in_file("^LREALFALSE.*", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("VASP ASKS TO BE RESTARTED WITH LREAL=.FALSE.")
+        REMEDY = ""
         PROBLEM = "lreal"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1375,8 +1375,8 @@ def VASP_INPUTS_ADJUST():
             f.write("{}\n{}\n".format(REMEDYSTEP, REMEDY))
 
     if ht.find_in_file("^INVROTMATRIX.*", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("PROBLEM WITH FINDING INVERESE ROTATION MATRIX WARNING")
+        REMEDY = ""
         PROBLEM = "tetkpts"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1396,8 +1396,8 @@ def VASP_INPUTS_ADJUST():
             f.write("{}\n{}\n".format(REMEDYSTEP, REMEDY))
 
     if ht.find_in_file("^LAST BADCONV ION", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("PROBLEM: BAD ION RELAXATION CONVERGENCE.")
+        REMEDY = ""
         PROBLEM = "ionrelax"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
@@ -1423,8 +1423,8 @@ def VASP_INPUTS_ADJUST():
 
     if ht.find_in_file("^LAST BADCONV ELEC", "../ht.controlled.msgs") or \
        ht.find_in_file("^FEXCF", "../ht.controlled.msgs"):
-        REMEDY = ""
         print("PROBLEM: BAD ELECTRONIC RELAXATION CONVERGENCE.")
+        REMEDY = ""
         PROBLEM = "elecrelax"
         remedy_file = "../ht.remedy.{}".format(PROBLEM)
         if os.path.exists(remedy_file):
