@@ -600,9 +600,12 @@ def elastic_config(fn):
     return sym, deltas, distortions, project
 
 
-def get_elastic_constants(path):
-    sym, delta, distortions, project = elastic_config(
-        os.path.join(path, '../settings.elastic'))
+def get_elastic_constants(path, settings_path=".."):
+    elastic_config_file = os.path.join(path, settings_path, "settings.elastic")
+    if not os.path.exists(elastic_config_file):
+        sys.exit("File {} can not be found!".format(elastic_config_file))
+    else:
+        sym, delta, distortions, project = elastic_config(elastic_config_file)
 
     stress_target = []
     epsilon = []
