@@ -264,7 +264,7 @@ def HT_TASK_INIT(args):
     HT_TASK_ATOMIC_EXEC()
     if os.path.exists("ht.nextstep"):
         with open("ht.nextstep", "r") as f:
-            STEP = f.read()
+            STEP = f.read().rstrip()
     if STEP == "ht_finished":
         HT_TASK_FINISHED()
     if STEP == "ht_broken":
