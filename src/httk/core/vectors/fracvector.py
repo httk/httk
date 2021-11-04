@@ -199,7 +199,7 @@ class FracVector(Vector):
 
         fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_ls)), noms))
 
-        lcd = reduce(lambda sub_l1, sub_l2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_l2, sub_l1), fracnoms, 1)
+        lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_ls2, sub_ls1), fracnoms, 1)
 
         v_noms = tuple(map(lambda sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_ls)), fracnoms))
 
@@ -658,7 +658,7 @@ class FracVector(Vector):
         denom = self.denom
 
         if self.denom != 1:
-            gcd = reduce(lambda sub_l1, sub_l2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_l2, sub_l1), noms, denom)
+            gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_ls2, sub_ls1), noms, denom)
             if gcd != 1:
                 denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))

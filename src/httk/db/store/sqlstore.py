@@ -447,9 +447,15 @@ class SqlStore(object):
                     #    else:
                     #        return Fraction(int(l),1000000000)
                     #flat=map(flatterer,flat)
-                    flat = map(lambda l: FracScalar(int(l), 1000000000).limit_denominator(5000000), flat)
-                    reshaped = zip(*[iter(flat)]*t[1])
-                    return FracVector.create(reshaped)
+                    #
+                    # Original code:
+                    # flat = map(lambda l: FracScalar(int(l), 1000000000).limit_denominator(5000000), flat)
+                    # reshaped = zip(*([iter(flat)]*t[1]))
+                    # return FracVector.create(reshaped)
+                    #
+                    # Speed-optimized version:
+                    reshaped = list(zip(*([iter(flat)]*t[1])))
+                    return FracVector.create_fast(reshaped, common_denom=1000000000, max_denom=5000000)
                 else:
                     map(tupletype, flat)
                     return zip(*[iter(flat)]*t[1])
@@ -465,10 +471,10 @@ class SqlStore(object):
                     vals = self.db.get_row(subtablename, table+"_sid", sid, columnames)
                     #
                     # Original code:
-                    vals = map(lambda l: map(lambda x: FracScalar(int(x), 1000000000), l), vals)
-                    return FracVector.create(vals).limit_denominator(5000000)
+                    # vals = map(lambda l: map(lambda x: FracScalar(int(x), 1000000000), l), vals)
+                    # return FracVector.create(vals).limit_denominator(5000000)
 
-                    # Following optimizations have been implemented to make the creation of
+                    # Following speed optimizations have been implemented to make the creation of
                     # httk.Structure objects faster:
                     #
                     #  1) Skip converting "vals" to FracScalars.
@@ -486,7 +492,7 @@ class SqlStore(object):
                     #     Here, by passing the max_denom=5_000_000 argument we end up with a FracVector
                     #     for which the common denominator becomes 5_000_000, instead of some gigantically large integer.
                     #
-                    # return FracVector.create_fast(vals, common_denom=1_000_000_000, max_denom=5_000_000)
+                    return FracVector.create_fast(vals, common_denom=1000000000, max_denom=5000000)
                 else:
                     return self.db.get_row(subtablename, table+"_sid", sid, columnames)
 
