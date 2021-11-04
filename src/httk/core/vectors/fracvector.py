@@ -21,7 +21,7 @@ from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector, string_types, integer_types
 
 try:
-    import quicktions as fractions
+    import cfractions as fractions
 except ImportError:
     import fractions
 
@@ -180,6 +180,42 @@ class FracVector(Vector):
             v = v.simplify()
 
         return v
+
+    @classmethod
+    def create_fast(cls, noms, common_denom, max_denom=None, denom=None, simplify=True, chain=False):
+        """ Optimized version that takes advantage of the fact that the type of noms is known.
+        """
+        def getlcd(a, y):
+            b = abs(y).denominator
+            return a * b // calc_gcd(a, b)
+
+        # Creates a tuple of tuples of Fraction
+        if max_denom is not None:
+            if max_denom <= common_denom:
+                # Round nominators to correspond to the desired max_denom.
+                ratio = max_denom / common_denom
+                noms = tuple(map(lambda sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_ls)), noms))
+                common_denom = max_denom
+
+        fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_ls)), noms))
+
+        lcd = reduce(lambda sub_l1, sub_l2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_l2, sub_l1), fracnoms, 1)
+
+        v_noms = tuple(map(lambda sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_ls)), fracnoms))
+
+        if chain:
+            v_noms = cls._dup_noms(itertools.chain(*v_noms))
+
+        if denom is None:
+            v = cls(v_noms, lcd)
+        else:
+            v = cls(v_noms, lcd * denom)
+
+        if simplify and v.denom != 1:
+            v = v.simplify_fast()
+
+        return v
+
 
     # Note, these are different, and thus named different (get_ prefix), than the corresponding methods in a list, since
     # they do not modify the vector itself.
@@ -607,6 +643,22 @@ class FracVector(Vector):
 
         if self.denom != 1:
             gcd = self._reduce_over_noms(lambda x, y: calc_gcd(x, abs(y)), initializer=self.denom)
+            if gcd != 1:
+                denom = denom // gcd
+                noms = self._map_over_noms(lambda x: int(x / gcd))
+
+        return self.__class__(noms, denom)
+
+    def simplify_fast(self):
+        """
+        Returns a reduced FracVector. I.e., each element has the same numerical value
+        but the new FracVector represents them using the smallest possible shared denominator.
+        """
+        noms = self.noms
+        denom = self.denom
+
+        if self.denom != 1:
+            gcd = reduce(lambda sub_l1, sub_l2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_l2, sub_l1), noms, denom)
             if gcd != 1:
                 denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))

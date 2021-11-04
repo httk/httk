@@ -19,7 +19,7 @@
 import sys, pickle, re
 import subprocess
 try:
-    from quicktions import Fraction
+    from cfractions import Fraction
 except:
     from fractions import Fraction
 

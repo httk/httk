@@ -55,7 +55,7 @@ class SqlStore(object):
 
         def puts(self, **args):
             self.store.puts(self.table, self.sid, **args)
-    
+
     def new(self, table, types, keyvals=None, updatesid=None):
         if not self.db.table_exists(table):
             self.create_table(table, types)
@@ -186,7 +186,7 @@ class SqlStore(object):
 
         #self.columns[table] = columns
         #self.column_types[table] = column_types
-    
+
     def insert(self, table, types, keyvals, cursor=None, updatesid=None):
         #sid=self.sids[table]
         #types=self.types[table]
@@ -463,8 +463,30 @@ class SqlStore(object):
                     columnames.append(name+"_"+str(i))
                 if tupletype == FracVector or tupletype == FracScalar:
                     vals = self.db.get_row(subtablename, table+"_sid", sid, columnames)
+                    #
+                    # Original code:
                     vals = map(lambda l: map(lambda x: FracScalar(int(x), 1000000000), l), vals)
                     return FracVector.create(vals).limit_denominator(5000000)
+
+                    # Following optimizations have been implemented to make the creation of
+                    # httk.Structure objects faster:
+                    #
+                    #  1) Skip converting "vals" to FracScalars.
+                    #  2) Create an optimized version of the FracVector.create() function.
+                    #     This version takes into account that the type of "vals" can be
+                    #     assumed to be a list of lists of integers.
+                    #     We also know that there is a hard-coded common denominator 1_000_000_000.
+                    #  3) Handle the limit_denominator(5_000_000) operation in a different way.
+                    #     In the original code the limit_denominator() function tends to create FracVectors
+                    #     with gigantically large denominators, because we run the limit_denominator() for each
+                    #     element in the FracVector, and get optimal denominators that usually don't have any common
+                    #     divisors between them.
+                    #     The lowest common denominator (lcd) of the whole FracVector therefore becomes a huge integer.
+                    #
+                    #     Here, by passing the max_denom=5_000_000 argument we end up with a FracVector
+                    #     for which the common denominator becomes 5_000_000, instead of some gigantically large integer.
+                    #
+                    # return FracVector.create_fast(vals, common_denom=1_000_000_000, max_denom=5_000_000)
                 else:
                     return self.db.get_row(subtablename, table+"_sid", sid, columnames)
 

@@ -21,7 +21,7 @@ from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map
 from httk.core.vectors.vector import MutableVector, integer_types
 
 try:
-    import quicktions as fractions
+    import cfractions as fractions
 except ImportError:
     import fractions
 
