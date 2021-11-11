@@ -44,10 +44,28 @@ class HttkObjDbPlugin(HttkPlugin):
                 search = store.searcher()
                 p = search.variable(c['class'])
                 search.add(p.__getattr__(c['column']) == self.obj)
-                search.output(p, 'object')
-                results = list(search)
-                if len(results) > 0:
-                    getattr(self.obj, c['add_method'])([x[0][0] for x in results])
+                #
+                # If we fetch the whole StructureTag object, things slow down,
+                # because a full copy of the Structure is constructed
+                # from the database to be attached to StructureTag as
+                # the "self.structure" attribute.
+                if 'types_resolved' in vars(c['class']):
+                    if c['class'].types_resolved['name'] == "StructureTag":
+                        search.output(p.tag, 'tag')
+                        search.output(p.value, 'value')
+                        results = list(search)
+                        # Convert the (tag, value) tuples into a dictionary
+                        results_dict = {}
+                        for res in results:
+                            results_dict[res[0][0]] = res[0][1]
+
+                        if len(results_dict.keys()) > 0:
+                            getattr(self.obj, c['add_method'])(results_dict)
+                else:
+                    search.output(p, 'object')
+                    results = list(search)
+                    if len(results) > 0:
+                        getattr(self.obj, c['add_method'])([x[0][0] for x in results])
 
     def store(self, store, avoid_duplicate=True):
         self.storable.storable_init(store)
