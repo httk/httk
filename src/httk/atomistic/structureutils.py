@@ -314,12 +314,12 @@ def reduced_to_cartesian(cell, coordgroups):
 
     return newcoordgroups
 
-
 def normalized_formula_parts(assignments, ratios, counts):
 
     formula = {}
     alloccs = {}
     maxc = 0
+    fv_zero = FracVector.create(0)
     for i in range(len(counts)):
         assignment = assignments[i]
         ratio = ratios[i]
@@ -334,8 +334,8 @@ def normalized_formula_parts(assignments, ratios, counts):
         else:
             occ = ratio
         if not assignment in formula:
-            formula[assignment] = FracVector.create(0)
-            alloccs[assignment] = FracVector.create(0)
+            formula[assignment] = fv_zero
+            alloccs[assignment] = fv_zero
         formula[assignment] += FracVector.create(occ*counts[i])
         alloccs[assignment] += FracVector.create(counts[i])
         if alloccs[assignment] > maxc:

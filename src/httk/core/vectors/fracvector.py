@@ -182,26 +182,51 @@ class FracVector(Vector):
         return v
 
     @classmethod
-    def create_fast(cls, noms, common_denom, max_denom=None, denom=None, simplify=True, chain=False):
-        """ Optimized version that takes advantage of the fact that the type of noms is known.
+    def create_fast(cls, noms, common_denom=1, max_denom=None, denom=None, simplify=True, chain=False):
+        """ Optimized version that takes advantage of the fact that the type of
+            noms is a nested list of ints.
         """
         def getlcd(a, y):
             b = abs(y).denominator
             return a * b // calc_gcd(a, b)
+
+        depth = None
+        try:
+            tmp = noms[0]
+        except:
+            depth = 0
+
+        if depth is None:
+            depth = 1
+            tmp = noms[0]
+            while True:
+                try:
+                    tmp = tmp[0]
+                    depth += 1
+                except:
+                    break
 
         # Creates a tuple of tuples of Fraction
         if max_denom is not None:
             if max_denom <= common_denom:
                 # Round nominators to correspond to the desired max_denom.
                 ratio = max_denom / common_denom
-                noms = tuple(map(lambda sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_ls)), noms))
+                if depth == 2:
+                    noms = tuple(map(lambda sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_ls)), noms))
+                elif depth == 3:
+                    noms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_sub_ls)), sub_ls)), noms))
                 common_denom = max_denom
 
-        fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_ls)), noms))
+        # noms is list of lists
+        if depth == 2:
+            fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_ls)), noms))
+            lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_ls2, sub_ls1), fracnoms, 1)
+            v_noms = tuple(map(lambda sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_ls)), fracnoms))
 
-        lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_ls2, sub_ls1), fracnoms, 1)
-
-        v_noms = tuple(map(lambda sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_ls)), fracnoms))
+        elif depth == 3:
+            fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_sub_ls)), sub_ls)), noms))
+            lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda sub_sub_ls1, sub_sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_sub_ls2, sub_sub_ls1), sub_ls2, sub_ls1), fracnoms, 1)
+            v_noms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_sub_ls)), sub_ls)), fracnoms))
 
         if chain:
             v_noms = cls._dup_noms(itertools.chain(*v_noms))
@@ -212,7 +237,7 @@ class FracVector(Vector):
             v = cls(v_noms, lcd * denom)
 
         if simplify and v.denom != 1:
-            v = v.simplify_fast()
+            v = v.simplify_fast(depth)
 
         return v
 
@@ -649,7 +674,7 @@ class FracVector(Vector):
 
         return self.__class__(noms, denom)
 
-    def simplify_fast(self):
+    def simplify_fast(self, depth):
         """
         Returns a reduced FracVector. I.e., each element has the same numerical value
         but the new FracVector represents them using the smallest possible shared denominator.
@@ -658,7 +683,12 @@ class FracVector(Vector):
         denom = self.denom
 
         if self.denom != 1:
-            gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_ls2, sub_ls1), noms, denom)
+            if depth == 1:
+                gcd = calc_gcd(noms, denom)
+            elif depth == 2:
+                gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_ls2, sub_ls1), noms, denom)
+            elif depth == 3:
+                gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda sub_sub_ls1, sub_sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_sub_ls2, sub_sub_ls1), sub_ls2, sub_ls1), noms, denom)
             if gcd != 1:
                 denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))
@@ -1463,7 +1493,6 @@ def tuple_eye(dims, onepos=0):
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
-
 
 
 def main():
