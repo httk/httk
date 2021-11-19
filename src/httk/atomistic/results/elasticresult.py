@@ -55,6 +55,7 @@ class Result_ElasticResult(httk.Result):
         'computation': httk.Computation,
         'initial_structure': Structure,
         'structure': Structure,
+        'temperature': float,
         'elastic_tensor': ElasticTensor,
         'elastic_tensor_nosym': ElasticTensor,
         'compliance_tensor': ElasticTensor,
@@ -78,6 +79,7 @@ class Result_ElasticResult(httk.Result):
             computation,
             initial_structure,
             structure,
+            temperature,
             elastic_tensor,
             elastic_tensor_nosym,
             compliance_tensor,
@@ -100,6 +102,7 @@ class Result_ElasticResult(httk.Result):
         self.computation = computation
         self.initial_structure = initial_structure
         self.structure = structure
+        self.temperature = temperature
         self.elastic_tensor = elastic_tensor
         self.elastic_tensor_nosym = elastic_tensor_nosym
         self.compliance_tensor = compliance_tensor
