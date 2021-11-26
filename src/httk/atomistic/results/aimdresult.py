@@ -24,8 +24,8 @@ class Result_AIMDResult(httk.Result):
     TODO: document the variables here
     """
     @httk.httk_typed_init({
-        'compound': str,
-        'temp': str,
+        'formula': str,
+        'temperature': float,
         'VEC': float,
         'c11': float,
         'c12': float,
@@ -71,10 +71,17 @@ class Result_AIMDResult(httk.Result):
         'crack001': float,
         'crack110': float,
         'crack111': float,
+        'G110': float,
+        'G111': float,
+        'Gv': float,
+        'B': float,
+        'Ev': float,
+        'G_over_B': float,
+        # 'material_id': str,
         })
     def __init__(self,
-        compound,
-        temp,
+        formula,
+        temperature,
         VEC,
         c11,
         c12,
@@ -120,9 +127,16 @@ class Result_AIMDResult(httk.Result):
         crack001,
         crack110,
         crack111,
+        G110,
+        G111,
+        Gv,
+        B,
+        Ev,
+        G_over_B,
+        # material_id,
             ):
-        self.compound = compound
-        self.temp = temp
+        self.formula = formula
+        self.temperature = temperature
         self.VEC = VEC
         self.c11 = c11
         self.c12 = c12
@@ -168,3 +182,10 @@ class Result_AIMDResult(httk.Result):
         self.crack001 = crack001
         self.crack110 = crack110
         self.crack111 = crack111
+        self.G110 = G110
+        self.G111 = G111
+        self.Gv = Gv
+        self.B = B
+        self.Ev = Ev
+        self.G_over_B = G_over_B
+        # self.material_id = material_id
