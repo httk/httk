@@ -19,25 +19,7 @@ import httk
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from httk.atomistic import Structure
 from httk.core import FracVector
-
-class ElasticTensor(HttkObject):
-    @httk_typed_init({'matrix': (FracVector, 6, 6)})
-    def __init__(self, matrix):
-        """
-        Private constructor, as per httk coding guidelines. Use ElasticTensor.create instead.
-        """
-        self.matrix = matrix
-
-    @classmethod
-    def create(cls, matrix=None):
-        """
-        matrix = A 6x6 array that represent the elastic constants.
-        """
-        if matrix is None:
-            raise Exception("ElasticTensor.create: The elastic constants matrix must be given as a 6x6 array.")
-        else:
-            matrix = FracVector.use(matrix)
-        return cls(matrix)
+from httk.atomistic.results.utils import ElasticTensor
 
 
 class Result_ElasticResult(httk.Result):
