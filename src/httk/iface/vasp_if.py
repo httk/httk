@@ -947,3 +947,27 @@ def get_elastic_constants(path, settings_path=".."):
                 elas_dict[key] = 0
 
     return cij, sij, elas_dict, cij_nosym
+
+def get_computation_info(ioa):
+    """Finds the VASP version number, values of ENCUT, # of kpoints
+    from the OUTCAR.
+    """
+
+    ioa = IoAdapterFileReader.use(ioa)
+    outcar = ioa.file
+
+    info = {'version': None, 'ENCUT': None}
+    for line in outcar:
+        # Every piece of info was already found:
+        if not None in info.values():
+            break
+        line = line.rstrip()
+        if info['version'] is None:
+            tmp = re.search("vasp\.\d\.\d\.\d", line)
+            if tmp is not None:
+                info['version'] = line
+        if info['ENCUT'] is None:
+            tmp = re.search("ENCUT\s*=\s*([\d\.]*)\s*eV", line)
+            if tmp is not None:
+                info['ENCUT'] = tmp.groups()[0]
+    print(info)
