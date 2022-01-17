@@ -55,6 +55,13 @@ class Result_ElasticResult(httk.Result):
         'walltimes': str,
         'rundir': str,
         'material_id': str,
+        'version': str,
+        'encut': float,
+        'nkpts': int,
+        'pseudopots': str,
+        'incar': str,
+        'kpoints': str,
+        'contcar': str
         })
     def __init__(self,
             total_energy,
@@ -79,6 +86,13 @@ class Result_ElasticResult(httk.Result):
             walltimes,
             rundir,
             material_id,
+            version,
+            encut,
+            nkpts,
+            pseudopots,
+            incar,
+            kpoints,
+            contcar
             ):
         self.total_energy = total_energy
         self.computation = computation
@@ -102,3 +116,10 @@ class Result_ElasticResult(httk.Result):
         self.walltimes = walltimes
         self.rundir = rundir
         self.material_id = material_id
+        self.version = version
+        self.encut = encut
+        self.nkpts = nkpts
+        self.pseudopots = pseudopots
+        self.incar = incar
+        self.kpoints = kpoints
+        self.contcar = contcar

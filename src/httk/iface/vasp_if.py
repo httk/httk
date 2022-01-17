@@ -954,9 +954,10 @@ def get_computation_info(ioa):
     """
 
     ioa = IoAdapterFileReader.use(ioa)
-    outcar = ioa.file
+    outcar = list(ioa.file)
 
-    info = {'version': None, 'ENCUT': None}
+    info = {'version': None, 'ENCUT': None,
+            'NKPTS': None}
     for line in outcar:
         # Every piece of info was already found:
         if not None in info.values():
@@ -970,4 +971,19 @@ def get_computation_info(ioa):
             tmp = re.search("ENCUT\s*=\s*([\d\.]*)\s*eV", line)
             if tmp is not None:
                 info['ENCUT'] = tmp.groups()[0]
-    print(info)
+        if info['NKPTS'] is None:
+            tmp = re.search("NKPTS = \s*(\d+)\s+", line)
+            if tmp is not None:
+                info['NKPTS'] = tmp.groups()[0]
+
+    # Get pseudopot info
+    for line in outcar:
+        tmp = re.search("POTCAR:\s*(PAW_.*)", line)
+        if tmp is not None:
+            if 'pseudopots' not in info.keys():
+                info['pseudopots'] = ""
+            info['pseudopots'] += tmp.groups()[0].strip() + "|"
+        if " ----------------------------------------------------------------------------- " in line:
+            break
+    info['pseudopots'] = info['pseudopots'].rstrip("|")
+    return info
