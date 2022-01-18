@@ -52,7 +52,7 @@ class Result_ElasticResult(httk.Result):
         'mechanically_stable': bool,
         'mechanically_stable_with_tolerance': bool,
         'atomic_relaxations': bool,
-        'walltimes': str,
+        # 'walltimes': str,
         'rundir': str,
         'material_id': str,
         # 'version': str,
@@ -61,7 +61,6 @@ class Result_ElasticResult(httk.Result):
         # 'pseudopots': str,
         'incar': str,
         'kpoints': str,
-        'contcar': str
         })
     def __init__(self,
             total_energy,
@@ -83,7 +82,7 @@ class Result_ElasticResult(httk.Result):
             mechanically_stable,
             mechanically_stable_with_tolerance,
             atomic_relaxations,
-            walltimes,
+            # walltimes,
             rundir,
             material_id,
             # version,
@@ -92,7 +91,6 @@ class Result_ElasticResult(httk.Result):
             # pseudopots,
             incar,
             kpoints,
-            contcar
             ):
         self.total_energy = total_energy
         self.computation = computation
@@ -113,7 +111,7 @@ class Result_ElasticResult(httk.Result):
         self.mechanically_stable = mechanically_stable
         self.mechanically_stable_with_tolerance = mechanically_stable_with_tolerance
         self.atomic_relaxations = atomic_relaxations
-        self.walltimes = walltimes
+        # self.walltimes = walltimes
         self.rundir = rundir
         self.material_id = material_id
         # self.version = version
@@ -122,4 +120,3 @@ class Result_ElasticResult(httk.Result):
         # self.pseudopots = pseudopots
         self.incar = incar
         self.kpoints = kpoints
-        self.contcar = contcar

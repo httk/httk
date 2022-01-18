@@ -953,11 +953,41 @@ def get_computation_info(ioa):
     from the OUTCAR.
     """
 
+    vasp_xc_tags = {
+        '91': "Perdew - Wang 91 (PW-91)",
+        'PE': "Perdew-Burke-Ernzerhof (PBE)",
+        'AM': "AM05",
+        'HL': "Hedin-Lundqvist",
+        'CA': "Ceperley-Alder",
+        'PZ': "Ceperley-Alder, parametrization of Perdew-Zunger",
+        'WI': "Wigner",
+        'RP': "revised Perdew-Burke-Ernzerhof (RPBE) with Pade Approximation",
+        'RE': "revPBE",
+        'VW': "Vosko-Wilk-Nusair (VWN)",
+        'B3': "B3LYP, where LDA part is with VWN3-correlation",
+        'B5': "B3LYP, where LDA part is with VWN5-correlation",
+        'BF': "BEEF, xc (with libbeef)",
+        'CO': "no exchange-correlation",
+        'PS': "Perdew-Burke-Ernzerhof revised for solids (PBEsol)",
+        'LIBXC': "LDA or GGA from Libxc",
+        'LI': "LDA or GGA from Libxc",
+        'OR': "optPBE",
+        'BO': "optB88",
+        'MK': "optB86b",
+        'RA': "new RPA Perdew Wang",
+        '03': "range-separated ACFDT (LDA - sr RPA) mu = 0.3Å",
+        '05': "range-separated ACFDT (LDA - sr RPA) mu = 0.5Å",
+        '10': "range-separated ACFDT (LDA - sr RPA) mu = 1.0Å",
+        '20': "range-separated ACFDT (LDA - sr RPA) mu = 2.0Å",
+        'PL': "new RPA+ Perdew Wang",
+    }
+
     ioa = IoAdapterFileReader.use(ioa)
     outcar = list(ioa.file)
 
     info = {'version': None, 'ENCUT': None,
-            'NKPTS': None}
+            'NKPTS': None, 'XC': None}
+    LEXCH = None
     for line in outcar:
         # Every piece of info was already found:
         if not None in info.values():
@@ -975,6 +1005,25 @@ def get_computation_info(ioa):
             tmp = re.search("NKPTS = \s*(\d+)\s+", line)
             if tmp is not None:
                 info['NKPTS'] = tmp.groups()[0]
+        if LEXCH is None:
+            tmp = re.search("\s*LEXCH\s+=\s*(\w+)", line)
+            if tmp is not None:
+                LEXCH = tmp.groups()[0]
+        if info['XC'] is None:
+            tmp = re.search("\s*GGA\s{5}=\s+([\d-]+)\s+", line)
+            if tmp is not None:
+                # Check if default POSCAR XC is used:
+                GGA = tmp.groups()[0]
+                if GGA == "--":
+                    try:
+                        info['XC'] = vasp_xc_tags[LEXCH]
+                    except KeyError:
+                        info['XC'] = "Unknown XC functional, LEXCH = " + LEXCH
+                else:
+                    try:
+                        info['XC'] = vasp_xc_tags[tmp.groups()[0]]
+                    except KeyError:
+                        info['XC'] = "Unknown XC functional, LEXCH = " + tmp.groups()[0]
 
     # Get pseudopot info
     for line in outcar:
@@ -987,3 +1036,4 @@ def get_computation_info(ioa):
             break
     info['pseudopots'] = info['pseudopots'].rstrip("|")
     return info
+
