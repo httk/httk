@@ -49,8 +49,9 @@ class HttkObjDbPlugin(HttkPlugin):
                 # because a full copy of the Structure is constructed
                 # from the database to be attached to StructureTag as
                 # the "self.structure" attribute.
-                if 'types_resolved' in vars(c['class']):
-                    if c['class'].types_resolved['name'] == "StructureTag":
+                if 'types_resolved' in vars(c['class']) and \
+                    'name' in c['class'].types_resolved.keys() and \
+                    c['class'].types_resolved['name'] == "StructureTag":
                         search.output(p.tag, 'tag')
                         search.output(p.value, 'value')
                         results = list(search)

@@ -55,10 +55,10 @@ class Result_ElasticResult(httk.Result):
         'walltimes': str,
         'rundir': str,
         'material_id': str,
-        'version': str,
-        'encut': float,
-        'nkpts': int,
-        'pseudopots': str,
+        # 'version': str,
+        # 'encut': float,
+        # 'nkpts': int,
+        # 'pseudopots': str,
         'incar': str,
         'kpoints': str,
         'contcar': str
@@ -86,10 +86,10 @@ class Result_ElasticResult(httk.Result):
             walltimes,
             rundir,
             material_id,
-            version,
-            encut,
-            nkpts,
-            pseudopots,
+            # version,
+            # encut,
+            # nkpts,
+            # pseudopots,
             incar,
             kpoints,
             contcar
@@ -116,10 +116,10 @@ class Result_ElasticResult(httk.Result):
         self.walltimes = walltimes
         self.rundir = rundir
         self.material_id = material_id
-        self.version = version
-        self.encut = encut
-        self.nkpts = nkpts
-        self.pseudopots = pseudopots
+        # self.version = version
+        # self.encut = encut
+        # self.nkpts = nkpts
+        # self.pseudopots = pseudopots
         self.incar = incar
         self.kpoints = kpoints
         self.contcar = contcar
