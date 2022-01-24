@@ -57,13 +57,15 @@ class HttkTemplateFormatter(string.Formatter):
                 new_kwargs['items'] = [new_kwargs['item']] + new_kwargs['items'] if 'items' in new_kwargs else []
             if 'index' in new_kwargs:
                 new_kwargs['indices'] = [new_kwargs['index']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
+            if 'index1' in new_kwargs:
+                new_kwargs['indices'] = [new_kwargs['index1']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
             def update_and_return(update):
                 new_kwargs.update(update)
                 return new_kwargs
             if type(value) is dict:
-                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in value])
+                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in value])
             else:
-                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in range(len(value))])
+                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in range(len(value))])
         elif spec == 'call' or spec.startswith('call:'):
             callargs, _sep, newspec = spec.partition("::")
             callargs = callargs.split(":")
@@ -352,3 +354,7 @@ if __name__ == "__main__":
     print(tf.format("If-else 1.2: '{x.__gt__:call:0::if::positive::else::negative}'", x=-2))
     print(tf.format("If-else 2.1: '{t:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
     print(tf.format("If-else 2.2: '{f:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
+
+    print()
+    print("== 1-indexed loops")
+    print(tf.format("1-indexed loops: '{chapters:repeat::Chapter {{index1}}={{item}},}'", chapters=["I", "II", "III", "IV"]))
