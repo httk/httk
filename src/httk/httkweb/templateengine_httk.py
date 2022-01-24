@@ -22,6 +22,7 @@
 from __future__ import print_function
 import string, os, sys, codecs
 import inspect
+import ast
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
@@ -67,6 +68,16 @@ class HttkTemplateFormatter(string.Formatter):
             callargs, _sep, newspec = spec.partition("::")
             callargs = callargs.split(":")
             callargs = [self.get_field(x[1:-1],quote=quote,args=args,kwargs=kwargs)[0] if (x.startswith('{') and x.endswith('}')) else x for x in callargs]
+            # If the variable type is int/float, callargs most likely cannot
+            # be str. Convert callargs to int/float.
+            if hasattr(value,"__repr__") and \
+               ("of float object" in value.__repr__() or
+                "of int object" in value.__repr__()):
+                for i in range(1,len(callargs)):
+                    try:
+                        callargs[i] = ast.literal_eval(callargs[i])
+                    except ValueError:
+                        pass
             result = value(*callargs[1:])
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
@@ -85,12 +96,24 @@ class HttkTemplateFormatter(string.Formatter):
                 return unicode_type(val)
             else:
                 return self.format_field(val, newspec, quote=quote, args=args, kwargs=kwargs)
-        elif spec.startswith('if:') or spec.startswith('if-not:') or spec.startswith('if-set:') or spec.startswith('if-unset:'):
-            outcome = (spec.startswith('if:') and value) or (spec.startswith('if-not:') and not value) or (spec.startswith('if-set:') and value is not None) or (spec.startswith('if-unset:') and value is None)
-            if not outcome:
-                return ''
-            template = spec.partition('::')[-1]
-            return self.format(template, **kwargs)
+        elif spec.startswith('if:') or spec.startswith('if-not:') or \
+             spec.startswith('if-set:') or spec.startswith('if-unset:'):
+            outcome = (spec.startswith('if:') and value) or \
+                      (spec.startswith('if-not:') and not value) or \
+                      (spec.startswith('if-set:') and value is not None) or \
+                      (spec.startswith('if-unset:') and value is None)
+            # Implement optional "else" functionality:
+            if "::else::" in spec:
+                if not outcome:
+                    template = spec.split('::')[-1]
+                else:
+                    template = spec.split('::')[1]
+                return self.format(template, **kwargs)
+            else:
+                if not outcome:
+                    return ''
+                template = spec.partition('::')[-1]
+                return self.format(template, **kwargs)
         elif value==None:
             return ""
         else:
@@ -244,6 +267,7 @@ if __name__ == "__main__":
 
     # Many examples adapted from https://pyformat.info/
 
+    print()
     print("== Simple strings")
     print(tf.format("Strings:       '{a}' '{b}'",a="one", b="two"))
     print(tf.format("Align:         '{a:>10}' '{a:10}' '{a:_<10}' '{a:^10}'",a='test'))
@@ -254,18 +278,21 @@ if __name__ == "__main__":
     print(tf.format("Std class support:  '{a:%Y-%m-%d %H:%M}'",a=datetime(2010,1,2,3,4)))
     print(tf.format("Own Class support:  '{a:test}' '{a}'",a=ExampleFormatter()))
 
+    print()
     print("== Simple numbers")
     print(tf.format("Integers:      '{a}' '{a:d}'",a=42))
     print(tf.format("Floats:        '{a:f}'",a=3.141592653589793))
     print(tf.format("Number padding:'{a:06.2f}'",a=3.141592653589793))
     print(tf.format("Sign:          '{a:+d}' '{b:+d}' '{a:=+5d}'",a=42,b=-42))
 
+    print()
     print("== Element access")
     print(tf.format("Dicts:          '{a[one]}' '{a[two]}'",a={'one':'1', 'two':'2'}))
     print(tf.format("Lists:          '{a[1]}' '{a[2]}'",a=[1,2,3,4,5]))
     print(tf.format("Attributes:     '{a.x}'",a=ExampleAttribute))
     print(tf.format("Combitations:   '{a.y[0][i]}'",a=ExampleAttribute))
 
+    print()
     print("== Parameterization")
     print(tf.format("Alignment and width: '{a:{align}{width}}'".format(a='test', align='^', width='10')))
     print(tf.format("Precision:           '{a:.{prec}} = {b:.{prec}f}'".format(a='Test', b=2.7182, prec=3)))
@@ -273,24 +300,28 @@ if __name__ == "__main__":
     print(tf.format("Width and precision: '{:{width}.{prec}f}'".format(2.7182, width=5, prec=2)))
     print(tf.format("Embedded class:      '{a:{dfmt} {tfmt}}'".format(a=datetime(2010,1,2,3,4), dfmt='%Y-%m-%d', tfmt='%H:%M')))
 
+    print()
     print("********** Functionality from superformatter (with a slight format change for repeat) **************")
 
+    print()
     print(tf.format("Loops: '{chapters:repeat::Chapter {{item}}, }'", chapters=["I", "II", "III", "IV"]))
     print(tf.format("Calls: '{name.upper:call}'", name="eric"))
-    print(tf.format("Tests: '{t:if:hello}' '{f:if:hello}' '{name:if:hello}' '{empty:if:hello}'", name="eric", empty="", t=True, f=False))
-    print(tf.format("Test and nesting: 'Action: Back / Logout {manager:if:/ Delete {id}}'", manager=True, id=34))
+    print(tf.format("Tests: '{t:if::hello}' '{f:if::hello}' '{name:if::hello}' '{empty:if::hello}'", name="eric", empty="", t=True, f=False))
+    print(tf.format("Test and nesting: 'Action: Back / Logout {manager:if::/ Delete {id}}'", manager=True, id=34))
 
+    print()
     print("********** New functionality here **************")
 
     # Hint: escaped {{ }} are needed to call varibale contents inside nested formatting, which always occur after ::,
     # (If used without nesting, then the content is replaced on the level above, which, e.g., does not contain the item from a loop.)
+    print()
     print("== Loops")
     print(tf.format("Indexed loops: '{chapters:repeat::Chapter {{index}}={{item}},}'", chapters=["I", "II", "III", "IV"]))
     print(tf.format("Nested loops: '{l:repeat::{{k:repeat::{{{{item}}}}({{item}})}}, }'", l=[1,2,3,4],k=["a","b","c","d"]))
     print(tf.format("Nested formatting: '{b:repeat:: {{a:.{{item}}f}},}'", a=3.141592653589793, b=["2","4","8","16"]))
     print()
     print("== Indirection")
-    print(tf.format("Item access indirection: '{a:getitem:{b}}' '{c:getitem:{d}}'",a={'x':1, 'y':2}, b='x', c=["0","1","2","3"], d=2))
+    print(tf.format("Item access indirection: '{a:getitem:{b}}' '{c:getitem:{d}}'",a={'x':1, 'y':2}, b='x', c=["10","11","12","13"], d=2))
     print(tf.format("Attribute access indirection: '{a:getattr:{b}}'",a=ExampleAttribute, b='x'))
     print(tf.format("Attribute access indirection with formatting: '{a:getattr:{b}::>10}'",a=ExampleAttribute, b='x'))
     print()
@@ -314,3 +345,10 @@ if __name__ == "__main__":
     print(tf.format("Quoting + formatting:       '{a:unquoted::>70}'",a="<i need to be quoted, \"indeed\" said the cat's hat>"))
     print(tf.format("Unquoted string: '{a}       '",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
     print(tf.format("Overriding unquoted string: '{a:quote}'",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
+
+    print()
+    print("== Conditionals with \"else\" fallback")
+    print(tf.format("If-else 1.1: '{x.__gt__:call:0::if::positive::else::negative}'", x=2))
+    print(tf.format("If-else 1.2: '{x.__gt__:call:0::if::positive::else::negative}'", x=-2))
+    print(tf.format("If-else 2.1: '{t:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
+    print(tf.format("If-else 2.2: '{f:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))

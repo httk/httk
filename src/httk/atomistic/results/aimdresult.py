@@ -27,6 +27,8 @@ class Result_AIMDResult(httk.Result):
     TODO: document the variables here
     """
     @httk.httk_typed_init({
+        'total_energy': float,
+        'computation': httk.Computation,
         'formula': str,
         'temperature': float,
         'VEC': float,
@@ -51,6 +53,8 @@ class Result_AIMDResult(httk.Result):
         # 'material_id': str,
         })
     def __init__(self,
+        total_energy,
+        computation,
         formula,
         temperature,
         VEC,
@@ -74,6 +78,8 @@ class Result_AIMDResult(httk.Result):
         G_over_B,
         # material_id,
             ):
+        self.total_energy = total_energy
+        self.computation = computation
         self.formula = formula
         self.temperature = temperature
         self.VEC = VEC
