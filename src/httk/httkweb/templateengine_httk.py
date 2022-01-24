@@ -77,10 +77,14 @@ class HttkTemplateFormatter(string.Formatter):
                 "of int object" in value.__repr__()):
                 for i in range(1,len(callargs)):
                     try:
-                        callargs[i] = ast.literal_eval(callargs[i])
+                        if callargs[i] == 'nan':
+                            callargs[i] = float('nan')
+                        else:
+                            callargs[i] = ast.literal_eval(callargs[i])
                     except ValueError:
                         pass
             result = value(*callargs[1:])
+            print(result, newspec, callargs)
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
