@@ -84,7 +84,6 @@ class HttkTemplateFormatter(string.Formatter):
                     except ValueError:
                         pass
             result = value(*callargs[1:])
-            print(result, newspec, callargs)
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
@@ -108,18 +107,22 @@ class HttkTemplateFormatter(string.Formatter):
                       (spec.startswith('if-not:') and not value) or \
                       (spec.startswith('if-set:') and value is not None) or \
                       (spec.startswith('if-unset:') and value is None)
+
             # Implement optional "else" functionality:
             if "::else::" in spec:
                 if not outcome:
-                    template = spec.split('::')[-1]
+                    template = spec.partition('::else::')[-1]
                 else:
-                    template = spec.split('::')[1]
-                return self.format(template, **kwargs)
+                    template = spec.partition('::else::')[0].partition('::')[-1]
             else:
                 if not outcome:
                     return ''
                 template = spec.partition('::')[-1]
-                return self.format(template, **kwargs)
+            # print()
+            # print("spec = ", spec)
+            # print("template = ", template)
+            # print()
+            return self.format(template, **kwargs)
         elif value==None:
             return ""
         else:
@@ -362,3 +365,8 @@ if __name__ == "__main__":
     print()
     print("== 1-indexed loops")
     print(tf.format("1-indexed loops: '{chapters:repeat::Chapter {{index1}}={{item}},}'", chapters=["I", "II", "III", "IV"]))
+
+    print()
+    print("== Conditional + Calls + Formatting")
+    print(tf.format("x=float: '{x:if-set::{{x.__mul__:call:1000::.1f}}::else::None!}'", x=3.1415926))
+    print(tf.format("x=None: '{x:if-unset::None!::else::{{x.__mul__:call:1000}}}'", x=None))

@@ -33,6 +33,7 @@ class Result_AIMDResult(httk.Result):
         'temperature': float,
         'VEC': float,
         'elastic_tensor': ElasticTensorFloat,
+        'compliance_tensor': ElasticTensorFloat,
         'third_order_elastic_tensor': ThirdOrderElasticTensor,
         'ultimate_tensile_strain': PlaneDependentTensor,
         'ultimate_shear_strain': PlaneDependentTensor,
@@ -59,6 +60,7 @@ class Result_AIMDResult(httk.Result):
         temperature,
         VEC,
         elastic_tensor,
+        compliance_tensor,
         third_order_elastic_tensor,
         ultimate_tensile_strain,
         ultimate_shear_strain,
@@ -84,6 +86,7 @@ class Result_AIMDResult(httk.Result):
         self.temperature = temperature
         self.VEC = VEC
         self.elastic_tensor = elastic_tensor
+        self.compliance_tensor = compliance_tensor
         self.third_order_elastic_tensor = third_order_elastic_tensor
         self.ultimate_tensile_strain = ultimate_tensile_strain
         self.ultimate_shear_strain = ultimate_shear_strain
