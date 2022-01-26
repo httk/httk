@@ -87,6 +87,12 @@ class HttkTemplateFormatter(string.Formatter):
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
+            # Check if there is a :call attached to the value that we are getting with
+            # getitem.
+            call_func = None
+            if ":call" in x:
+                call_func = x.partition(".")[-1].split(":")[0]
+                x = x.partition(".")[0]
             idx = self.get_field(x[1:-1],args=args,kwargs=kwargs)[0] if (x.startswith('{') and x.endswith('}')) else x
             try:
                 val = value[idx] if spec.startswith('getitem:') else getattr(value,idx)
@@ -97,9 +103,13 @@ class HttkTemplateFormatter(string.Formatter):
                     return ''
             # TODO: Check if the unicode conversion really is necessary here,
             # or if we can make sure val is always unicode.
-            if newspec == '':
+            if newspec == '' and call_func is None:
                 return unicode_type(val)
             else:
+                # Check if there is a call we want to do with the value that we got with getitem:
+                if call_func is not None:
+                    val = getattr(val, call_func)
+                    newspec = "call" + spec.partition(":call")[-1]
                 return self.format_field(val, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('if:') or spec.startswith('if-not:') or \
              spec.startswith('if-set:') or spec.startswith('if-unset:'):
@@ -118,10 +128,15 @@ class HttkTemplateFormatter(string.Formatter):
                 if not outcome:
                     return ''
                 template = spec.partition('::')[-1]
-            # print()
-            # print("spec = ", spec)
-            # print("template = ", template)
-            # print()
+            
+            # Implement a "SELF" keyword to easily reuse the value
+            if "SELF" in template:
+                newspec = template.lstrip("{").rstrip("}").partition(":")[-1]
+                if newspec.startswith("call"):
+                    value = getattr(value, template.partition(":")[0].partition(".")[-1])
+                # print("SELF template, newspec: ", template, newspec)
+                return self.format_field(value, newspec, quote=quote, args=args, kwargs=kwargs)
+
             return self.format(template, **kwargs)
         elif value==None:
             return ""
@@ -346,6 +361,7 @@ if __name__ == "__main__":
     print()
     print("== Advanced")
     print(tf.format("Item access indirection inside loops: '{a:repeat:: {{a:getitem:{{{{index}}}}}}}'",a=[5,6,7,8]))
+    # print(tf.format("Item access indirection inside loops: '{a:repeat:: {{item.__mul__:call:100}}}'",a=[5,6,7,8]))
     print()
     print("== Quoting")
     tf.quote = True
@@ -370,3 +386,13 @@ if __name__ == "__main__":
     print("== Conditional + Calls + Formatting")
     print(tf.format("x=float: '{x:if-set::{{x.__mul__:call:1000::.1f}}::else::None!}'", x=3.1415926))
     print(tf.format("x=None: '{x:if-unset::None!::else::{{x.__mul__:call:1000}}}'", x=None))
+    print()
+    print("== Getitem + Calls")
+    print(tf.format("Getitem + Call: '{a:getitem:{b}.__mul__:call:100}'",a={'x':1, 'y':2}, b='x'))
+    print(tf.format("Getitem + Call + Formatting: '{a:getitem:{b}.__mul__:call:100::.8f}'",a={'x':1, 'y':2}, b='x'))
+
+    print()
+    print("== SELF for easy variable reuse")
+    print(tf.format("'{x:if-unset::Unset!::else::{{SELF:.6f}}}'", x=3.2))
+    print(tf.format("'{x:if-set::{{SELF.__mul__:call:100}}}'", x=3.2))
+

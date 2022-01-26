@@ -71,22 +71,35 @@ class ThirdOrderElasticTensor(HttkObject):
             raise Exception("ThirdOrderElasticTensor.create: The elastic constants matrix must be given as a 6x6x6 array.")
         return cls(matrix, shape)
 
-    @property
-    def matrix(self):
-        """Re-create the third dimension from the flattened 2D _matrix.
+    # @property
+    def matrix(self, flatten=False, include_indices=False):
+        """If flatten=False, re-create the third dimension from the flattened 2D _matrix.
+        If flatten=True, return a flattened 1D array.
         """
         shape = self.shape
         matrix = []
-        for i in range(shape[0]):
-            index_flat = 0
-            tmp1 = []
-            for j in range(shape[1]):
-                tmp2 = []
-                for k in range(shape[2]):
-                    tmp2.append(self._matrix[i][index_flat])
-                    index_flat += 1
-                tmp1.append(tmp2)
-            matrix.append(tmp1)
+        if flatten:
+            for i in range(shape[0]):
+                index_flat = 0
+                for j in range(shape[1]):
+                    for k in range(shape[2]):
+                        if include_indices:
+                            index_tuple = (i+1,j+1,k+1)
+                            matrix.append((index_tuple, self._matrix[i][index_flat]))
+                        else:
+                            matrix.append(self._matrix[i][index_flat])
+                        index_flat += 1
+        else:
+            for i in range(shape[0]):
+                index_flat = 0
+                tmp1 = []
+                for j in range(shape[1]):
+                    tmp2 = []
+                    for k in range(shape[2]):
+                        tmp2.append(self._matrix[i][index_flat])
+                        index_flat += 1
+                    tmp1.append(tmp2)
+                matrix.append(tmp1)
         return matrix
 
     @property
@@ -131,22 +144,34 @@ class PlaneDependentTensor(HttkObject):
             raise Exception("PlaneDependentTensor.create: The matrix must be given as a 3x3x3 array.")
         return cls(matrix, shape)
 
-    @property
-    def matrix(self):
-        """Re-create the third dimension from the flattened 2D _matrix.
+    # @property
+    def matrix(self, flatten=False, include_indices=False):
+        """If flatten=False, re-create the third dimension from the flattened 2D _matrix.
+        If flatten=True, return a flattened 1D array.
         """
         shape = self.shape
         matrix = []
-        for i in range(shape[0]):
-            index_flat = 0
-            tmp1 = []
-            for j in range(shape[1]):
-                tmp2 = []
-                for k in range(shape[2]):
-                    tmp2.append(self._matrix[i][index_flat])
-                    index_flat += 1
-                tmp1.append(tmp2)
-            matrix.append(tmp1)
+        if flatten:
+            for i in range(shape[0]):
+                index_flat = 0
+                for j in range(shape[1]):
+                    for k in range(shape[2]):
+                        if include_indices:
+                            matrix.append(((i,j,k), self._matrix[i][index_flat]))
+                        else:
+                            matrix.append(self._matrix[i][index_flat])
+                        index_flat += 1
+        else:
+            for i in range(shape[0]):
+                index_flat = 0
+                tmp1 = []
+                for j in range(shape[1]):
+                    tmp2 = []
+                    for k in range(shape[2]):
+                        tmp2.append(self._matrix[i][index_flat])
+                        index_flat += 1
+                    tmp1.append(tmp2)
+                matrix.append(tmp1)
         return matrix
 
     @property
