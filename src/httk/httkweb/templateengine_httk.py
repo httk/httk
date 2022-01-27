@@ -129,14 +129,6 @@ class HttkTemplateFormatter(string.Formatter):
                     return ''
                 template = spec.partition('::')[-1]
             
-            # Implement a "SELF" keyword to easily reuse the value
-            if "SELF" in template:
-                newspec = template.lstrip("{").rstrip("}").partition(":")[-1]
-                if newspec.startswith("call"):
-                    value = getattr(value, template.partition(":")[0].partition(".")[-1])
-                # print("SELF template, newspec: ", template, newspec)
-                return self.format_field(value, newspec, quote=quote, args=args, kwargs=kwargs)
-
             return self.format(template, **kwargs)
         elif value==None:
             return ""
@@ -390,9 +382,4 @@ if __name__ == "__main__":
     print("== Getitem + Calls")
     print(tf.format("Getitem + Call: '{a:getitem:{b}.__mul__:call:100}'",a={'x':1, 'y':2}, b='x'))
     print(tf.format("Getitem + Call + Formatting: '{a:getitem:{b}.__mul__:call:100::.8f}'",a={'x':1, 'y':2}, b='x'))
-
-    print()
-    print("== SELF for easy variable reuse")
-    print(tf.format("'{x:if-unset::Unset!::else::{{SELF:.6f}}}'", x=3.2))
-    print(tf.format("'{x:if-set::{{SELF.__mul__:call:100}}}'", x=3.2))
 
