@@ -382,4 +382,5 @@ if __name__ == "__main__":
     print("== Getitem + Calls")
     print(tf.format("Getitem + Call: '{a:getitem:{b}.__mul__:call:100}'",a={'x':1, 'y':2}, b='x'))
     print(tf.format("Getitem + Call + Formatting: '{a:getitem:{b}.__mul__:call:100::.8f}'",a={'x':1, 'y':2}, b='x'))
+    print(tf.format("Repeat + Getitem + Call + Formatting: '{a:repeat::{{b:getitem:{{{{index}}}}.__truediv__:call:100}}, }'", a=[1,2,3], b=[100,200,300]))
 

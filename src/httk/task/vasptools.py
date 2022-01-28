@@ -848,7 +848,8 @@ def VASP_STDOUT_CHECKER(MSGFILE, EXITPID, process):
     return returncode
 
 
-def VASP_CLEAN_OUTCAR(FILE=None):
+def VASP_CLEAN_OUTCAR(FILE=None, clean_forces_acting_on_ions=False,
+                      clean_avg_electrostatic_pot_at_core=False):
     if FILE is None:
         FILE = "OUTCAR"
     if not os.path.exists(FILE):
@@ -874,6 +875,12 @@ def VASP_CLEAN_OUTCAR(FILE=None):
                     off = 2
                 elif "k-point" in line and "plane waves:" in line and off == 0:
                     newline = "VASP_CLEAN_OUTCAR: Removed k-point plane wave data\n"
+                    off = 2
+                elif clean_forces_acting_on_ions and "FORCES acting on ions" in line and off == 0:
+                    newline = "VASP_CLEAN_OUTCAR: Removed FORCES acting on ions data\n"
+                    off = 2
+                elif clean_avg_electrostatic_pot_at_core and "average (electrostatic) potential at core" in line and off == 0:
+                    newline = "VASP_CLEAN_OUTCAR: Removed average electrostatic potential at core data\n"
                     off = 2
                 elif ht.re_line_matches("^ *k-point *[0-9*]* *: +[0-9.-]* +[0-9.-]* +[0-9.-]* *$", line) and off == 0:
                     newline = "VASP_CLEAN_OUTCAR: Removed k-point occupation data\n"
