@@ -191,8 +191,8 @@ def find_type_conversion(value):
     return value
 
 
-def cp(from_file, to_file):
-    shutil.copyfile(from_file, to_file)
+def cp(from_file, to_file, follow_symlinks=True):
+    shutil.copyfile(from_file, to_file, follow_symlinks=follow_symlinks)
 
 
 def mv(from_file, to_file):
