@@ -855,10 +855,13 @@ def VASP_CLEAN_OUTCAR(FILE=None, clean_forces_acting_on_ions=False,
     if not os.path.exists(FILE):
         print("VASP_CLEAN_OUTCAR: Missing {} file.".format(FILE))
         sys.exit(1)
-
+    
+    dirname = os.path.dirname(FILE)
+    if dirname == "":
+        dirname = "."
     off = 0
     with open(FILE, "r") as f_src:
-        with open("OUTCAR.cleaned", "w") as f_dest:
+        with open(os.path.join(dirname, "OUTCAR.cleaned"), "w") as f_dest:
             for line in f_src:
                 newline = None
                 if "Following reciprocal coordinates:" in line and off == 0:
