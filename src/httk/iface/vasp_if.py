@@ -1027,14 +1027,14 @@ def get_computation_info(ioa):
 
     # Get pseudopot info
     for line in outcar:
-        tmp = re.search("POTCAR:\s*(PAW_.*)", line)
+        tmp = re.search("TITEL  =\s*(PAW_.*)", line)
         if tmp is not None:
             pseudo_info = tmp.groups()[0].strip()
             if 'pseudopots' not in info.keys():
                 info['pseudopots'] = ""
             if pseudo_info not in info['pseudopots']:
                 info['pseudopots'] +=  pseudo_info + "|"
-        if "TITEL  =" in line:
+        if "POSCAR:" in line:
             break
     info['pseudopots'] = info['pseudopots'].rstrip("|")
     return info
