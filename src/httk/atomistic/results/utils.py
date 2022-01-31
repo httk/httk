@@ -182,3 +182,4 @@ class PlaneDependentTensor(HttkObject):
             return [x[0] for x in self._shape]
         else:
             return self._shape
+

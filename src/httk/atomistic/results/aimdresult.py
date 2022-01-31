@@ -30,6 +30,8 @@ class Result_AIMDResult(httk.Result):
         'total_energy': float,
         'computation': httk.Computation,
         'formula': str,
+        'initial_structure': Structure,
+        'structure': Structure,
         'temperature': float,
         'VEC': float,
         'elastic_tensor': ElasticTensorFloat,
@@ -51,12 +53,13 @@ class Result_AIMDResult(httk.Result):
         'B': float,
         'Ev': float,
         'G_over_B': float,
-        # 'material_id': str,
         })
     def __init__(self,
         total_energy,
         computation,
         formula,
+        initial_structure,
+        structure,
         temperature,
         VEC,
         elastic_tensor,
@@ -78,11 +81,12 @@ class Result_AIMDResult(httk.Result):
         B,
         Ev,
         G_over_B,
-        # material_id,
             ):
         self.total_energy = total_energy
         self.computation = computation
         self.formula = formula
+        self.initial_structure = initial_structure
+        self.structure = structure
         self.temperature = temperature
         self.VEC = VEC
         self.elastic_tensor = elastic_tensor
@@ -104,4 +108,3 @@ class Result_AIMDResult(httk.Result):
         self.B = B
         self.Ev = Ev
         self.G_over_B = G_over_B
-        # self.material_id = material_id
