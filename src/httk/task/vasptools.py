@@ -929,7 +929,7 @@ def VASP_OUTCAR_CHECKER(MSGFILE, EXITPID):
 
 
 def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
-    TIMEOUT = 3600
+    TIMEOUT = 3600*24*7
 
     # Do not try to follow a file before there is a file to follow.
     # while not os.path.exists("OUTCAR"):
@@ -1483,5 +1483,7 @@ def VASP_CONTCAR_TO_POSCAR(CONTCAR=None, REFPOSCAR=None):
             for i, line in enumerate(f_src):
                 if i == 0:
                     f_dest.write(FIRSTLINE)
+                    f_dest.flush()
                 else:
                     f_dest.write(line)
+                    f_dest.flush()
