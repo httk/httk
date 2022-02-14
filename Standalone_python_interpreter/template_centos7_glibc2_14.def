@@ -6,7 +6,9 @@ Stage: build
 %post
     yum update -y
     # Python build dependencies:
-    yum install -y git gcc make zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel awk vim clang
+    yum install -y git gcc make zlib-devel bzip2 bzip2-devel readline-devel
+    yum install -y sqlite sqlite-devel openssl-devel tk-devel libffi-devel
+    yum install -y xz-devel awk vim clang patch 
     git clone https://github.com/pyenv/pyenv.git /usr/.pyenv
     export PYENV_ROOT=/usr/.pyenv
     export PATH=$PYENV_ROOT/bin:$PATH

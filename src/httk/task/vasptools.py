@@ -978,13 +978,13 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
         # SDA:   6    -0.198310401180E+02   -0.81525E+01   -0.11482E-02  1596   0.503E+02 0.000E+00
         # CGA:   7    -0.337212707899E+02   -0.13890E+02   -0.14223E+02  1596   0.488E+01-0.322E+01
         #
-        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([0-9]+) +(-?\d*\.\d*[Ee][+-]\d*)([\s-][+0-9.Ee]+)", line)
+        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})([\s-]*[+0-9.Ee]+)", line)
         if match is not None:
             # print(match.groups(), flush=True)
             nstep = int(match.groups()[0])
             lastrmsc = float(match.groups()[5])
             continue
-        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +([0-9]+) +([-+0-9.Ee]+)", line)
+        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})", line)
         if match is not None:
             # print(match.groups(), flush=True)
             nstep = int(match.groups()[0])
