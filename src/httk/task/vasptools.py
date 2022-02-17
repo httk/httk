@@ -1486,9 +1486,9 @@ def VASP_CONTCAR_TO_POSCAR(CONTCAR=None, REFPOSCAR=None):
                 else:
                     f_dest.write(line)
                 
-                # Force the file to be written to disk immediately.
-                # This tries to fix a problem on Dardel, where the
-                # file doesn't get written to disk for a long time
-                # (presumable for performance reasons).
-                f_dest.flush()
-                os.fsync(f_dest.fileno())
+            # Force the file to be written to disk immediately.
+            # This tries to fix a problem on Dardel, where the
+            # file doesn't get written to disk for a long time
+            # (presumable for performance reasons).
+            f_dest.flush()
+            os.fsync(f_dest.fileno())
