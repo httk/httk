@@ -1483,7 +1483,12 @@ def VASP_CONTCAR_TO_POSCAR(CONTCAR=None, REFPOSCAR=None):
             for i, line in enumerate(f_src):
                 if i == 0:
                     f_dest.write(FIRSTLINE)
-                    f_dest.flush()
                 else:
                     f_dest.write(line)
-                    f_dest.flush()
+                
+                # Force the file to be written to disk immediately.
+                # This tries to fix a problem on Dardel, where the
+                # file doesn't get written to disk for a long time
+                # (presumable for performance reasons).
+                f_dest.flush()
+                os.fsync(f_dest.fileno())
