@@ -208,6 +208,13 @@ def VASP_KPOINTSLINE(lval=None):
     with open("POSCAR", "r") as f:
         lines = f.read().splitlines()
 
+    # Check that we have a valid POSCAR (there is a problem where
+    # the POSCAR file can be empty for some reason, even though
+    # we have created a POSCAR with the CONTCAR_TO_POSCAR function.
+    if len(lines) <= 3:
+        sys.stderr.write("Error in VASP_KPOINTSLINE: POSCAR is empty.\n")
+        return ""
+
     for i, line in enumerate(lines):
         if i == 1:
             scale = float(line.split()[0])

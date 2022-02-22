@@ -46,4 +46,5 @@ Standalone_python_interpreter/*.sif
 Standalone_python_interpreter/lib
 Standalone_python_interpreter/python
 
-
+# ctags
+tags
