@@ -34,13 +34,22 @@ httk_entry_info = {
           'nperiodic_dimensions': optimade_entries.entry_info['structures']['properties']['nperiodic_dimensions'],
           'lattice_vectors': optimade_entries.entry_info['structures']['properties']['lattice_vectors'],
           'structure_features': optimade_entries.entry_info['structures']['properties']['structure_features'],
+          # These have been added by hpleva:
+          'nsites': optimade_entries.entry_info['structures']['properties']['nsites'],
+          'species_at_sites': optimade_entries.entry_info['structures']['properties']['species_at_sites'],
+          'cartesian_site_positions': optimade_entries.entry_info['structures']['properties']['cartesian_site_positions'],
+          'chemical_formula_anonymous': optimade_entries.entry_info['structures']['properties']['chemical_formula_anonymous'],
+          'chemical_formula_reduced': optimade_entries.entry_info['structures']['properties']['chemical_formula_reduced'],
       }
   },
+
   'calculations': {
       'description': optimade_entries.entry_info['calculations']['descripion'],
       'properties': {
           'id': optimade_entries.entry_info['calculations']['properties']['id'],
           'type': optimade_entries.entry_info['calculations']['properties']['type'],
+          '_httk_total_energy': optimade_entries.entry_info['calculations']['properties']['_httk_total_energy'],
+          '_httk_structure_id': optimade_entries.entry_info['calculations']['properties']['_httk_structure_id'],
       }
   },
   #'references': {
@@ -59,6 +68,15 @@ httk_entry_info['structures']['properties']['nelements']['default_response']=Tru
 httk_entry_info['structures']['properties']['chemical_formula_descriptive']['default_response']=True
 httk_entry_info['structures']['properties']['dimension_types']['default_response']=True
 httk_entry_info['structures']['properties']['nperiodic_dimensions']['default_response']=True
+# These have been added by hpleva:
+httk_entry_info['structures']['properties']['nsites']['default_response']=True
+httk_entry_info['structures']['properties']['species_at_sites']['default_response']=True
+httk_entry_info['structures']['properties']['cartesian_site_positions']['default_response']=True
+httk_entry_info['structures']['properties']['chemical_formula_anonymous']['default_response']=True
+httk_entry_info['structures']['properties']['chemical_formula_reduced']['default_response']=True
+
+httk_entry_info['calculations']['properties']['_httk_total_energy']['default_response']=True
+httk_entry_info['calculations']['properties']['_httk_structure_id']['default_response']=True
 
 #dict([(x,optimade_entries.entry_info[x]) for x in optimade_entries.entry_info if x in httk_all_entries])
 httk_valid_endpoints = list(['info', 'links'] + httk_all_entries + ["info/"+x for x in httk_all_entries] + [''])

@@ -29,6 +29,7 @@ from httk.optimade.httk_entries import httk_entry_info, httk_recognized_prefixes
 
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
+from httk.atomistic.results.elasticresult import Result_ElasticResult
 
 def format_value(fulltype, val, allow_null=False):
     if fulltype.startswith('list of '):
@@ -58,7 +59,8 @@ constant_types = ['String','Number']
 
 table_mapper = {
     'structures': Structure,
-    'calculations': Result_TotalEnergyResult,
+    # 'calculations': Result_TotalEnergyResult,
+    'calculations': Result_ElasticResult,
 }
 
 invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
@@ -360,6 +362,52 @@ optimade_field_handlers = {
             'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, has_type, search_variable),
             'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
-        }
+        },
+
+        # These have been added by hpleva:
+        # TODO: The 'comparison' etc. do not match the property, e.g. 'nsites', they have just been copy-pasted from above.
+        'nsites': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'species_at_sites': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'cartesian_site_positions': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'chemical_formula_anonymous': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('anonymous_formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('anonymous_formula', value, stringmatching_type, search_variable)
+        },
+        'chemical_formula_reduced': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('formula', value, stringmatching_type, search_variable)
+        },
     },
+    'calculations': {
+        'id': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('__id', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('__id', value, stringmatching_type, search_variable)
+        },
+        'type': {
+            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'calculations', search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: constant_stringmatching_handler(value, 'calculations', stringmatching_type, search_variable)
+        },
+        '_httk_total_energy': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('total_energy', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        '_httk_structure_id': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('structure_Structure_sid', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('structure_Structure_sid', value, stringmatching_type, search_variable)
+        },
+    }
 }

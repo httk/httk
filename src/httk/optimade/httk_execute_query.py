@@ -31,7 +31,20 @@ _field_map = {
         'dimension_types': lambda x,y: [1 if el else 0 for el in [True, True, True]],
         'nperiodic_dimensions': lambda x,y: list([True, True, True]).count(True),
         #TODO: Sort out what is wrong with x.pbc
-    }
+
+        # These have been added by hpleva:
+        'nsites': lambda x,y: len(x.uc.uc_cartesian_coords),
+        'species_at_sites': lambda x,y: [item for sublist in [[a.symbols[0]]*count for a, count in zip(x.assignments, x.uc_counts)] for item in sublist],
+        'cartesian_site_positions': lambda x,y: x.uc.uc_cartesian_coords.to_floats(),
+        'chemical_formula_reduced': lambda x,y: x.formula,
+        'chemical_formula_anonymous': lambda x,y: x.anonymous_formula,
+    },
+    'Result_ElasticResult': {
+        'type': lambda x,y: "calculations",
+        'id': lambda x,y: x.db.sid,
+        '_httk_total_energy': lambda x,y: x.total_energy,
+        '_httk_structure_id': lambda x,y: x.structure.db.sid,
+    },
 }
 
 class HttkResults(object):

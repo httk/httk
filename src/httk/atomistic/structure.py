@@ -602,7 +602,7 @@ class Structure(HttkObject):
 
     @property
     def uc_cartesian_coords(self):
-        return self.uc.get_cartesian_coords
+        return self.uc.uc_sites.get_cartesian_coords
 
     @property
     def uc_lengths_and_angles(self):
