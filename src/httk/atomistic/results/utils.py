@@ -1,5 +1,29 @@
+import copy
 from httk.core.httkobject import HttkObject, httk_typed_init
 from httk.core import FracVector
+from httk.atomistic import Structure, Spacegroup
+from httk.atomistic.assignments import Assignments
+from httk.atomistic.sites import Sites
+from httk.atomistic.cell import Cell
+from httk.atomistic.representativesites import RepresentativeSites
+
+# Store initial_structure (the input file POSCAR) as a new class,
+# so that the Structure table in the SQLite file does not get
+# polluted with initial structures.
+class InitialStructure(Structure):
+
+    @classmethod
+    def use(cls, other):
+        if isinstance(other, InitialStructure):
+            return other
+        elif isinstance(other, Structure):
+            return InitialStructure(other.assignments, other.rc_sites,
+                                    other.rc_cell)
+        else:
+            raise Exception("InitialStructure.use: do not know how to use object of class:"+str(other.__class__))
+
+    def __str__(self):
+        return "<httk InitialStructure object:\n  "+str(self.rc_cell)+"\n  "+str(self.assignments)+"\n  "+str(self.rc_sites)+"\n  Tags:"+str([str(self.get_tags()[tag]) for tag in self.get_tags()])+"\n  Refs:"+str([str(ref) for ref in self.get_refs()])+"\n>"
 
 class ElasticTensor(HttkObject):
     @httk_typed_init({'matrix': (FracVector, 6, 6)})

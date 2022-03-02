@@ -20,7 +20,7 @@ from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_propert
 from httk.atomistic import Structure
 from httk.core import FracVector
 from httk.atomistic.results.utils import ElasticTensor
-
+from httk.atomistic.results.utils import InitialStructure
 
 class Result_ElasticResult(httk.Result):
     """
@@ -35,7 +35,7 @@ class Result_ElasticResult(httk.Result):
     @httk.httk_typed_init({
         'total_energy': float,
         'computation': httk.Computation,
-        'initial_structure': Structure,
+        'initial_structure': InitialStructure,
         'structure': Structure,
         'temperature': float,
         'elastic_tensor': ElasticTensor,
@@ -52,46 +52,36 @@ class Result_ElasticResult(httk.Result):
         'mechanically_stable': bool,
         'mechanically_stable_with_tolerance': bool,
         'atomic_relaxations': bool,
-        # 'walltimes': str,
         'rundir': str,
         'material_id': str,
-        # 'version': str,
-        # 'encut': float,
-        # 'nkpts': int,
-        # 'pseudopots': str,
         'incar': str,
         'kpoints': str,
         })
     def __init__(self,
-            total_energy,
-            computation,
-            initial_structure,
-            structure,
-            temperature,
-            elastic_tensor,
-            elastic_tensor_nosym,
-            compliance_tensor,
-            K_V,
-            K_R,
-            K_VRH,
-            G_V,
-            G_R,
-            G_VRH,
-            mu_VRH,
-            E_VRH,
-            mechanically_stable,
-            mechanically_stable_with_tolerance,
-            atomic_relaxations,
-            # walltimes,
-            rundir,
-            material_id,
-            # version,
-            # encut,
-            # nkpts,
-            # pseudopots,
-            incar,
-            kpoints,
-            ):
+        total_energy,
+        computation,
+        initial_structure,
+        structure,
+        temperature,
+        elastic_tensor,
+        elastic_tensor_nosym,
+        compliance_tensor,
+        K_V,
+        K_R,
+        K_VRH,
+        G_V,
+        G_R,
+        G_VRH,
+        mu_VRH,
+        E_VRH,
+        mechanically_stable,
+        mechanically_stable_with_tolerance,
+        atomic_relaxations,
+        rundir,
+        material_id,
+        incar,
+        kpoints,
+        ):
         self.total_energy = total_energy
         self.computation = computation
         self.initial_structure = initial_structure
@@ -111,12 +101,7 @@ class Result_ElasticResult(httk.Result):
         self.mechanically_stable = mechanically_stable
         self.mechanically_stable_with_tolerance = mechanically_stable_with_tolerance
         self.atomic_relaxations = atomic_relaxations
-        # self.walltimes = walltimes
         self.rundir = rundir
         self.material_id = material_id
-        # self.version = version
-        # self.encut = encut
-        # self.nkpts = nkpts
-        # self.pseudopots = pseudopots
         self.incar = incar
         self.kpoints = kpoints

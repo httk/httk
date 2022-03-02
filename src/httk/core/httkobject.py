@@ -68,7 +68,10 @@ class HttkObject(object):
     @classmethod
     def types(cls):
         try:
-            return cls.types_resolved
+            # Make sure the cached types_resolved is not
+            # outdated.
+            if cls.types_resolved['name'] == cls.__name__:
+                return cls.types_resolved
         except Exception:
             pass
 

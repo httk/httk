@@ -21,6 +21,7 @@ from httk.core import FracVector
 from httk.atomistic.results.utils import ElasticTensorFloat
 from httk.atomistic.results.utils import ThirdOrderElasticTensor
 from httk.atomistic.results.utils import PlaneDependentTensor
+from httk.atomistic.results.utils import InitialStructure
 
 class Result_AIMDResult(httk.Result):
     """
@@ -29,8 +30,7 @@ class Result_AIMDResult(httk.Result):
     @httk.httk_typed_init({
         'total_energy': float,
         'computation': httk.Computation,
-        'formula': str,
-        'initial_structure': Structure,
+        'initial_structure': InitialStructure,
         'structure': Structure,
         'temperature': float,
         'VEC': float,
@@ -57,7 +57,6 @@ class Result_AIMDResult(httk.Result):
     def __init__(self,
         total_energy,
         computation,
-        formula,
         initial_structure,
         structure,
         temperature,
@@ -81,10 +80,9 @@ class Result_AIMDResult(httk.Result):
         B,
         Ev,
         G_over_B,
-            ):
+        ):
         self.total_energy = total_energy
         self.computation = computation
-        self.formula = formula
         self.initial_structure = initial_structure
         self.structure = structure
         self.temperature = temperature
