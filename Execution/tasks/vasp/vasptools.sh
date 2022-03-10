@@ -465,8 +465,8 @@ function VASP_PREPARE_INCAR {
 	VASP_SET_TAG "NPAR" "1"
     fi
 
-    local MAGMOMS=$(VASP_GET_TAG MAGMOMS)
-    if [ -z "$MAGMOMS" ]; then
+    local MAGMOM=$(VASP_GET_TAG MAGMOM)
+    if [ -z "$MAGMOM" ]; then
 	LINE=$(VASP_MAGMOMLINE)
 	if [ -z "$LINE" ]; then
 	    echo "Error in VASP_PREPARE_INCAR: got empty MAGMOM line" >&2
