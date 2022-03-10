@@ -228,7 +228,7 @@ def poscar_to_strs(fio, included_decimals=''):
     return (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
 
 
-def poscar_to_structure(f, included_decimals=''):
+def poscar_to_structure(f, included_decimals='', structure_class=Structure):
     cell, scale, volume, coords, coords_reduced, counts, occupations, comment = poscar_to_strs(f, included_decimals)
 
     frac_cell = FracVector.create(cell, simplify=True)
@@ -249,7 +249,7 @@ def poscar_to_structure(f, included_decimals=''):
     for occupation in occupations:
         newoccupations.append(periodictable.atomic_number(occupation))
 
-    struct = Structure.create(uc_basis=frac_cell, uc_volume=volume, uc_scale=scale, uc_reduced_coords=frac_coords, uc_counts=counts, assignments=newoccupations, tags={'comment': comment}, periodicity=0)
+    struct = structure_class.create(uc_basis=frac_cell, uc_volume=volume, uc_scale=scale, uc_reduced_coords=frac_coords, uc_counts=counts, assignments=newoccupations, tags={'comment': comment}, periodicity=0)
 
     return struct
 
