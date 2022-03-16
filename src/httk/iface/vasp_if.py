@@ -29,7 +29,6 @@ from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
 
-import numpy as np
 from pymatgen.core import Structure as pmg_Structure
 from pymatgen.io.vasp import Poscar as pmg_Poscar
 from pymatgen.core.lattice import Lattice as pmg_Lattice
@@ -456,12 +455,12 @@ class OutcarReader():
             # Due to these VASP conventions, provide also the stress tensor
             # in the normal Voigt order and in units of GPa:
             self.stress_tensor_voigt_gpa = [
-                str(np.round(-float(self.stress_tensor[0])/10, 5)),
-                str(np.round(-float(self.stress_tensor[1])/10, 5)),
-                str(np.round(-float(self.stress_tensor[2])/10, 5)),
-                str(np.round(-float(self.stress_tensor[4])/10, 5)),
-                str(np.round(-float(self.stress_tensor[5])/10, 5)),
-                str(np.round(-float(self.stress_tensor[3])/10, 5)),
+                str(round(-float(self.stress_tensor[0])/10, 5)),
+                str(round(-float(self.stress_tensor[1])/10, 5)),
+                str(round(-float(self.stress_tensor[2])/10, 5)),
+                str(round(-float(self.stress_tensor[4])/10, 5)),
+                str(round(-float(self.stress_tensor[5])/10, 5)),
+                str(round(-float(self.stress_tensor[3])/10, 5)),
                 ]
 
         results = micro_pyawk(self.ioa, [
@@ -478,6 +477,7 @@ def read_outcar(ioa):
 
 
 def get_dist_matrix(array):
+    from httk.external.numpy_ext import numpy as np
     return np.array([
         [1+array[0], array[5]/2, array[4]/2],
         [array[5]/2, 1+array[1], array[3]/2],
@@ -487,6 +487,8 @@ def get_dist_matrix(array):
 
 def distort(dist_mat, mat):
     """Apply distortion matrix"""
+    from httk.external.numpy_ext import numpy as np
+
     array = np.array(mat)
     for i in range(len(mat)):
         array[i, :] = np.array([np.sum(dist_mat[0, :]*mat[i, :]),
@@ -505,6 +507,8 @@ def rotation_matrix(axis, theta):
     :param theta:
     :type theta:
     """
+    from httk.external.numpy_ext import numpy as np
+
     axis = np.asarray(axis)
     theta = np.asarray(theta)
     axis = axis/np.linalg.norm(axis)
@@ -518,6 +522,8 @@ def rotation_matrix(axis, theta):
 
 
 def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
+    from httk.external.numpy_ext import numpy as np
+
     dist_ind = ELASTICSTEP - 1
     delta_ind = DELTASTEP - 1
     d = deltas[dist_ind][delta_ind]
@@ -534,6 +540,8 @@ def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
 
 
 def elastic_config(fn):
+    from httk.external.numpy_ext import numpy as np
+
     config = configparser.ConfigParser()
     config.read(fn)
     # The type of symmetry
@@ -601,6 +609,8 @@ def elastic_config(fn):
 
 
 def get_elastic_constants(path, settings_path=".."):
+    from httk.external.numpy_ext import numpy as np
+
     elastic_config_file = os.path.join(path, settings_path, "settings.elastic")
     if not os.path.exists(elastic_config_file):
         sys.exit("File {} can not be found!".format(elastic_config_file))

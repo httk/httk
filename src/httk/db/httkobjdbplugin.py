@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -20,7 +20,7 @@ from httk.db.storable import Storable
 
 
 class HttkObjDbPlugin(HttkPlugin):
-            
+
     def plugin_init(self, obj):
         self.obj = obj
         self.types = obj.types()
@@ -30,7 +30,7 @@ class HttkObjDbPlugin(HttkPlugin):
         self.derived = self.types['derived']
         self.derived_keydict = dict(self.types['derived'])
         self.index = self.types['index']
-        self.storable = Storable({"name": self.object_name, "keys": self.keys, "keydict": self.keydict, "index": self.index, 
+        self.storable = Storable({"name": self.object_name, "keys": self.keys, "keydict": self.keydict, "index": self.index,
                                   "derived": self.derived, "derived_keydict": self.derived_keydict})
         self.sid = None
 
@@ -51,7 +51,9 @@ class HttkObjDbPlugin(HttkPlugin):
                 # the "self.structure" attribute.
                 if 'types_resolved' in vars(c['class']) and \
                     'name' in c['class'].types_resolved.keys() and \
-                    c['class'].types_resolved['name'] == "StructureTag":
+                    (c['class'].types_resolved['name'] == "StructureTag" or
+                     c['class'].types_resolved['name'] == "StructureRef"):
+                    if c['class'].types_resolved['name'] == "StructureTag":
                         search.output(p.tag, 'tag')
                         search.output(p.value, 'value')
                         results = list(search)
@@ -59,9 +61,17 @@ class HttkObjDbPlugin(HttkPlugin):
                         results_dict = {}
                         for res in results:
                             results_dict[res[0][0]] = res[0][1]
-
                         if len(results_dict.keys()) > 0:
                             getattr(self.obj, c['add_method'])(results_dict)
+
+                    elif c['class'].types_resolved['name'] == "StructureRef":
+                        search.output(p.reference, 'reference')
+                        results = list(search)
+                        for i in range(len(results)):
+                            results[i] = results[i][0][0].ref
+                        if len(results) > 0:
+                            getattr(self.obj, c['add_method'])(results)
+
                 else:
                     search.output(p, 'object')
                     results = list(search)
@@ -85,7 +95,7 @@ class HttkObjDbPlugin(HttkPlugin):
                 for variables in self.keys:
                     if issubclass(variables[1], HttkObject):
                         definedvariables += [search.variable(variables[1])]
-                
+
                 p = search.variable(self.obj.__class__)
                 for variables in self.keys:
                     shouldbe = getattr(self.obj, variables[0])
@@ -104,7 +114,7 @@ class HttkObjDbPlugin(HttkPlugin):
                     p = results[0][0][0]
                     self.sid = p.db.sid
                     self.storable = p.db.storable
-        
+
         data = {}
         for key in dict(self.keydict):
             data[key] = getattr(self.obj, key)

@@ -179,8 +179,10 @@ class Sites(HttkObject):
 
     def clean(self):
 
-        reduced_coordgroups = self.reduced_coordgroups.limit_denominator(5000000)
-        reduced_coords = self.reduced_coords.limit_denominator(5000000)
+        # reduced_coordgroups = self.reduced_coordgroups.limit_denominator(5000000)
+        # reduced_coords = self.reduced_coords.limit_denominator(5000000)
+        reduced_coordgroups = self.reduced_coordgroups.set_denominator(5000000).simplify()
+        reduced_coords = self.reduced_coords.set_denominator(5000000).simplify()
 
         return self.__class__(reduced_coordgroups=reduced_coordgroups,
                               reduced_coords=reduced_coords,

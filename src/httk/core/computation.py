@@ -115,8 +115,10 @@ class Computation(HttkObject):
             self._fill_codependent_data()
         if isinstance(ref, ComputationRef):
             refobj = ref.reference
+        elif isinstance(ref, Reference):
+            refobj = ref
         else:
-            refobj = ComputationRef.use(ref)
+            refobj = Reference.use(ref)
         new = ComputationRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]

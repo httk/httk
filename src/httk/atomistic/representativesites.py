@@ -38,8 +38,8 @@ class RepresentativeSites(Sites):
     def __init__(self, reduced_coordgroups=None,
                  cartesian_coordgroups=None, reduced_coords=None,
                  cartesian_coords=None, counts=None,
-                 hall_symbol=None, pbc=None, wyckoff_symbols=None,
-                 multiplicities=None):
+                 hall_symbol=None, pbc=None, wyckoff_symbols=[],
+                 multiplicities=[]):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
         """
@@ -57,7 +57,7 @@ class RepresentativeSites(Sites):
                reduced_coords=None,
                counts=None,
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-               periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None):
+               periodicity=None, wyckoff_symbols=[], multiplicities=[], occupancies=None, pbc=None):
 
         sites = super(RepresentativeSites, cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups,
                                                        reduced_coords=reduced_coords,
@@ -98,6 +98,11 @@ class RepresentativeSites(Sites):
     @httk_typed_property(str)
     def anonymous_wyckoff_sequence(self):
         if self.wyckoff_symbols is None:
+            return None
+        # When this object is retrieved from a database, self.wyckoff_symbols
+        # is no longer None, but an empty list. Need additional check for that:
+        elif isinstance(self.wyckoff_symbols, list) and \
+             len(self.wyckoff_symbols) == 0:
             return None
         data = {}
         idx = 0

@@ -354,13 +354,14 @@ class SqlStore(object):
 
         origt = t
 
+
         # Regular column, no strangeness
         if t in self.basics:
             if t == FracScalar:
                 val = self.db.get_val(table, table+"_id", sid, name)
                 if val is None:
                     return None
-                return FracVector.create(FracScalar(int(val), 1000000000).limit_denominator(5000000))
+                return FracVector.create(FracScalar(int(val), 1000000000).limit_denominator(5000000000))
             return self.db.get_val(table, table+"_id", sid, name)
 
         # List type means we need to establish a second table and store key values
@@ -455,10 +456,15 @@ class SqlStore(object):
                     #
                     # Speed-optimized version:
                     reshaped = list(zip(*([iter(flat)]*t[1])))
-                    return FracVector.create_fast(reshaped, common_denom=1000000000, max_denom=5000000)
+                    return FracVector.create_fast(reshaped, common_denom=1000000000, max_denom=5000000000)
                 else:
-                    map(tupletype, flat)
-                    return zip(*[iter(flat)]*t[1])
+                    # Is it better if a single value is returned as the value
+                    # instead of as a length-one tuple?
+                    flat = list(map(tupletype, flat))
+                    if t[1] > 1:
+                        return list(zip(*[iter(flat)]*t[1]))
+                    else:
+                        return flat
                 # TODO: ADD support for numpy
 
             # Variable length numpy array, needs subtable
@@ -492,7 +498,7 @@ class SqlStore(object):
                     #     Here, by passing the max_denom=5_000_000 argument we end up with a FracVector
                     #     for which the common denominator becomes 5_000_000, instead of some gigantically large integer.
                     #
-                    return FracVector.create_fast(vals, common_denom=1000000000, max_denom=5000000)
+                    return FracVector.create_fast(vals, common_denom=1000000000, max_denom=5000000000)
                 else:
                     return self.db.get_row(subtablename, table+"_sid", sid, columnames)
 

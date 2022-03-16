@@ -255,7 +255,8 @@ class Cell(HttkObject):
         return Cell.create(basis=self.basis*scale.simplify())
 
     def clean(self):
-        newbasis = self.basis.limit_denominator(5000000)
+        # newbasis = self.basis.limit_denominator(5000000)
+        newbasis = self.basis.set_denominator(5000000).simplify()
         #new_niggli_matrix = self.niggli_matrix.limit_denominator(5000000)
         return self.__class__(newbasis, lattice_system=self.lattice_system, orientation=self.orientation)
 

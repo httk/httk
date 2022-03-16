@@ -131,7 +131,7 @@ class Sqlite(object):
         if result == []:
             return False
         return True
-    
+
     def create_table(self, name, primkey, columnnames, columntypes, cursor=None, index=None):
         sql = primkey+" INTEGER PRIMARY KEY"
         for i in range(len(columnnames)):
