@@ -75,6 +75,7 @@ httk_entry_info['structures']['properties']['cartesian_site_positions']['default
 httk_entry_info['structures']['properties']['chemical_formula_anonymous']['default_response']=True
 httk_entry_info['structures']['properties']['chemical_formula_reduced']['default_response']=True
 
+# calculations
 httk_entry_info['calculations']['properties']['_httk_total_energy']['default_response']=True
 httk_entry_info['calculations']['properties']['_httk_structure_id']['default_response']=True
 

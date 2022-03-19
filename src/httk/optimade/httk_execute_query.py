@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 from httk.optimade.optimade_filter_to_httk import optimade_filter_to_httk
 from httk.optimade.httk_entries import httk_recognized_prefixes
 
@@ -39,6 +40,12 @@ _field_map = {
         'chemical_formula_reduced': lambda x,y: x.formula,
         'chemical_formula_anonymous': lambda x,y: x.anonymous_formula,
     },
+    'Result_AIMDResult': {
+        'type': lambda x,y: "calculations",
+        'id': lambda x,y: x.db.sid,
+        '_httk_total_energy': lambda x,y: x.total_energy,
+        '_httk_structure_id': lambda x,y: x.structure.db.sid,
+    },
     'Result_ElasticResult': {
         'type': lambda x,y: "calculations",
         'id': lambda x,y: x.db.sid,
@@ -48,9 +55,15 @@ _field_map = {
 }
 
 class HttkResults(object):
-    def __init__(self, searcher, response_fields, unknown_response_fields, limit, offset):
-        self.searcher = searcher
-        self.cur = iter(searcher)
+    # TODO: searcher should be able to iterate through more than one result.
+    # TODO: itertools.chain
+    # TODO: searcher -> searchers: list
+    def __init__(self, searchers, response_fields, unknown_response_fields, limit, offset):
+        if not isinstance(searchers, list):
+            searchers = [searchers]
+        self.searchers = searchers
+        # self.cur = iter(searcher)
+        self.cur = iter(itertools.chain(*searchers))
         self.limit = limit
         self.response_fields = response_fields
         self.unknown_response_fields = unknown_response_fields
@@ -59,7 +72,11 @@ class HttkResults(object):
         self.more_data_available = True
 
     def count(self):
-        return self.searcher.count()
+        count = 0
+        for searcher in self.searchers:
+            count += searcher.count()
+        # return self.searcher.count()
+        return count
 
     def __iter__(self):
         return self
@@ -86,13 +103,15 @@ class HttkResults(object):
                     raise Exception("Unexpected field requested:"+str(field))
         except StopIteration:
             self.more_data_available = False
-            self.cur.close()
+            # self.cur.close()
+            self.close()
             self.cur = None
             raise StopIteration
 
         if self.limit is not None and self._count == self.limit:
             self.more_data_available = True
-            self.cur.close()
+            # self.cur.close()
+            self.close()
             self.cur = None
             raise StopIteration
 
@@ -100,9 +119,15 @@ class HttkResults(object):
 
         return result
 
+    def close(self):
+        pass
+        # for searcher in self.searchers:
+        #     searcher.close()
+
     def __del__(self):
         if self.cur is not None:
-            self.cur.close()
+            # self.cur.close()
+            self.close()
 
     # Python 2 compability
     def next(self):
@@ -110,17 +135,40 @@ class HttkResults(object):
 
 def httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
 
-    searcher = store.searcher()
+    # searcher = store.searcher()
 
-    searcher =  optimade_filter_to_httk(optimade_filter_ast, entries, searcher)
-    if response_limit is not None:
-        # We need one more than asked for to know if there is more data.
-        searcher.set_limit(response_limit+1)
-    if response_offset is not None:
-        searcher.add_offset(response_offset)
+    searchers =  optimade_filter_to_httk(optimade_filter_ast, entries, store)
+
+    if response_offset is not None and response_offset != 0:
+        remaining_offset = response_offset
+        for i, searcher in enumerate(searchers):
+            count = searcher.count()
+            remaining_offset -= count
+            if remaining_offset < 0:
+                searcher.add_offset(count - remaining_offset)
+                searchers = searchers[i:]
+                break
+
+    if response_limit is not None and response_limit != 0:
+        remaining_limit = response_limit
+        for i, searcher in enumerate(searchers):
+            count = searcher.count()
+            remaining_limit -= count
+            if remaining_limit < 0:
+                searcher.set_limit(count - remaining_limit)
+                searchers = searchers[:i+1]
+                break
+
+    # results_iterator = itertools.chain(*searchers)
+
+    # if response_limit is not None:
+    #     # We need one more than asked for to know if there is more data.
+    #     searcher.set_limit(response_limit+1)
+    # if response_offset is not None:
+    #     searcher.add_offset(response_offset)
 
     # Offset (and limit, but it doesn't matter) is already handled by the searcher.
-    return HttkResults(searcher, response_fields, unknown_response_fields, response_limit, 0)
+    return HttkResults(searchers, response_fields, unknown_response_fields, response_limit, 0)
 
 if __name__ == "__main__":
 

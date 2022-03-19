@@ -30,6 +30,7 @@ from httk.optimade.httk_entries import httk_entry_info, httk_recognized_prefixes
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
 from httk.atomistic.results.elasticresult import Result_ElasticResult
+from httk.atomistic.results.aimdresult import Result_AIMDResult
 
 def format_value(fulltype, val, allow_null=False):
     if fulltype.startswith('list of '):
@@ -60,28 +61,44 @@ constant_types = ['String','Number']
 table_mapper = {
     'structures': Structure,
     # 'calculations': Result_TotalEnergyResult,
-    'calculations': Result_ElasticResult,
+    # 'calculations': Result_ElasticResult,
+    'calculations': [Result_ElasticResult, Result_AIMDResult],
 }
 
 invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
 _python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__', 'STARTS':'startswith','ENDS':'endswith'}
 
-def optimade_filter_to_httk(filter_ast, entries, searcher):
+def optimade_filter_to_httk(filter_ast, entries, store):
 
+    searchers = []
     search_variables = []
 
     for entry in entries:
-        search_variable = searcher.variable(table_mapper[entry])
-        searcher.output(search_variable,entry)
-        search_variables += [search_variable]
+        if isinstance(table_mapper[entry], list):
+            for sub_entry in table_mapper[entry]:
+                searcher = store.searcher()
+                search_variable = searcher.variable(sub_entry)
+                searcher.output(search_variable, entry)
+                searchers += [searcher]
+                search_variables.append(search_variable)
+        else:
+            searcher = store.searcher()
+            search_variable = searcher.variable(table_mapper[entry])
+            searcher.output(search_variable, entry)
+            searchers += [searcher]
+            search_variables.append(search_variable)
 
         if filter_ast is not None:
-            search_expr, needs_post = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry, False)
-            searcher.add(search_expr)
-            if needs_post:
-                searcher.add_all(search_expr)
+            for searcher, search_variable in zip(searchers, search_variables):
+                search_expr, needs_post = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry, False)
+                searcher.add(search_expr)
+                if needs_post:
+                    searcher.add_all(search_expr)
 
-    return searcher
+    if len(searchers) == 0:
+        searchers = [store.searcher()]
+
+    return searchers
 
 
 def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, recursion=0):
@@ -405,9 +422,9 @@ optimade_field_handlers = {
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
         },
         '_httk_structure_id': {
-            'comparison': lambda entry, op, value, search_variable: string_handler('structure_Structure_sid', op, value, search_variable),
+            'comparison': lambda entry, op, value, search_variable: string_handler('structure', op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
-            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('structure_Structure_sid', value, stringmatching_type, search_variable)
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('structure', value, stringmatching_type, search_variable)
         },
     }
 }
