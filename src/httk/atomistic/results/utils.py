@@ -35,6 +35,7 @@ class InitialStructure(Structure):
                str([str(self.get_tags()[tag]) for tag in self.get_tags()])+\
                "\n  Refs:"+str([str(ref) for ref in self.get_refs()])+"\n>"
 
+
 class ElasticTensor(HttkObject):
     @httk_typed_init({'_matrix': (FracVector, 6, 6), '_nan_mask': (int, 6, 6)})
     def __init__(self, _matrix, _nan_mask):

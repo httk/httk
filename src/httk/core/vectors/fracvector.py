@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, random, operator, itertools, decimal
+import sys, random, operator, itertools, decimal, math
 from functools import reduce
 from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector, string_types, integer_types
@@ -483,9 +483,17 @@ class FracVector(Vector):
         """
         Converts the ExactVector to a list of floats.
         """
+        def to_floats_nan_check(x, denom):
+            if math.isnan(x):
+                return x
+            else:
+                return float(fractions.Fraction(x, denom))
+
         #denom = float(self.denom)
         #return nested_map_list(lambda x: float(x) / denom, self.noms)
-        return nested_map_list(lambda x: float(fractions.Fraction(x, self.denom)), self.noms)
+        # return nested_map_list(lambda x: float(fractions.Fraction(x, self.denom)), self.noms)
+        #
+        return nested_map_list(lambda x: to_floats_nan_check(x, self.denom), self.noms)
 
     def to_float(self):
         """
