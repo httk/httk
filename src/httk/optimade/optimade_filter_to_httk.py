@@ -62,7 +62,8 @@ table_mapper = {
     'structures': Structure,
     # 'calculations': Result_TotalEnergyResult,
     # 'calculations': Result_ElasticResult,
-    'calculations': [Result_ElasticResult, Result_AIMDResult],
+    # 'calculations': [Result_ElasticResult, Result_AIMDResult],
+    'calculations': [Result_AIMDResult, Result_ElasticResult],
 }
 
 invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
@@ -79,13 +80,13 @@ def optimade_filter_to_httk(filter_ast, entries, store):
                 searcher = store.searcher()
                 search_variable = searcher.variable(sub_entry)
                 searcher.output(search_variable, entry)
-                searchers += [searcher]
+                searchers.append(searcher)
                 search_variables.append(search_variable)
         else:
             searcher = store.searcher()
             search_variable = searcher.variable(table_mapper[entry])
             searcher.output(search_variable, entry)
-            searchers += [searcher]
+            searchers.append(searcher)
             search_variables.append(search_variable)
 
         if filter_ast is not None:

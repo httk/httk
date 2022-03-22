@@ -55,9 +55,6 @@ _field_map = {
 }
 
 class HttkResults(object):
-    # TODO: searcher should be able to iterate through more than one result.
-    # TODO: itertools.chain
-    # TODO: searcher -> searchers: list
     def __init__(self, searchers, response_fields, unknown_response_fields, limit, offset):
         if not isinstance(searchers, list):
             searchers = [searchers]
@@ -135,9 +132,7 @@ class HttkResults(object):
 
 def httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
 
-    # searcher = store.searcher()
-
-    searchers =  optimade_filter_to_httk(optimade_filter_ast, entries, store)
+    searchers = optimade_filter_to_httk(optimade_filter_ast, entries, store)
 
     if response_offset is not None and response_offset != 0:
         remaining_offset = response_offset
@@ -145,21 +140,23 @@ def httk_execute_query(store, entries, response_fields, unknown_response_fields,
             count = searcher.count()
             remaining_offset -= count
             if remaining_offset < 0:
-                searcher.add_offset(count - remaining_offset)
+                # In SQLite, having an OFFSET without a LIMIT results in a syntax
+                # error. We must therefore set a dummy limit -1, which means no bound.
+                searcher.set_limit(-1)
+                searcher.add_offset(count + remaining_offset)
                 searchers = searchers[i:]
                 break
 
     if response_limit is not None and response_limit != 0:
         remaining_limit = response_limit
         for i, searcher in enumerate(searchers):
-            count = searcher.count()
+            count = searcher.count() - searcher.offset
             remaining_limit -= count
             if remaining_limit < 0:
-                searcher.set_limit(count - remaining_limit)
+                # We need one more than asked for to know if there is more data.
+                searcher.set_limit(count + remaining_limit + 1)
                 searchers = searchers[:i+1]
                 break
-
-    # results_iterator = itertools.chain(*searchers)
 
     # if response_limit is not None:
     #     # We need one more than asked for to know if there is more data.
