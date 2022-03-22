@@ -60,7 +60,7 @@ class HttkResults(object):
             searchers = [searchers]
         self.searchers = searchers
         # self.cur = iter(searcher)
-        self.cur = iter(itertools.chain(*searchers))
+        self.cur = itertools.chain(*searchers)
         self.limit = limit
         self.response_fields = response_fields
         self.unknown_response_fields = unknown_response_fields
@@ -71,8 +71,7 @@ class HttkResults(object):
     def count(self):
         count = 0
         for searcher in self.searchers:
-            count += searcher.count()
-        # return self.searcher.count()
+            count += searcher.count() - searcher.offset
         return count
 
     def __iter__(self):
@@ -95,19 +94,17 @@ class HttkResults(object):
                         if field.startswith(prefix):
                             field = field[len(prefix):]
                             break
-                    result[field]=getattr(row,field)
+                    result[field]=getattr(row, field)
                 else:
                     raise Exception("Unexpected field requested:"+str(field))
         except StopIteration:
             self.more_data_available = False
-            # self.cur.close()
             self.close()
             self.cur = None
             raise StopIteration
 
         if self.limit is not None and self._count == self.limit:
             self.more_data_available = True
-            # self.cur.close()
             self.close()
             self.cur = None
             raise StopIteration
@@ -117,20 +114,21 @@ class HttkResults(object):
         return result
 
     def close(self):
+        # self.cur.close()
+        # There is nothing to close when we use itertools.chain().
         pass
-        # for searcher in self.searchers:
-        #     searcher.close()
 
     def __del__(self):
         if self.cur is not None:
-            # self.cur.close()
             self.close()
 
     # Python 2 compability
     def next(self):
         return self.__next__()
 
-def httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
+def httk_execute_query(store, entries, response_fields, unknown_response_fields,
+                       response_limit, response_offset, optimade_filter_ast=None,
+                       debug=False):
 
     searchers = optimade_filter_to_httk(optimade_filter_ast, entries, store)
 
