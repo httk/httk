@@ -29,9 +29,6 @@ from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
 
-from pymatgen.core import Structure as pmg_Structure
-from pymatgen.io.vasp import Poscar as pmg_Poscar
-from pymatgen.core.lattice import Lattice as pmg_Lattice
 
 if sys.version_info[0] == 3:
     import configparser
@@ -523,6 +520,10 @@ def rotation_matrix(axis, theta):
 
 def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
     from httk.external.numpy_ext import numpy as np
+    from httk.external import pymatgen_glue
+    from pymatgen.core import Structure as pmg_Structure
+    from pymatgen.io.vasp import Poscar as pmg_Poscar
+    from pymatgen.core.lattice import Lattice as pmg_Lattice
 
     dist_ind = ELASTICSTEP - 1
     delta_ind = DELTASTEP - 1

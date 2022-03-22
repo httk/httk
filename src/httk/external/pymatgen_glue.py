@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import numpy as np
 
 from httk.core import citation
 from httk.core.basic import is_sequence
@@ -127,6 +126,7 @@ def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
             return_atomic_symbols=True)
 
     if find_primitive:
+        from httk.external.numpy_ext import numpy as np
         import spglib
         dataset = spglib.get_symmetry_dataset(
             (cell, coords, symbols_int))
