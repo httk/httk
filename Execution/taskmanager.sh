@@ -66,9 +66,9 @@ BZIPLOG=1
 ZSTDLOG=0
 
 # If we have to restart to fix the process group, the command line
-# arguments are lost in the restart, because "$@" on line 171 is empty.
+# arguments are lost in the restart, because "$@" on line 175 is empty.
 # Collect arguments in the "args_restart" array to make sure that they
-# are not lost during the restart; see line 172.
+# are not lost during the restart; see line 176.
 # The "-d" argument should not be saved, because taskmanager changes
 # directory based on the value of -d and the directory change survives
 # the restart.
