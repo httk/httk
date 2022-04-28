@@ -235,7 +235,7 @@ class Result_ElasticResult(httk.Result):
                     new_authors.append(Author.create(a.last_name, a.given_names))
                 new_editors = []
                 for e in r.editors:
-                    new_editors.append(Author.create(a.last_name, a.given_names))
+                    new_editors.append(Author.create(e.last_name, e.given_names))
                 new_references.append(
                     Reference(
                         ref=r.ref, authors=new_authors, editors=new_editors,
