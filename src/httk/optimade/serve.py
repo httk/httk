@@ -35,6 +35,10 @@ def format_output(output):
 
 def serve(store, config=None, port=8080, baseurl=None, basepath='/', debug=False):
 
+    # hpleva has made changes to the handling of baseurl/basepath to make
+    # it easier for a user to change the address from where the OPTIMADE
+    # entrypoint is served.
+
     if config is None:
         config = {}
 

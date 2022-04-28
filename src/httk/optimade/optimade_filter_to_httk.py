@@ -58,6 +58,9 @@ def format_value(fulltype, val, allow_null=False):
 
 constant_types = ['String','Number']
 
+# Currently the Result types that we want to query over with
+# the "calculations" entrypoint are hardcoded right here.
+# Needs a way for them to be specified by the user.
 table_mapper = {
     'structures': Structure,
     # 'calculations': Result_TotalEnergyResult,
@@ -70,6 +73,9 @@ invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
 _python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__', 'STARTS':'startswith','ENDS':'endswith'}
 
 def optimade_filter_to_httk(filter_ast, entries, store):
+
+    # This function was heavily modified to make it possible to query more than
+    # one Result type simultaneously.
 
     searchers = []
     search_variables = []

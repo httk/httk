@@ -66,6 +66,8 @@ else:
     from StringIO import StringIO
     import ConfigParser as configparser
 
+# This fixes a bug that might happen with standalone Python
+# that is using "frozen" modules.
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     python_root = os.path.abspath(sys._MEIPASS) + "/httk"
 else:

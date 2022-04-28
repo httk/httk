@@ -255,6 +255,7 @@ class Cell(HttkObject):
         return Cell.create(basis=self.basis*scale.simplify())
 
     def clean(self):
+        # I think it should be ".simplify()" here instead of ".limit_denominator()".
         # newbasis = self.basis.limit_denominator(5000000)
         newbasis = self.basis.set_denominator(5000000).simplify()
         #new_niggli_matrix = self.niggli_matrix.limit_denominator(5000000)

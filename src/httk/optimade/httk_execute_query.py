@@ -40,6 +40,9 @@ _field_map = {
         'chemical_formula_reduced': lambda x,y: x.formula,
         'chemical_formula_anonymous': lambda x,y: x.anonymous_formula,
     },
+    # Currently the names of the Result types that we want to use are hardcoded
+    # right here.
+    # Needs a mechanism to make the Result type changeable by user.
     'Result_AIMDResult': {
         'type': lambda x,y: "calculations",
         'id': lambda x,y: x.db.sid,
@@ -129,6 +132,9 @@ class HttkResults(object):
 def httk_execute_query(store, entries, response_fields, unknown_response_fields,
                        response_limit, response_offset, optimade_filter_ast=None,
                        debug=False):
+
+    # This function was heavily modified to make it possible to query more than
+    # one Result type simultaneously.
 
     searchers = optimade_filter_to_httk(optimade_filter_ast, entries, store)
 
