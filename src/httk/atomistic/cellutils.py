@@ -22,7 +22,7 @@ from httk.core.vectors import FracVector, vectormath
 from httk.atomistic.spacegrouputils import crystal_system_from_hall
 
 try:
-    from quicktions import Fraction
+    from cfractions import Fraction
 except:
     from fractions import Fraction
 

@@ -17,7 +17,7 @@
 
 import time
 try:
-    import quicktions as fractions
+    import cfractions as fractions
 except ImportError:
     import fractions
 

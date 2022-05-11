@@ -33,7 +33,11 @@ def format_output(output):
         output['content'] = _json_format(output['json_response'])
     return output
 
-def serve(store, config=None, port=80, baseurl = None, debug=False):
+def serve(store, config=None, port=8080, baseurl=None, basepath='/', debug=False):
+
+    # hpleva has made changes to the handling of baseurl/basepath to make
+    # it easier for a user to change the address from where the OPTIMADE
+    # entrypoint is served.
 
     if config is None:
         config = {}
@@ -84,16 +88,16 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
 
     if baseurl == None:
         if port == 80:
-            baseurl="http://localhost/"
+            baseurl="http://localhost"
         else:
-            baseurl="http://localhost:"+str(port)+"/"
+            baseurl="http://localhost:"+str(port)
 
     process_init(config, query_function, debug=debug)
 
     if not debug:
-        webserver.startup(httk_web_callback, port=8080, error_callback=httk_error_callback, debug=False)
+        webserver.startup(httk_web_callback, port=port, netloc=baseurl, basepath=basepath, error_callback=httk_error_callback, debug=False)
     else:
-        webserver.startup(httk_web_callback, port=8080, debug=True)
+        webserver.startup(httk_web_callback, port=port, netloc=baseurl, basepath=basepath, debug=True)
 
 if __name__ == "__main__":
 

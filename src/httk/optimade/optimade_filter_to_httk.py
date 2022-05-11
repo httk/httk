@@ -29,6 +29,8 @@ from httk.optimade.httk_entries import httk_entry_info, httk_recognized_prefixes
 
 from httk.atomistic import Structure
 from httk.atomistic.results import Result_TotalEnergyResult
+from httk.atomistic.results.elasticresult import Result_ElasticResult
+from httk.atomistic.results.aimdresult import Result_AIMDResult
 
 def format_value(fulltype, val, allow_null=False):
     if fulltype.startswith('list of '):
@@ -56,30 +58,54 @@ def format_value(fulltype, val, allow_null=False):
 
 constant_types = ['String','Number']
 
+# Currently the Result types that we want to query over with
+# the "calculations" entrypoint are hardcoded right here.
+# Needs a way for them to be specified by the user.
 table_mapper = {
     'structures': Structure,
-    'calculations': Result_TotalEnergyResult,
+    # 'calculations': Result_TotalEnergyResult,
+    # 'calculations': Result_ElasticResult,
+    # 'calculations': [Result_ElasticResult, Result_AIMDResult],
+    'calculations': [Result_AIMDResult, Result_ElasticResult],
 }
 
 invert_op = {'!=': '!=', '>':'<', '<':'>', '=':'=', '<=': '>=', '>=': '<='}
 _python_opmap = {'!=': '__ne__', '>': '__gt__', '<': '__lt__', '=': '__eq__', '<=': '__le__', '>=': '__ge__', 'STARTS':'startswith','ENDS':'endswith'}
 
-def optimade_filter_to_httk(filter_ast, entries, searcher):
+def optimade_filter_to_httk(filter_ast, entries, store):
 
+    # This function was heavily modified to make it possible to query more than
+    # one Result type simultaneously.
+
+    searchers = []
     search_variables = []
 
     for entry in entries:
-        search_variable = searcher.variable(table_mapper[entry])
-        searcher.output(search_variable,entry)
-        search_variables += [search_variable]
+        if isinstance(table_mapper[entry], list):
+            for sub_entry in table_mapper[entry]:
+                searcher = store.searcher()
+                search_variable = searcher.variable(sub_entry)
+                searcher.output(search_variable, entry)
+                searchers.append(searcher)
+                search_variables.append(search_variable)
+        else:
+            searcher = store.searcher()
+            search_variable = searcher.variable(table_mapper[entry])
+            searcher.output(search_variable, entry)
+            searchers.append(searcher)
+            search_variables.append(search_variable)
 
         if filter_ast is not None:
-            search_expr, needs_post = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry, False)
-            searcher.add(search_expr)
-            if needs_post:
-                searcher.add_all(search_expr)
+            for searcher, search_variable in zip(searchers, search_variables):
+                search_expr, needs_post = optimade_filter_to_httk_recurse(filter_ast, search_variable, entry, False)
+                searcher.add(search_expr)
+                if needs_post:
+                    searcher.add_all(search_expr)
 
-    return searcher
+    if len(searchers) == 0:
+        searchers = [store.searcher()]
+
+    return searchers
 
 
 def optimade_filter_to_httk_recurse(node, search_variable, entry, inv_toggle, recursion=0):
@@ -360,6 +386,52 @@ optimade_field_handlers = {
             'HAS': lambda entry, ops, values, search_variable, has_type, inv: structure_features_set_handler(values, ops, inv, has_type, search_variable),
             'length': lambda entry, op, value, search_variable: structure_features_length_handler(op, value, search_variable),
             'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
-        }
+        },
+
+        # These have been added by hpleva:
+        # TODO: The 'comparison' etc. do not match the property, e.g. 'nsites', they have just been copy-pasted from above.
+        'nsites': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'species_at_sites': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'cartesian_site_positions': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('number_of_elements', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        'chemical_formula_anonymous': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('anonymous_formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('anonymous_formula', value, stringmatching_type, search_variable)
+        },
+        'chemical_formula_reduced': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('formula', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('formula', value, stringmatching_type, search_variable)
+        },
     },
+    'calculations': {
+        'id': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('__id', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('__id', value, stringmatching_type, search_variable)
+        },
+        'type': {
+            'comparison': lambda entry, op, value, search_variable: constant_comparison_handler(value, op, 'calculations', search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: constant_stringmatching_handler(value, 'calculations', stringmatching_type, search_variable)
+        },
+        '_httk_total_energy': {
+            'comparison': lambda entry, op, value, search_variable: number_handler('total_energy', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+        },
+        '_httk_structure_id': {
+            'comparison': lambda entry, op, value, search_variable: string_handler('structure', op, value, search_variable),
+            'unknown': lambda entry, search_variable, unknown_type: known_unknown_handler(entry, search_variable, unknown_type),
+            'stringmatching': lambda entry, value, stringmatching_type, search_variable: stringmatching_handler('structure', value, stringmatching_type, search_variable)
+        },
+    }
 }

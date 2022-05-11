@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, shutil, math
-import numpy as np
 import re
 import inspect
 
@@ -29,6 +28,7 @@ from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
 from httk.atomistic import Structure
 from httk.atomistic.structureutils import cartesian_to_reduced
+
 
 if sys.version_info[0] == 3:
     import configparser
@@ -452,12 +452,12 @@ class OutcarReader():
             # Due to these VASP conventions, provide also the stress tensor
             # in the normal Voigt order and in units of GPa:
             self.stress_tensor_voigt_gpa = [
-                str(np.round(-float(self.stress_tensor[0])/10, 5)),
-                str(np.round(-float(self.stress_tensor[1])/10, 5)),
-                str(np.round(-float(self.stress_tensor[2])/10, 5)),
-                str(np.round(-float(self.stress_tensor[4])/10, 5)),
-                str(np.round(-float(self.stress_tensor[5])/10, 5)),
-                str(np.round(-float(self.stress_tensor[3])/10, 5)),
+                str(round(-float(self.stress_tensor[0])/10, 5)),
+                str(round(-float(self.stress_tensor[1])/10, 5)),
+                str(round(-float(self.stress_tensor[2])/10, 5)),
+                str(round(-float(self.stress_tensor[4])/10, 5)),
+                str(round(-float(self.stress_tensor[5])/10, 5)),
+                str(round(-float(self.stress_tensor[3])/10, 5)),
                 ]
 
         results = micro_pyawk(self.ioa, [
@@ -472,7 +472,77 @@ class OutcarReader():
 def read_outcar(ioa):
     return OutcarReader(ioa)
 
+
+def get_dist_matrix(array):
+    from httk.external.numpy_ext import numpy as np
+    return np.array([
+        [1+array[0], array[5]/2, array[4]/2],
+        [array[5]/2, 1+array[1], array[3]/2],
+        [array[4]/2, array[3]/2, 1+array[2]]
+    ])
+
+
+def distort(dist_mat, mat):
+    """Apply distortion matrix"""
+    from httk.external.numpy_ext import numpy as np
+
+    array = np.array(mat)
+    for i in range(len(mat)):
+        array[i, :] = np.array([np.sum(dist_mat[0, :]*mat[i, :]),
+                                np.sum(dist_mat[1, :]*mat[i, :]),
+                                np.sum(dist_mat[2, :]*mat[i, :])])
+    return array
+
+
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+
+    :param axis:
+    :type axis:
+    :param theta:
+    :type theta:
+    """
+    from httk.external.numpy_ext import numpy as np
+
+    axis = np.asarray(axis)
+    theta = np.asarray(theta)
+    axis = axis/np.linalg.norm(axis)
+    a = np.cos(theta/2.0)
+    b, c, d = -axis*np.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+def apply_dist(ELASTICSTEP, DELTASTEP, sym, deltas, distortions):
+    from httk.external.numpy_ext import numpy as np
+    from httk.external import pymatgen_glue
+    from pymatgen.core import Structure as pmg_Structure
+    from pymatgen.io.vasp import Poscar as pmg_Poscar
+    from pymatgen.core.lattice import Lattice as pmg_Lattice
+
+    dist_ind = ELASTICSTEP - 1
+    delta_ind = DELTASTEP - 1
+    d = deltas[dist_ind][delta_ind]
+
+    # epsilon_array is the distortion in Voigt notation
+    epsilon_array = np.array(distortions[dist_ind]) * d
+    dist_matrix = get_dist_matrix(epsilon_array)
+
+    struct = pmg_Structure.from_file("POSCAR")
+    struct.lattice = pmg_Lattice(distort(dist_matrix, struct._lattice.matrix))
+
+    poscar = pmg_Poscar(struct)
+    poscar.write_file("POSCAR", significant_figures=8)
+
+
 def elastic_config(fn):
+    from httk.external.numpy_ext import numpy as np
+
     config = configparser.ConfigParser()
     config.read(fn)
     # The type of symmetry
@@ -524,7 +594,7 @@ def elastic_config(fn):
                 for new_d in (xyz_to_yzx, xyz_to_zxy):
                     include_new_d = True
                     for dd in distortions:
-                        if vectors_are_same(dd, new_d):
+                        if np.allclose(dd, new_d):
                             include_new_d = False
                             break
                     if include_new_d:
@@ -539,20 +609,14 @@ def elastic_config(fn):
     return sym, deltas, distortions, project
 
 
-def vectors_are_same(v1, v2):
-    """Check whether all elements of two vectors are the same,
-    within some tolerance."""
-    tol = 1e-5
-    max_diff = np.max(np.abs(np.array(v1) - np.array(v2)))
-    if max_diff > tol:
-        return False
+def get_elastic_constants(path, settings_path=".."):
+    from httk.external.numpy_ext import numpy as np
+
+    elastic_config_file = os.path.join(path, settings_path, "settings.elastic")
+    if not os.path.exists(elastic_config_file):
+        sys.exit("File {} can not be found!".format(elastic_config_file))
     else:
-        return True
-
-
-def get_elastic_constants(path):
-    sym, delta, distortions, project = elastic_config(
-        os.path.join(path, '../settings.elastic'))
+        sym, delta, distortions, project = elastic_config(elastic_config_file)
 
     stress_target = []
     epsilon = []
@@ -894,3 +958,95 @@ def get_elastic_constants(path):
                 elas_dict[key] = 0
 
     return cij, sij, elas_dict, cij_nosym
+
+def get_computation_info(ioa):
+    """Finds the VASP version number, values of ENCUT, # of kpoints
+    from the OUTCAR.
+    """
+
+    vasp_xc_tags = {
+        '91': "Perdew - Wang 91 (PW-91)",
+        'PE': "Perdew-Burke-Ernzerhof (PBE)",
+        'AM': "AM05",
+        'HL': "Hedin-Lundqvist",
+        'CA': "Ceperley-Alder",
+        'PZ': "Ceperley-Alder, parametrization of Perdew-Zunger",
+        'WI': "Wigner",
+        'RP': "revised Perdew-Burke-Ernzerhof (RPBE) with Pade Approximation",
+        'RE': "revPBE",
+        'VW': "Vosko-Wilk-Nusair (VWN)",
+        'B3': "B3LYP, where LDA part is with VWN3-correlation",
+        'B5': "B3LYP, where LDA part is with VWN5-correlation",
+        'BF': "BEEF, xc (with libbeef)",
+        'CO': "no exchange-correlation",
+        'PS': "Perdew-Burke-Ernzerhof revised for solids (PBEsol)",
+        'LIBXC': "LDA or GGA from Libxc",
+        'LI': "LDA or GGA from Libxc",
+        'OR': "optPBE",
+        'BO': "optB88",
+        'MK': "optB86b",
+        'RA': "new RPA Perdew Wang",
+        '03': "range-separated ACFDT (LDA - sr RPA) mu = 0.3Å",
+        '05': "range-separated ACFDT (LDA - sr RPA) mu = 0.5Å",
+        '10': "range-separated ACFDT (LDA - sr RPA) mu = 1.0Å",
+        '20': "range-separated ACFDT (LDA - sr RPA) mu = 2.0Å",
+        'PL': "new RPA+ Perdew Wang",
+    }
+
+    ioa = IoAdapterFileReader.use(ioa)
+    outcar = list(ioa.file)
+
+    info = {'version': None, 'ENCUT': None,
+            'NKPTS': None, 'XC': None}
+    LEXCH = None
+    for line in outcar:
+        # Every piece of info was already found:
+        if not None in info.values():
+            break
+        line = line.rstrip()
+        if info['version'] is None:
+            tmp = re.search("vasp\.\d\.\d\.\d", line)
+            if tmp is not None:
+                info['version'] = line
+        if info['ENCUT'] is None:
+            tmp = re.search("ENCUT\s*=\s*([\d\.]*)\s*eV", line)
+            if tmp is not None:
+                info['ENCUT'] = tmp.groups()[0]
+        if info['NKPTS'] is None:
+            tmp = re.search("NKPTS = \s*(\d+)\s+", line)
+            if tmp is not None:
+                info['NKPTS'] = tmp.groups()[0]
+        if LEXCH is None:
+            tmp = re.search("\s*LEXCH\s+=\s*(\w+)", line)
+            if tmp is not None:
+                LEXCH = tmp.groups()[0]
+        if info['XC'] is None:
+            tmp = re.search("\s*GGA\s{5}=\s+([\d-]+)\s+", line)
+            if tmp is not None:
+                # Check if default POSCAR XC is used:
+                GGA = tmp.groups()[0]
+                if GGA == "--":
+                    try:
+                        info['XC'] = vasp_xc_tags[LEXCH]
+                    except KeyError:
+                        info['XC'] = "Unknown XC functional, LEXCH = " + LEXCH
+                else:
+                    try:
+                        info['XC'] = vasp_xc_tags[tmp.groups()[0]]
+                    except KeyError:
+                        info['XC'] = "Unknown XC functional, LEXCH = " + tmp.groups()[0]
+
+    # Get pseudopot info
+    for line in outcar:
+        tmp = re.search("TITEL  =\s*(PAW_.*)", line)
+        if tmp is not None:
+            pseudo_info = tmp.groups()[0].strip()
+            if 'pseudopots' not in info.keys():
+                info['pseudopots'] = ""
+            if pseudo_info not in info['pseudopots']:
+                info['pseudopots'] +=  pseudo_info + "|"
+        if "POSCAR:" in line:
+            break
+    info['pseudopots'] = info['pseudopots'].rstrip("|")
+    return info
+

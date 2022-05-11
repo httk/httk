@@ -261,6 +261,27 @@ entry_info = {
                 'required_response': False,
                 'default_response': True,
             },
+            '_httk_total_energy': {
+                'description': "Total energy",
+                'type': 'float',
+                'fulltype': 'float',
+                'required_support': False,
+                'should_support': True,
+                'required_query': False,
+                'required_response': False,
+                'default_response': False,
+            },
+            '_httk_structure_id': {
+                'description': "Index of the structure in structures entry type",
+                'type': 'integer',
+                'fulltype': 'integer',
+                'required_support': False,
+                'should_support': True,
+                'required_query': False,
+                'required_response': False,
+                'default_response': False,
+            },
+
         },
     },
     'references': {

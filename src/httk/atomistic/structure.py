@@ -160,7 +160,7 @@ class Structure(HttkObject):
                rc_reduced_coords=None, rc_cartesian_coords=None,
                rc_reduced_occupationscoords=None, rc_cartesian_occupationscoords=None,
                rc_occupancies=None, rc_counts=None,
-               wyckoff_symbols=None, multiplicities=None,
+               wyckoff_symbols=[], multiplicities=[],
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
                rc_scale=None, rc_scaling=None, rc_volume=None,
 
@@ -436,7 +436,8 @@ class Structure(HttkObject):
         if 'uc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_cell=self.rc_cell, uc_sites=self.rc_sites.get_uc_sites())
             self._other_reps['uc'] = cc_struct
-            self._other_reps['cc'] = cc_struct
+            if 'cc' not in self._other_reps:
+                self._other_reps['cc'] = cc_struct
         return self._other_reps['uc']
 
     @property
@@ -458,7 +459,8 @@ class Structure(HttkObject):
     def cc(self):
         if 'cc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_sites=self.rc_sites.get_uc_sites(), uc_cell=self.rc_cell)
-            self._other_reps['uc'] = cc_struct
+            if 'uc' not in self._other_reps:
+                self._other_reps['uc'] = cc_struct
             self._other_reps['cc'] = cc_struct
         return self._other_reps['cc']
 
@@ -600,7 +602,7 @@ class Structure(HttkObject):
 
     @property
     def uc_cartesian_coords(self):
-        return self.uc.get_cartesian_coords
+        return self.uc.uc_sites.get_cartesian_coords
 
     @property
     def uc_lengths_and_angles(self):
@@ -738,7 +740,7 @@ class Structure(HttkObject):
     @httk_typed_property((bool, 1, 3))
     #TODO: Do we need to rethink the pbc specifier, when cc and pc can have basis vectors in other directions...
     def pbc(self):
-        return self.rc_sites.pbc
+        return list(self.rc_sites.pbc)
 
     def clean(self):
         rc_sites = self.rc_sites.clean()
@@ -863,6 +865,11 @@ class Structure(HttkObject):
     @httk_typed_property(str)
     def element_wyckoff_sequence(self):
         if self.rc_sites.wyckoff_symbols is None:
+            return None
+        # When this object is retrieved from a database, self.wyckoff_symbols
+        # is no longer None, but an empty list. Need additional check for that:
+        elif isinstance(self.rc_sites.wyckoff_symbols, list) and \
+             len(self.rc_sites.wyckoff_symbols) == 0:
             return None
         symbols = []
         for a in self.assignments:
@@ -1011,7 +1018,7 @@ class StructureTag(HttkObject):
         super(StructureTag, self).__init__()
         self.tag = tag
         self.structure = structure
-        self.value = value
+        self.value = str(value)
 
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
@@ -1026,7 +1033,7 @@ class StructureRef(HttkObject):
         self.reference = reference
 
     def __str__(self):
-        return str(self.reference.ref)
+        return str(self.reference)
 
 
 def main():

@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 from httk.optimade.optimade_filter_to_httk import optimade_filter_to_httk
 from httk.optimade.httk_entries import httk_recognized_prefixes
 
@@ -31,13 +32,38 @@ _field_map = {
         'dimension_types': lambda x,y: [1 if el else 0 for el in [True, True, True]],
         'nperiodic_dimensions': lambda x,y: list([True, True, True]).count(True),
         #TODO: Sort out what is wrong with x.pbc
-    }
+
+        # These have been added by hpleva:
+        'nsites': lambda x,y: len(x.uc.uc_cartesian_coords),
+        'species_at_sites': lambda x,y: [item for sublist in [[a.symbols[0]]*count for a, count in zip(x.assignments, x.uc_counts)] for item in sublist],
+        'cartesian_site_positions': lambda x,y: x.uc.uc_cartesian_coords.to_floats(),
+        'chemical_formula_reduced': lambda x,y: x.formula,
+        'chemical_formula_anonymous': lambda x,y: x.anonymous_formula,
+    },
+    # Currently the names of the Result types that we want to use are hardcoded
+    # right here.
+    # Needs a mechanism to make the Result type changeable by user.
+    'Result_AIMDResult': {
+        'type': lambda x,y: "calculations",
+        'id': lambda x,y: x.db.sid,
+        '_httk_total_energy': lambda x,y: x.total_energy,
+        '_httk_structure_id': lambda x,y: x.structure.db.sid,
+    },
+    'Result_ElasticResult': {
+        'type': lambda x,y: "calculations",
+        'id': lambda x,y: x.db.sid,
+        '_httk_total_energy': lambda x,y: x.total_energy,
+        '_httk_structure_id': lambda x,y: x.structure.db.sid,
+    },
 }
 
 class HttkResults(object):
-    def __init__(self, searcher, response_fields, unknown_response_fields, limit, offset):
-        self.searcher = searcher
-        self.cur = iter(searcher)
+    def __init__(self, searchers, response_fields, unknown_response_fields, limit, offset):
+        if not isinstance(searchers, list):
+            searchers = [searchers]
+        self.searchers = searchers
+        # self.cur = iter(searcher)
+        self.cur = itertools.chain(*searchers)
         self.limit = limit
         self.response_fields = response_fields
         self.unknown_response_fields = unknown_response_fields
@@ -46,7 +72,10 @@ class HttkResults(object):
         self.more_data_available = True
 
     def count(self):
-        return self.searcher.count()
+        count = 0
+        for searcher in self.searchers:
+            count += searcher.count() - searcher.offset
+        return count
 
     def __iter__(self):
         return self
@@ -68,18 +97,18 @@ class HttkResults(object):
                         if field.startswith(prefix):
                             field = field[len(prefix):]
                             break
-                    result[field]=getattr(row,field)
+                    result[field]=getattr(row, field)
                 else:
                     raise Exception("Unexpected field requested:"+str(field))
         except StopIteration:
             self.more_data_available = False
-            self.cur.close()
+            self.close()
             self.cur = None
             raise StopIteration
 
         if self.limit is not None and self._count == self.limit:
             self.more_data_available = True
-            self.cur.close()
+            self.close()
             self.cur = None
             raise StopIteration
 
@@ -87,27 +116,60 @@ class HttkResults(object):
 
         return result
 
+    def close(self):
+        # self.cur.close()
+        # There is nothing to close when we use itertools.chain().
+        pass
+
     def __del__(self):
         if self.cur is not None:
-            self.cur.close()
+            self.close()
 
     # Python 2 compability
     def next(self):
         return self.__next__()
 
-def httk_execute_query(store, entries, response_fields, unknown_response_fields, response_limit, response_offset, optimade_filter_ast=None, debug=False):
+def httk_execute_query(store, entries, response_fields, unknown_response_fields,
+                       response_limit, response_offset, optimade_filter_ast=None,
+                       debug=False):
 
-    searcher = store.searcher()
+    # This function was heavily modified to make it possible to query more than
+    # one Result type simultaneously.
 
-    searcher =  optimade_filter_to_httk(optimade_filter_ast, entries, searcher)
-    if response_limit is not None:
-        # We need one more than asked for to know if there is more data.
-        searcher.set_limit(response_limit+1)
-    if response_offset is not None:
-        searcher.add_offset(response_offset)
+    searchers = optimade_filter_to_httk(optimade_filter_ast, entries, store)
+
+    if response_offset is not None and response_offset != 0:
+        remaining_offset = response_offset
+        for i, searcher in enumerate(searchers):
+            count = searcher.count()
+            remaining_offset -= count
+            if remaining_offset < 0:
+                # In SQLite, having an OFFSET without a LIMIT results in a syntax
+                # error. We must therefore set a dummy limit -1, which means no bound.
+                searcher.set_limit(-1)
+                searcher.add_offset(count + remaining_offset)
+                searchers = searchers[i:]
+                break
+
+    if response_limit is not None and response_limit != 0:
+        remaining_limit = response_limit
+        for i, searcher in enumerate(searchers):
+            count = searcher.count() - searcher.offset
+            remaining_limit -= count
+            if remaining_limit < 0:
+                # We need one more than asked for to know if there is more data.
+                searcher.set_limit(count + remaining_limit + 1)
+                searchers = searchers[:i+1]
+                break
+
+    # if response_limit is not None:
+    #     # We need one more than asked for to know if there is more data.
+    #     searcher.set_limit(response_limit+1)
+    # if response_offset is not None:
+    #     searcher.add_offset(response_offset)
 
     # Offset (and limit, but it doesn't matter) is already handled by the searcher.
-    return HttkResults(searcher, response_fields, unknown_response_fields, response_limit, 0)
+    return HttkResults(searchers, response_fields, unknown_response_fields, response_limit, 0)
 
 if __name__ == "__main__":
 

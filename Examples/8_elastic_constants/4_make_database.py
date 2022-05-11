@@ -2,18 +2,17 @@
 
 import os, sys
 import re
-import numpy as np
 import httk, httk.iface.vasp_if
 from httk.iface.vasp_if import get_elastic_constants
 import httk.db
 from httk.core import HttkObject, FracVector, FracScalar
 from httk.atomistic import Structure, UnitcellStructure
+from httk.atomistic.results.elasticresult import ElasticTensor
 from httk.atomistic.results.elasticresult import Result_ElasticResult
+from httk.atomistic.results.utils import MethodDescriptions, Method
+from httk.atomistic.results.utils import InitialStructure, MaterialId
+from httk.core.reference import Reference, Author
 import httk.task
-import subprocess
-import glob
-import bz2
-import json
 import zipfile
 import shutil
 import atexit
@@ -78,17 +77,41 @@ def make_database(db_name):
 
         outcar = httk.iface.vasp_if.read_outcar(os.path.join(rundir, "OUTCAR.cleaned.relax-final"))
         result = Result_ElasticResult(
-                float(outcar.final_energy),
-                computation, initial_struct, struct,
-                cij, cij_nosym, sij, elas_dict['K_V'],
-                elas_dict['K_R'], elas_dict['K_VRH'],
-                elas_dict['G_V'], elas_dict['G_R'],
-                elas_dict['G_VRH'], elas_dict['mu_VRH'],
-                elas_dict['E_VRH'], atomic_relaxations,
-                "", # walltimes
-                "", # rundir
-                "", # material_id
-                )
+                     total_energy = float(outcar.final_energy),
+                     computation = computation,
+                     initial_structure = initial_struct,
+                     structure = struct,
+                     temperature = 0.0,
+                     elastic_tensor = ElasticTensor.create(cij),
+                     elastic_tensor_nosym = ElasticTensor.create(cij_nosym),
+                     compliance_tensor = ElasticTensor.create(sij),
+                     K_V = elas_dict['K_V'],
+                     K_R = elas_dict['K_R'],
+                     K_VRH = elas_dict['K_VRH'],
+                     G_V = elas_dict['G_V'],
+                     G_R = elas_dict['G_R'],
+                     G_VRH = elas_dict['G_VRH'],
+                     mu_VRH = elas_dict['mu_VRH'],
+                     E_VRH = elas_dict['E_VRH'],
+                     mechanically_stable = True,
+                     mechanically_stable_with_tolerance = True,
+                     atomic_relaxations = atomic_relaxations,
+                     rundir = "", # rundir
+                     method_descriptions = MethodDescriptions([
+                         Method(name="SQS", description="The SQS method",
+                             references=[
+                                 Reference.create(
+                                     authors=[Author.create("Zunger", "A.")],
+                                     journal="Phys. Rev. Lett.",
+                                     journal_volume="65",
+                                     year="1990",
+                                     title="Special Quasirandom Structures"
+                                 )
+                             ]
+                         )
+                     ]),
+                     material_id = MaterialId("test"),
+                 )
 
         print("{0:3} Processed outcar: {1:10}".format(index, initial_struct.formula))
 
@@ -96,7 +119,7 @@ def make_database(db_name):
         index += 1
 
         print("Elastic tensor:")
-        for row in cij:
+        for row in result.elastic_tensor.matrix.to_ints():
             print("{0:3.0f} {1:3.0f} {2:3.0f} {3:3.0f} {4:3.0f} {5:3.0f}".format(*row))
 
     store.commit()

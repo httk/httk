@@ -23,7 +23,7 @@ import httk
 from httk.atomistic import *
 
 try:
-    from quicktions import Fraction
+    from cfractions import Fraction
 except:
     from fractions import Fraction
 

@@ -18,6 +18,7 @@
 
 from __future__ import print_function
 import os, sys, cgitb, codecs, cgi, shutil
+import io
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -81,8 +82,16 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             # => TypeError: can't concat str to bytes
             #
             # Hence, we wrap the writer instead
-            writer = codecs.getwriter(encoding)
-            shutil.copyfileobj(s, writer(self.wfile))
+
+            # Python 3 gives the str-bytes mismatch errors
+            # depending on the situation.
+            # This works in Python 3, but is probably not
+            # the optimal/correct solution:
+            if isinstance(s, io.StringIO):
+                writer = codecs.getwriter(encoding)
+                shutil.copyfileobj(s, writer(self.wfile))
+            else:
+                shutil.copyfileobj(s, self.wfile)
         else:
             self.wfile.write(codecs.encode(s, encoding))
 

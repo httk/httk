@@ -55,7 +55,7 @@ class SqlStore(object):
 
         def puts(self, **args):
             self.store.puts(self.table, self.sid, **args)
-    
+
     def new(self, table, types, keyvals=None, updatesid=None):
         if not self.db.table_exists(table):
             self.create_table(table, types)
@@ -186,7 +186,7 @@ class SqlStore(object):
 
         #self.columns[table] = columns
         #self.column_types[table] = column_types
-    
+
     def insert(self, table, types, keyvals, cursor=None, updatesid=None):
         #sid=self.sids[table]
         #types=self.types[table]
@@ -354,13 +354,14 @@ class SqlStore(object):
 
         origt = t
 
+
         # Regular column, no strangeness
         if t in self.basics:
             if t == FracScalar:
                 val = self.db.get_val(table, table+"_id", sid, name)
                 if val is None:
                     return None
-                return FracVector.create(FracScalar(int(val), 1000000000).limit_denominator(5000000))
+                return FracVector.create(FracScalar(int(val), 1000000000).limit_denominator(5000000000))
             return self.db.get_val(table, table+"_id", sid, name)
 
         # List type means we need to establish a second table and store key values
@@ -447,12 +448,23 @@ class SqlStore(object):
                     #    else:
                     #        return Fraction(int(l),1000000000)
                     #flat=map(flatterer,flat)
-                    flat = map(lambda l: FracScalar(int(l), 1000000000).limit_denominator(5000000), flat)
-                    reshaped = zip(*[iter(flat)]*t[1])
-                    return FracVector.create(reshaped)
+                    #
+                    # Original code:
+                    # flat = map(lambda l: FracScalar(int(l), 1000000000).limit_denominator(5000000), flat)
+                    # reshaped = zip(*([iter(flat)]*t[1]))
+                    # return FracVector.create(reshaped)
+                    #
+                    # Speed-optimized version:
+                    reshaped = list(zip(*([iter(flat)]*t[1])))
+                    return FracVector.create_fast(reshaped, common_denom=1000000000, max_denom=5000000000)
                 else:
-                    map(tupletype, flat)
-                    return zip(*[iter(flat)]*t[1])
+                    # Is it better if a single value is returned as the value
+                    # instead of as a length-one tuple?
+                    flat = list(map(tupletype, flat))
+                    if t[1] > 1:
+                        return list(zip(*[iter(flat)]*t[1]))
+                    else:
+                        return flat
                 # TODO: ADD support for numpy
 
             # Variable length numpy array, needs subtable
@@ -463,8 +475,30 @@ class SqlStore(object):
                     columnames.append(name+"_"+str(i))
                 if tupletype == FracVector or tupletype == FracScalar:
                     vals = self.db.get_row(subtablename, table+"_sid", sid, columnames)
-                    vals = map(lambda l: map(lambda x: FracScalar(int(x), 1000000000), l), vals)
-                    return FracVector.create(vals).limit_denominator(5000000)
+                    #
+                    # Original code:
+                    # vals = map(lambda l: map(lambda x: FracScalar(int(x), 1000000000), l), vals)
+                    # return FracVector.create(vals).limit_denominator(5000000)
+
+                    # Following speed optimizations have been implemented to make the creation of
+                    # httk.Structure objects faster:
+                    #
+                    #  1) Skip converting "vals" to FracScalars.
+                    #  2) Create an optimized version of the FracVector.create() function.
+                    #     This version takes into account that the type of "vals" can be
+                    #     assumed to be a list of lists of integers.
+                    #     We also know that there is a hard-coded common denominator 1_000_000_000.
+                    #  3) Handle the limit_denominator(5_000_000) operation in a different way.
+                    #     In the original code the limit_denominator() function tends to create FracVectors
+                    #     with gigantically large denominators, because we run the limit_denominator() for each
+                    #     element in the FracVector, and get optimal denominators that usually don't have any common
+                    #     divisors between them.
+                    #     The lowest common denominator (lcd) of the whole FracVector therefore becomes a huge integer.
+                    #
+                    #     Here, by passing the max_denom=5_000_000 argument we end up with a FracVector
+                    #     for which the common denominator becomes 5_000_000, instead of some gigantically large integer.
+                    #
+                    return FracVector.create_fast(vals, common_denom=1000000000, max_denom=5000000000)
                 else:
                     return self.db.get_row(subtablename, table+"_sid", sid, columnames)
 

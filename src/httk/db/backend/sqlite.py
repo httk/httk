@@ -28,7 +28,7 @@ from httk.core import reraise_from
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
-#database_debug = True
+# database_debug = True
 database_debug_slow = False
 if 'DATABASE_DEBUG_SLOW' in os.environ:
     database_debug_slow = True
@@ -131,7 +131,7 @@ class Sqlite(object):
         if result == []:
             return False
         return True
-    
+
     def create_table(self, name, primkey, columnnames, columntypes, cursor=None, index=None):
         sql = primkey+" INTEGER PRIMARY KEY"
         for i in range(len(columnnames)):

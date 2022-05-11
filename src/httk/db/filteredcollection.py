@@ -356,13 +356,12 @@ class FCMultiDict(FilteredCollection):
 # atexit.register(sqlite_close_all)
 ###############################################################
 
-
 def instantiate_from_store(classobj, store, id):
     types = classobj.types()
     output = store.retrieve(types['name'], types, id)
     args = types['init_keydict'].keys()
     calldict = {}
-    #print("ARGS",args, output, id)
+    # print("ARGS", args, output, id)
     for arg in args:
         try:
             calldict[arg] = output[arg]

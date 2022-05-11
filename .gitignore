@@ -40,3 +40,11 @@ Tests/python_versions/ver3
 
 .vscode
 Examples/9_duckdb/duckdb
+
+# Standalone Python interpreter related files
+Standalone_python_interpreter/*.sif
+Standalone_python_interpreter/lib
+Standalone_python_interpreter/python
+
+# ctags
+tags
