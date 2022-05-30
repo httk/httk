@@ -91,9 +91,9 @@ def serve(store, config=None, port=80, baseurl = None, debug=False):
     process_init(config, query_function, debug=debug)
 
     if not debug:
-        webserver.startup(httk_web_callback, port=8080, error_callback=httk_error_callback, debug=False)
+        webserver.startup(httk_web_callback, port=port, error_callback=httk_error_callback, debug=False)
     else:
-        webserver.startup(httk_web_callback, port=8080, debug=True)
+        webserver.startup(httk_web_callback, port=port, debug=True)
 
 if __name__ == "__main__":
 
