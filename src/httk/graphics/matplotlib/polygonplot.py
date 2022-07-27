@@ -17,9 +17,6 @@
 #
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
-import pylab 
-
-
 class PolygonPlot(object):
 
     def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three', 'four', 'five'), sides=3,
@@ -36,6 +33,8 @@ class PolygonPlot(object):
         text_args: matplotlib keyword args for axis labels.
 
         """
+        from httk.external.matplotlib_ext import pylab
+
         self.basis = pylab.array(
             [
                 [
@@ -84,6 +83,8 @@ class PolygonPlot(object):
         self.ax = ax
 
     def translate_coords(self, data, scaling=True):
+        from httk.external.matplotlib_ext import pylab
+
         if len(data) == 0:
             return data
 
@@ -101,6 +102,8 @@ class PolygonPlot(object):
 __all__ = ['PolygonPlot']
 
 if __name__ == '__main__':
+    from httk.external.matplotlib_ext import pylab
+
     k = 0.5
     s = 1000
 

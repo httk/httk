@@ -17,72 +17,25 @@
 
 import os
 
-from httk.core import citation
 from httk.core.basic import is_sequence
-citation.add_ext_citation("Pymatgen",
-                          "Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier, Michael Kocher, \
-Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A. Persson, Gerbrand Ceder. \
-Python Materials Genomics (pymatgen) : A Robust, Open-Source Python Library for Materials Analysis. \
-Computational Materials Science, 2013, 68, 314-319. \
-doi:10.1016/j.commatsci.2012.10.028; and others")
 import httk.atomistic.data
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 
 from httk import config
 from httk.atomistic import Structure, UnitcellSites, Spacegroup
 from httk.core.vectors import FracVector
-import httk.iface
-from httk.external.subimport import submodule_import_external
-try:
-    pymatgen_path = config.get('paths', 'pymatgen')
-except Exception:
-    pymatgen_path = None
-
-from httk.external.pyspglib_ext import ensure_pyspg_is_imported
-
-pymatgen_major_version = None
-pymatgen_minor_version = None
-
-def ensure_pymatgen_is_imported():
-    if pymatgen_path == "False":
-        raise Exception("httk.external.pymatgen_glue: module pymatgen_glue imported, but pymatgen is disabled in configuration file.")
-    if pymatgen_major_version is None:
-        raise ImportError("httk.external.pymatgen_glue imported without access to the pymatgen python library.")
-
-if pymatgen_path != "False":
-    if pymatgen_path is not None:
-        submodule_import_external(os.path.join(pymatgen_path), 'pymatgen')
-    else:
-        try:
-            external = config.get('general', 'allow_system_libs')
-        except Exception:
-            external = 'yes'
-
-    try:
-        import pymatgen
-
-        try:
-            pymatgen_major_version = pymatgen.__version__.split('.')[0]
-            pymatgen_minor_version = pymatgen.__version__.split('.')[1]
-        # New 2022.X.X version have moved the __version__ attribute:
-        except AttributeError:
-            import pymatgen.core
-            pymatgen_major_version = pymatgen.core.__version__.split('.')[0]
-            pymatgen_minor_version = pymatgen.core.__version__.split('.')[1]
-
-    except ImportError:
-        pass
 
 mp_key = ""
-
 
 def set_mp_key(key):
     global mp_key
     mp_key = key
 
-
 def structure_to_pmg_struct(struct):
     """Converts httk structures to Pymatgen structures."""
+
+    from httk.external.pymatgen_ext import pymatgen
+
     basis = struct.uc_basis.to_floats()
     coords = struct.uc_reduced_coords.to_floats()
     counts = struct.uc_counts
@@ -119,15 +72,14 @@ def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
     Structure can be optionally reduced to the standard conventional
     structure, which also gives the standard primitive structure (struct.pc).
     """
-    # Does not import spglib
-    # ensure_pyspg_is_imported()
 
     (cell, coords, symbols_int), atomic_symbols = pmg_struct_to_spglib_tuple(pmg_struct,
             return_atomic_symbols=True)
 
     if find_primitive:
         from httk.external.numpy_ext import numpy as np
-        import spglib
+        from httk.external.pyspglib_ext import spglib
+
         dataset = spglib.get_symmetry_dataset(
             (cell, coords, symbols_int))
         hall_symbol = dataset['hall']
@@ -178,7 +130,7 @@ def pmg_struct_to_structure(pmg_struct, hall_symbol=None, comment=None,
             )
 
     elif hall_symbol == 'generate':
-        import spglib
+        from httk.external.pyspglib_ext import spglib
         dataset = spglib.get_symmetry_dataset(
             (cell, coords, symbols_int))
         hall_symbol = dataset['hall']

@@ -20,7 +20,6 @@
 """
 
 import os, sys
-import numpy as np
 
 from httk.core import citation
 citation.add_ext_citation('spglib / pyspglib', "(Author list to be added)")
@@ -125,6 +124,8 @@ def primitive(struct, symprec=1e-5):
 
 
 def struct_process_with_spglig(struct, symprec=1e-5):
+    from httk.external.numpy_ext import numpy as np
+
     ensure_pyspg_is_imported()
 
     basis = struct.uc_basis.to_floats()

@@ -24,56 +24,8 @@ import httk.atomistic.data
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic import Cell
 from httk.atomistic.spacegrouputils import get_symops_strs, spacegroup_get_number_and_setting
-
-from httk import config
 from httk.atomistic import Structure, UnitcellSites
 import httk.iface
-from httk.iface.ase_if import *
-from httk.external.subimport import submodule_import_external
-
-ase_major_version = None
-ase_minor_version = None
-
-try:
-    ase_path = config.get('paths', 'ase')
-except Exception:
-    ase_path = None
-
-def ensure_ase_is_imported():
-    if ase_path == "False":
-        raise Exception("httk.external.ase_glue: module ase_glue imported, but ase is disabled in configuration file.")
-    if ase_major_version is None:
-        raise ImportError("httk.external.ase_glue used without access to the ase python library.")
-
-if ase_path != "False":
-
-    if ase_path is not None and ase_path != "False":
-        submodule_import_external(os.path.join(ase_path), 'ase')
-    else:
-        try:
-            external = config.get('general', 'allow_system_libs')
-        except Exception:
-            external = 'yes'
-
-    try:
-        import ase
-        import ase.io
-        import ase.geometry
-        from ase.spacegroup import crystal
-        from ase.atoms import Atoms
-        try:
-            from ase import version
-            ase_version = version.version
-        except ImportError:
-            from ase import __version__ as aseversion
-
-        ase_major_version = aseversion.split('.')[0]
-        ase_minor_version = aseversion.split('.')[1]
-
-    except ImportError:
-        # Fail silently and report error in ensure_ase_imported function when we actually try to use this module
-        pass
-
 
 def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     """Returns primitive cell given an Atoms object for a conventional
@@ -82,15 +34,16 @@ def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     Code snippet kindly posted by Jesper Friis,
       https://listserv.fysik.dtu.dk/pipermail/ase-users/2011-January/000911.html
     """
-    ensure_ase_is_imported()
+    from httk.external.ase_ext.ase import geometry
 
     sg = spacegroup.Spacegroup(spacegroup, setting)
     prim_cell = sg.scaled_primitive_cell  # Check if we need to transpose
-    return ase.geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])
+    return geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])
 
 
 def structure_to_ase_atoms(struct):
-    ensure_ase_is_imported()
+    from httk.external.ase_ext.ase.spacegroup import crystal
+    from httk.external.ase_ext.ase.atoms import Atoms
 
     struct = Structure.use(struct)
 
@@ -149,7 +102,8 @@ def structure_to_ase_atoms(struct):
 
 
 def ase_read_structure(f):
-    ensure_ase_is_imported()
+    from httk.external.ase_ext import ase
+    import ase.io
 
     ioa = httk.IoAdapterFilename.use(f)
     atoms = ase.io.read(ioa.filename)
@@ -196,7 +150,8 @@ def ase_atoms_to_structure(atoms, hall_symbol):
 
 
 def ase_write_struct(struct, ioa, format=None):
-    ensure_ase_is_imported()
+    from httk.external.ase_ext import ase
+    import ase.io
 
     ioa = IoAdapterFileWriter.use(ioa)
     aseatoms = structure_to_ase_atoms(struct)
@@ -218,7 +173,7 @@ class StructureAsePlugin(HttkPlugin):
         return ase_atoms_to_structure(atoms, None)
 
 Structure.ase = HttkPluginWrapper(StructureAsePlugin)
-
+g
 # def structure_to_p1structure(sgstruct, primitive=False):
 #     #print("SGSTRUCTURE TO STRUCTURE:",sgstruct.nonequiv.assignments,sgstruct.nonequiv.coordgroups.to_floats(),sgstruct.nonequiv.cell.to_floats())
 #

@@ -2,7 +2,6 @@
 
 import os, sys
 import re
-import numpy as np
 import httk, httk.iface.vasp_if
 from httk.iface.vasp_if import get_elastic_constants
 import httk.db

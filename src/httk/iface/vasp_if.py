@@ -986,10 +986,10 @@ def get_computation_info(ioa):
         'BO': "optB88",
         'MK': "optB86b",
         'RA': "new RPA Perdew Wang",
-        '03': "range-separated ACFDT (LDA - sr RPA) mu = 0.3Å",
-        '05': "range-separated ACFDT (LDA - sr RPA) mu = 0.5Å",
-        '10': "range-separated ACFDT (LDA - sr RPA) mu = 1.0Å",
-        '20': "range-separated ACFDT (LDA - sr RPA) mu = 2.0Å",
+        '03': "range-separated ACFDT (LDA - sr RPA) mu = 0.3\u00C5",
+        '05': "range-separated ACFDT (LDA - sr RPA) mu = 0.5\u00C5",
+        '10': "range-separated ACFDT (LDA - sr RPA) mu = 1.0\u00C5",
+        '20': "range-separated ACFDT (LDA - sr RPA) mu = 2.0\u00C5",
         'PL': "new RPA+ Perdew Wang",
     }
 

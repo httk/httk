@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2022 Henrik Levämäki

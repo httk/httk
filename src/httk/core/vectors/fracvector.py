@@ -1570,8 +1570,8 @@ def main():
     print()
     print("==== Numpy conversion:")
     try:
-        import numpy
-        x = numpy.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
+        from httk.external.numpy_ext import numpy as np
+        x = np.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
         a = FracVector.create(x)
         print("Original numpy array:", x)
         print("FracVector:", a)

@@ -6,3 +6,4 @@ ase
 pymatgen
 docutils
 web.py
+duckdb

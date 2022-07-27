@@ -20,7 +20,6 @@ This provides a thin abstraction layer for SQL queries, implemented on top of Du
 """
 from __future__ import print_function
 import os, sys, time
-import duckdb
 import atexit
 from httk.core import FracScalar
 from httk.core import reraise_from
@@ -37,6 +36,7 @@ if 'DATABASE_DEBUG' in os.environ:
 
 
 def db_open(filename):
+    from httk.external.duckdb_ext import duckdb
     global duckdbconnections
     connection = duckdb.connect(filename)
     duckdbconnections.add(connection)
@@ -44,6 +44,7 @@ def db_open(filename):
 
 
 def db_close(connection):
+    from httk.external.duckdb_ext import duckdb
     global duckdbconnections
     duckdbconnections.remove(connection)
     connection.close()
@@ -123,6 +124,7 @@ class Duckdb(object):
             self.db = db
 
         def execute(self, sql, values=[]):
+            from httk.external.duckdb_ext import duckdb
             global database_debug
             if database_debug:
                 print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values) + "\n", end="", file=sys.stderr)

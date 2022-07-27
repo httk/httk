@@ -35,10 +35,11 @@ def readstruct(ioa, struct, importers=None):
         try_importers = importers
 
     for importer in try_importers:
-        
+
         if importer == 'ase':
+            from httk.external.ase_ext import ase
+            import ase.io
             try:
-                import ase.io
                 atoms = ase.io.read(fileadapter.filename_open_workaround())
                 species = atoms.get_atomic_numbers()
                 coords = atoms.get_positions()
@@ -49,9 +50,8 @@ def readstruct(ioa, struct, importers=None):
                     reraise_from(Exception,"Error while trying ase importer: "+str(info[1]), e)
     
         elif importer == 'openbabel':
+            from httk.external.openbabel_ext import openbabel
             try:
-                import openbabel
-    
                 file = fileadapter.file
                 filename = fileadapter.filename
         
