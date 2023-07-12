@@ -25,7 +25,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os, unittest, subprocess, argparse, fnmatch
+import os, sys, unittest, subprocess, argparse, fnmatch
 
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 httk_src_dir = os.path.join(top,'src','httk')
@@ -55,11 +55,15 @@ for root, d, files in os.walk(httk_src_dir):
         if not f.startswith('_'):
             with open(fullname,'r') as ff:
                 lines = ff.readlines()
+                # Smooth transition to Python3.
+                # Programs marked Python3 only are not tested in Python2
+                if len(lines)>0 and "python3" in lines[0] and sys.version[0] == "2":
+                    continue
                 if 'if __name__ == "__main__":\n' in lines or "if __name__ == '__main__':\n" in lines:
                     test_programs += [fullname]
                 else:
                     test_importers += [fullname]
-                    
+
 def function_factory(program):
     def exec_func(slf):
         execute(slf,program)

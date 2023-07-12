@@ -193,7 +193,6 @@ class HttkTemplateFormatter(string.Formatter):
                     # given the field_name, find the object it references
                     #  and the argument it came from
                     obj, arg_used = self.get_field(field_name, args, kwargs)
-                    print("COMING FROM:",obj,"::",field_name, args, kwargs)
                     used_args.add(arg_used)
 
                     # do any conversion on the resulting object

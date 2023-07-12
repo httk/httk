@@ -1,0 +1,34 @@
+
+n.n.n / 2022-02-15
+==================
+
+  * Do not break on unit cells with negative determinant
+  * Fix bug where some internal representations of structure were unexpectedly replaced
+  * Merge pull request #35 from hpleva/devel
+  * Fix Python3 bugs in Tutorial step6_part4.py
+  * OPTIMADE: fix bug with structure_features HAS comparisons. Closes #32
+  * OPTIMADE: change response code to 404 on non-existing endpoints to satisfy validator (possibly validator bug?).
+  * OPTIMADE: implement sensible SQL paging
+  * OPTIMADE bugfix: handle versions endpoint correctly
+  * OPTIMADE: remove debug printouts
+  * OPTIMADE: bugfix handle constant comparisons also in Python 2.7
+  * OPTIMADE: Support for missing string operators, fixes to various small queries
+  * Fix issue with cif reading in some corner cases, e.g., empty loop
+  * OPTIMADE: fix broken next links
+  * OPTIMADE: fix single entry return format
+  * OPTIMADE fixes for unknown response_fields and hack to get id numbers to work consistently
+  * OPTIMADE bugfix: response format on info endpoint
+  * OPTIMADE bugfix: HAS ONLY with unknown external identifier failed with SQL error
+  * OPTIMADE: handle unknown values according to OPTIMADE specification
+  * OPTIMADE: return better meta info on errors
+  * Optimade bugfix: not HAS ALL X (also invoked by not HAS X) still evaluated incorrectly
+  * Fixes for optimade; handle 'not x has y'-type filters
+  * Implement LENGTH and cleanup of optimade_filter_to_httk.py
+  * Fix bug that prevented access through versioned endpoint.
+  * Make sure there is a provider
+  * Further baseurl adjustments
+  * Make sure configued baseurl is used
+  * Optimade support
+  * Add features from python-optimade-server; separate out webserver into own file in httkweb
+  * Fix unicode issues between python2 and 3
+  * Minor bugfixes and document adjustments discovered in release

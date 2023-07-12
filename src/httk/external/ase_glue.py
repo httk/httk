@@ -173,7 +173,7 @@ class StructureAsePlugin(HttkPlugin):
         return ase_atoms_to_structure(atoms, None)
 
 Structure.ase = HttkPluginWrapper(StructureAsePlugin)
-g
+
 # def structure_to_p1structure(sgstruct, primitive=False):
 #     #print("SGSTRUCTURE TO STRUCTURE:",sgstruct.nonequiv.assignments,sgstruct.nonequiv.coordgroups.to_floats(),sgstruct.nonequiv.cell.to_floats())
 #
