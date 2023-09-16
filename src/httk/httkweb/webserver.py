@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, cgitb, codecs, cgi, shutil
+import os, sys, cgitb, codecs, cgi, shutil, io
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -68,7 +68,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
     def wfile_write_encoded(self, s, encoding='utf-8'):
         if hasattr(s, 'read'):
-            #reader = codecs.getreader(encoding)
+            reader = codecs.getreader(encoding)
             # Wrapping the reader doesn't work in
             # Python 3 because of a bug (?)
             # that can be reproduced by the following short script:
@@ -82,7 +82,11 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             #
             # Hence, we wrap the writer instead
             writer = codecs.getwriter(encoding)
-            shutil.copyfileobj(s, writer(self.wfile))
+            print("HERE",type(s))
+            if isinstance(s,io.StringIO):
+                shutil.copyfileobj(s, writer(self.wfile))
+            else:
+                shutil.copyfileobj(s, self.wfile)
         else:
             self.wfile.write(codecs.encode(s, encoding))
 
