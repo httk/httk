@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, cgitb, codecs, cgi, shutil, io
+import os, sys, cgitb, codecs, cgi, shutil, io, traceback
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -178,6 +178,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.debug:
                 self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                traceback.print_exc()
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
