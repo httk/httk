@@ -64,7 +64,7 @@ class FilteredCollection(object):
     def set_limit(self, limit):
         self.limit = limit
 
-    def output(self, expression, name=None):
+    def output(self, expression, name=None, concat=False):
         """
         Define which columns should be included in the results when iterating over a FilteredCollection.
         attributes is a list of tuples consisting of (name,definition) where definition can be any
@@ -74,7 +74,7 @@ class FilteredCollection(object):
         """
         #if isinstance(expression,TableOrColumn):
         #    expression = TableOrColumn(expression.context,expression.name+"_id")
-        self.columns.append((name, expression))
+        self.columns.append((name, expression, concat))
 
     def reset(self):
         """
@@ -458,7 +458,7 @@ class FCSqlite(FilteredCollection):
         if len(self.columns) == 0:
             sqlstr += " *\n"
         else:
-            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] for c in self.columns])+" \n"
+            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] if not c[2] else "GROUP_CONCAT("+c[1]._sql(False)+",'"+c[2]+"') "+c[0] for c in self.columns])+" \n"
         sqlstr += "FROM\n"
         sqlstr += self.sql_query()
         if self.limit is not None:
