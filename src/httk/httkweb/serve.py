@@ -51,4 +51,4 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
 
         return {'response_code':200, 'content_type':out['mimetype'], 'content':out['content'], 'encoding':'utf-8' }
 
-    webserver.startup(httk_web_callback, port=8080, debug=True)
+    webserver.startup(httk_web_callback, port=port, debug=True)
