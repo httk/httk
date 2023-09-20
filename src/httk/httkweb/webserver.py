@@ -146,7 +146,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile_write_encoded(e.content, e.encoding)
 
-        except IOError as e:
+        except FileNotFoundError as e:
             if len(self.error_callbacks) > 0:
                 try:
                     for callback in self.error_callbacks:
