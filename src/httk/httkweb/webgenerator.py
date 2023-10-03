@@ -49,6 +49,9 @@ class WebGenerator(object):
 
         # Setup the crucial pages function
         def access_pages(relative_url,subfield):
+            print("ACCESS PAGE:",relative_url)
+            if relative_url == "third_post.md":
+                raise Exception("BROKEKN")
             page = self._retrieve_page(relative_url, update_access_timestamp=False, query = False)
             return getattr(page, subfield)
         global_data['pages'] = access_pages
@@ -89,8 +92,11 @@ class WebGenerator(object):
         except IOError as e:
             raise IOError("Requested page not found")
 
-        metadata = render_output.metadata()
-        content = render_output.content()
+        try:
+            metadata = render_output.metadata()
+            content = render_output.content()
+        except Exception as e:
+            raise Exception("Failed to render page: "+str(e)+" while using render class: "+render_class.__name__)
 
         # Support for web functions
         page.functions = []
@@ -183,11 +189,11 @@ class WebGenerator(object):
                 #print("RESULT OF RUN:",outstr,"::",function['output_name'])
 
         base_template_identity = helpers.identify(self.templates_dir,page.base_template,self.template_engines, allow_urls_without_ext=True)
-        instaced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])
-        page.content = instaced_template_engine.apply(UnquotedStr(page._rendered_content), data=global_data, *page._rendered_subcontent)
+        instanced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])
+        page.content = instanced_template_engine.apply(UnquotedStr(page._rendered_content), data=global_data, *page._rendered_subcontent)
 
         page.mimetype = 'text/html'
-        page.dependency_filenames += instaced_template_engine.get_dependency_filenames()
+        page.dependency_filenames += instanced_template_engine.get_dependency_filenames()
 
     def _retrieve_page(self, relative_url, query=None, update_access_timestamp=True, allow_urls_without_ext=None, all_functions = False):
 
@@ -254,12 +260,12 @@ class WebGenerator(object):
             page.timestamp_render = now
             self._render_page(identity['relative_filename'], identity['class'],
                     query, page, all_functions=all_functions)
-        except Exception:
+        except Exception as e:
             del self.page_memcache[canonical_request]
             del self.page_memcache_index[relative_url][canonical_request]
             if len(self.page_memcache_index[relative_url]) == 0:
                 del self.page_memcache_index[relative_url]
-            raise
+            raise Exception("Page render problem: "+str(e))
 
         # Make sure we only keep page_memcache_limit number of pages in cache
         if len(self.page_memcache) > self.page_memcache_limit:
