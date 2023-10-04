@@ -266,7 +266,7 @@ class WebGenerator(object):
             del self.page_memcache_index[relative_url][canonical_request]
             if len(self.page_memcache_index[relative_url]) == 0:
                 del self.page_memcache_index[relative_url]
-            raise Exception("Page render problem: "+str(e))
+            raise Exception("Page render problem: "+str(e)+" for page:"+str(relative_url))
 
         # Make sure we only keep page_memcache_limit number of pages in cache
         if len(self.page_memcache) > self.page_memcache_limit:

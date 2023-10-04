@@ -50,7 +50,7 @@ jobs:
           export PYTHONPATH=$PWD/httk/src:$PYTHONPATH
           export PATH=$PWD/httk/bin:$PATH
           cd web
-          python3 ./publish.py
+          python3 ./publish_static.py
           cd ..
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
