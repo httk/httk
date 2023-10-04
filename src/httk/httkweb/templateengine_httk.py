@@ -59,7 +59,9 @@ class HttkTemplateFormatter(string.Formatter):
             def update_and_return(update):
                 new_kwargs.update(update)
                 return new_kwargs
-            if type(value) is dict:
+            if value is None:
+                raise Exception("HttkTemplateFormatter: asked to loop over None for spec: "+str(spec))
+            elif type(value) is dict:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in value])
             else:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in range(len(value))])

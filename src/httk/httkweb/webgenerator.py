@@ -49,9 +49,6 @@ class WebGenerator(object):
 
         # Setup the crucial pages function
         def access_pages(relative_url,subfield):
-            print("ACCESS PAGE:",relative_url)
-            if relative_url == "third_post.md":
-                raise Exception("BROKEKN")
             page = self._retrieve_page(relative_url, update_access_timestamp=False, query = False)
             return getattr(page, subfield)
         global_data['pages'] = access_pages
@@ -81,6 +78,10 @@ class WebGenerator(object):
         else:
             init_function = init_function_info['class'](os.path.join(srcdir,'functions'), 'init', {}, global_data)
             init_function.execute()
+
+        # Re-initialize the memcache to avoid chicen-and-egg issues from initalization function
+        self.page_memcache = collections.OrderedDict()
+        self.page_memcache_index = {}
 
     def _render_page(self, relative_filename, render_class, query, page, all_functions = False):
 

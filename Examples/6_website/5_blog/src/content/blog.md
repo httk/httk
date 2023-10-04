@@ -8,4 +8,5 @@ Base_template: base_default
 Blog
 ====
 
-This page list our blog posts.
+Below is a list of all blog posts available here.
+

@@ -3,7 +3,7 @@ Title: My Website - Hello Everyone
 Author: Rickard Armiento
 Date: 2023-10-03
 Name: Hello Everyone
-Template: blog
+Template: blogpost
 Base_template: base_default
 --------
 

@@ -82,7 +82,6 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             #
             # Hence, we wrap the writer instead
             writer = codecs.getwriter(encoding)
-            print("HERE",type(s))
             if isinstance(s,io.StringIO):
                 shutil.copyfileobj(s, writer(self.wfile))
             else:
