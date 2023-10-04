@@ -1,4 +1,4 @@
-import os
+import os, datetime
 
 def execute(global_data,**kargs):
 
@@ -11,7 +11,7 @@ def execute(global_data,**kargs):
     global_data['blogposts_latest'] = []
 
     def listdirsorted(path):
-        return [x[0] for x in sorted([(fn, global_data['pages'](os.path.join(path,fn),'date')) for fn in os.listdir(os.path.join(prefix,path))], key = lambda x: x[1])]
+        return [x[0] for x in sorted([(fn, datetime.datetime.strptime(str(global_data['pages'](os.path.join(path,fn),'date')), "%Y-%m-%d")) for fn in os.listdir(os.path.join(prefix,path))], key = lambda x: x[1],reverse=True)]
 
     global_data['blogposts'] = [os.path.join(path, f) for f in listdirsorted(path) if os.path.isfile(os.path.join(prefix, path, f)) and any([f.endswith(t) for t in filterlist])]
 
