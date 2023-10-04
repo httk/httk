@@ -153,7 +153,7 @@ class WebGenerator(object):
         relroot = os.path.dirname(relative_filename)
         page._relroot = relroot
         if relroot != '.' and relroot != '':
-            page.relbaseurl = '/'.join(['..']*relroot.count(os.sep))
+            page.relbaseurl = '/'.join(['..']*(relroot.count(os.sep)+1))
         else:
             page.relbaseurl = '.'
         if not hasattr(page,'template'):

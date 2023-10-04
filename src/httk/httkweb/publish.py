@@ -52,7 +52,6 @@ def publish(srcdir,outdir,baseurl,renderers = None, template_engines = None, fun
             full_rel_filename = os.path.relpath(os.path.join(root,filename),os.path.join(srcdir,"content"))
             full_rel_url, __dummy = os.path.splitext(full_rel_filename)
             full_rel_output_filename = full_rel_url + '.html'
-            print("DOING:",full_rel_filename)
 
             output = webgenerator.retrieve(full_rel_url,all_functions=True)
             if(len(output['functions'])>0):
