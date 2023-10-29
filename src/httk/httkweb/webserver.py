@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, cgitb, codecs, cgi, shutil, io, traceback
+import os, sys, cgitb, codecs, cgi, shutil, io, traceback, time
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -90,6 +90,8 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(codecs.encode(s, encoding))
 
     def do_GET(self):
+
+        starttime_get_request = time.time()
 
         parsed_path = urlsplit(self.path)
         query = dict(parse_qsl(parsed_path.query, keep_blank_values=True))
@@ -181,7 +183,11 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
+        print("GET request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_get_request))
+
     def do_POST(self):
+
+        starttime_post_request = time.time()
 
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
         if ctype == 'multipart/form-data':
@@ -261,6 +267,8 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
                 self.wfile_write_encoded(cgitb.html(sys.exc_info()))
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
+
+        print("POST request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_get_request))
 
     # Redirect log messages to stdout instead of stderr
     def log_message(self, format, *args):
