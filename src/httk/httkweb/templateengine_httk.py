@@ -69,7 +69,14 @@ class HttkTemplateFormatter(string.Formatter):
             callargs, _sep, newspec = spec.partition("::")
             callargs = callargs.split(":")
             callargs = [self.get_field(x[1:-1],quote=quote,args=args,kwargs=kwargs)[0] if (x.startswith('{') and x.endswith('}')) else x for x in callargs]
-            result = value(*callargs[1:])
+            try:
+                result = value(*callargs[1:])
+            except Exception as e:
+                if '::' in spec:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e)+ ". Note: string to render contains '::', which could have been caused by an ':item:' with an item equal the empty string")
+                else:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e))
+
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
