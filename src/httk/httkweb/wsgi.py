@@ -84,7 +84,10 @@ class WsgiApplication:
 
         except FileNotFoundError as e:
             start_response('404 Not found', [('Content-Type','text/html')])
-            return self.output("<html><body>Requested URL not found.</body></html>")
+            if self.debug:
+                return self.output("<html><body>Requested URL not found. Reason given: "+str(e)+"</body></html>")
+            else:
+                return self.output("<html><body>Requested URL not found.</body></html>")
 
         except Exception as e:
             start_response('500 Internal error',[('Content-Type','text/html')])
@@ -108,7 +111,6 @@ class WsgiApplication:
         if hasattr(content, '__iter__') and not isinstance(content, str):
             return BytesIOWrapper(content, encoding)
         else:
-            print("HUH",content)
             return [codecs.encode(content,encoding)]
 
     def wsgi_get_request(self, environ):
