@@ -249,6 +249,12 @@ function VASP_PREPARE_POTCAR {
             if [ "${SPECIES}${PRIORITY}" == "Ru_pv" ]; then
               PRIORITY="_sv" # Ru_pv has probelm converging in the ground state
             fi
+            if [ "${SPECIES}${PRIORITY}" == "K_pv" ]; then
+              PRIORITY="_sv" # K_pv has too low ENCUT to be compatable with ENCUT 600
+            fi
+            if [ "${SPECIES}${PRIORITY}" == "Rb_pv" ]; then
+              PRIORITY="_sv" # Rb_pv has too low ENCUT to be compatable with ENCUT 600
+            fi
 	    if [ -d "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}" ]; then
 	      if [ -e "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" ]; then
 		  cat "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" >> "$POTCAR"
@@ -465,8 +471,8 @@ function VASP_PREPARE_INCAR {
 	VASP_SET_TAG "NPAR" "1"
     fi
 
-    local MAGMOM=$(VASP_GET_TAG MAGMOM)
-    if [ -z "$MAGMOM" ]; then
+    local MAGMOMS=$(VASP_GET_TAG MAGMOMS)
+    if [ -z "$MAGMOMS" ]; then
 	LINE=$(VASP_MAGMOMLINE)
 	if [ -z "$LINE" ]; then
 	    echo "Error in VASP_PREPARE_INCAR: got empty MAGMOM line" >&2
@@ -543,7 +549,7 @@ function VASP_PREPARE_INCAR {
 	    fi
 	fi
     fi
-
+    
     local NEDOS=$(VASP_GET_TAG NEDOS)
     if [ -z "$NEDOS" ]; then
 	if grep "^BUMP_NEDOS$" ht.remedy.* >/dev/null 2>&1; then
