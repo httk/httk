@@ -3,4 +3,4 @@
 DIRNAME="$(dirname "$0")"
 HTTK_BIN_PATH="$(cd "$DIRNAME"; pwd -P)"
 
-echo $HTTK_BIN_PATH
+echo "binpath:$HTTK_BIN_PATH"
