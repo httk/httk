@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIRNAME="$(dirname "$0")"
+HTTK_BIN_PATH="$(cd "$DIRNAME"; pwd -P)"
+
+echo "binpath:$HTTK_BIN_PATH"
