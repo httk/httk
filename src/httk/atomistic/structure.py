@@ -481,8 +481,8 @@ class Structure(HttkObject):
             self._other_reps['rc'] = rc_struct
         return self._other_reps['rc']
 
-    def transform(self, matrix, max_search_cells=20, max_atoms=5000,use_hall_symbol=None):
-        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms,use_hall_symbol=use_hall_symbol)
+    def transform(self, matrix, max_search_cells=20, max_atoms=5000,force_hall_symbol=None):
+        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms,force_hall_symbol=force_hall_symbol)
 
 
     @httk_typed_property(str)

@@ -946,11 +946,11 @@ def get_primitive_basis_transform(hall_symbol):
 #     # Transform to primitive cell
 #     return lattrans
 
-def transform(structure, transformation, max_search_cells=20, max_atoms=5000, use_hall_symbol = None):
+def transform(structure, transformation, max_search_cells=20, max_atoms=5000, force_hall_symbol = None):
     """Applies a transformation matrix to the structure
 
     Args:
-        use_hall_symbol (bool, optional): Enforces a supplied hall_symbol. If True, defaults into using P 1.
+        force_hall_symbol (bool, optional): Enforces a supplied hall_symbol. If True, defaults into using P 1.
     """
     transformation = FracVector.use(transformation).simplify()
     #if transformation.denom != 1:
@@ -1002,10 +1002,10 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=5000, us
         raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
 
 
-    if use_hall_symbol:
-        assert isinstance(use_hall_symbol, str), "hall symbol must be a string" 
+    if force_hall_symbol:
+        assert isinstance(force_hall_symbol, str), "hall symbol must be a string" 
 
-        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments,hall_symbol= use_hall_symbol)
+        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments,hall_symbol= force_hall_symbol)
 
     return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 
