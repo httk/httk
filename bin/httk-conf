@@ -3,4 +3,16 @@
 DIRNAME="$(dirname "$0")"
 HTTK_BIN_PATH="$(cd "$DIRNAME"; pwd -P)"
 
-echo "binpath:$HTTK_BIN_PATH"
+if [ -z "$1" ]; then
+
+    echo "binpath:$HTTK_BIN_PATH"
+
+else
+
+    for keys in "$@"; do
+        if [ "$key" == "$binpath" ]; then
+            echo "$HTTK_BIN_PATH"
+        fi
+    done
+
+fi
