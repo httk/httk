@@ -946,7 +946,7 @@ def get_primitive_basis_transform(hall_symbol):
 #     # Transform to primitive cell
 #     return lattrans
 
-def transform(structure, transformation, max_search_cells=20, max_atoms=5000, force_hall_symbol = None):
+def transform(structure, transformation, max_search_cells=20, max_atoms=10000, force_hall_symbol = None):
     """Applies a transformation matrix to the structure
 
     Args:
@@ -1003,9 +1003,9 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=5000, fo
 
 
     if force_hall_symbol:
-        assert isinstance(force_hall_symbol, str), "hall symbol must be a string" 
+        assert isinstance(force_hall_symbol, str), "hall symbol must be a string"
 
-        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments,hall_symbol= force_hall_symbol)
+        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments, hall_symbol=force_hall_symbol)
 
     return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 

@@ -401,9 +401,9 @@ class Structure(HttkObject):
                               wyckoff_symbols=wyckoff_symbols,
                               multiplicities=multiplicities,
                               hall_symbol=hall_symbol)
-            
+
             new._other_reps = other_reps
-            
+
         else:
             new = cls(assignments=assignments, rc_sites=rc_sites, rc_cell=rc_cell, other_reps=other_reps)
 

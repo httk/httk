@@ -327,7 +327,7 @@ class UnitcellStructure(HttkObject):
     def uc_counts(self):
         return self.uc_sites.counts
 
-    def transform(self, matrix, max_search_cells=20, max_atoms=5000):
+    def transform(self, matrix, max_search_cells=20, max_atoms=10000):
         return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
 
     def __str__(self):
