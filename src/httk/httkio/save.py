@@ -25,7 +25,7 @@ from httk.core import *
 from httk.atomistic import *
 
 
-def save(obj, ioa, ext=None):
+def save(obj, ioa, ext=None, **kwargs):
     """
     A *very* generic file writer method.
     
@@ -37,7 +37,10 @@ def save(obj, ioa, ext=None):
         import httk.atomistic.atomisticio
 
         if isinstance(obj, httk.atomistic.Structure):        
-            return obj.io.save(ioa, ext=ext)
+            return obj.io.save(ioa, ext=ext, **kwargs)
+        elif isinstance(obj, httk.atomistic.PlaneWaveFunctions):
+            from httk.atomistic.atomisticio.wavefunction_io import save_wavefunc
+            return save_wavefunc(obj, ioa, ext=ext, **kwargs)
     except Exception:
         raise
         pass        

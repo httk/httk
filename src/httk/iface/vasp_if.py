@@ -24,9 +24,11 @@ from httk.atomistic.data import periodictable
 from httk.core.ioadapters import cleveropen
 from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
-from httk.atomistic import Structure
+from httk.atomistic import Structure, Cell, PlaneWaveFunctions
 from httk.atomistic.structureutils import cartesian_to_reduced
 
+import struct
+import numpy as np
 
 def get_pseudopotential(species, poscarspath=None):
     if poscarspath is None:
@@ -412,6 +414,205 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
         template = os.path.join(httk.httk_root, 'Execution', 'tasks-templates', template[2:])
 
     apply_templates(template, dirpath, envglobals=data, mkdir=False)
+
+
+def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
+    """
+    Reads the information in a VASP WAVECAR file into a PlaneWaveFunctions object.
+
+    Input
+    file: File-like object or io adapter pointing to WAVECAR file
+    gamma_mode: Reduction axis in the gamma-point format
+
+    Return
+    file: file-adapter to wavecar
+    nspin: Number of spin channels
+    nkpts: Number of k-points
+    nbands: Number of bands
+    nplws: Number plane-waves at each k-point
+    encut: Energy cutoff of calculation
+    cell: Supercell cell vectors
+    kpts: List of k-point vectors
+    float_size: byte-size of floats specified by precision tag
+    eigs: eigenvalues
+    occups: occupation of bands
+    rec_pos: function for byte-position of plane-wave coefficients, given (spin, kpt, band) with index starting from 1
+
+    """
+    file = IoAdapterFilename.use(file)
+    filename = file.filename
+    file = httk.core.ioadapters.cleveropen(filename, "rb") # make sure to open in byte-mode
+
+    record_len, nspin, rtag, extra = map(int, struct.unpack('d'*4, file.read(8*4)))
+
+    # determine complex number precision from rtag
+    if wavefunc_prec is None:
+        if rtag == 45200:
+            float_size = 4 # single precision
+        elif rtag == 45210:
+            float_size = 8 # double precision
+        else:
+            raise ValueError("Unknown RTAG value in WAVECAR. Perhaps unsupported version of VASP was used. Specify floating point precision using wavefunc_prec (= {64,128})")
+    else:
+        float_size = wavefunc_prec//16
+    
+    file.seek(record_len) # move to second record
+    header = struct.unpack('d'*12, file.read(8*12))
+
+    nkpts = int(header[0])
+    nbands = int(header[1])
+    encut = header[2]
+    cell_nums = header[3:]
+    cell = Cell.create(basis=[[cell_nums[3*j + i] for i in range(3)] for j in range(3)])
+    
+    # define function for seeking specific record in WAVECAR
+    def rec_pos(spin, kpt, band, record_length = record_len):
+        assert 1 <= spin <= nspin, "Spin index {} out of range [1,{}]".format(spin, nspin)
+        assert 1 <= kpt <= nkpts, "K-point index {} out of range [1,{}]".format(kpt, nkpts)
+        assert 1 <= band <= nbands, "Band index {} out of range [1,{}]".format(band, nbands)
+
+        # return position at the first plane-wave coefficient:
+        #### two header records
+        #### for s in spin:
+        ####    for k in kpts:
+        ####        header records with k-point planewave metadata eigenvalues and occupations
+        ####        for b in bands:
+        ####            coeffs <--- Record position goes at start of this record
+        return (2 + (spin - 1) * nkpts * (nbands+1) + (kpt - 1) * (nbands + 1) + band) * record_length
+
+    ### Read occupations and eigenvalues
+    eigs = [[0 for j in range(nkpts)] for k in range(nspin)]
+    occups = [[[0 for i in range(nbands)] for j in range(nkpts)] for k in range(nspin)]
+    nplw_coeffs = [0]*nkpts
+    kpts = [0]*nkpts
+    for spin in range(nspin):
+        for kpt in range(nkpts):
+            seek_pos = rec_pos(spin+1, kpt+1, 1) - record_len # position of spin-kpt header
+            file.seek(seek_pos)
+            nentries = (4+3*nbands)
+            record = struct.unpack('d'*nentries, file.read(8*nentries))
+            if spin == 0:
+                # read kpt header info
+                nplw_coeffs[kpt] = int(record[0])
+                kpts[kpt] = record[1:4]
+            eigs[spin][kpt] = record[4::3]
+            occups[spin][kpt] = record[4+2::3]
+ 
+    wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
+    return wavefuncs 
+
+def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, format=None, gamma_half=None):
+    """
+    Writes a PlaneWaveFunctions object to specified file.
+
+    Optional arguments are for writing a subset of the plane-wave object, limiting the new file to certain spin-components, k-points or bands. Writing to gamma format or standard format can be specified, when possible.
+
+    Input
+    file_wrapper: Filename or file object to new file (will be closed and opened in binary read mode if necessary)
+    planewaves: PlaneWaveFunctions object to copy to file
+    spins: Indices of spin components to write, default is all, counting from 1
+    kpts: Indices of k-points to write, default is all, counting from 1
+    bands: Indices of bands to write, default is all, counting from 1
+    format: Either 'std' or 'gamma', default is same format as planewaves object
+    gamma_half: If writing to gamma format, change the axis of reduction, either 'z' or 'x'
+    """
+    
+    import numpy as np # import numpy for faster routines when writing data
+    
+    ### Sanitize arguments
+    if not isinstance(planewaves, PlaneWaveFunctions):
+        return None
+
+    if bands is None:
+        bands = np.arange(1, planewaves.nbands+1)
+    if spins is None:
+        spins = np.arange(1, planewaves.nspins+1)
+    if kpts is None:
+        kpts = np.arange(1, planewaves.nkpts+1)
+
+    filename = IoAdapterFilename.use(file_wrapper)
+    file_wrapper = cleveropen(filename.filename, 'wb')
+
+    assert 1 <= min(spins) and max(spins) <= planewaves.nspins
+    assert 1 <= min(kpts) and max(kpts) <= planewaves.nkpts
+    assert 1 <= min(bands) and max(bands) <= planewaves.nbands 
+
+    if format == 'gamma':
+        assert len(kpts) == 0 and kpts[0] == np.array([0,0,0]), "Can only write gamma-wavecar at the gamma-point, several k-points or non-gamma point provided"
+        to_gamma = True
+    elif format == 'std':
+        to_gamma = False
+    else:
+        to_gamma = planewaves.is_gamma
+
+    if to_gamma != planewaves.is_gamma:
+        convert = True
+    else:
+        convert = False
+
+
+    ### Write header
+    if not planewaves.double_precision:
+        rtag = 45200
+        data_size = 8
+        data_id = np.complex64
+    else:
+        rtag = 45210
+        data_size = 16
+        data_id = np.complex128
+    
+    nkpts = len(kpts)
+    nbands = len(bands)
+    nplws = planewaves.nplws[kpts-1]
+    max_nplws = max(planewaves.nplws)
+    if convert:
+        if to_gamma:
+            nplws = [(nplw - 1)//2 + 1 for nplw in nplws]
+            max_nplws = max(nplws)
+        else:
+            nplws = [2*nplw - 1 for nplw in nplws]
+            max_nplws = max(nplws)
+    record_size = int(max(max_nplws*data_size, (4+nbands*3)*8))
+    nfloats = record_size // 8
+    ncomplex = record_size // data_size
+    float_rec = np.zeros(nfloats, dtype=np.float64)
+    complex_rec = np.zeros(ncomplex, dtype=data_id)
+    # top header
+    float_rec[:3] = [record_size, planewaves.nspins, rtag]
+    float_rec.tofile(file_wrapper)
+
+    # second header
+    cell_nums = [planewaves.cell.basis[i,j].to_float() for i in range(3) for j in range(3)]
+    float_rec[:12] = [nkpts, nbands, planewaves.encut.to_float()] + cell_nums
+    float_rec.tofile(file_wrapper)
+
+    ### Write wavefunctions and wavefunction headers
+    for s in spins:
+        for ki, k in enumerate(kpts):
+            if convert:
+                gam_gvecs = planewaves.get_gvecs(planewaves.kpts[k-1], gamma=True, gamma_half=gamma_half)
+                if to_gamma:
+                    std_gvecs = planewaves.get_gvecs(planewaves.kpts[k-1], gamma=False)
+                
+            float_rec = np.zeros(record_size//8, dtype=np.float64)
+            nwaves = nplws[ki]
+            float_rec[0] = nplws
+            float_rec[1:4] = planewaves.kpts[k-1][:]
+            float_rec[4:4+len(bands)*3:3] = planewaves.eigs[s-1,k-1,bands-1]
+            float_rec[4+2:4+2+len(bands)*3:3] = planewaves.occups[s-1,k-1,bands-1]
+            float_rec.tofile(file_wrapper)
+    
+            for b in bands:
+                coeffs = planewaves.get_plws(s,k,b, cache=False)
+                if convert:
+                    if to_gamma:
+                        coeffs = reduce_std_coeffs(coeffs, planewaves.grid_size, std_gvecs, gam_gvecs, gamma_half)
+                    else:
+                        coeffs = expand_gamma_coeffs(coeffs, planewaves.grid_size, gam_gvecs, planewaves.gamma_half)
+                complex_rec[:nplws] = coeffs
+                complex_rec[nplws:] = 0j
+                complex_rec.tofile(file_wrapper)
+    file_wrapper.close()
 
 
 class OutcarReader():
