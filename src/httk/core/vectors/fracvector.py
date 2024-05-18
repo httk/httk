@@ -797,7 +797,7 @@ class FracVector(Vector):
         denom = self.denom
 
         v1, v2, v3 = noms[0], noms[1], noms[2]
-        noms = (cross_noms(v2, v3), cross_noms(v1, v3), cross_noms(v1, v2))
+        noms = (cross_noms(v2, v3), cross_noms(v3, v1), cross_noms(v1, v2))
         noms = self.nested_map(lambda x: x*denom, noms)
         return self.__class__(noms, detnom)
 
