@@ -63,3 +63,4 @@ def save_wavefunc(planewave_obj, ioa, ext=None, **kwargs):
         httk.iface.vasp_if.write_wavecar(ioa, planewave_obj, **kwargs)
     else:
         raise Exception("httk.atomistic.atomisticio.wavefunction_io.save: I do not know what to do with the file:" + filename)
+
