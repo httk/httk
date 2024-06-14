@@ -6,10 +6,12 @@ from httk.core.httkobject import HttkObject, HttkPluginPlaceholder, httk_typed_p
 
 import math
 from scipy import fft
-import numpy as np
 from copy import deepcopy
 from collections import defaultdict
 import struct
+import numpy as np
+from enum import Enum
+from numba import njit
 
 # constants used in VASP
 AUtoA    = FracScalar.create(0.529177249)  # 1 a.u. in Angstrom
@@ -17,18 +19,23 @@ RYtoEV   = FracScalar.create(13.605826)    # 1 Ry in eV
 kinE_prefactor = RYtoEV * AUtoA**2         # equivalent to hbar**2/(2*m_e)
 PI       = FracScalar.create(3.141592653589793238)
 
-def gen_kgrid(grid_size, gamma, gamma_half='x'):
+class GammaHalf(Enum):
+    X = 0
+    Z = 1
+
+def gen_kgrid(grid_size, gamma, gamma_half="x"):
     """
     Generates the (rectangular) kgrid containing all states fulfilling G**2 / 2 < ENCUT
     """
-    fx,fy,fz = [np.arange(grid_size[i]) - grid_size[i]//2 for i in range(3)]
+    # format of fft-grid is [0, 1, 2, 3... grid_size//2, -grid_size//2, ..+1,..+2,... -1]
+    fx,fy,fz = [(np.arange(grid_size[i]) + grid_size[i]//2) % grid_size[i] - grid_size[i]//2 for i in range(3)]
     if gamma:
-        if gamma_half == 'x':
+        if gamma_half == "x":
             # generate only upper half of x-grid, but on border keep half of y-plane and half of z-line
             fx = fx[fx >= 0]
             filter_func = lambda k: (k[:,0] > 0) | ((k[:,0] == 0) & (k[:,1] > 0)) | ((k[:,0] == 0) & (k[:,1] == 0) & (k[:,2] >= 0))
 
-        elif gamma_half == 'z':
+        elif gamma_half == "z":
             # generate only upper half of z-grid, but on border keep half of y-plane and half of x-line
             fz = fz[fz >= 0]
             filter_func = lambda k: (k[:,2] > 0) | ((k[:,2] == 0) & (k[:,1] > 0)) | ((k[:,2] == 0) & (k[:,1] == 0) & (k[:,0] >= 0))
@@ -37,7 +44,7 @@ def gen_kgrid(grid_size, gamma, gamma_half='x'):
     else:
         filter_func = lambda k: np.ones(k.shape[0], dtype=bool)
 
-    fxyz = np.array(np.meshgrid(fx,fy,fz)).T.reshape(-1,3)
+    fxyz = np.array(np.meshgrid(fz,fy,fx, indexing='ij')).reshape(3,-1).T[:,[2,1,0]]
     filter_array = filter_func(fxyz)
     kgrid = fxyz[filter_array]
     
@@ -64,7 +71,7 @@ def gen_gvecs(kgrid, kvec, basis, encut):
 
     return gvecs
 
-def to_real_wave(plane_wave, grid_size, gvecs, gamma=False, gamma_half='x'):
+def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x"):
     """
     Fourier-transform the given plane-wave coefficients into a real-space wavefunction
 
@@ -79,69 +86,86 @@ def to_real_wave(plane_wave, grid_size, gvecs, gamma=False, gamma_half='x'):
     """
 
     if gamma:
-        if gamma_half == 'x':
+        if gamma_half == "x":
             phi = np.zeros((grid_size[0]//2+1, grid_size[1], grid_size[2]), dtype=complex)
-        elif gamma_half == 'z':
+        elif gamma_half == "z":
             phi = np.zeros((grid_size[0], grid_size[1], grid_size[2]//2+1), dtype=complex)
         else:
             raise ValueError('Unrecognized gamma-half argument. z or x is supported')
     else:
         phi = np.zeros(grid_size, dtype=complex)
 
-    phi[gvec[:,0], gvec[:,1], gvec[:,2]] = plane_wave
+    phi[gvecs[:,0], gvecs[:,1], gvecs[:,2]] = coeffs
     normalization = np.sqrt(np.prod(np.array(grid_size)))
 
     if gamma:
-        x,y,z = [np.arange(-grid_size[i]//2, 0) for i in range(3)]
-        if gamma_half == 'x':
-            # fill y and z-axis for fourier transform
-            x = [0]
-            axis=0
-        elif gamma_half == 'z':
-            # fill x and y-axis for fourier transform
-            z = [0]
-            axis=2
-
-        xyz = np.array(np.meshgrid(x,y,z)).T.reshape((-1,3))
-        phi[xyz[:,0],xyz[:,1],xyz[:,2]] = phi[-xyz[:,0],-xyz[:,1],-xyz[:,2]].conjugate()
-        phi /= np.sqrt(2)
-        phi[0,0,0] *= np.sqrt(2)
-
-        phi_real = fft.irfftn(phi, axes=axis) * normalization
-        return phi_real
+        phi = expand_gamma_wav(phi, -gvecs)
+        if gamma_half == "x":
+            grid = grid_size[[2,1,0]]
+            tmp = np.swapaxes(phi, 0, 2)
+            tmp = fft.irfftn(tmp, s=grid)
+            phi = np.swapaxes(tmp, 0, 2)
+        elif gamma_half == "z":
+            phi = fft.irfftn(tmp, s=grid_size)
+        phi *= normalization
+        return phi
     else:
         return fft.ifftn(phi) * normalization
 
-def expand_gamma_coeffs(coeffs, grid_size, gvecs, gamma_half='x'):
-    wavefunction[gvecs[:,0], gvecs[:,1], gvecs[:,2]] = coeffs
+def meshgrid(x,y,z):
+    return np.array(np.meshgrid(x,y,z)).T.reshape((-1,3))
 
-    x,y,z = [np.arange(0,grid_size[i]) - grid_size[i]//2 for i in range(3)]
-    if gamma_half == 'x':
-        x = x[:grid_size[0]//2 + 1]
-    elif gamma_half == 'z':
-        z = z[:grid_size[0]//2 + 1]
-    else:
-        raise ValueError('Unrecognized gamma-half argument. z or x is supported')
+#@njit
+def expand_gamma_wav(buffer, xyz):
+    buffer[xyz[:,0], xyz[:,1], xyz[:,2]] = buffer[-xyz[:,0], -xyz[:,1], -xyz[:,2]].conjugate()
+    buffer /= np.sqrt(2)
+    buffer[0,0,0] *= np.sqrt(2)
+    return buffer
     
-    xyz = np.array(np.meshgrid(x,y,z)).T.reshape((-1,3))
-    wavefunction[xyz[:,0], xyz[:,1], xyz[:,2]] = wavefunction[-xyz[:,0], -xyz[:,1], -xyz[:,2]].conjugate()
-    wavefunction /= np.sqrt(2)
-    wavefunction[0,0,0] *= np.sqrt(2)
-    coeffs = wavefunction[gvecs[:,0], gvecs[:,1], gvecs[:,2]]
-    return coeffs 
+def expand_gamma_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half, xyz=None, buffer=None):
+    
+    if buffer is None:
+        nx, ny, nz = [np.max(std_gvecs[:,i]) - np.min(std_gvecs[:,i]) for i in range(3)]
+        buffer = np.zeros((nx, ny, nz), dtype=np.complex128)
+    buffer[gam_gvecs[:,0], gam_gvecs[:,1], gam_gvecs[:,2]] = coeffs
 
-def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half='x'):
-    if gamma_half == 'x':
-        axis=0
-    elif gamma_half == 'z':
-        axis=2
-    else:
+#    if xyz is None and False:
+#        #xyz = -gen_kgrid(
+#        x,y,z = [np.arange(0,grid_size[i]) - grid_size[i]//2 for i in range(3)]
+#        if gamma_half == GammaHalf.X:
+#            filter_func = lambda k:
+#                  (k[:,0] < 0)
+#                | ((k[:,0] == 0) & (k[:,1] < 0))
+#                | ((k[:,0] == 0) & (k[:,1] == 0) & (k[:,2] < 0))
+#        elif gamma_half == GammaHalf.Z:
+#            filter_func = lambda k:
+#                      (k[:,2] < 0)
+#                    | ((k[:,2] == 0) & (k[:,1] < 0))
+#                    | ((k[:,2] == 0) & (k[:,1] == 0) & (k[:,0] < 0))
+#        else:
+#            raise ValueError('Unrecognized gamma-half argument. z or x is supported')
+#        
+#        xyz = meshgrid(x, y, z)
+#        xyz = xyz[filter_func(xyz)] 
+    buffer = expand_gamma_wav(buffer, -gam_gvecs)
+    return buffer[std_gvecs[:,0], std_gvecs[:,1], std_gvecs[:,2]]
+
+def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half="x"):
+    if not gamma_half == "x" and not gamma_half == "z":
         raise ValueError('Unrecognized gamma-half argument. z or x is supported')
     
     real_wave = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half)
 
-    real_wave = np.sqrt(real_wave.real**2 + real_wave.imag**2)*np.sign(real_wav.real)
-    real_wave = fft.rfftn(real_wave, axes=axis)
+    real_wave = np.sqrt(real_wave.real**2 + real_wave.imag**2)*np.sign(real_wave.real)
+    
+    if gamma_half == "x":
+        grid = grid_size[[2,1,0]]
+        tmp = np.swapaxes(real_wave, 2, 0)
+        tmp = fft.rfftn(tmp, s=grid)
+        real_wave = np.swapaxes(tmp, 2, 0)
+    elif gamma_half == "z":
+        real_wave = fft.rfftn(real_wave, s=grid_size)
+
     real_wave *= np.sqrt(2)
     real_wave[0,0,0] /= np.sqrt(2)
 
@@ -180,9 +204,10 @@ class PlaneWaveFunctions(HttkObject):
         self.is_gamma = is_gamma
         self.gamma_half = gamma_half
         self.kgrid = kgrid
+        self.gvecs = {}
 
     @classmethod
-    def create(cls, file_wrapper = None, rec_pos_func=None, nplws=None, encut=None, cell=None, kpts=None, double_precision=None, eigs=None, occups=None, pwcoeffs=None, is_gamma=None, gamma_half='x'):
+    def create(cls, file_wrapper = None, rec_pos_func=None, nplws=None, encut=None, cell=None, kpts=None, double_precision=None, eigs=None, occups=None, pwcoeffs=None, is_gamma=None, gamma_half="x"):
         """
         Creation function for the proxy object for wavefunctions file.
         """
@@ -220,13 +245,12 @@ class PlaneWaveFunctions(HttkObject):
             kgrid_size = np.array([math.ceil(g)*2 + 1 for g in G_cutoff.to_floats()], dtype=int) # could be replaced with element-wise ceil?
 
             # check if wavefunction format is gamma or not
-            print(kpts)
-            print(nplws)
-            print(encut)
             if nkpts > 1:
                 is_gamma = False
                 kgrid = gen_kgrid(kgrid_size, False)
-            elif (kpts[0] == (0,0,0)).all():
+            elif (kpts[0] == np.array((0,0,0))).all():
+                if not gamma_half == 'x' and not gamma_half == 'z':
+                    raise ValueError("Incompatible format or value for gamma_half given")
                 std_grid = gen_kgrid(kgrid_size, False, gamma_half)
                 gam_grid = gen_kgrid(kgrid_size, True, gamma_half)
                 std_gvecs = gen_gvecs(std_grid, (0,0,0), cell.basis, encut)
@@ -288,34 +312,38 @@ class PlaneWaveFunctions(HttkObject):
             array_size = self.nplws[kpt-1]
             type_id = np.complex128 if self.double_precision else np.complex64
             coeffs = np.fromfile(self.file_ref, dtype=type_id, count=array_size)
-            #coeffs = struct.unpack(type_id*2*array_size, self.file_ref.read(2*array_size))
-            #coeffs = (FracVector.create([i for i in coeffs[::2]]), FracVector.create([i for i in coeffs[1::2]]))
             return coeffs
         else:
             raise ValueError('Wavefunction file reference non-existent. Failed to read file') 
 
-    def get_gvecs(self, kpt_ind=None, kpt=None, gamma=None, gamma_half=None, cache=True):
+    def get_gvecs(self, kpt_ind=None, kpt=None, gamma=None, gamma_half=None, kgrid=None, cache=True):
         if kpt_ind is not None:
             assert 1 <= kpt_ind <= self.nkpts
-            kpt = self.kpts[kpt_ind]
-
-        if tuple(kpt) in self.gvecs:
-            return self.gvecs[tuple(kpt)]
+            kpt = self.kpts[kpt_ind - 1]
+        
+        if kpt is None:
+            raise ValueError("Generation of g-vectors requires a k-point, None provided")
+        
         
         if gamma is None:
             gamma = self.is_gamma
-        elif gamma != self.is_gamma:
-            cache = False
         if gamma_half is None:
             gamma_half = self.gamma_half
-        elif gamma_half != self.gamma_half:
+        
+        if gamma != self.is_gamma or gamma_half != self.gamma_half or kgrid is not None:
             cache = False
         
-        kgrid = gen_krid(self.grid_size, gamma, gamma_half)
+        if cache:
+            immut_kpt = FracVector.create(tuple(kpt))
+            if immut_kpt in self.gvecs:
+                return self.gvecs[immut_kpt]
+       
+        if kgrid is None:
+            kgrid = gen_kgrid(self.kgrid_size, gamma, gamma_half)
         gvecs = gen_gvecs(kgrid, kpt, self.cell.basis, self.encut)
             
         if cache:
-            self.gvecs[tuple(kpt)] = gvecs 
+            self.gvecs[immut_kpt] = gvecs 
         return gvecs
               
 
@@ -326,12 +354,10 @@ class PlaneWaveFunctions(HttkObject):
         assert 1 <= band <= self.nbands
         
         plane_wave = self.get_plws(spin, kpt, band)
-        gvecs = self.gvec_list[kpt-1]
+        gvecs = self.get_gvecs(kpt_ind=kpt)
         real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self.is_gamma, gamma_half=self.gamma_half)
 
         return real_space_wave
-        #return (FracVector.create(real_space_wave.real())),
-        #        FracVector.create(real_space_wave)))
 
     def copy(self, spins=None, kpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
         if bands is None:
@@ -371,16 +397,17 @@ class PlaneWaveFunctions(HttkObject):
             new_occups = np.zeros((nspins, nkpts, nbands), dtype=int)
             for s_i,s in enumerate(spins):
                 for k_i,k in enumerate(kpts):
-                    if convert and to_gamma:
+                    if convert:
                         std_gvecs = get_gvecs(kpt_ind=k, gamma=False)
                         gam_gvecs = get_gvecs(kpt_ind=k, gamma=True, gamma_half=gamma_half)
+
                     for b_i,b in enumerate(bands):
                         coeffs = self.get_plws(s, k, b, cache=False)
                         if convert:
                             if to_gamma:
                                 coeffs = reduce_std_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, gamma_half)
                             else:
-                                coeffs = expand_gamma_coeffs(coeffs, self.grid_size, gam_gvecs, self.gamma_half)
+                                coeffs = expand_gamma_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, self.gamma_half)
                         new_coeffs[(s_i,k_i,b_i)] = coeffs
                         new_eigs[s_i,k_i,b_i] = self.eigs[s-1,k-1,b-1]
                         new_occups[s_i,k_i,b_i] = self.occups[s-1,k-1,b-1]
