@@ -41,11 +41,12 @@ from httk.atomistic.structurephasediagram import StructurePhaseDiagram
 
 # edvva488 httk 2
 from httk.atomistic.simplestructure import SimpleStructure
+from httk.atomistic.symmetrystructure import SymmetryStructure
 
 import io as _atomistic_io
 
 __all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites", "Assignments",
            "Compound", "CompoundStructure", "StructurePhaseDiagram", "StructureRef", "StructureTag",
-           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure", "SimpleStructure"]
+           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure", "SimpleStructure", "SymmetryStructure"]
 
 from httk.atomistic import atomisticio

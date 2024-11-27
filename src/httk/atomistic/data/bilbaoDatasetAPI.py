@@ -1,5 +1,6 @@
-import json, os, sys
-with open(os.path.join(sys.path[0], "db_compact.json"), "r") as f:
+import json, sys
+from os.path import abspath, dirname, join
+with open(join(dirname(abspath(__file__)), "bilbaoMAXSUB_WPsplittings.json"), "r") as f:
 	data = json.load(f)
 def get_max_subgroups(group_id, sub_type=None, curr_size=None, max_size=None, subgroup_restriction=[], search_same_spacegroup=False):
 	group_id = str(group_id)

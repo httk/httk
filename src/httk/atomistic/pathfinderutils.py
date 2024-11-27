@@ -3,7 +3,7 @@ from ase import io, Atoms
 from ase.io import vasp
 import spglib
 import sys
-import os
+from os.path import join, dirname, abspath
 import json
 import re
 import numpy as np
@@ -12,7 +12,7 @@ from diffpy.structure.lattice import Lattice
 from ase.neighborlist import primitive_neighbor_list
 
 
-with open(os.path.join(sys.path[0], "correct_hall_nums.json"), "r") as f:
+with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
     hall_nums = json.load(f)
 
 def read_file(file_path, symprec_val):
