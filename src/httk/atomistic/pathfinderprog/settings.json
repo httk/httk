@@ -1,0 +1,22 @@
+{
+    "depth": 6,
+    "symprec": 1e-05,
+    "sub-type": [
+        "t",
+        "k"
+    ],
+    "max-path": 99999,
+    "max-orig": 999,
+    "max-results": 1,
+    "save-format": [
+        "poscar"
+    ],
+    "output": "output",
+    "output-name": "",
+    "steps": 10,
+    "subgroups": [
+        "any"
+    ],
+    "collision-threshold": 0.1,
+    "collision-level": 2
+}
