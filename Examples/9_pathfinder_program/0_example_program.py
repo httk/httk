@@ -8,8 +8,8 @@ from httk.atomistic.simplestructureutils import convert_to_simplestruct
 from httk.atomistic.symmetrystructure import SymmetryStructure
 from httk.core import *
 
-start_file = "..\\..\\Tutorial\\pathfinder_data\\UGePt_62.poscar"
-end_file = "..\\..\\Tutorial\\pathfinder_data\\UGePt_44.poscar"
+start_file = "Tutorial\\pathfinder_data\\UGePt_62.poscar"
+end_file = "Tutorial\\pathfinder_data\\UGePt_44.poscar"
 
 start_struct = httk.load(start_file)
 end_struct = httk.load(end_file)
@@ -28,4 +28,8 @@ subgroups = ["any"]
 collision_threshold = 0.1
 collision_level = 2
 
-prefix_str, start_orig, end_orig, paths_short, paths_main=pf.get_paths(start_simple, end_simple, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
+prefix_str, start_orig, end_orig, paths_short, paths_main=pf.get_paths(start_file, end_file, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
+print(prefix_str)
+print(start_orig)
+print(end_orig)
+print(paths_short)
