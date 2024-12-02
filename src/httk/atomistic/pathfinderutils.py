@@ -15,7 +15,7 @@ from ase.neighborlist import primitive_neighbor_list
 with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
     hall_nums = json.load(f)
 
-def read_file(file_path, symprec_val):
+def read_file(simple_struct, symprec_val):
     """Read crystal structure and returns extra information on symmetry properties.
 
     Args:
@@ -31,11 +31,21 @@ def read_file(file_path, symprec_val):
             num_of_atoms - The number of atoms in the symmetrized structure, its size.
             formula - The atomic formula of the structure, used as a prefix for the output files.
     """
-    atoms_obj = io.read(file_path)
-    positions = atoms_obj.get_scaled_positions()
-    numbers = atoms_obj.get_atomic_numbers()
-    lattice = atoms_obj.get_cell()
-    atomic_formula = atoms_obj.get_chemical_formula()
+    #atoms_obj = io.read(file_path)
+    #positions = atoms_obj.get_scaled_positions()
+    #numbers = atoms_obj.get_atomic_numbers()
+    #lattice = atoms_obj.get_cell()
+    #atomic_formula = atoms_obj.get_chemical_formula()
+
+    numbers = []
+    positions = []
+    for i in range(0, len(simple_struct._species)):
+        numbers += simple_struct._species[i]*len(simple_struct._sites_fractional[i])
+        positions += simple_struct._sites_fractional[i]
+    print(numbers)
+    print(positions)
+
+
     if re.search("[A-Za-z]$", atomic_formula):
         atomic_formula += "1"
     needs_1 = re.findall("[A-Za-z]{1}[A-Z]{1}", atomic_formula)
