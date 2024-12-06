@@ -37,15 +37,10 @@ def read_file(simple_struct, symprec_val):
     #lattice = atoms_obj.get_cell()
     #atomic_formula = atoms_obj.get_chemical_formula()
 
-    numbers = []
-    positions = []
-    for i in range(0, len(simple_struct._species)):
-        numbers += simple_struct._species[i]*len(simple_struct._sites_fractional[i])
-        positions += simple_struct._sites_fractional[i]
-    print(numbers)
-    print(positions)
-
-
+    lattice = simple_struct._cell_lattice_vectors
+    positions = simple_struct._sites_fractional
+    numbers = simple_struct._species_sites_numbers
+    atomic_formula = simple_struct.get_atomic_formula()
     if re.search("[A-Za-z]$", atomic_formula):
         atomic_formula += "1"
     needs_1 = re.findall("[A-Za-z]{1}[A-Z]{1}", atomic_formula)

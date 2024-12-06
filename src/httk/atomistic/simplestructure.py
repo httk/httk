@@ -3,8 +3,8 @@ from httk.core.basic import *
 from httk.core.httkobject import HttkObject
 
 class SimpleStructure(HttkObject):
-    def __init__(self, cell_basis=None, cell_parameters=None, cell_niggli=None, cell_metric=None, scale=None, sites_fractional=None, sites_cartesian=None, species=None, species_sites=None):
-        self._cell_basis = cell_basis
+    def __init__(self, cell_lattice_vectors=None, cell_parameters=None, cell_niggli=None, cell_metric=None, scale=None, sites_fractional=None, sites_cartesian=None, species=None, species_sites=None, species_sites_numbers=None):
+        self._cell_lattice_vectors = cell_lattice_vectors
         self._cell_parameters = cell_parameters
         self._cell_niggli = cell_niggli
         self._cell_metric = cell_metric
@@ -13,24 +13,25 @@ class SimpleStructure(HttkObject):
         self._sites_cartesian = sites_cartesian
         self._species = species
         self._species_sites = species_sites
+        self._species_sites_numbers = species_sites_numbers
     
     @classmethod
-    def create(cls, cell_basis=None, cell_parameters=None, cell_niggli=None, cell_metric=None, scale=None, sites_fractional=None, sites_cartesian=None, species=None, species_sites=None):
-        if cell_basis:
-            if type(cell_basis) is not list:
-                cell_basis = list(cell_basis)
-            if len(cell_basis) == 3:
+    def create(cls, cell_lattice_vectors=None, cell_parameters=None, cell_niggli=None, cell_metric=None, scale=None, sites_fractional=None, sites_cartesian=None, species=None, species_sites=None):
+        if cell_lattice_vectors:
+            if type(cell_lattice_vectors) is not list:
+                cell_lattice_vectors = list(cell_lattice_vectors)
+            if len(cell_lattice_vectors) == 3:
                 all_vectors_correct = True
                 i = 0
                 while i < 3:
-                    if type(cell_basis[i]) is not list:
-                        cell_basis[i] = list(cell_basis[i])
-                    if len(cell_basis[i]) != 3:
+                    if type(cell_lattice_vectors[i]) is not list:
+                        cell_lattice_vectors[i] = list(cell_lattice_vectors[i])
+                    if len(cell_lattice_vectors[i]) != 3:
                         all_vectors_correct = False
                         break
                     i += 1
                 if not all_vectors_correct:
-                    print("cell_basis error")
+                    print("cell_lattice_vectors error")
         else:
             if cell_parameters:
                 if type(cell_parameters) is list and len(cell_parameters) == 6:
@@ -50,51 +51,60 @@ class SimpleStructure(HttkObject):
                     species[atom] = 1
                 else:
                     species[atom] += 1
-        return cls(cell_basis, cell_parameters, cell_niggli, cell_metric, scale, sites_fractional, sites_cartesian, species, species_sites)
+        return cls(cell_lattice_vectors, cell_parameters, cell_niggli, cell_metric, scale, sites_fractional, sites_cartesian, species, species_sites)
 
     @property
     def sites_cartesian(self):
         if self._sites_cartesian is None:
-            self._sites_cartesian = (self._cell_basis.T @ self._sites_fractional.T).T
+            self._sites_cartesian = (self._cell_lattice_vectors.T @ self._sites_fractional.T).T
         return self._sites_cartesian
 
     @property
     def sites_fractional(self):
         if self._sites_fractional is None:
-            self._sites_fractional = self._cell_basis.inv() @ self._sites_cartesian
+            self._sites_fractional = self._cell_lattice_vectors.inv() @ self._sites_cartesian
         return self._sites_fractional
 
     @property
     def scale(self):
         if self._scale is None:
             if self._scale is not None:
-                self._scale = abs(self._volume / self._cell_basis.det()) # Some calculation here
+                self._scale = abs(self._volume / self._cell_lattice_vectors.det()) # Some calculation here
         return self._scale
     
     @property
-    def cell_basis(self):
-        return self._cell_basis
+    def cell_lattice_vectors(self):
+        return self._cell_lattice_vectors
     
     @property
     def cell_parameters(self):
         if self._cell_parameters is None:
-            self._cell_parameters = self._cell_basis # some transformation function
+            self._cell_parameters = self._cell_lattice_vectors # some transformation function
         return self._cell_parameters
     
     @property
     def cell_niggli(self):
         if self._cell_niggli is None:
-            self._cell_niggli = self._cell_basis # some transformation function
+            self._cell_niggli = self._cell_lattice_vectors # some transformation function
         return self._cell_niggli
     
     @property
     def cell_metric(self):
         if self._cell_metric is None:
-            self._cell_metric = self._cell_basis # some transformation function
+            self._cell_metric = self._cell_lattice_vectors # some transformation function
         return self._cell_metric
     
     def get_volume(self):
-        return abs(self._scale * self._cell_basis.det()) # Some calculation here
+        return abs(self._scale * self._cell_lattice_vectors.det()) # Some calculation here
     
     def get_formula(self):
         return self._species # some calculation here
+    
+    def get_atomic_formula(self):
+        formula_str = ""
+        for atom in self._species:
+            atom_count = self._species_sites.count(atom["chemical_symbols"][0])
+            formula_str += atom["chemical_symbols"][0]
+            if atom_count > 1:
+                formula_str += str(atom_count)
+        return formula_str
