@@ -3,9 +3,8 @@ PATH_TO_HTTK = "G:\\amanuens_HT24\\httk-2-testing\\src"
 sys.path.insert(1, PATH_TO_HTTK)
 import httk
 import httk.atomistic.pathfinderprog as pf
-from httk.atomistic.simplestructure import SimpleStructure
 from httk.atomistic.simplestructureutils import convert_to_simplestruct
-from httk.atomistic.symmetrystructure import SymmetryStructure
+from httk.atomistic.symmetrystructureutils import create_from_simple_struct
 from httk.core import *
 
 start_file = "Tutorial\\pathfinder_data\\UGePt_62.poscar"
@@ -16,6 +15,9 @@ end_struct = httk.load(end_file)
 
 start_simple = convert_to_simplestruct(start_struct)
 end_simple = convert_to_simplestruct(end_struct)
+
+start_sym = create_from_simple_struct(start_simple, 1e-05)
+print(start_sym._wyckoffs)
 # parameters
 search_depth = 6
 symprec = 1e-05

@@ -31,11 +31,6 @@ def read_file(simple_struct, symprec_val):
             num_of_atoms - The number of atoms in the symmetrized structure, its size.
             formula - The atomic formula of the structure, used as a prefix for the output files.
     """
-    #atoms_obj = io.read(file_path)
-    #positions = atoms_obj.get_scaled_positions()
-    #numbers = atoms_obj.get_atomic_numbers()
-    #lattice = atoms_obj.get_cell()
-    #atomic_formula = atoms_obj.get_chemical_formula()
 
     lattice = simple_struct._cell_lattice_vectors
     positions = simple_struct._sites_fractional

@@ -100,11 +100,18 @@ class SimpleStructure(HttkObject):
     def get_formula(self):
         return self._species # some calculation here
     
-    def get_atomic_formula(self):
+    def get_atomic_formula(self, reduced=True, ones=True, sorted=True):
         formula_str = ""
+        atoms_counts = {}
+        counts_gcd = 1
         for atom in self._species:
-            atom_count = self._species_sites.count(atom["chemical_symbols"][0])
-            formula_str += atom["chemical_symbols"][0]
-            if atom_count > 1:
-                formula_str += str(atom_count)
+            atoms_counts[atom["chemical_symbols"][0]] = self._species_sites.count(atom["chemical_symbols"][0])
+        species_simple = list(atoms_counts.keys())
+        species_simple.sort()
+        if reduced:
+            counts_gcd = np.gcd.reduce(list(atoms_counts.values()))
+        for key in species_simple:
+            formula_str += key
+            if atoms_counts[key]/counts_gcd > 1 or ones:
+                formula_str += str(atoms_counts[key]/counts_gcd)
         return formula_str
