@@ -9,8 +9,8 @@ from httk.atomistic.simplestructureutils import convert_to_simplestruct
 from httk.atomistic.symmetrystructureutils import create_from_simple_struct, create_lower_symmetry_copy
 from httk.core import *
 
-start_file = "Tutorial\\pathfinder_data\\UGePt_62.poscar"
-end_file = "Tutorial\\pathfinder_data\\UGePt_44.poscar"
+start_file = os.path.join("Tutorial", "pathfinder_data", "UGePt_62.poscar")
+end_file = os.path.join("Tutorial", "pathfinder_data", "UGePt_44.poscar")
 
 start_struct = httk.load(start_file)
 end_struct = httk.load(end_file)
