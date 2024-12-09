@@ -1,7 +1,7 @@
 import os, sys
 PATH_TO_HTTK = "G:\\amanuens_HT24\\httk-2-testing\\src"
 sys.path.insert(1, PATH_TO_HTTK)
-PATH_TO_HTTK = "~/Dokument/amanuens_HT24/httk-2-testing/httk/src"
+PATH_TO_HTTK = "~/Dokument/amanuens_HT24/httk-2-testing/src"
 sys.path.insert(1, os.path.expanduser(PATH_TO_HTTK))
 import httk
 import httk.atomistic.pathfinderprog as pf
