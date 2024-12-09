@@ -3,7 +3,9 @@ import httk.atomistic.data.bilbaoDatasetAPI as bilbaoAPI
 import datetime
 import os
 import json
-
+from httk.atomistic.simplestructure import SimpleStructure
+from httk.atomistic.symmetrystructure import SymmetryStructure
+from httk.atomistic.symmetrystructureutils import create_from_simple_struct
 
 def check_path(start_wyckoff, path1, end_wyckoff, path2, final_space_id):
     path1_transformation = {}
@@ -11,7 +13,7 @@ def check_path(start_wyckoff, path1, end_wyckoff, path2, final_space_id):
     next_wyckoffs1 = start_wyckoff
     i = 1
     while i < len(path1):
-        transformation_info = pfutils.get_best_trans_matrix(bilbaoAPI.get_trans_matrices(path1[i - 1][0]["int_number"], path1[i][0]["id"]))
+        transformation_info = bilbaoAPI.get_best_trans_matrix(path1[i - 1][0]["int_number"], path1[i][0]["id"])
         wp_splitting = transformation_info["wp_splitting"]
         transformation_matrix = transformation_info["trans_matrix"]
         next_wyckoffs1 = pfutils.get_next_wyckoffs(path1[i][0]["int_number"], prev_wyckoffs1, wp_splitting)
@@ -26,7 +28,7 @@ def check_path(start_wyckoff, path1, end_wyckoff, path2, final_space_id):
     next_wyckoffs2 = end_wyckoff
     i = 1
     while i < len(path2):
-        transformation_info = pfutils.get_best_trans_matrix(bilbaoAPI.get_trans_matrices(path2[i - 1][0]["int_number"], path2[i][0]["id"]))
+        transformation_info = bilbaoAPI.get_best_trans_matrix(path2[i - 1][0]["int_number"], path2[i][0]["id"])
         wp_splitting = transformation_info["wp_splitting"]
         transformation_matrix = transformation_info["trans_matrix"]
         next_wyckoffs2 = pfutils.get_next_wyckoffs(path2[i][0]["int_number"], prev_wyckoffs2, wp_splitting)
@@ -125,12 +127,12 @@ def search_for_paths(wyckoffs1, paths_1, wyckoffs2, paths_2, max_size, sub_type,
             continue_search = False
     return complete_matches
 
-def generate_structs(paths, f1_info, f2_info, steps, collision_threshold, collision_level):
+def generate_structs(paths, f1_struct, f2_struct, steps, collision_threshold, collision_level):
     paths_main = {}
     paths_short = {}
     i = 0
     while i < len(paths):
-        paths_main[str(i + 1)] = {"start": {"1": f1_info["new_struct"]}, "end": {"1": f2_info["new_struct"]}}
+        paths_main[str(i + 1)] = {"start": {"1": [f1_struct._cell_lattice_vectors, f1_struct._sites_fractional, f1_struct._species_sites_numbers]}, "end": {"1": [f2_struct._cell_lattice_vectors, f2_struct._sites_fractional, f2_struct._species_sites_numbers]}}
         paths_short[str(i + 1)] = {"start": [], "end": []}
         paths_short[str(i + 1)]["size"] = paths[i][0][-1][1]
         j = 0
@@ -142,7 +144,7 @@ def generate_structs(paths, f1_info, f2_info, steps, collision_threshold, collis
             paths_short[str(i + 1)]["end"].append(paths[i][2][j][0]["int_number"])
             j += 1
         # construct path 1
-        next_lattice = f1_info["new_struct"][0]
+        next_lattice = f1_struct._cell_lattice_vectors
         if len(paths[i][0]) > 1:
             j = 1
             while j < len(paths[i][0]):
@@ -161,7 +163,7 @@ def generate_structs(paths, f1_info, f2_info, steps, collision_threshold, collis
         else:
             paths_main[str(i + 1)]["start"]["0-1"] = paths[i][1]["0-1"][0]
         # construct path 2
-        next_lattice = f2_info["new_struct"][0]
+        next_lattice = f2_struct._cell_lattice_vectors
         if len(paths[i][2]) > 1:
             j = 1
             while j < len(paths[i][2]):
@@ -194,26 +196,30 @@ def generate_structs(paths, f1_info, f2_info, steps, collision_threshold, collis
         i += 1
     return paths_short, paths_main
 
-def get_paths(f1, f2, max_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level):
+def get_paths(start_struct, end_struct, max_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level):
     # Function for getting start and end structures, generating paths and generating the structures along the paths.
-    f1_info = pfutils.read_file(f1, symprec)
-    f2_info = pfutils.read_file(f2, symprec)
-    prefix_str = pfutils.check_struct_compatibility(f1_info, f2_info, max_orig)
+    if isinstance(start_struct_sym, SimpleStructure):
+        start_struct_sym = create_from_simple_struct(start_struct, symprec)
+    else:
+        start_struct_sym = start_struct
+    if isinstance(end_struct_sym, SimpleStructure):
+        end_struct_sym = create_from_simple_struct(end_struct, symprec)
+    else:
+        end_struct_sym = end_struct
+    prefix_str = pfutils.check_struct_compatibility(start_struct_sym, end_struct_sym, max_orig)
     if subgroups[0].lower() == "any":
         subgroup_choice = [x for x in range(1, 231)]
     else:
         subgroup_choice = [int(x) for x in subgroups]
-    paths_1 = [[({"int_number": f1_info["space_number"]}, f1_info["num_of_atoms"])]]
-    paths_2 = [[({"int_number": f2_info["space_number"]}, f2_info["num_of_atoms"])]]
-    found_paths = search_for_paths(f1_info["wyckoffs"], paths_1, f2_info["wyckoffs"], paths_2, max_path, sub_type, max_depth, max_results, subgroup_choice)
+    paths_1 = [[({"int_number": start_struct_sym._space_number}, start_struct_sym._num_of_atoms)]]
+    paths_2 = [[({"int_number": end_struct_sym._space_number}, end_struct_sym._num_of_atoms)]]
+    found_paths = search_for_paths(start_struct_sym._wyckoffs, paths_1, end_struct_sym._wyckoffs, paths_2, max_path, sub_type, max_depth, max_results, subgroup_choice)
     if len(found_paths) == 0:
         print("No found paths")
         return None, None, None, None, "no_path"
         #sys.exit(0)
-    paths_short, paths_main = generate_structs(found_paths, f1_info, f2_info, steps, collision_threshold, collision_level)
-    start_orig = f1_info["orig_struct"]
-    end_orig = f2_info["orig_struct"]
-    return prefix_str, start_orig, end_orig, paths_short, paths_main
+    paths_short, paths_main = generate_structs(found_paths, start_struct_sym, end_struct_sym, steps, collision_threshold, collision_level)
+    return prefix_str, start_struct, end_struct, paths_short, paths_main
 
 def get_subgroup_struct(orig_struct, subgroup_num, symprec):
     # timing code

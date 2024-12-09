@@ -107,7 +107,8 @@ class SimpleStructure(HttkObject):
         for atom in self._species:
             atoms_counts[atom["chemical_symbols"][0]] = self._species_sites.count(atom["chemical_symbols"][0])
         species_simple = list(atoms_counts.keys())
-        species_simple.sort()
+        if sorted:
+            species_simple.sort()
         if reduced:
             counts_gcd = np.gcd.reduce(list(atoms_counts.values()))
         for key in species_simple:
@@ -115,3 +116,16 @@ class SimpleStructure(HttkObject):
             if atoms_counts[key]/counts_gcd > 1 or ones:
                 formula_str += str(atoms_counts[key]/counts_gcd)
         return formula_str
+    def get_species_copy(self):
+        species_copy = []
+        for specie in self._species:
+            new_specie = {}
+            for key, val in specie.items():
+                if isinstance(val, list):
+                    new_specie[key] = []
+                    for list_val in val:
+                        new_specie[key].append(list_val)
+                else:
+                    new_specie[key] = val
+            species_copy.append(new_specie)
+        return species_copy

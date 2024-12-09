@@ -20,3 +20,12 @@ class SymmetryStructure(SimpleStructure):
         self._wyckoffs = wyckoffs
         self._space_number = space_number
         self._num_of_atoms = num_of_atoms
+    
+    def __str__(self):
+        return_str = ""
+        return_str += "Space group number: "+str(self._space_number)+"\n"
+        return_str += "Wyckoff\n"
+        return_str += "Atom\tLetter\tNum\tFree_degr\tBasis\n"
+        for wyckoff in self._wyckoffs:
+            return_str += str(wyckoff["atom"])+"\t"+str(wyckoff["letter"])+"\t"+str(wyckoff["multiplicity"])+"\t"+", ".join(str(x)[0] for x in wyckoff["freedom_degr"])+"\t\t"+", ".join(str(round(x, 2)) for x in wyckoff["basis"])+"\n"
+        return return_str

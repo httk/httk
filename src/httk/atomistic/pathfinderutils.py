@@ -1,126 +1,12 @@
 """This module contains the class with tools used by the path finding program."""
 from ase import io, Atoms
 from ase.io import vasp
-import spglib
 import sys
-from os.path import join, dirname, abspath
-import json
-import re
 import numpy as np
 from httk.atomistic.data.symmetry_wyckoff import Spacegroup
 from diffpy.structure.lattice import Lattice
 from ase.neighborlist import primitive_neighbor_list
 
-
-with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
-    hall_nums = json.load(f)
-
-def read_file(simple_struct, symprec_val):
-    """Read crystal structure and returns extra information on symmetry properties.
-
-    Args:
-        file_path (str): File path for a file that can be read using the ase.io.read() function.
-        symprec_val (float): Precision used by spglib when finding space group of the provided crystal structure.
-    
-    Returns:
-        dict: Dictionary containing extra information on the crystal structure.
-            space_number - The space group number.
-            wyckoffs - List of Wyckoff positions and information about them.
-            orig_struct - The provided structure, as used by spglib.
-            new_struct - Symmetrized structure as provided by spglib.
-            num_of_atoms - The number of atoms in the symmetrized structure, its size.
-            formula - The atomic formula of the structure, used as a prefix for the output files.
-    """
-
-    lattice = simple_struct._cell_lattice_vectors
-    positions = simple_struct._sites_fractional
-    numbers = simple_struct._species_sites_numbers
-    atomic_formula = simple_struct.get_atomic_formula()
-    if re.search("[A-Za-z]$", atomic_formula):
-        atomic_formula += "1"
-    needs_1 = re.findall("[A-Za-z]{1}[A-Z]{1}", atomic_formula)
-    for s in needs_1:
-        atomic_formula = atomic_formula.replace(s, s[0] + "1" + s[1])
-    cell = (lattice, positions, numbers)
-    dataset = spglib.get_symmetry_dataset(cell, symprec=symprec_val)
-    if str(dataset["number"]) in hall_nums:
-        hall_num = hall_nums[str(dataset["number"])]
-    else:
-        hall_num = 0
-    new_struct = (dataset["std_lattice"], dataset["std_positions"], dataset["std_types"])
-    dataset2 = spglib.get_symmetry_dataset(new_struct, symprec=symprec_val, hall_number=hall_num)
-    new_struct2 = (dataset2["std_lattice"], dataset2["std_positions"], dataset2["std_types"])
-    dataset3 = spglib.get_symmetry_dataset(new_struct2, symprec=symprec_val, hall_number=hall_num)
-    new_wyckoff = calc_wyckoff_basis_coords(new_struct2,
-                                                    dataset3["wyckoffs"],
-                                                    dataset3["equivalent_atoms"],
-                                                    dataset3["number"])
-    if len(new_wyckoff) == 0:
-        print("Could not identify any wyckoff orbits.")
-        sys.exit()
-    num_of_atoms = len(dataset3["std_positions"])
-    return {"space_number": dataset3["number"],
-            "wyckoffs": new_wyckoff,
-            "orig_struct": cell,
-            "new_struct": new_struct2,
-            "num_of_atoms": num_of_atoms,
-            "formula": atomic_formula}
-
-def calc_wyckoff_basis_coords(struct, wyckoffs, equivalent, space_group):
-    """Identify the Wyckoff orbits and find suitable values for degrees of freedom.
-
-    Args:
-        struct (list): list or tuple with lattice, positions and atom numbers.
-        wyckoffs (list): list of Wyckoff letters corresponding to the letter of each position.
-        equivalent (list): list of numbers corresponding to the Wyckoff orbit of each position.
-        space_group (int): Space group number of structure.
-    
-    Returns:
-        list: list of dictionaries describing each Wyckoff position. Each dictionary contains
-            atom - atom number.
-            multiplicity - number of atoms in the Wyckoff orbit.
-            letter - The Wyckoff letter.
-            basis - Set of values for the degrees of freedom.
-            freedom_degr - The degrees of freedom, which axes can be changed.
-    """
-    # Generate wyckoff orbits of subgroup
-    new_wyckoff = []
-    s = Spacegroup(space_group)
-    for orbit_id in set(equivalent):
-        multiplicity = np.count_nonzero(equivalent == orbit_id)
-        coords = [struct[1][i] for i in np.where(equivalent == orbit_id)[0]]
-        wyck_letter = wyckoffs[np.where(equivalent == orbit_id)[0][0]]
-        atom_num = struct[2][np.where(equivalent == orbit_id)[0][0]]
-        try:
-            degr_freedom = repr(s[wyck_letter])
-        except Exception as e:
-            print(e)
-            print(space_group)
-            print(wyckoffs)
-            print(equivalent)
-            sys.exit()
-        degr_freedom = degr_freedom[degr_freedom.find("["):]
-        degr_freedom = [x.strip() == "True" for x in degr_freedom.strip("[]").split(",")]
-        final_coord = None
-        got_final_coord = False
-        for coordinate in coords:
-            calc_pos = np.mod(s[wyck_letter].affinedot(coordinate), 1.0)
-            if compare_list_of_coords(coords, calc_pos):
-                final_coord = calc_pos[0]
-                got_final_coord = True
-                break
-        if got_final_coord:
-            new_wyckoff.append({"atom": atom_num,
-                                "multiplicity": multiplicity,
-                                "letter": wyck_letter,
-                                "basis": final_coord,
-                                "freedom_degr": degr_freedom})
-    new_wyckoff.sort(key=lambda a: "{atom:03d}+{l}".format(l=a["letter"], atom=a["atom"]))
-    i = 0
-    while i < len(new_wyckoff):
-        new_wyckoff[i]["id"] = i
-        i += 1
-    return new_wyckoff
 
 def calc_new_wyckoff_pos(group_values, subgroup_formula):
     """Calculate values of formulas given input values.
@@ -241,7 +127,7 @@ def compare_wyckoffs(wyckoffs1, wyckoffs2):
         return True
     return False
 
-def check_struct_compatibility(f1_info, f2_info, max_orig):
+def check_struct_compatibility(f1_struct, f2_struct, max_orig):
     """Check if two structures are compatible and have the same stochiometry.
 
     Args:
@@ -252,30 +138,27 @@ def check_struct_compatibility(f1_info, f2_info, max_orig):
     Returns:
         str: Formula describing atomic composition, returned if the two structures match.
     """
-    if f1_info["num_of_atoms"] > max_orig:
-        print("Start point structure is too large: " + str(f1_info["num_of_atoms"]) + " > " + str(max_orig))
+
+
+    if f1_struct._num_of_atoms > max_orig:
+        print("Start point structure is too large: " + str(f1_struct._num_of_atoms) + " > " + str(max_orig))
         sys.exit(0)
-    if f2_info["num_of_atoms"] > max_orig:
-        print("End point structure is too large: " + str(f2_info["num_of_atoms"]) + " > " + str(max_orig))
+    if f2_struct._num_of_atoms > max_orig:
+        print("End point structure is too large: " + str(f2_struct._num_of_atoms) + " > " + str(max_orig))
         sys.exit(0)
-    if f1_info["space_number"] == f2_info["space_number"] and compare_wyckoffs(f1_info["wyckoffs"], f2_info["wyckoffs"]):
+    if f1_struct._space_number == f2_struct._space_number and compare_wyckoffs(f1_struct._wyckoffs, f2_struct._wyckoffs):
         print("Structures are identical")
-    if len(set(f1_info["new_struct"][2])) != len(set(f2_info["new_struct"][2])):
+    if len(set(f1_struct._species_sites_numbers)) != len(set(f2_struct._species_sites_numbers)):
         print("Structures' atomic composition does not match")
         sys.exit(0)
-    for atom in set(f1_info["new_struct"][2]):
-        if atom not in f2_info["new_struct"][2]:
+    for atom in set(f1_struct._species_sites_numbers):
+        if atom not in f2_struct._species_sites_numbers:
             print("Structures' atomic composition does not match")
             sys.exit(0)
-    atom_count_1 = get_reduced_formula_info(f1_info["formula"])
-    atom_count_2 = get_reduced_formula_info(f2_info["formula"])
-    atoms = list(atom_count_1.keys())
-    if len(atoms) > 1:
-        for atom in atoms:
-            if atom_count_1[atom] != atom_count_2[atom]:
-                print("Structures' atomic composition does not match")
-                sys.exit(0)
-    return "".join([i + str(j) if j > 1 else i for i, j in atom_count_1.items()])
+    if f1_struct.get_atomic_formula(reduced=True, ones=True, sorted=True) != f2_struct.get_atomic_formula(reduced=True, ones=True, sorted=True):
+        print("Structures' atomic composition does not match")
+        sys.exit(0)
+    return f1_struct.get_atomic_formula(reduced=True, ones=False, sorted=True)
 
 def get_next_wyckoffs(next_space_group, curr_wyckoffs, wp_splitting):
     """Get new Wyckoff positions and calculate the new values for the degrees of freedom.
@@ -334,21 +217,6 @@ def get_pos_from_wyckoff(space_group, wyckoff_info, other_basis=None, move_to_un
         return positions, atoms
     else:
         return positions
-
-def get_reduced_formula_info(formula_str):
-    atom_count = {}
-    big_letters = re.findall("[A-Z]{2}", formula_str)
-    for big_letter_combo in big_letters:
-        formula_str = formula_str.replace(big_letter_combo, big_letter_combo[0]+"1"+big_letter_combo[1])
-    atom_count_pairs = re.findall("[A-Za-z]+[0-9]+", formula_str)
-    for pair in atom_count_pairs:
-        head = pair.rstrip("0123456789")
-        tail = pair[len(head):]
-        atom_count[head] = int(tail)
-    atom_count_gcd = np.gcd.reduce(list(atom_count.values()))
-    for key, val in atom_count.items():
-        atom_count[key] = int(val / atom_count_gcd)
-    return atom_count
 
 def get_interpolation(wyckoffs1, wyckoffs2, space_group, start_matrix, end_matrix, steps, collision_threshold, collision_level):
     complete_structures = []
