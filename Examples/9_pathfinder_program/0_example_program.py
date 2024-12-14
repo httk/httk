@@ -20,8 +20,9 @@ end_simple = convert_to_simplestruct(end_struct)
 
 start_sym = create_from_simple_struct(start_simple, 1e-05)
 start_sym_lower = create_lower_symmetry_copy(start_sym, 31)
-print(start_sym)
-print(start_sym_lower)
+#print(start_sym)
+#print(start_sym._wyckoffs)
+#print(start_sym_lower)
 # parameters
 search_depth = 6
 symprec = 1e-05
@@ -34,8 +35,9 @@ subgroups = ["any"]
 collision_threshold = 0.1
 collision_level = 2
 
-"""prefix_str, start_orig, end_orig, paths_short, paths_main=pf.get_paths(start_simple, end_simple, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
+prefix_str, start_orig, end_orig, paths=pf.get_paths(start_simple, end_simple, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
 print(prefix_str)
 print(start_orig)
 print(end_orig)
-print(paths_short)"""
+for path in paths:
+    print(path)

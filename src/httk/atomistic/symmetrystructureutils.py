@@ -6,6 +6,8 @@ from httk.atomistic.data.symmetry_wyckoff import Spacegroup
 import httk.atomistic.data.bilbaoDatasetAPI as bilbaoAPI
 from diffpy.structure.lattice import Lattice
 from ase.neighborlist import primitive_neighbor_list
+from httk.atomistic.symmetrypath import SymmetryPath
+from httk.atomistic.interpolation import Interpolation
 
 with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
     spglib_hall_nums = json.load(f)
@@ -146,13 +148,14 @@ def create_lower_symmetry_copy(sym_struct, new_space_number, transformation_info
         new_numbers += list(num)
     new_species_sites = get_species_sites_from_numbers(sym_struct, new_numbers)
     new_num_of_atoms = sym_struct._num_of_atoms*transformation_info["size_increase"]
+    new_cart_positions = fractional_to_cartesian(new_lattice, new_positions)
     return SymmetryStructure(cell_lattice_vectors=new_lattice,
                              cell_parameters=None,
                              cell_niggli=None,
                              cell_metric=None,
                              scale=1,
                              sites_fractional=new_positions,
-                             sites_cartesian=None,
+                             sites_cartesian=new_cart_positions,
                              species=sym_struct.get_species_copy(),
                              species_sites=new_species_sites,
                              species_sites_numbers=new_numbers,
@@ -160,21 +163,28 @@ def create_lower_symmetry_copy(sym_struct, new_space_number, transformation_info
                              space_number=new_space_number,
                              num_of_atoms=new_num_of_atoms)
 
-def create_from_wyckoffs(lattice, space_group, wyckoffs):
-    return "pass"
-    return SymmetryStructure(cell_lattice_vectors=new_lattice,
+def create_from_wyckoffs(lattice, space_number, wyckoffs, species=None):
+    positions = []
+    numbers = []
+    for wyckoff in wyckoffs:
+        pos, num = get_pos_from_wyckoff(space_number, wyckoff)
+        positions += list(pos)
+        numbers += list(num)
+    num_of_atoms = len(numbers)
+    cart_pos = fractional_to_cartesian(lattice, positions)
+    return SymmetryStructure(cell_lattice_vectors=lattice,
                              cell_parameters=None,
                              cell_niggli=None,
                              cell_metric=None,
                              scale=1,
-                             sites_fractional=new_positions,
-                             sites_cartesian=None,
-                             species=sym_struct.get_species_copy(),
-                             species_sites=new_species_sites,
-                             species_sites_numbers=new_numbers,
-                             wyckoffs=new_wyckoffs,
-                             space_number=new_space_number,
-                             num_of_atoms=new_num_of_atoms)
+                             sites_fractional=positions,
+                             sites_cartesian=cart_pos,
+                             species=species,
+                             species_sites=None,
+                             species_sites_numbers=numbers,
+                             wyckoffs=wyckoffs,
+                             space_number=space_number,
+                             num_of_atoms=num_of_atoms)
 
 def get_next_wyckoffs(next_space_group, curr_wyckoffs, wp_splitting):
     """Get new Wyckoff positions and calculate the new values for the degrees of freedom.
@@ -321,59 +331,57 @@ def check_path_compatibility(struct1, struct2, max_orig):
         sys.exit(0)
     return struct1.get_atomic_formula(reduced=True, ones=False, sorted=True)
 
-def interpolate_structs(start_struct, end_struct, space_group, steps, collision_threshold, collision_level):
-    wyckoffs1 = start_struct._wyckoffs
-    wyckoffs2 = end_struct._wyckoffs
-    start_matrix = start_struct._cell_lattice_vectors
-    end_matrix = end_struct._cell_lattice_vectors
+def generate_interpolation(sym_path, steps, collision_threshold, collision_level):
+    wyckoffs1 = sym_path._start_common_struct._wyckoffs
+    wyckoffs2 = sym_path._end_common_struct._wyckoffs
     complete_structures = []
-    interpolation_desc = {}
     done_atom_letter = []
     pair_dict = {}
-    xyz = ["x", "y", "z"]
-    start_parameters = lattice_matrix_to_parameters(start_matrix)
-    end_parameters = lattice_matrix_to_parameters(end_matrix)
-    intermediate_parameters = interpolate_between_coords(start_parameters, end_parameters, steps)
-    complete_structures = [[lattice_parameters_to_matrix(x)] for x in intermediate_parameters]
-    matrices = [lattice_parameters_to_matrix(x) for x in intermediate_parameters]
+    interpolated_matrices = get_interpolated_matrices(sym_path._start_common_struct, sym_path._end_common_struct, steps)
     total_dist = 0
     i = 0
     while i < len(wyckoffs1):
         if str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"] not in done_atom_letter:
             curr_wyckoffs_1 = [x for x in wyckoffs1 if str(x["atom"]) + x["letter"] == str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"]]
             curr_wyckoffs_2 = [x for x in wyckoffs2 if str(x["atom"]) + x["letter"] == str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"]]
-            pair_dict_add, corr_msg_list, part_dist = get_best_vector_pairs(curr_wyckoffs_1, curr_wyckoffs_2, space_group, matrices, start_matrix, end_matrix, steps, collision_threshold, collision_level)
+            pair_dict_add, corr_msg_list, part_dist = get_best_vector_pairs(sym_path._start_common_struct, sym_path._end_common_struct, curr_wyckoffs_1, curr_wyckoffs_2, sym_path._common_subgroup_number, interpolated_matrices, steps, collision_threshold, collision_level)
             total_dist += part_dist
             pair_dict.update(pair_dict_add)
             done_atom_letter.append(str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"])
         i += 1
+    interpolated_wyckoffs = {}
     for pair, pair_info in pair_dict.items():
-        degr_free = wyckoffs1[pair[0]]["freedom_degr"]
+        #degr_free = wyckoffs1[pair[0]]["freedom_degr"]
         wyckoffs2[pair[1]]["basis"] = pair_info[4]
         interpolated_basis = interpolate_between_coords(wyckoffs1[pair[0]]["basis"], wyckoffs2[pair[1]]["basis"], steps)
-        interpolation_desc[pair] = {}
         i = 0
         while i < steps:
-            positions, atoms = get_pos_from_wyckoff(space_group, {"atom": wyckoffs1[pair[0]]["atom"], "basis": interpolated_basis[i], "letter": wyckoffs1[pair[0]]["letter"]})
-            if len(complete_structures[i]) == 1:
-                complete_structures[i] += [list(positions), atoms]
+            new_wyckoff = copy_wyckoff(wyckoffs1[pair[0]])
+            new_wyckoff["basis"] = interpolated_basis[i]
+            if i in interpolated_wyckoffs:
+                interpolated_wyckoffs[i].append(new_wyckoff)
             else:
-                complete_structures[i][1] += list(positions)
-                complete_structures[i][2] += atoms
-            for j in range(0, 3):
-                if degr_free[j]:
-                    if xyz[j] in interpolation_desc[pair]:
-                        interpolation_desc[pair][xyz[j]].append(interpolated_basis[i][j])
-                    else:
-                        interpolation_desc[pair][xyz[j]] = [interpolated_basis[i][j]]
+                interpolated_wyckoffs[i] = [new_wyckoff]
             i += 1
+    i = 0
+    while i < steps:
+        interpolated_struct = create_from_wyckoffs(lattice=interpolated_matrices[i], space_number=sym_path._common_subgroup_number, wyckoffs=interpolated_wyckoffs[i])
+        complete_structures.append(interpolated_struct)
+        i += 1
     if collision_level > 0:
         i = 0
-        while i < len(complete_structures):
-            if check_collision_in_pos_ase(np.array(complete_structures[i][1]), collision_threshold, np.array(complete_structures[i][0])):
+        while i < steps:
+            if check_collision_in_pos_ase(np.array(complete_structures[i]._sites_fractional), collision_threshold, np.array(complete_structures[i]._cell_lattice_vectors)):
                 corr_msg_list.append(str(i))
             i += 1
-    return complete_structures, interpolation_desc, corr_msg_list, total_dist
+    dist_per_atom = total_dist/complete_structures[0]._num_of_atoms
+    interpolation_obj = Interpolation(space_number=sym_path._common_subgroup_number,
+                         collision_detection_level=collision_level,
+                         structs_with_collision=corr_msg_list,
+                         interpolated_structs=complete_structures,
+                         dist_per_atom=dist_per_atom,
+                         total_dist=total_dist)
+    sym_path._interpolations.append(interpolation_obj)
 
 def interpolate_between_coords(start_pos, end_pos, steps):
     return [np.array(start_pos) + (np.array(end_pos) - np.array(start_pos)) * i * (1 / (steps + 1)) for i in range(1, steps + 1)]
@@ -393,7 +401,29 @@ def fractional_to_cartesian(lattice, coords):
         lattice = np.array(lattice)
     return (lattice.T @ coords.T).T
 
-def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wyckoffs_end, space_group, matrices, start_matrix, end_matrix, steps, collision_threshold, collision_level):
+def copy_wyckoff(wyckoff):
+    new_wyckoff = {}
+    for key, val in wyckoff.items():
+        if key == "freedom_degr":
+            new_wyckoff[key] = []
+            for x in wyckoff["freedom_degr"]:
+                new_wyckoff[key].append(x)
+        elif key == "basis":
+            new_wyckoff[key] = []
+            for x in wyckoff["basis"]:
+                new_wyckoff[key].append(x)
+        else:
+            new_wyckoff[key] = val
+    return new_wyckoff
+
+def get_interpolated_matrices(start_struct, end_struct, steps):
+    start_parameters = lattice_matrix_to_parameters(start_struct._cell_lattice_vectors)
+    end_parameters = lattice_matrix_to_parameters(end_struct._cell_lattice_vectors)
+    intermediate_parameters = interpolate_between_coords(start_parameters, end_parameters, steps)
+    matrices = [lattice_parameters_to_matrix(x) for x in intermediate_parameters]
+    return matrices
+
+def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wyckoffs_end, space_group, matrices, steps, collision_threshold, collision_level):
     start_matrix = start_struct._cell_lattice_vectors
     end_matrix = end_struct._cell_lattice_vectors
     result_list = {}
