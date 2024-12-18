@@ -38,9 +38,93 @@ from httk.atomistic.spacegrouputils import spacegroup_get_number_and_setting
 class Structure(HttkObject):
 
     """
-    Lightweight structure object.
+    A Structure represents N sites of, e.g., atoms or ions, in any periodic or non-periodic arrangement.
+    The structure object is meant to be immutable and assumes that no internal variables are changed after its creation.
+    All methods that 'changes' the object creates and returns a new, updated, structure object.
+
+    This is the general heavy weight structure object. For lightweight structure objects, use UnitcellStructure or
+    RepresentativeStructure.
+
+    Naming conventions in httk.atomistic:
+
+    Structure cell type abbreviations:
+        rc = Representative cell: only representative atoms are given inside the conventional cell.
+             they need to be replicated by the symmetry elements.
+
+        uc = Unit cell: any (imprecisely defined) unit cell (usually the unit cell used to define the structure
+             if it was not done via a representative cell.) with all atoms inside.
+
+        pc = Primitive unit cell: a smallest possible unit cell (the standard one) with all atoms inside.
+
+        cc = Conventional unit cell: the high symmetry unit cell (rc) with all atoms inside.
+
+    For cells:
+        cell = an abstract name for any reasonable representation of a 'cell' that defines
+               the basis vectors used for representing the structure. When a 'cell' is returned,
+               it is an object of type Cell
+
+        basis = a 3x3 sequence-type with (in rows) the three basis vectors (for a periodic system, defining the unit cell, and defines the unit of repetition for the periodic dimensions)
+
+        lengths_and_angles = (a,b,c,alpha,beta,gamma): the basis vector lengths and angles
+
+        niggli_matrix = ((v1*v1, v2*v2, v3*v3),(2*v2*v3, 2*v1*v3, 2*v2*v3)) where v1, v2, v3 are the vectors forming the basis
+
+        metric = ((v1*v1,v1*v2,v1*v3),(v2*v1,v2*v2,v2*v3),(v3*v1,v3*v2,v3*v3))
+
+    For sites:
+        These following prefixes are used to describe types of site specifications:
+            representative cell/rc = only representative atoms are given, which are then to be
+            repeated by structure symmetry group to give all sites
+
+            unit cell/uc = all atoms in unitcell
+
+            reduced = coordinates given in cell vectors
+
+            cartesian = coordinates given as direct cartesian coordinates
+
+        sites = used as an abstract name for any sensible representation of a list of coordinates and a cell,
+                when a 'sites' is returned, it is an object of type Sites
+
+        counts = number of atoms of each type (one per entry in assignments)
+
+        coordgroups = coordinates represented as a 3-level-list of coordinates, e.g.
+        [[[0,0,0],[0.5,0.5,0.5]],[[0.25,0.25,0.25]]] where level-1 list = groups: one group for each equivalent atom
+
+        counts and coords = one list with the number of atoms of each type (one per entry in assignments)
+        and a 2-level list of coordinates.
+
+    For assignments of atoms, etc. to sites:
+        assignments = abstract name for any representation of assignment of atoms.
+        When returned, will be object of type Assignment.
+
+        atomic_numbers = a sequence of integers for the atomic number of each species
+
+        occupations = a sequence where the assignments are *repeated* for each coordinate as needed
+        (prefixed with uc or rc depending on which coordinates)
+
+    For cell scaling:
+        scaling = abstract name for any representation of cell scaling
+
+        scale = multiply all basis vectors with this number
+
+        volume = rescaling the cell such that it takes this volume
+
+    For periodicity:
+        periodicity = abstract name of a representation of periodicity
+
+        pbc = 'periodic boundary conditions' = sequence of True and False for which basis vectors are periodic / non-periodic
+
+        nonperiodic_vecs = integer, number of basis vectors, counted from the first, which are non-periodic
+
+    For spacegroup:
+        spacegroup = abstract name for any spacegroup representation. When returned, is of type Spacegroup.
+
+        hall_symbol = specifically the hall_symbol string representation of the spacegroup
+
     """
-    @httk_typed_init(ex=['assignments', 'rc_sites', 'rc_cell'])
+    @httk_typed_init({'assignments': Assignments, 'rc_sites': RepresentativeSites,
+                      'rc_cell': Cell},
+                     index=['assignments', 'rc_sites', 'rc_cell'])
     def __init__(self, assignments, rc_sites=None, rc_cell=None, other_reps=None):
         """
         Private constructor, as per httk coding guidelines. Use ReducedCellStructure.create instead.
