@@ -46,6 +46,7 @@ class WyckoffPosition:
         return len(self.affine)
 
     def affinedot(self, coordinate: ArrayLike) -> ArrayLike:
+        # Created by abhpa50@liu
         """
         Apply the affine transformation to the given coordinate. returns all the images of the coordinate (multiplicity)
 

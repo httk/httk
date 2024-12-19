@@ -6,7 +6,6 @@ from httk.atomistic.data.symmetry_wyckoff import Spacegroup
 import httk.atomistic.data.bilbaoDatasetAPI as bilbaoAPI
 from diffpy.structure.lattice import Lattice
 from ase.neighborlist import primitive_neighbor_list
-from httk.atomistic.symmetrypath import SymmetryPath
 from httk.atomistic.interpolation import Interpolation
 
 with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
@@ -299,6 +298,19 @@ def compare_wyckoffs(struct1, struct2):
         return True
     return False
 
+def compare_wyckoffs_new(struct1, struct2):
+    """Compare two sets of wyckoff orbits, return True if they have the same sets of letters and atoms."""
+    if len(struct1._wyckoffs) == len(struct2._wyckoffs):
+        struct1._wyckoffs.sort()
+        struct2._wyckoffs.sort()
+        i = 0
+        while i < len(struct1._wyckoffs):
+            if struct1._wyckoffs[i] != struct2._wyckoffs[i]:
+                return False
+            i += 1
+        return True
+    return False
+
 def check_path_compatibility(struct1, struct2, max_orig):
     """Check if two structures are compatible and have the same stochiometry.
 
@@ -332,31 +344,29 @@ def check_path_compatibility(struct1, struct2, max_orig):
     return struct1.get_atomic_formula(reduced=True, ones=False, sorted=True)
 
 def generate_interpolation(sym_path, steps, collision_threshold, collision_level):
-    wyckoffs1 = sym_path._start_common_struct._wyckoffs
-    wyckoffs2 = sym_path._end_common_struct._wyckoffs
     complete_structures = []
     done_atom_letter = []
     pair_dict = {}
     interpolated_matrices = get_interpolated_matrices(sym_path._start_common_struct, sym_path._end_common_struct, steps)
     total_dist = 0
     i = 0
-    while i < len(wyckoffs1):
-        if str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"] not in done_atom_letter:
-            curr_wyckoffs_1 = [x for x in wyckoffs1 if str(x["atom"]) + x["letter"] == str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"]]
-            curr_wyckoffs_2 = [x for x in wyckoffs2 if str(x["atom"]) + x["letter"] == str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"]]
+    while i < len(sym_path._start_common_struct._wyckoffs):
+        if str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"] not in done_atom_letter:
+            curr_wyckoffs_1 = [x for x in sym_path._start_common_struct._wyckoffs if str(x["atom"]) + x["letter"] == str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"]]
+            curr_wyckoffs_2 = [x for x in sym_path._end_common_struct._wyckoffs if str(x["atom"]) + x["letter"] == str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"]]
             pair_dict_add, corr_msg_list, part_dist = get_best_vector_pairs(sym_path._start_common_struct, sym_path._end_common_struct, curr_wyckoffs_1, curr_wyckoffs_2, sym_path._common_subgroup_number, interpolated_matrices, steps, collision_threshold, collision_level)
             total_dist += part_dist
             pair_dict.update(pair_dict_add)
-            done_atom_letter.append(str(wyckoffs1[i]["atom"]) + wyckoffs1[i]["letter"])
+            done_atom_letter.append(str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"])
         i += 1
     interpolated_wyckoffs = {}
     for pair, pair_info in pair_dict.items():
-        #degr_free = wyckoffs1[pair[0]]["freedom_degr"]
-        wyckoffs2[pair[1]]["basis"] = pair_info[4]
-        interpolated_basis = interpolate_between_coords(wyckoffs1[pair[0]]["basis"], wyckoffs2[pair[1]]["basis"], steps)
+        #degr_free = sym_path._start_common_struct._wyckoffs[pair[0]]["freedom_degr"]
+        sym_path._end_common_struct._wyckoffs[pair[1]]["basis"] = pair_info[4]
+        interpolated_basis = interpolate_between_coords(sym_path._start_common_struct._wyckoffs[pair[0]]["basis"], sym_path._end_common_struct._wyckoffs[pair[1]]["basis"], steps)
         i = 0
         while i < steps:
-            new_wyckoff = copy_wyckoff(wyckoffs1[pair[0]])
+            new_wyckoff = copy_wyckoff(sym_path._start_common_struct._wyckoffs[pair[0]])
             new_wyckoff["basis"] = interpolated_basis[i]
             if i in interpolated_wyckoffs:
                 interpolated_wyckoffs[i].append(new_wyckoff)
@@ -492,7 +502,7 @@ def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wy
                     j += 1
                 i += 1
     total_dist = 0
-    for key, val in result_list.items():
+    for val in result_list.values():
         total_dist += val[0]
     return result_list, coll_msg, total_dist
 
@@ -561,8 +571,15 @@ def calc_dist_with_boundary(start_pos, end_pos, free_degr, space_group, letter, 
     return shortest_dist, return_pos, coll_msg
 
 def check_if_vectors_get_close(pos1_start, pos1_end, pos2_start, pos2_end, coll_threshold):
-    pos1_direction = pos1_end - pos1_start
-    pos2_direction = pos2_end - pos2_start
+    """
+    Method for checking distance between two vectors, given that you measure the distance between one point on each vector
+    as they both move at a constant speed that is relative to the length of each vector. For an explanation for how these
+    calculations were derived, look at the thesis paper by edvva488, urn:nbn:se:liu:diva-207867
+
+    
+    """
+    pos1_direction = pos1_end - pos1_start #get vector 1 as a vector starting from (0,0,0)
+    pos2_direction = pos2_end - pos2_start #get vector 2 as a vector starting from (0,0,0)
     # a will always be positive
     a = ((pos1_direction[0] - pos2_direction[0])**2 + (pos1_direction[1] - pos2_direction[1])**2 + (pos1_direction[2] - pos2_direction[2])**2)
     b = ((pos1_direction[0] - pos2_direction[0]) * (pos1_start[0] - pos2_start[0]) + (pos1_direction[1] - pos2_direction[1]) * (pos1_start[1] - pos2_start[1]) + (pos1_direction[2] - pos2_direction[2]) * (pos1_start[2] - pos2_start[2]))

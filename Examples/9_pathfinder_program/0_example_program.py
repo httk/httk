@@ -35,9 +35,7 @@ subgroups = ["any"]
 collision_threshold = 0.1
 collision_level = 2
 
-prefix_str, start_orig, end_orig, paths=pf.get_paths(start_simple, end_simple, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
+prefix_str, paths=pf.get_paths(start_simple, end_simple, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
 print(prefix_str)
-print(start_orig)
-print(end_orig)
 for path in paths:
     print(path)
