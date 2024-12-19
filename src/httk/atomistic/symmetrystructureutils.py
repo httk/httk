@@ -7,6 +7,7 @@ import httk.atomistic.data.bilbaoDatasetAPI as bilbaoAPI
 from diffpy.structure.lattice import Lattice
 from ase.neighborlist import primitive_neighbor_list
 from httk.atomistic.interpolation import Interpolation
+from httk.atomistic.wyckofforbit import WyckoffOrbit
 
 with open(join(dirname(abspath(__file__)), "data", "spglib_standard_hall.json"), "r") as f:
     spglib_hall_nums = json.load(f)
@@ -15,6 +16,7 @@ def create_from_simple_struct(simple_struct, symprec_val):
     positions = simple_struct._sites_fractional
     numbers = simple_struct._species_sites_numbers
     cell = (lattice, positions, numbers)
+    new_species = simple_struct.get_species_copy()
     dataset = spglib.get_symmetry_dataset(cell, symprec=symprec_val)
     if str(dataset["number"]) in spglib_hall_nums:
         hall_num = spglib_hall_nums[str(dataset["number"])]
@@ -27,7 +29,8 @@ def create_from_simple_struct(simple_struct, symprec_val):
     new_wyckoff = calc_wyckoff_basis_coords(new_struct2,
                                                     dataset3["wyckoffs"],
                                                     dataset3["equivalent_atoms"],
-                                                    dataset3["number"])
+                                                    dataset3["number"],
+                                                    new_species)
     if len(new_wyckoff) == 0:
         print("Could not identify any wyckoff orbits.")
         sys.exit()
@@ -40,14 +43,14 @@ def create_from_simple_struct(simple_struct, symprec_val):
                              scale=1,
                              sites_fractional=dataset2["std_positions"],
                              sites_cartesian=None,
-                             species=simple_struct.get_species_copy(),
+                             species=new_species,
                              species_sites=new_species_sites,
                              species_sites_numbers=dataset2["std_types"],
                              wyckoffs=new_wyckoff,
                              space_number=dataset3["number"],
                              num_of_atoms=num_of_atoms)
 
-def calc_wyckoff_basis_coords(struct, wyckoffs, equivalent, space_group):
+def calc_wyckoff_basis_coords(struct, wyckoffs, equivalent, space_group, species):
     """Identify the Wyckoff orbits and find suitable values for degrees of freedom.
 
     Args:
@@ -65,43 +68,23 @@ def calc_wyckoff_basis_coords(struct, wyckoffs, equivalent, space_group):
             freedom_degr - The degrees of freedom, which axes can be changed.
     """
     # Generate wyckoff orbits of subgroup
-    new_wyckoff = []
-    s = Spacegroup(space_group)
+    new_wyckoffs = []
     for orbit_id in set(equivalent):
-        multiplicity = np.count_nonzero(equivalent == orbit_id)
         coords = [struct[1][i] for i in np.where(equivalent == orbit_id)[0]]
         wyck_letter = wyckoffs[np.where(equivalent == orbit_id)[0][0]]
         atom_num = struct[2][np.where(equivalent == orbit_id)[0][0]]
-        try:
-            degr_freedom = repr(s[wyck_letter])
-        except Exception as e:
-            print(e)
-            print(space_group)
-            print(wyckoffs)
-            print(equivalent)
-            sys.exit()
-        degr_freedom = degr_freedom[degr_freedom.find("["):]
-        degr_freedom = [x.strip() == "True" for x in degr_freedom.strip("[]").split(",")]
-        final_coord = None
-        got_final_coord = False
-        for coordinate in coords:
-            calc_pos = np.mod(s[wyck_letter].affinedot(coordinate), 1.0)
-            if compare_list_of_coords(coords, calc_pos):
-                final_coord = calc_pos[0]
-                got_final_coord = True
-                break
-        if got_final_coord:
-            new_wyckoff.append({"atom": atom_num,
-                                "multiplicity": multiplicity,
-                                "letter": wyck_letter,
-                                "basis": final_coord,
-                                "freedom_degr": degr_freedom})
-    new_wyckoff.sort(key=lambda a: "{atom:03d}+{l}".format(l=a["letter"], atom=a["atom"]))
+        specie_name = get_specie_name_from_number(species, atom_num)
+        wyckoff = WyckoffOrbit.create_from_sites(space_number=space_group,
+                                                 letter=wyck_letter,
+                                                 fractional_sites=coords,
+                                                 specie_name=specie_name)
+        new_wyckoffs.append(wyckoff)
+    new_wyckoffs.sort()
     i = 0
-    while i < len(new_wyckoff):
-        new_wyckoff[i]["id"] = i
+    while i < len(new_wyckoffs):
+        new_wyckoffs[i]._id = i
         i += 1
-    return new_wyckoff
+    return new_wyckoffs
 
 def compare_list_of_coords(list_1, list_2):
     found_match = True
@@ -141,11 +124,13 @@ def create_lower_symmetry_copy(sym_struct, new_space_number, transformation_info
     new_lattice = np.matmul(np.array([x[0:3] for x in transformation_info["trans_matrix"][0:3]]).T, np.array(sym_struct._cell_lattice_vectors)).tolist()
     new_positions = []
     new_numbers = []
+    new_species_sites = []
+    new_species = sym_struct.get_species_copy()
     for wyckoff in new_wyckoffs:
-        pos, num = get_pos_from_wyckoff(new_space_number, wyckoff)
+        pos, species_sites, numbers_sites = wyckoff.get_positions(species=new_species)
         new_positions += list(pos)
-        new_numbers += list(num)
-    new_species_sites = get_species_sites_from_numbers(sym_struct, new_numbers)
+        new_species_sites += list(species_sites)
+        new_numbers += list(numbers_sites)
     new_num_of_atoms = sym_struct._num_of_atoms*transformation_info["size_increase"]
     new_cart_positions = fractional_to_cartesian(new_lattice, new_positions)
     return SymmetryStructure(cell_lattice_vectors=new_lattice,
@@ -155,7 +140,7 @@ def create_lower_symmetry_copy(sym_struct, new_space_number, transformation_info
                              scale=1,
                              sites_fractional=new_positions,
                              sites_cartesian=new_cart_positions,
-                             species=sym_struct.get_species_copy(),
+                             species=new_species,
                              species_sites=new_species_sites,
                              species_sites_numbers=new_numbers,
                              wyckoffs=new_wyckoffs,
@@ -165,10 +150,12 @@ def create_lower_symmetry_copy(sym_struct, new_space_number, transformation_info
 def create_from_wyckoffs(lattice, space_number, wyckoffs, species=None):
     positions = []
     numbers = []
+    species_sites = []
     for wyckoff in wyckoffs:
-        pos, num = get_pos_from_wyckoff(space_number, wyckoff)
+        pos, species_sites, numbers_sites = wyckoff.get_positions(species=species)
         positions += list(pos)
-        numbers += list(num)
+        species_sites += list(species_sites)
+        numbers += list(numbers_sites)
     num_of_atoms = len(numbers)
     cart_pos = fractional_to_cartesian(lattice, positions)
     return SymmetryStructure(cell_lattice_vectors=lattice,
@@ -197,31 +184,24 @@ def get_next_wyckoffs(next_space_group, curr_wyckoffs, wp_splitting):
         list: List of Wyckoff orbits for the subgroup structure. Same data layout as curr_wyckoffs.
     """
     next_wyckoffs = []
-    s = Spacegroup(next_space_group)
     for elem in curr_wyckoffs:
-        wp_splitting_info = get_orbits(wp_splitting, elem["letter"])
+        wp_splitting_info = get_orbits(wp_splitting, elem._letter)
         new_basis_pos = None
         i = 0
         while i < len(wp_splitting_info["orbits"]):
             if wp_splitting_info["orbits"][i]["new_basis"]:
-                new_basis_pos = calc_new_wyckoff_pos(elem["basis"], wp_splitting_info["orbits"][i]["subgroup_basis"])
+                new_basis_pos = calc_new_wyckoff_pos(elem._basis, wp_splitting_info["orbits"][i]["subgroup_basis"])
             if i == len(wp_splitting_info["orbits"]) - 1:
                 wyck_letter = wp_splitting_info["orbits"][i]["name"].split("_")[0][-1]
-                degr_freedom = repr(s[wyck_letter])
-                degr_freedom = degr_freedom[degr_freedom.find("["):]
-                degr_freedom = [x.strip() == "True" for x in degr_freedom.strip("[]").split(",")]
-                next_wyckoffs.append({"atom": elem["atom"], "letter": wyck_letter, "basis": new_basis_pos, "multiplicity": int(wp_splitting_info["orbits"][i]["name"].split("_")[0][:-1]), "freedom_degr": degr_freedom})
+                next_wyckoffs.append(WyckoffOrbit.create_from_basis(space_number=next_space_group, letter=wyck_letter, basis=new_basis_pos, specie_name=elem._specie_name))
             elif wp_splitting_info["orbits"][i + 1]["name"] != wp_splitting_info["orbits"][i]["name"]:
                 wyck_letter = wp_splitting_info["orbits"][i]["name"].split("_")[0][-1]
-                degr_freedom = repr(s[wyck_letter])
-                degr_freedom = degr_freedom[degr_freedom.find("["):]
-                degr_freedom = [x.strip() == "True" for x in degr_freedom.strip("[]").split(",")]
-                next_wyckoffs.append({"atom": elem["atom"], "letter": wyck_letter, "basis": new_basis_pos, "multiplicity": int(wp_splitting_info["orbits"][i]["name"].split("_")[0][:-1]), "freedom_degr": degr_freedom})
+                next_wyckoffs.append(WyckoffOrbit.create_from_basis(space_number=next_space_group, letter=wyck_letter, basis=new_basis_pos, specie_name=elem._specie_name))
             i += 1
-    next_wyckoffs.sort(key=lambda a: "{atom:03d}+{l}".format(l=a["letter"], atom=a["atom"]))
+    next_wyckoffs.sort()
     i = 0
     while i < len(next_wyckoffs):
-        next_wyckoffs[i]["id"] = i
+        next_wyckoffs[i]._id = i
         i += 1
     return next_wyckoffs
 
@@ -251,24 +231,6 @@ def calc_new_wyckoff_pos(group_values, subgroup_formula):
     position = [eval(subgroup_formula[i], var_dict) for i in range(0, 3)]
     return np.round([i - np.floor(i) for i in position], 8)
 
-def get_pos_from_wyckoff(space_group, wyckoff_info, other_basis=None, move_to_unit=True):
-    s = Spacegroup(space_group)
-    if other_basis is not None:
-        if move_to_unit:
-            positions = np.mod(np.round(s[wyckoff_info["letter"]].affinedot(other_basis), 8), 1.0)
-        else:
-            positions = np.round(s[wyckoff_info["letter"]].affinedot(other_basis), 8)
-    else:
-        if move_to_unit:
-            positions = np.mod(np.round(s[wyckoff_info["letter"]].affinedot(wyckoff_info["basis"]), 8), 1.0)
-        else:
-            positions = np.round(s[wyckoff_info["letter"]].affinedot(wyckoff_info["basis"]), 8)
-    if "atom" in wyckoff_info:
-        atoms = [wyckoff_info["atom"]] * len(positions)
-        return positions, atoms
-    else:
-        return positions
-
 def get_species_sites_from_numbers(sym_struct, new_numbers=None):
     species_sites = []
     atom_nums_to_symbols = dict(zip([str(x["atomic_numbers"][0]) for x in sym_struct._species], [x["chemical_symbols"][0] for x in sym_struct._species]))
@@ -285,20 +247,18 @@ def get_numbers_from_species_sites(sym_struct, new_species_sites=None):
         species_sites_numbers.append(atom_symbols_to_nums[str(atom_symbol)])
     return species_sites_numbers
 
-def compare_wyckoffs(struct1, struct2):
-    """Compare two sets of wyckoff orbits, return True if they have the same sets of letters and atoms."""
-    if len(struct1._wyckoffs) == len(struct2._wyckoffs):
-        struct1._wyckoffs.sort(key=lambda a: a["letter"] + str(a["atom"]))
-        struct2._wyckoffs.sort(key=lambda a: a["letter"] + str(a["atom"]))
-        i = 0
-        while i < len(struct1._wyckoffs):
-            if (struct1._wyckoffs[i]["atom"] != struct2._wyckoffs[i]["atom"]) or (struct1._wyckoffs[i]["letter"] != struct2._wyckoffs[i]["letter"]):
-                return False
-            i += 1
-        return True
-    return False
+def get_specie_name_from_number(struct, number):
+    if isinstance(struct, SymmetryStructure):
+        for specie in struct._species:
+            if specie["atomic_numbers"][0] == number:
+                return specie["name"]
+    elif isinstance(struct, list):
+        for specie in struct:
+            if specie["atomic_numbers"][0] == number:
+                return specie["name"]
+    return None
 
-def compare_wyckoffs_new(struct1, struct2):
+def compare_wyckoffs(struct1, struct2):
     """Compare two sets of wyckoff orbits, return True if they have the same sets of letters and atoms."""
     if len(struct1._wyckoffs) == len(struct2._wyckoffs):
         struct1._wyckoffs.sort()
@@ -351,23 +311,22 @@ def generate_interpolation(sym_path, steps, collision_threshold, collision_level
     total_dist = 0
     i = 0
     while i < len(sym_path._start_common_struct._wyckoffs):
-        if str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"] not in done_atom_letter:
-            curr_wyckoffs_1 = [x for x in sym_path._start_common_struct._wyckoffs if str(x["atom"]) + x["letter"] == str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"]]
-            curr_wyckoffs_2 = [x for x in sym_path._end_common_struct._wyckoffs if str(x["atom"]) + x["letter"] == str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"]]
+        if sym_path._start_common_struct._wyckoffs[i]._specie_name + sym_path._start_common_struct._wyckoffs[i]._letter not in done_atom_letter:
+            curr_wyckoffs_1 = [x for x in sym_path._start_common_struct._wyckoffs if x._specie_name + x._letter == sym_path._start_common_struct._wyckoffs[i]._specie_name + sym_path._start_common_struct._wyckoffs[i]._letter]
+            curr_wyckoffs_2 = [x for x in sym_path._end_common_struct._wyckoffs if x._specie_name + x._letter == sym_path._start_common_struct._wyckoffs[i]._specie_name + sym_path._start_common_struct._wyckoffs[i]._letter]
             pair_dict_add, corr_msg_list, part_dist = get_best_vector_pairs(sym_path._start_common_struct, sym_path._end_common_struct, curr_wyckoffs_1, curr_wyckoffs_2, sym_path._common_subgroup_number, interpolated_matrices, steps, collision_threshold, collision_level)
             total_dist += part_dist
             pair_dict.update(pair_dict_add)
-            done_atom_letter.append(str(sym_path._start_common_struct._wyckoffs[i]["atom"]) + sym_path._start_common_struct._wyckoffs[i]["letter"])
+            done_atom_letter.append(sym_path._start_common_struct._wyckoffs[i]._specie_name + sym_path._start_common_struct._wyckoffs[i]._letter)
         i += 1
     interpolated_wyckoffs = {}
     for pair, pair_info in pair_dict.items():
-        #degr_free = sym_path._start_common_struct._wyckoffs[pair[0]]["freedom_degr"]
-        sym_path._end_common_struct._wyckoffs[pair[1]]["basis"] = pair_info[4]
-        interpolated_basis = interpolate_between_coords(sym_path._start_common_struct._wyckoffs[pair[0]]["basis"], sym_path._end_common_struct._wyckoffs[pair[1]]["basis"], steps)
+        sym_path._end_common_struct._wyckoffs[pair[1]]._basis = pair_info[4]
+        interpolated_basis = interpolate_between_coords(sym_path._start_common_struct._wyckoffs[pair[0]]._basis, sym_path._end_common_struct._wyckoffs[pair[1]]._basis, steps)
         i = 0
         while i < steps:
-            new_wyckoff = copy_wyckoff(sym_path._start_common_struct._wyckoffs[pair[0]])
-            new_wyckoff["basis"] = interpolated_basis[i]
+            new_wyckoff = sym_path._start_common_struct._wyckoffs[pair[0]].copy()
+            new_wyckoff.set_new_basis(interpolated_basis[i])
             if i in interpolated_wyckoffs:
                 interpolated_wyckoffs[i].append(new_wyckoff)
             else:
@@ -375,7 +334,10 @@ def generate_interpolation(sym_path, steps, collision_threshold, collision_level
             i += 1
     i = 0
     while i < steps:
-        interpolated_struct = create_from_wyckoffs(lattice=interpolated_matrices[i], space_number=sym_path._common_subgroup_number, wyckoffs=interpolated_wyckoffs[i])
+        interpolated_struct = create_from_wyckoffs(lattice=interpolated_matrices[i],
+                                                   space_number=sym_path._common_subgroup_number,
+                                                   wyckoffs=interpolated_wyckoffs[i],
+                                                   species=sym_path._start_common_struct.get_species_copy())
         complete_structures.append(interpolated_struct)
         i += 1
     if collision_level > 0:
@@ -411,21 +373,6 @@ def fractional_to_cartesian(lattice, coords):
         lattice = np.array(lattice)
     return (lattice.T @ coords.T).T
 
-def copy_wyckoff(wyckoff):
-    new_wyckoff = {}
-    for key, val in wyckoff.items():
-        if key == "freedom_degr":
-            new_wyckoff[key] = []
-            for x in wyckoff["freedom_degr"]:
-                new_wyckoff[key].append(x)
-        elif key == "basis":
-            new_wyckoff[key] = []
-            for x in wyckoff["basis"]:
-                new_wyckoff[key].append(x)
-        else:
-            new_wyckoff[key] = val
-    return new_wyckoff
-
 def get_interpolated_matrices(start_struct, end_struct, steps):
     start_parameters = lattice_matrix_to_parameters(start_struct._cell_lattice_vectors)
     end_parameters = lattice_matrix_to_parameters(end_struct._cell_lattice_vectors)
@@ -434,8 +381,6 @@ def get_interpolated_matrices(start_struct, end_struct, steps):
     return matrices
 
 def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wyckoffs_end, space_group, matrices, steps, collision_threshold, collision_level):
-    start_matrix = start_struct._cell_lattice_vectors
-    end_matrix = end_struct._cell_lattice_vectors
     result_list = {}
     distances = {}
     dist_list = []
@@ -444,24 +389,34 @@ def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wy
     while i < len(curr_wyckoffs_start):
         j = 0
         while j < len(curr_wyckoffs_end):
-            wyckoff2_pos, wyckoff2_atoms = get_pos_from_wyckoff(space_group, curr_wyckoffs_end[j])
+            wyckoff2_pos = curr_wyckoffs_end[j].get_positions()
             possible_free_degr = []
             for pos in wyckoff2_pos:
                 pos_works = True
                 for k in range(0, 3):
-                    if not curr_wyckoffs_end[j]["freedom_degr"][k]:
-                        if np.round(curr_wyckoffs_end[j]["basis"][k], 8) != np.round(pos[k], 8):
+                    if not curr_wyckoffs_end[j]._freedom_degr[k]:
+                        if np.round(curr_wyckoffs_end[j]._basis[k], 8) != np.round(pos[k], 8):
                             pos_works = False
                 if pos_works:
-                    candidate_pos, temp_atoms = get_pos_from_wyckoff(space_group, curr_wyckoffs_end[j], pos)
-                    if compare_list_of_coords(wyckoff2_pos, candidate_pos):
+                    if curr_wyckoffs_end[j].check_basis(pos):
                         possible_free_degr.append(pos)
             for possible_val in possible_free_degr:
-                dist, new_end, coll_warning = calc_dist_with_boundary(curr_wyckoffs_start[i]["basis"], possible_val, curr_wyckoffs_start[i]["freedom_degr"], space_group, curr_wyckoffs_start[i]["letter"], matrices, steps, collision_threshold, collision_level, start_matrix, end_matrix, (curr_wyckoffs_start[i]["id"], curr_wyckoffs_end[j]["id"]))
+                dist, new_end, coll_warning = calc_dist_with_boundary(curr_wyckoffs_start[i]._basis,
+                                                                      possible_val,
+                                                                      curr_wyckoffs_start[i]._freedom_degr,
+                                                                      space_group,
+                                                                      curr_wyckoffs_start[i]._letter,
+                                                                      matrices,
+                                                                      steps,
+                                                                      collision_threshold,
+                                                                      collision_level,
+                                                                      start_struct._cell_lattice_vectors,
+                                                                      end_struct._cell_lattice_vectors,
+                                                                      (curr_wyckoffs_start[i]._id, curr_wyckoffs_end[j]._id))
                 if coll_warning:
                     coll_msg.append(coll_warning)
-                distances[(curr_wyckoffs_start[i]["id"], curr_wyckoffs_end[j]["id"])] = [dist, curr_wyckoffs_start[i]["id"], curr_wyckoffs_end[j]["id"], curr_wyckoffs_start[i]["basis"], new_end, curr_wyckoffs_start[i]]
-                dist_list.append([dist, curr_wyckoffs_start[i]["id"], curr_wyckoffs_end[j]["id"], curr_wyckoffs_start[i]["basis"], new_end, curr_wyckoffs_start[i]])
+                distances[(curr_wyckoffs_start[i]._id, curr_wyckoffs_end[j]._id)] = [dist, curr_wyckoffs_start[i]._id, curr_wyckoffs_end[j]._id, curr_wyckoffs_start[i]._basis, new_end, curr_wyckoffs_start[i]]
+                dist_list.append([dist, curr_wyckoffs_start[i]._id, curr_wyckoffs_end[j]._id, curr_wyckoffs_start[i]._basis, new_end, curr_wyckoffs_start[i]])
             j += 1
         i += 1
     dist_list.sort(key=lambda x: x[0])
@@ -479,10 +434,10 @@ def get_best_vector_pairs(start_struct, end_struct, curr_wyckoffs_start, curr_wy
                 j = i + 1
                 while j < len(key_list):
                     if i not in already_switched and j not in already_switched:
-                        start1_cart = fractional_to_cartesian(start_matrix, result_list[key_list[i]][3])
-                        start2_cart = fractional_to_cartesian(start_matrix, result_list[key_list[j]][3])
-                        end1_cart = fractional_to_cartesian(end_matrix, result_list[key_list[i]][4])
-                        end2_cart = fractional_to_cartesian(end_matrix, result_list[key_list[j]][4])
+                        start1_cart = fractional_to_cartesian(start_struct._cell_lattice_vectors, result_list[key_list[i]][3])
+                        start2_cart = fractional_to_cartesian(start_struct._cell_lattice_vectors, result_list[key_list[j]][3])
+                        end1_cart = fractional_to_cartesian(end_struct._cell_lattice_vectors, result_list[key_list[i]][4])
+                        end2_cart = fractional_to_cartesian(end_struct._cell_lattice_vectors, result_list[key_list[j]][4])
                         collision_bool = check_if_vectors_get_close(start1_cart,
                                                                             end1_cart,
                                                                             start2_cart,
@@ -512,7 +467,7 @@ def check_collision_in_pos_ase(positions, coll_dist, lattice=[[1, 0, 0], [0, 1, 
 
 def check_collision_between_coords(start_pos, end_pos, space_group, letter, matrices, steps, coll_threshold):
     interpolated_coords = interpolate_between_coords(start_pos, end_pos, steps)
-    frac_positions = [get_pos_from_wyckoff(space_group, {"letter": letter}, x) for x in interpolated_coords]
+    frac_positions = [WyckoffOrbit.get_pos_from_wyckoff(space_group, letter, x) for x in interpolated_coords]
     cart_positions = [fractional_to_cartesian(matrices[i], frac_positions[i]) for i in range(0, steps)]
     for struct_pos in cart_positions:
         if check_collision_in_pos_ase(struct_pos, coll_threshold):
@@ -520,8 +475,8 @@ def check_collision_between_coords(start_pos, end_pos, space_group, letter, matr
     return False
 
 def calc_dist_between_set_of_coords(start_pos, end_pos, space_group, letter, start_matrix, end_matrix):
-    start_positions = fractional_to_cartesian(start_matrix, get_pos_from_wyckoff(space_group, {"letter": letter}, start_pos, False))
-    end_positions = fractional_to_cartesian(end_matrix, get_pos_from_wyckoff(space_group, {"letter": letter}, end_pos, False))
+    start_positions = fractional_to_cartesian(start_matrix, WyckoffOrbit.get_pos_from_wyckoff(space_group, letter, start_pos, False))
+    end_positions = fractional_to_cartesian(end_matrix, WyckoffOrbit.get_pos_from_wyckoff(space_group, letter, end_pos, False))
     total_dist = 0
     i = 0
     while i < len(start_positions):
