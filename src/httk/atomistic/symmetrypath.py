@@ -38,3 +38,6 @@ class SymmetryPath(HttkObject):
         for x in self._interpolations:
             return_str += str(x)
         return return_str
+    
+    def write_to_folder(self, folder_prefix):
+        pass

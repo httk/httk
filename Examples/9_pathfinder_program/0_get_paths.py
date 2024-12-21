@@ -18,12 +18,6 @@ end_struct = httk.load(end_file)
 start_simple = convert_to_simplestruct(start_struct)
 end_simple = convert_to_simplestruct(end_struct)
 
-start_sym = create_from_simple_struct(start_simple, 1e-05)
-start_sym_lower = create_lower_symmetry_copy(start_sym, 31)
-#print(start_sym)
-#print(start_sym._wyckoffs)
-#print(start_sym_lower)
-# parameters
 search_depth = 6
 symprec = 1e-05
 sub_type = ["t","k"]

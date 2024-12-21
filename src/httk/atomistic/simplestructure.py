@@ -129,3 +129,6 @@ class SimpleStructure(HttkObject):
                     new_specie[key] = val
             species_copy.append(new_specie)
         return species_copy
+    
+    def write_to_poscar(self, output_name, first_line=None):
+        pass
