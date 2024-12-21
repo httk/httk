@@ -1,4 +1,6 @@
 from httk.core.httkobject import HttkObject
+from os.path import join, isdir
+from os import makedirs
 
 class Interpolation(HttkObject):
     def __init__(self,
@@ -23,3 +25,13 @@ class Interpolation(HttkObject):
         return_str += "Number of species:"+"{:.3f}".format(self._interpolated_structs[0]._num_of_atoms)+"\n"
         return_str += "Distance moved per atom:"+"{:.3f}".format(self._dist_per_atom)+"\n"
         return return_str
+
+    def write_to_folder(self, folder_name, prefix=""):
+        if not isdir(folder_name):
+            makedirs(folder_name)
+        i = 0
+        while i < len(self._interpolated_structs):
+            self._interpolated_structs[i].write_to_poscar(output_name=join(folder_name, prefix+str(i)+".poscar"))
+            i += 1
+        with open(join(folder_name, "info.txt"), "w") as f:
+            f.write(str(self)+"Structs with collision: "+", ".join([str(x) for x in self._structs_with_collision])+"\n")

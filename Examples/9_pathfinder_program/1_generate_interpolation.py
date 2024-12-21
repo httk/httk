@@ -1,13 +1,8 @@
-import os, sys
-PATH_TO_HTTK = "G:\\amanuens_HT24\\httk-2-testing\\src"
-sys.path.insert(1, PATH_TO_HTTK)
-PATH_TO_HTTK = "~/Dokument/amanuens_HT24/httk-2-testing/src"
-sys.path.insert(1, os.path.expanduser(PATH_TO_HTTK))
+import os
 import httk
 import httk.atomistic.pathfinderprog as pf
 from httk.atomistic.simplestructureutils import convert_to_simplestruct
 from httk.atomistic.symmetrystructureutils import generate_interpolation
-from httk.core import *
 
 start_file = os.path.join("Tutorial", "pathfinder_data", "UGePt_62.poscar")
 end_file = os.path.join("Tutorial", "pathfinder_data", "UGePt_44.poscar")
@@ -32,5 +27,6 @@ collision_level = 2
 prefix_str, paths=pf.get_paths(start_simple, end_simple, search_depth, symprec, sub_type, max_path, max_orig, max_results, steps, subgroups, collision_threshold, collision_level)
 print(prefix_str)
 for path in paths:
-    generate_interpolation(path, symprec, collision_threshold, collision_level)
+    # Generate extra interpolation, now ignoring collisions and with more interpolated structures
+    generate_interpolation(path, steps=20, collision_threshold=collision_threshold, collision_level=0)
     print(path)

@@ -10,7 +10,7 @@ def create_subgroup_structs(start_struct, start_subgroups, end_struct, end_subgr
     start_space_groups = [start_struct._space_number]
     start_intermediate_structs = []
     end_space_groups = [end_struct._space_number]
-    end_intermediate_structs = None
+    end_intermediate_structs = []
     i = 1
     while i < len(start_subgroups)-1:
         start_intermediate_structs.append(symutils.create_lower_symmetry_copy(start_struct, start_subgroups[i][0]["int_number"], transformation_id=start_subgroups[i][0]["id"]))

@@ -152,9 +152,9 @@ def create_from_wyckoffs(lattice, space_number, wyckoffs, species=None):
     numbers = []
     species_sites = []
     for wyckoff in wyckoffs:
-        pos, species_sites, numbers_sites = wyckoff.get_positions(species=species)
+        pos, temp_species_sites, numbers_sites = wyckoff.get_positions(species=species)
         positions += list(pos)
-        species_sites += list(species_sites)
+        species_sites += list(temp_species_sites)
         numbers += list(numbers_sites)
     num_of_atoms = len(numbers)
     cart_pos = fractional_to_cartesian(lattice, positions)
@@ -166,7 +166,7 @@ def create_from_wyckoffs(lattice, space_number, wyckoffs, species=None):
                              sites_fractional=positions,
                              sites_cartesian=cart_pos,
                              species=species,
-                             species_sites=None,
+                             species_sites=species_sites,
                              species_sites_numbers=numbers,
                              wyckoffs=wyckoffs,
                              space_number=space_number,
@@ -332,12 +332,13 @@ def generate_interpolation(sym_path, steps, collision_threshold, collision_level
             else:
                 interpolated_wyckoffs[i] = [new_wyckoff]
             i += 1
+    species=sym_path._start_common_struct.get_species_copy()
     i = 0
     while i < steps:
         interpolated_struct = create_from_wyckoffs(lattice=interpolated_matrices[i],
                                                    space_number=sym_path._common_subgroup_number,
                                                    wyckoffs=interpolated_wyckoffs[i],
-                                                   species=sym_path._start_common_struct.get_species_copy())
+                                                   species=species)
         complete_structures.append(interpolated_struct)
         i += 1
     if collision_level > 0:
