@@ -7,7 +7,9 @@
 # Httk specific ignores
 httk.cfg
 httk.old
-External
+#External
+./External
+path_example*
 #Docs/full/_static/generated/**
 Docs/full/_build/**
 # Docs/full/generated/**

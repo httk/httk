@@ -20,3 +20,5 @@ citation.add_src_citation("httk", "Rickard Armiento")
 
 from httk.atomistic.data import periodictable
 from httk.atomistic.data import spacegroups
+from httk.atomistic.data import bilbaoDatasetAPI
+from httk.atomistic.data import symmetry_wyckoff
