@@ -212,7 +212,7 @@ def out_to_struct(ioa):
     out = httk.basic.micro_pyawk(ioa, [
         ['^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
         ['^ *CIF2CELL ([0-9.]*)', None, read_version],
-        ['^ *Output for (.*\)) *$', None, read_name],
+        [r'^ *Output for (.*\)) *$', None, read_name],
         ['^ *Database reference code: *([0-9]+)', None, read_id],
         ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
         ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
@@ -222,7 +222,7 @@ def out_to_struct(ioa):
         ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
         #            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
         ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
-        ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
+        [r'^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
         ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
         ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
         ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],

@@ -378,7 +378,7 @@ class Structure(HttkObject):
             if rc_sites_exception is not None:
                 reraise_from(Exception,"Sites creation raised an exception",rc_sites_exception)
             if rc_cell is not None and rc_sites is not None and hall_symbol is None:
-                reraise_from(Exception,"Spacegroup creation raised an exception",rc_spacegroup_exception)
+                reraise_from(Exception,"Spacegroup creation raised an exception",spacegroup_exception)
             if uc_cell_exception is not None:
                 reraise_from(Exception,"Cell creation raised an exception", uc_cell_exception)
             if uc_sites_exception is not None:

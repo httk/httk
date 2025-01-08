@@ -174,8 +174,8 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
         ['^# CIF file$', None, cif_start],
         ['^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
         ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
         ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
         ['.*', lambda results, match: results['on'], cif_add],
     ], debug=False, results=results)
