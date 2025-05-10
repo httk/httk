@@ -271,7 +271,7 @@ def write_poscar(fio, cell, coords, coords_reduced, counts, occupations, comment
       scale: (optional) *string* representing the overall scale of the cell
       vol: *string* representing the volume of the cell (only one of scale and vol can be set)
     """
-    print(cell)
+    #print(cell)
     fio = IoAdapterFileWriter.use(fio)
     f = fio.file
     f.write(str(comment)+"\n")
@@ -426,25 +426,14 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
     gamma_mode: Reduction axis in the gamma-point format
 
     Return
-    file: file-adapter to wavecar
-    nspin: Number of spin channels
-    nkpts: Number of k-points
-    nbands: Number of bands
-    nplws: Number plane-waves at each k-point
-    encut: Energy cutoff of calculation
-    cell: Supercell cell vectors
-    kpts: List of k-point vectors
-    float_size: byte-size of floats specified by precision tag
-    eigs: eigenvalues
-    occups: occupation of bands
-    rec_pos: function for byte-position of plane-wave coefficients, given (spin, kpt, band) with index starting from 1
+    PlaneWaveObject acting as proxy for the WAVECAR file
 
     """
     file = IoAdapterFilename.use(file)
     filename = file.filename
     file = httk.core.ioadapters.cleveropen(filename, "rb") # make sure to open in byte-mode
 
-    record_len, nspin, rtag, extra = map(int, struct.unpack('d'*4, file.read(8*4)))
+    record_len, nspin, rtag, _ = map(int, struct.unpack('d'*4, file.read(8*4)))
 
     # determine complex number precision from rtag
     if wavefunc_prec is None:
@@ -502,7 +491,7 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
     wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
     return wavefuncs 
 
-def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, format=None, gamma_half="x"):
+def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, format=None, gamma_half="x", keep_records=False):
     """
     Writes a PlaneWaveFunctions object to specified file.
 
@@ -516,6 +505,8 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     bands: Indices of bands to write, default is all, counting from 1
     format: Output format. Either 'std' or 'gamma', default is same format as planewaves object
     gamma_half: If writing to gamma format, change the axis of reduction, either 'z' or 'x'
+    keep_records: If True, the coefficients will be written while keeping their positions in the binary file.
+                If only selection of coeffs are to be written, all other coefficients will be set to zero.
     """
     
     import numpy as np # import numpy for faster routines when writing data
@@ -524,15 +515,29 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     if not isinstance(planewaves, PlaneWaveFunctions):
         return None
 
-    if bands is None:
+    if keep_records:
+        band_to_keep = np.ones(planewaves.nbands, dtype=bool)
+        spin_to_keep = np.ones(planewaves.nspins, dtype=bool)
+        kpt_to_keep = np.ones(planewaves.nkpts, dtype=bool)
+        if bands is not None:
+            band_to_keep.fill(False)
+            band_to_keep[np.array(bands)-1] = True
+        if spins is not None:
+            spin_to_keep.fill(False)
+            spin_to_keep[np.array(spins)-1] = True
+        if kpts is not None:
+            kpt_to_keep.fill(False)
+            kpt_to_keep[np.array(kpts)-1] = True
+
+    if bands is None or keep_records:
         bands = np.arange(1, planewaves.nbands+1)
     else:
         bands = np.array(bands)
-    if spins is None:
+    if spins is None or keep_records:
         spins = np.arange(1, planewaves.nspins+1)
     else:
         spins = np.array(spins)
-    if kpts is None:
+    if kpts is None or keep_records:
         kpts = np.arange(1, planewaves.nkpts+1)
     else:
         kpts = np.array(kpts)
@@ -608,9 +613,9 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         ## generate k-grid for G-vectors
         if to_gamma:
             gam_half = gamma_half if gamma_half else "x"
-            gam_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=True, gamma_half=gam_half)
         else:
-            gam_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=True, gamma_half=planewaves.gamma_half)
+            gam_half = planewaves.gamma_half
+        gam_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=True, gamma_half=gam_half)
         std_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=False)
 
     for s in spins:
@@ -633,19 +638,22 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
             float_rec.tofile(file_wrapper)
     
             for b in bands:
-                coeffs = planewaves.get_plws(s,k,b, cache=False)
+                if keep_records and (not band_to_keep[b-1] or not spin_to_keep[s-1] or not kpt_to_keep[ki-1]):
+                    coeffs = np.zeros(record_size, dtype=data_id)
+                else:
+                    coeffs = planewaves.get_plws(s,k,b, cache=False)
                 if convert:
                     if to_gamma:
                         coeffs = reduce_std_coeffs(coeffs, planewaves.kgrid_size, std_gvecs, gam_gvecs, gamma_half)
                     else:
-                        coeffs = expand_gamma_coeffs(coeffs, planewaves.kgrid_size, std_gvecs, gam_gvecs, planewaves.gamma_half, buffer=wave_buffer)
+                        coeffs = expand_gamma_coeffs(coeffs, std_gvecs, gam_gvecs, buffer=wave_buffer)
 
                 complex_rec[:nwaves] = coeffs
                 complex_rec[nwaves:] = 0j
                 complex_rec.tofile(file_wrapper)
     file_wrapper.close()
 
-def save_vesta(filename, structure, isosurface):
+def save_vesta(filename, structure, isosurface, cols=10):
     filename = IoAdapterFilename.use(filename).filename
     for ext_i, ext in enumerate(["_r.vasp", "_i.vasp"]):
         ext_name = filename + ext
@@ -657,17 +665,17 @@ def save_vesta(filename, structure, isosurface):
             iso = iso.real
         else:
             iso = iso.imag
-        cols = 10
         shape = isosurface.shape
         print("\n{} {} {}".format(*shape), file=f)
         remainder = iso.size % cols
         rows = iso.size // cols
+        fmt = "%16.8E"
         
-        row_s = [0]*rows
+        row_s = [0]*(rows + int(remainder != 0))
         for i in range(rows):
-            row_s[i] = ' '.join(map(str, iso[i*cols:(i+1)*cols]))
+            row_s[i] = ' '.join([fmt % v for v in iso[i*cols:(i+1)*cols]])
         if remainder != 0:
-            row_s.append(' '.join(map(str, iso[-remainder:])))
+            row_s[i+1] = ' '.join(map(str, iso[-remainder:]))
         print("\n".join(row_s) + "\n", file=f)
         f.close()
 
