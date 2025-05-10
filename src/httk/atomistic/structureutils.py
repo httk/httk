@@ -950,7 +950,7 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=10000, f
     """Applies a transformation matrix to the structure
 
     Args:
-        force_hall_symbol (bool, optional): Enforces a supplied hall_symbol. If True, defaults into using P 1.
+        force_hall_symbol (str, optional): Enforces a supplied hall_symbol.
     """
     transformation = FracVector.use(transformation).simplify()
     #if transformation.denom != 1:

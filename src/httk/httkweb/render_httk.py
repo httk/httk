@@ -32,6 +32,7 @@ if sys.version[0] == "2":
 
     from StringIO import StringIO
     import ConfigParser as configparser
+    
 else:
     from html import escape
     unicode_type=str
@@ -389,7 +390,11 @@ class RenderHttk(object):
         md = self.metadata_block
         buf = StringIO("[main]\n"+md)
         config = configparser.ConfigParser()
-        config.readfp(buf)
+        if not hasattr(config,'read_file'):
+            # Python2 compatibility
+            config.readfp(buf)
+        else:
+            config.read_file(buf)
         d = dict(config.items('main'))
         # In Python 3 d.keys() is not a list but an iterator,
         # which means that when we do the deleting of keys and values

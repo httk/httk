@@ -122,7 +122,8 @@ def setup(renderers, template_engines, function_handlers):
         from httk.httkweb.render_httk import RenderHttk
         from httk.httkweb.render_rst import RenderRst
         from httk.httkweb.render_md import RenderMd
-        renderers = {'httkweb': RenderHttk, 'rst': RenderRst, 'md': RenderMd}
+        from httk.httkweb.render_html import RenderHtml
+        renderers = {'httkweb': RenderHttk, 'rst': RenderRst, 'md': RenderMd, 'html': RenderHtml}
 
     if template_engines is None:
         from httk.httkweb.templateengine_httk import TemplateEngineHttk

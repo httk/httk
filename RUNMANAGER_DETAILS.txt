@@ -271,7 +271,10 @@ e.g.,
 
 You start single_job_taskmanager.sh with the task directory as the
 current working directory, and it will run that one task to
-completion. It never 'restarts' a task. It thus always create a new
+completion. It have the functionality to resume a run if there is
+a directory that is called ht.run.resume, this is primarily used for 
+starting a workflow from a specific stage.
+It never 'restarts' a task. It thus always create a new
 'run.<date and timestamp>' and run the task in this directory. It will
 not rename the task directory itself, and there is no need to follow
 the naming convention of the task directory at all. It ignores all
