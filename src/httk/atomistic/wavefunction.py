@@ -28,7 +28,12 @@ class GammaHalf(Enum):
 
 def gen_kgrid(grid_size, gamma, gamma_half="x"):
     """
-    Generates the (rectangular) kgrid containing all states fulfilling G**2 / 2 < ENCUT
+    Generates the (rectangular) kgrid containing all k-states within the given grid size (excluding gamma-compressed states if specified).
+    
+    Input:
+    grid_size: Size of the kgrid in each dimension (must be ueven)
+    gamma: If the kgrid is gamma-compressed (True) or not (False)
+    gamma_half: Which axis of k-space to use for the gamma-compression. Either "x" or "z". Only relevant if gamma is True.
     """
     # format of fft-grid is [0, 1, 2, 3... grid_size//2, -grid_size//2, ..+1,..+2,... -1]
     fx,fy,fz = [(np.arange(grid_size[i]) + grid_size[i]//2) % grid_size[i] - grid_size[i]//2 for i in range(3)]
@@ -84,7 +89,7 @@ def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x"):
     gamma_half: which axis of k-space gamma-compression was done along
 
     Output
-    Numpy array with real-space wave functions. Let the calling function determine if conversion to FracVector is necessary
+    Numpy array with real-space wave functions.
     """
 
     grid = grid_size * 2 # the grid size is twice the size of the kgrid, maybe to avoid aliasing?
@@ -169,24 +174,6 @@ def expand_gamma_coeffs(coeffs, std_gvecs, gam_gvecs, buffer=None):
         buffer = np.zeros((nx, ny, nz), dtype=np.complex128)
     buffer[gam_gvecs[:,0], gam_gvecs[:,1], gam_gvecs[:,2]] = coeffs
 
-#    if xyz is None and False:
-#        #xyz = -gen_kgrid(
-#        x,y,z = [np.arange(0,grid_size[i]) - grid_size[i]//2 for i in range(3)]
-#        if gamma_half == GammaHalf.X:
-#            filter_func = lambda k:
-#                  (k[:,0] < 0)
-#                | ((k[:,0] == 0) & (k[:,1] < 0))
-#                | ((k[:,0] == 0) & (k[:,1] == 0) & (k[:,2] < 0))
-#        elif gamma_half == GammaHalf.Z:
-#            filter_func = lambda k:
-#                      (k[:,2] < 0)
-#                    | ((k[:,2] == 0) & (k[:,1] < 0))
-#                    | ((k[:,2] == 0) & (k[:,1] == 0) & (k[:,0] < 0))
-#        else:
-#            raise ValueError('Unrecognized gamma-half argument. z or x is supported')
-#        
-#        xyz = meshgrid(x, y, z)
-#        xyz = xyz[filter_func(xyz)] 
     buffer = expand_gamma_wav(buffer, gam_gvecs)
     return buffer[std_gvecs[:,0], std_gvecs[:,1], std_gvecs[:,2]]
 
