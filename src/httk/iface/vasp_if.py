@@ -429,6 +429,7 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
     PlaneWaveObject acting as proxy for the WAVECAR file
 
     """
+    import numpy as np
     file = IoAdapterFilename.use(file)
     filename = file.filename
     file = httk.core.ioadapters.cleveropen(filename, "rb") # make sure to open in byte-mode
@@ -471,8 +472,8 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
         return (2 + (spin - 1) * nkpts * (nbands+1) + (kpt - 1) * (nbands + 1) + band) * record_length
 
     ### Read occupations and eigenvalues
-    eigs = [[0 for j in range(nkpts)] for k in range(nspin)]
-    occups = [[[0 for i in range(nbands)] for j in range(nkpts)] for k in range(nspin)]
+    eigs = np.zeros((nspin,nkpts,nbands))
+    occups = np.zeros((nspin,nkpts,nbands))
     nplw_coeffs = [0]*nkpts
     kpts = [0]*nkpts
     for spin in range(nspin):
@@ -485,8 +486,8 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
                 # read kpt header info
                 nplw_coeffs[kpt] = int(record[0])
                 kpts[kpt] = record[1:4]
-            eigs[spin][kpt] = record[4::3]
-            occups[spin][kpt] = record[4+2::3]
+            eigs[spin, kpt, :] = record[4::3]
+            occups[spin, kpt, :] = record[4+2::3]
  
     wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
     return wavefuncs 
@@ -633,8 +634,8 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
             # write nplws, k-point, eigenvalues and occupations
             float_rec[0] = nwaves
             float_rec[1:4] = planewaves.kpts[k-1][:]
-            float_rec[4:4+len(bands)*3:3] = planewaves.eigs[s-1,k-1,bands-1]
-            float_rec[4+2:4+2+len(bands)*3:3] = planewaves.occups[s-1,k-1,bands-1]
+            float_rec[4:4+len(bands)*3:3] = [planewaves.eigenval(s,k,b) for b in bands]
+            float_rec[4+2:4+2+len(bands)*3:3] = [planewaves.occupation(s,k,b) for b in bands]
             float_rec.tofile(file_wrapper)
     
             for b in bands:

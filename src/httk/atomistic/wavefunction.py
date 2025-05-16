@@ -251,6 +251,9 @@ class PlaneWaveFunctions(HttkObject):
         self.kgrid = kgrid
         self.gvecs = {}
 
+        # internal variables
+        self.reorder_map = {}
+
     @classmethod
     def create(cls, file_wrapper = None, rec_pos_func=None, nplws=None, encut=None, cell=None, kpts=None, double_precision=None, eigs=None, occups=None, pwcoeffs=None, is_gamma=None, gamma_half="x"):
         """
@@ -307,10 +310,7 @@ class PlaneWaveFunctions(HttkObject):
             kgrid_size = np.array([math.ceil(g)*2 + 1 for g in G_cutoff.to_floats()], dtype=int) # could be replaced with element-wise ceil?
 
             # check if wavefunction format is gamma or not
-            if nkpts > 1:
-                is_gamma = False
-                kgrid = gen_kgrid(kgrid_size, False)
-            elif (kpts[0] == np.array((0,0,0))).all():
+            if kpts == 1 and (kpts[0] == np.array((0,0,0))).all():
                 if not gamma_half == 'x' and not gamma_half == 'z':
                     raise ValueError("Incompatible format or value for gamma_half given")
                 std_grid = gen_kgrid(kgrid_size, False, gamma_half)
@@ -325,6 +325,9 @@ class PlaneWaveFunctions(HttkObject):
                     kgrid = gam_grid
                 else:
                     raise ValueError('No. of planewaves inconsistent! Cannot determine format of wavefunctions. {} {} {}'.format(std_gvecs.shape[0], gam_gvecs.shape[0], nplws[0]))
+            if else:
+                is_gamma = False
+                kgrid = gen_kgrid(kgrid_size, False)
 
         if file_wrapper is not None and rec_pos_func is not None and double_precision is not None:
             pwcoeffs = defaultdict(None)
@@ -372,13 +375,17 @@ class PlaneWaveFunctions(HttkObject):
         assert 1 <= spin <= self.nspins
         assert 1 <= kpt <= self.nkpts
         assert 1 <= band <= self.nbands
+        
+        ind = (spin, kpt, band)
+        if ind in self.reorder_map:
+            ind = self.reorder_map[ind]
 
-        if (spin,kpt,band) in self.pwcoeffs:
-            return self.pwcoeffs[(spin,kpt,band)]
+        if ind in self.pwcoeffs:
+            return self.pwcoeffs[ind]
         else:
-            plws = self.read_plws(spin, kpt, band)
+            plws = self.read_plws(*ind)
             if cache:
-                self.pwcoeffs[(spin,kpt,band)] = plws
+                self.pwcoeffs[ind] = plws
             return plws
 
     def read_plws(self, spin, kpt, band):
@@ -460,6 +467,35 @@ class PlaneWaveFunctions(HttkObject):
 
         return real_space_wave
 
+    def rearrange(self, index_map):
+        """
+        Exchanges specified orbitals, exchanging band index or spin index according to given map.
+        Note that orbitals cannot be exchanged between k-points, as the number of coefficients and g-vectors are k-dependent.
+
+        Input
+        index_map: Dictionary with indices of orbitals to rearrange as keys, and target indices as values, on the form (spin_i, k_i, band_i). k_i of key and value has to be the same. The map has to be one-to-one for the given indices in both directions.
+        """
+        assert np.all([len(key) == 3 and len(val) == 3 for key, val in index_map.items()]), "Incorrect index format, expect 3-tuple of (spin_i, k_i, band_i)"
+        assert np.all([key[1] == val[1] for key,val in index_map.items()]), "Trying to interchange orbitals between k-points"
+        key_set = set(index_map.keys())
+        val_set = set(index_map.values())
+        assert key_set == val_set, "Provided mapping not bi-directional one-to-one"
+
+        for key,val in index_map.items():
+            self.reorder_map[key] = val
+
+    def eigenval(self, s, k, b):
+        ind = (s,k,b)
+        if ind in self.reorder_map:
+            ind = self.reorder_map[ind]
+        return self.eigs[ind[0]-1, ind[1]-1, ind[2]-1]
+
+    def occupation(self, s, k, b):
+        ind = (s,k,b)
+        if ind in self.reorder_map:
+            ind = self.reorder_map[ind]
+        return self.occups[ind[0]-1, ind[1]-1, ind[2]-1]
+
     def copy(self, spins=None, kpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
         """
         
@@ -513,8 +549,8 @@ class PlaneWaveFunctions(HttkObject):
                             else:
                                 coeffs = expand_gamma_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, self.gamma_half)
                         new_coeffs[(s_i,k_i,b_i)] = coeffs
-                        new_eigs[s_i,k_i,b_i] = self.eigs[s-1,k-1,b-1]
-                        new_occups[s_i,k_i,b_i] = self.occups[s-1,k-1,b-1]
+                        new_eigs[s_i,k_i,b_i] = self.eigenval(s,k,b)
+                        new_occups[s_i,k_i,b_i] = self.occupation(s,k,b)
 
             # convert to desired format
 
