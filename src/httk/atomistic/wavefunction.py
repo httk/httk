@@ -310,7 +310,7 @@ class PlaneWaveFunctions(HttkObject):
             kgrid_size = np.array([math.ceil(g)*2 + 1 for g in G_cutoff.to_floats()], dtype=int) # could be replaced with element-wise ceil?
 
             # check if wavefunction format is gamma or not
-            if kpts == 1 and (kpts[0] == np.array((0,0,0))).all():
+            if nkpts == 1 and (kpts[0] == np.array((0,0,0))).all():
                 if not gamma_half == 'x' and not gamma_half == 'z':
                     raise ValueError("Incompatible format or value for gamma_half given")
                 std_grid = gen_kgrid(kgrid_size, False, gamma_half)
@@ -325,7 +325,7 @@ class PlaneWaveFunctions(HttkObject):
                     kgrid = gam_grid
                 else:
                     raise ValueError('No. of planewaves inconsistent! Cannot determine format of wavefunctions. {} {} {}'.format(std_gvecs.shape[0], gam_gvecs.shape[0], nplws[0]))
-            if else:
+            else:
                 is_gamma = False
                 kgrid = gen_kgrid(kgrid_size, False)
 
