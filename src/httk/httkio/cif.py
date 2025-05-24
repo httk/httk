@@ -154,7 +154,7 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
                 # multiple data values in this situation would be an
                 # error in the file otherwise, but if there is whitespace + underscore/data_/loop_ we parse that
                 # as a new symbol, since otherwise we COULD misread valid files (with very weird formatting...).
-                splitstr = re.split("\s+_|\s+data_|\s+loop_", striprow, maxsplit=1)
+                splitstr = re.split(r'\s+_|\s+data_|\s+loop_', striprow, maxsplit=1)
             else:
                 splitstr = striprow.split(None, 1)
             data_value = splitstr[0].strip()

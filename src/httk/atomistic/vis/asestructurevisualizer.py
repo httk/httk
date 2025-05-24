@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import httk.external.ase_glue
+import ase
 
 class AseStructureVisualizer(object):
 
@@ -26,7 +27,7 @@ class AseStructureVisualizer(object):
     def show(self):
         ase_atoms = self.struct.ase.to_Atoms()
         #ase_atoms = httk.iface.ase_if.ase_atoms_to_structure(self.struct)
-        ase_glue.ase.visualize.view(ase_atoms)
+        ase.visualize.view(ase_atoms)
         
     def wait(self):
         pass

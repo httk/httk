@@ -51,3 +51,8 @@ def is_string(s):
 
 def bz2open(filename, mode, *args):
     return bz2.BZ2File(filename, mode, *args)
+
+def which(executable):
+    import distutils.spawn
+    return distutils.spawn.find_executable(executable)
+    

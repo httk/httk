@@ -170,14 +170,14 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
 
     results = {'on': False, 'data': '', 'cif': '', 'out': False, 'group': -1, 'groupdata': [], 'occucounts': {}, 'did_start': False, 'wyckoff': []}
     httk.basic.micro_pyawk(ioa, [
-        ['This program has bombed', None, cif_broken],
-        ['^# CIF file$', None, cif_start],
-        ['^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
-        ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
-        ['.*', lambda results, match: results['on'], cif_add],
+        [r'This program has bombed', None, cif_broken],
+        [r'^# CIF file$', None, cif_start],
+        [r'^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
+        [r'^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
+        [r'.*', lambda results, match: results['on'], cif_add],
     ], debug=False, results=results)
     add_groupdata(results)
     if results['did_start'] == False:

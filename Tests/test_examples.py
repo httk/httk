@@ -66,6 +66,9 @@ ignore_programs = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warn
                    '5_calculations/1_simple_vasp.py', '5_calculations/2_ht_vasp.py' # Requires pseudopotentials
                   ]
 
+if 'HTTK_TESTS_SKIP_EXTERNAL' in os.environ and os.environ['HTTK_TESTS_SKIP_EXTERNAL'] not in [ "", "0" ]:
+    ignore_programs+='2_visualization/1_structure_visualizer.py'
+
 for program in test_programs:
 
     exec_func = function_factory(program)
@@ -88,7 +91,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="Example tests")
     args, leftovers = ap.parse_known_args()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestHttkSrcInline)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestExamples)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 

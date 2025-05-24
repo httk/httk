@@ -23,7 +23,6 @@ import os, time, threading, subprocess, signal, sys, glob
 
 import httk
 from httk.iface.jmol_if import *
-import distutils.spawn
 from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from httk.external.command import Command, find_executable

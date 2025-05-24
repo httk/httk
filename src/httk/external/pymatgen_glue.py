@@ -58,8 +58,12 @@ if pymatgen_path != "False":
     try:
         import pymatgen
 
-        pymatgen_major_version = pymatgen.__version__.split('.')[0]
-        pymatgen_minor_version = pymatgen.__version__.split('.')[1]
+        try:
+            pymatgen_major_version = pymatgen.version
+            pymatgen_minor_version = ""
+        except AttributeError:
+            pymatgen_major_version = pymatgen.__version__.split('.')[0]
+            pymatgen_minor_version = pymatgen.__version__.split('.')[1]
 
     except ImportError:
         pass

@@ -389,7 +389,11 @@ class RenderHttk(object):
         md = self.metadata_block
         buf = StringIO("[main]\n"+md)
         config = configparser.ConfigParser()
-        config.readfp(buf)
+        try:
+            config.read_file(buf)
+        except AttributeError:
+            # COMPATIBILITY Python < 3.2
+            config.readfp(buf)
         d = dict(config.items('main'))
         # In Python 3 d.keys() is not a list but an iterator,
         # which means that when we do the deleting of keys and values

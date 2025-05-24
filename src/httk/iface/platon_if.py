@@ -126,16 +126,16 @@ def platon_lis_to_struct_broken(ioa):
     results['occupancies'] = []
     results['coords'] = []
     out = httk.basic.micro_pyawk(ioa, [
-        ['^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
-        ['^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
-        ['^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
-        ['^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
-        ['^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
+        [r'^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
+        [r'^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
+        [r'^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
+        [r'^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
+        [r'^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
         #['^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
-        ['^[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ ]*) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ \n]+) *$', lambda results, match: results['in_table'], read_coords],
-        ['^ *Flags Label +Fractional Coordinates \(x,y,z\) +Orthogonal Coordinates \(XO,YO,ZO\) +',
+        [r'^[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ ]*) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ \n]+) *$', lambda results, match: results['in_table'], read_coords],
+        [r'^ *Flags Label +Fractional Coordinates \(x,y,z\) +Orthogonal Coordinates \(XO,YO,ZO\) +',
          lambda results, match: results['in_table'] is None and results['section'] == 'Space Group Symmetry', in_table],
-        ['^ *=+ ([A-Za-z ]+) =+ *$', None, section],
+        [r'^ *=+ ([A-Za-z ]+) =+ *$', None, section],
     ], results=results, debug=False)
 
     # If we only have =1 occupancy everywhere, drop the occupancy ratio

@@ -15,10 +15,10 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading, subprocess, sys, os, signal, glob, distutils.spawn
+import threading, subprocess, sys, os, signal, glob
 import codecs
 import httk.core
-from httk.core.basic import is_sequence
+from httk.core.basic import is_sequence, which
 from httk import config
 from httk.config import httk_root
 import platform
@@ -201,7 +201,7 @@ def find_executable(executables, config_name):
             pass
 
         for executable in executables:
-            path = distutils.spawn.find_executable(executable)
+            path = which(executable)
             if path is not None:
                 return path
 
