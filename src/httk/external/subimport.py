@@ -41,6 +41,7 @@ if sys.version_info < (3, 4):
 else: # sys.version_info >= (3, 4)
 
     import importlib
+    import importlib.util
     
     loader_details = (
         importlib.machinery.ExtensionFileLoader,

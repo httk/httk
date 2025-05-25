@@ -16,7 +16,7 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os, distutils, glob
+import os, glob
 
 from httk.core import citation, IoAdapterString
 from httk.atomistic.atomisticio.structure_cif_io import struct_to_cif

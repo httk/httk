@@ -115,4 +115,4 @@ if __name__ == "__main__":
       ]
     }
 
-    serve(store, config, debug=True)
+    serve(store, config, port=8080, debug=True)

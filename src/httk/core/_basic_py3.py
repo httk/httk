@@ -16,13 +16,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys, collections, queue, bz2
-
 try:
-    collectionsAbc = collections.abc
-except AttributeError:
-    # Handle python <3.3
-    collectionsAbc = collections
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
+from shutil import which
+    
 unicode_type = str
 
 # Exception backtrace is automatically saved in e.__backtrace__ in Python 3
@@ -36,7 +36,7 @@ def print_(*args,**kwargs):
     print(*args,**kwargs)
 
 def is_sequence(l):
-    return isinstance(l, collectionsAbc.Iterable) and not isinstance(l, str)
+    return isinstance(l, Iterable) and not isinstance(l, str)
     #return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
     #        (hasattr(arg, "__iter__") and not isinstance(arg, str)))
 

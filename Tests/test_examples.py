@@ -63,7 +63,9 @@ ignore_programs = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warn
                    '6_website/3_hello_world_app/run_as_app.py', # The qt apps don't work that well in testing
                    '3_external_libraries/2_phasediagram_from_materialsproject.py', # Requires pymatgen
                    '3_external_libraries/3_phasediagram_pymatgen.py', # Requires pymatgen
-                   '5_calculations/1_simple_vasp.py', '5_calculations/2_ht_vasp.py' # Requires pseudopotentials
+                   '5_calculations/1_simple_vasp.py', '5_calculations/2_ht_vasp.py', # Requires pseudopotentials
+                   '6_website/4_search_app/serve_wsgi_test.py', # serving stalls
+                   '6_website/2_static_rst_templator/publish_static.py' # web.py is broken for python 3.12 and forward, needs web.py commit d3649322b85777b291ac2b7b3699fb6fc839e382
                   ]
 
 for program in test_programs:

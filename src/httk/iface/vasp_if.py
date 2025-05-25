@@ -431,7 +431,7 @@ class OutcarReader():
             self.final_energy_with_entropy = match.group(1)
             self.final_energy = match.group(2)
         results = micro_pyawk(self.ioa, [
-                              ["^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
+                              [r'^ *energy *without *entropy= *([^ ]+) *energy\(sigma->0\) *= *([^ ]+) *$', None, read_energy],
                               ["FREE ENERGIE", None, set_final],
                               ], results, debug=False)
         self.parsed = True

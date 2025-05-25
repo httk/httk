@@ -23,7 +23,6 @@ import os, time, threading, subprocess, signal, sys, glob
 
 import httk
 from httk.iface.jmol_if import *
-import distutils.spawn
 from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
 from httk.external.command import Command, find_executable
@@ -61,10 +60,10 @@ try:
             # ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
         # ], debug=False)
         results = micro_pyawk(httk.IoAdapterString(out), [
-            ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
+            ['^ *Jmol [Vv]ersion:? ([^ ]+) +([^ ]+)', None, get_version],
         ], debug=False)
 
-        if not 'version' in results:
+        if not 'version' in results or results['version'] is None:
             raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
 
         jmol_version = results['version']
@@ -72,8 +71,8 @@ try:
 
     check_works()
 
-except Exception:
-    print("FAIL:")
+except Exception as e:
+    print("FAIL:"+str(e))
     pass
 
 
@@ -93,6 +92,10 @@ def _jmol_stophook(command):
 
 
 def start(cwd='./', args=['-I']):
+
+    if jmol_version is None:
+        raise Exception("jmol does not seem to be available")
+    
     ensure_has_cif2cell()
 
     version = jmol_version.split('.')

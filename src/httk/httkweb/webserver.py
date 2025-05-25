@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, cgitb, codecs, cgi, shutil, io, traceback, time
+import os, sys, codecs, shutil, io, traceback, time
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -26,6 +26,7 @@ except ImportError:
     from urlparse import parse_qsl, urlsplit, urlunsplit
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
+from httk.core import parse_header, parse_multipart, cgitb_html
 
 class WebError(Exception):
     def __init__(self, message, response_code, response_msg, longmsg=None, content_type='text/plain', encoding='utf-8'):
@@ -178,7 +179,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
-                self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                self.wfile_write_encoded(cgitb_html(sys.exc_info()))
                 traceback.print_exc()
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
@@ -189,9 +190,9 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
         starttime_post_request = time.time()
 
-        ctype, pdict = cgi.parse_header(self.headers['content-type'])
+        ctype, pdict = parse_header(self.headers['content-type'])
         if ctype == 'multipart/form-data':
-            postvars = cgi.parse_multipart(self.rfile, pdict)
+            postvars = parse_multipart(self.rfile, pdict)
         elif ctype == 'application/x-www-form-urlencoded':
             length = int(self.headers['content-length'])
             postvars = dict(parse_qsl(self.rfile.read(length), keep_blank_values=True))
@@ -264,7 +265,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
-                self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                self.wfile_write_encoded(cgitb_html(sys.exc_info()))
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 

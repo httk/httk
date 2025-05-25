@@ -27,7 +27,7 @@
 
 from __future__ import print_function
 
-import cgi, time, codecs, traceback, cgitb, sys, io
+import time, codecs, traceback, sys, io
 
 try:
     from urllib.parse import parse_qsl, urlunsplit
@@ -35,6 +35,8 @@ except ImportError:
     from urlparse import parse_qsl, urlunsplit
 
 from httk.httkweb.webserver import WebError
+
+from httk.core import parse_header, parse_multipart, cgitb_html
 
 class BytesIOWrapper:
 

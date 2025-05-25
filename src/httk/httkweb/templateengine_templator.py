@@ -58,6 +58,8 @@ class TemplateEngineTemplator(object):
         #can make sure the template application always returns unicode
         if self.base_filename is not None:
             templator = self.render(self.template_dir,base=self.base_template,globals=data)
+            print("HERE", content, subcontent)
+            content=""
             output = unicode_type(getattr(templator,self.template_name)(content,*subcontent))
         else:
             templator = self.render(self.template_dir,globals=data)

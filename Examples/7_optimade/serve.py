@@ -18,4 +18,4 @@ config = {
   ]
 }
 
-httk.optimade.serve(store, config)
+httk.optimade.serve(store, config, port=8080)
