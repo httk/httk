@@ -36,3 +36,5 @@ src/httk.egg-info
 Tests/structreading.tmp
 Tests/python_versions/ver2
 Tests/python_versions/ver3
+.venv
+.venvs
