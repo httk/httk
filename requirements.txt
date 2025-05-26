@@ -1,0 +1,16 @@
+pytest
+matplotlib
+numpy==1.26.4; python_version >= '3'
+numpy==1.16.6; python_version < '3'
+ase; python_version >= '3'
+ase==3.17.0; python_version < '3'
+pymatgen; python_version >= '3'
+pymatgen==2018.12.12; python_version < '3'
+docutils
+web.py; python_version >= '3'
+web.py==0.51; python_version < '3'
+markdown
+python-markdown-math
+pyyaml
+legacy-cgi; python_version >= '3.11'
+palettable==3.3.2; python_version < '3'
