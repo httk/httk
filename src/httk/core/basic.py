@@ -315,7 +315,7 @@ try:
     cgi = import_from_legacy_cgi("cgi")
     cgitb = import_from_legacy_cgi("cgitb")
 except ImportError as e:
-    print("Falling back to standard library:", e)
+    # Falling back to standard library import for older versions of Python where it is not deprecated
     import cgi
     import cgitb
 
