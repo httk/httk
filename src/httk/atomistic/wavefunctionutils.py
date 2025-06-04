@@ -18,6 +18,7 @@ def compare_wavefuncs(wobj1, wobj2, spin1, kind1, band1, spin2, kind2, band2):
     func1 = wobj1.get_wavr(spin1, kind1, band1)
     func2 = wobj2.get_wavr(spin2, kind2, band2)
 
+    # could be moved to core?
     overlap = np.sum(np.conjugate(func1) * func2)
     similarity = np.abs(overlap)
     phase = np.angle(similarity, deg=True)

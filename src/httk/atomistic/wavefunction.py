@@ -11,9 +11,7 @@ import math
 from scipy import fft
 from copy import deepcopy
 from collections import defaultdict
-import struct
 import numpy as np
-from enum import Enum
 #from numba import njit
 
 # constants used in VASP
@@ -21,10 +19,6 @@ AUtoA    = FracScalar.create(0.529177249)  # 1 a.u. in Angstrom
 RYtoEV   = FracScalar.create(13.605826)    # 1 Ry in eV
 kinE_prefactor = RYtoEV * AUtoA**2         # equivalent to hbar**2/(2*m_e)
 PI       = FracScalar.create(3.141592653589793238)
-
-class GammaHalf(Enum):
-    X = 0
-    Z = 1
 
 def gen_kgrid(grid_size, gamma, gamma_half="x"):
     """
@@ -95,9 +89,9 @@ def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x"):
     grid = grid_size * 2 # the grid size is twice the size of the kgrid, maybe to avoid aliasing?
     ## Allocate according to the gamma-compression if applicable
     if gamma:
-        if gamma_half == "x" or gamma_half == GammaHalf.X:
+        if gamma_half == "x":
             phi = np.zeros((grid[0]//2+1, grid[1], grid[2]), dtype=complex)
-        elif gamma_half == "z" or gamma_half == GammaHalf.Z:
+        elif gamma_half == "z":
             phi = np.zeros((grid[0], grid[1], grid[2]//2+1), dtype=complex)
         else:
             raise ValueError('Unrecognized gamma-half argument. "z" or "x" is supported')
@@ -225,7 +219,7 @@ class PlaneWaveFunctions(HttkObject):
 
     In addition, it caches the k-vectors/g-vectors associated with the basis set and parameters necessary to generate these (e.g. VASP energy cutoff)
 
-    NOTE: Currently does not support Spin-Orbit-Coupling (SOC) output formats
+    NOTE: Currently does not support non-collinear (SOC) output formats
 
     NOTE: As fourier transforms and similar rely on the numpy/scipy/jax library, read-in FracVectors are in working functions converted to numpy arrays during processing
     """
@@ -234,11 +228,11 @@ class PlaneWaveFunctions(HttkObject):
     def __init__(self, file_ref=None, recpos_func=None, nkpts=None, nbands=None, nspins=None, nplws=None, encut=None, cell=None, kpts=None, kgrid_size=None, double_precision=None, eigs=None, occups=None, pwcoeffs=None, is_gamma=None, gamma_half=None, kgrid=None):
         self.file_ref = file_ref
         self.recpos_func = recpos_func
-        self.nkpts = nkpts
-        self.nbands = nbands
-        self.nspins = nspins
-        self.nplws = nplws
-        self.encut = encut
+        self._nkpts = nkpts
+        self._nbands = nbands
+        self._nspins = nspins
+        self._nplws = nplws
+        self._encut = encut
         self.cell = cell
         self.kpts = kpts
         self.double_precision = double_precision
@@ -246,8 +240,8 @@ class PlaneWaveFunctions(HttkObject):
         self.occups = occups
         self.pwcoeffs = pwcoeffs
         self.kgrid_size = kgrid_size
-        self.is_gamma = is_gamma
-        self.gamma_half = gamma_half
+        self._is_gamma = is_gamma
+        self._gamma_half = gamma_half
         self.kgrid = kgrid
         self.gvecs = {}
 
@@ -372,9 +366,9 @@ class PlaneWaveFunctions(HttkObject):
         Output:
         coeffs: 3D numpy array of complex numbers, containing the plane-wave coefficients of the wavefunction
         """
-        assert 1 <= spin <= self.nspins
-        assert 1 <= kpt <= self.nkpts
-        assert 1 <= band <= self.nbands
+        assert 1 <= spin <= self._nspins
+        assert 1 <= kpt <= self._nkpts
+        assert 1 <= band <= self._nbands
         
         ind = (spin, kpt, band)
         if ind in self.reorder_map:
@@ -396,7 +390,7 @@ class PlaneWaveFunctions(HttkObject):
         if self.file_ref is not None and self.recpos_func is not None:
             file_pos = self.recpos_func(spin, kpt, band)
             self.file_ref.seek(file_pos)
-            array_size = self.nplws[kpt-1]
+            array_size = self._nplws[kpt-1]
             type_id = np.complex128 if self.double_precision else np.complex64
             coeffs = np.fromfile(self.file_ref, dtype=type_id, count=array_size)
             return coeffs
@@ -416,7 +410,7 @@ class PlaneWaveFunctions(HttkObject):
         kgrid: The k-grid to use for the generation of the g-vectors. If None, generate a new k-grid for current object.
         """
         if kpt_ind is not None:
-            assert 1 <= kpt_ind <= self.nkpts
+            assert 1 <= kpt_ind <= self._nkpts
             kpt = self.kpts[kpt_ind - 1]
         
         if kpt is None:
@@ -424,11 +418,11 @@ class PlaneWaveFunctions(HttkObject):
         
         
         if gamma is None:
-            gamma = self.is_gamma
+            gamma = self._is_gamma
         if gamma_half is None:
-            gamma_half = self.gamma_half
+            gamma_half = self._gamma_half
         
-        if gamma != self.is_gamma or gamma_half != self.gamma_half or kgrid is not None:
+        if gamma != self._is_gamma or gamma_half != self._gamma_half or kgrid is not None:
             cache = False
         
         ### check if g-vectors are already cached
@@ -439,7 +433,7 @@ class PlaneWaveFunctions(HttkObject):
        
         if kgrid is None:
             kgrid = gen_kgrid(self.kgrid_size, gamma, gamma_half)
-        gvecs = gen_gvecs(kgrid, kpt, self.cell.basis, self.encut)
+        gvecs = gen_gvecs(kgrid, kpt, self.cell.basis, self._encut)
             
         if cache:
             self.gvecs[immut_kpt] = gvecs 
@@ -457,13 +451,13 @@ class PlaneWaveFunctions(HttkObject):
         Output:
         real_space_wave: 3D numpy array of complex numbers, containing the real-space form of the wavefunction
         """
-        assert 1 <= spin <= self.nspins
-        assert 1 <= kpt <= self.nkpts
-        assert 1 <= band <= self.nbands
+        assert 1 <= spin <= self._nspins
+        assert 1 <= kpt <= self._nkpts
+        assert 1 <= band <= self._nbands
         
         plane_wave = self.get_plws(spin, kpt, band)
         gvecs = self.get_gvecs(kpt_ind=kpt)
-        real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self.is_gamma, gamma_half=self.gamma_half)
+        real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self._is_gamma, gamma_half=self._gamma_half)
 
         return real_space_wave
 
@@ -495,24 +489,79 @@ class PlaneWaveFunctions(HttkObject):
         if ind in self.reorder_map:
             ind = self.reorder_map[ind]
         return self.occups[ind[0]-1, ind[1]-1, ind[2]-1]
+    
+    @property
+    def nbands(self):
+        """
+        Returns the number of bands in the wavefunction object.
+        """
+        return self._nbands
+    @property
+    def nkpts(self):
+        """
+        Returns the number of k-points in the wavefunction object.
+        """
+        return self._nkpts
+    @property
+    def nspins(self):
+        """
+        Returns the number of spin-channels in the wavefunction object.
+        """
+        return self._nspins
+
+    @property
+    def is_gamma(self):
+        """
+        Returns whether the wavefunction is gamma-compressed or not.
+        """
+        return self._is_gamma
+    @property
+    def gamma_half(self):
+        """
+        Returns the axis of k-space used for gamma-compression, if the wavefunction is gamma-compressed.
+        """
+        if not self.is_gamma:
+            return None
+        else:
+            return self._gamma_half
+    
+    @property
+    def nplanewaves(self):
+        """
+        Returns the number of plane-waves for each k-point in the wavefunction object.
+        """
+        return self._nplws
+    @property
+    def encut(self):
+        """
+        Returns the energy cutoff for the plane-wave basis set.
+        """
+        return self._encut
+    
+    @property
+    def kpoints(self):
+        """
+        Returns the k-points of the wavefunction object as fracvector array.
+        """
+        return self.kpts
 
     def copy(self, spins=None, kpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
         """
         
         """
         if bands is None:
-            bands = np.arange(self.nbands) + 1
+            bands = np.arange(self._nbands) + 1
         else:
             assert len(bands) > 0, 'Empty band list provided'
             bands = np.array(bands)
-            assert (1 <= bands & bands <= self.nbands).all(), 'Provided bands out of bounds of %d and %d' % (1, self.nbands)
+            assert (1 <= bands & bands <= self._nbands).all(), 'Provided bands out of bounds of %d and %d' % (1, self._nbands)
         
         if kpts is None:
-            kpts = np.arange(self.nkpts) + 1
+            kpts = np.arange(self._nkpts) + 1
         else:
             assert len(kpts) > 0, 'Empty k-point list provided'
             kpts = np.array(kpts)
-            assert (1 <= kpts & kpts <= self.nkpts).all(), 'Provided kpoint indices out of bounds of %d and %d' % (1, self.nkpts)
+            assert (1 <= kpts & kpts <= self._nkpts).all(), 'Provided kpoint indices out of bounds of %d and %d' % (1, self._nkpts)
         if format is not None:
             if format == 'gamma':
                 to_gamma = True
@@ -521,10 +570,10 @@ class PlaneWaveFunctions(HttkObject):
                 to_gamma = False
             else:
                 raise ValueError('Invalid wavecar format specified, only "std" and "gamma" are currently supported')
-            if to_gamma != self.is_gamma:
+            if to_gamma != self._is_gamma:
                 convert = True
         else:
-            to_gamma = self.is_gamma
+            to_gamma = self._is_gamma
             convert = False
         nspins = len(spins)
         nbands = len(bands)
@@ -547,7 +596,7 @@ class PlaneWaveFunctions(HttkObject):
                             if to_gamma:
                                 coeffs = reduce_std_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, gamma_half)
                             else:
-                                coeffs = expand_gamma_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, self.gamma_half)
+                                coeffs = expand_gamma_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, self._gamma_half)
                         new_coeffs[(s_i,k_i,b_i)] = coeffs
                         new_eigs[s_i,k_i,b_i] = self.eigenval(s,k,b)
                         new_occups[s_i,k_i,b_i] = self.occupation(s,k,b)
@@ -555,7 +604,7 @@ class PlaneWaveFunctions(HttkObject):
             # convert to desired format
 
             # make new object
-            new_wavefuncs = PlaneWaveFunctions.create(nkpts=nkpts, nbands=nbands, nspins=nspins, nplws=self.nplws, encut=self.encut, cell=self.cell, kpts=kpts, double_precision=self.double_precision, eigs=new_eigs, occups=new_occups, pw_coeffs=new_coeffs, is_gamma=to_gamma, gamma_half=gamma_half)
+            new_wavefuncs = PlaneWaveFunctions.create(nkpts=nkpts, nbands=nbands, nspins=nspins, nplws=self._nplws, encut=self._encut, cell=self.cell, kpts=kpts, double_precision=self.double_precision, eigs=new_eigs, occups=new_occups, pw_coeffs=new_coeffs, is_gamma=to_gamma, gamma_half=gamma_half)
 
         else:
             ### Write a copy to file
