@@ -517,9 +517,9 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         return None
 
     if keep_records:
-        band_to_keep = np.ones(planewaves.nbands, dtype=bool)
-        spin_to_keep = np.ones(planewaves.nspins, dtype=bool)
-        kpt_to_keep = np.ones(planewaves.nkpts, dtype=bool)
+        band_to_keep = np.ones(planewaves._nbands, dtype=bool)
+        spin_to_keep = np.ones(planewaves._nspins, dtype=bool)
+        kpt_to_keep = np.ones(planewaves._nkpts, dtype=bool)
         if bands is not None:
             band_to_keep.fill(False)
             band_to_keep[np.array(bands)-1] = True
@@ -531,24 +531,24 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
             kpt_to_keep[np.array(kpts)-1] = True
 
     if bands is None or keep_records:
-        bands = np.arange(1, planewaves.nbands+1)
+        bands = np.arange(1, planewaves._nbands+1)
     else:
         bands = np.array(bands)
     if spins is None or keep_records:
-        spins = np.arange(1, planewaves.nspins+1)
+        spins = np.arange(1, planewaves._nspins+1)
     else:
         spins = np.array(spins)
     if kpts is None or keep_records:
-        kpts = np.arange(1, planewaves.nkpts+1)
+        kpts = np.arange(1, planewaves._nkpts+1)
     else:
         kpts = np.array(kpts)
 
     filename = IoAdapterFilename.use(file_wrapper)
     file_wrapper = cleveropen(filename.filename, 'wb')
 
-    assert 1 <= min(spins) and max(spins) <= planewaves.nspins
-    assert 1 <= min(kpts) and max(kpts) <= planewaves.nkpts
-    assert 1 <= min(bands) and max(bands) <= planewaves.nbands 
+    assert 1 <= min(spins) and max(spins) <= planewaves._nspins
+    assert 1 <= min(kpts) and max(kpts) <= planewaves._nkpts
+    assert 1 <= min(bands) and max(bands) <= planewaves._nbands 
 
     ### Determine conversion settings based on provided format and wavefunctions
 
@@ -558,14 +558,14 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     elif format == 'std':
         to_gamma = False
     else:
-        to_gamma = planewaves.is_gamma
+        to_gamma = planewaves._is_gamma
 
-    if to_gamma != planewaves.is_gamma:
+    if to_gamma != planewaves._is_gamma:
         convert = True
         if to_gamma:
             gam_half = gamma_half if gamma_half else "x"
         else:
-            gam_half = planewaves.gamma_half
+            gam_half = planewaves._gamma_half
     else:
         convert = False
 
@@ -582,8 +582,8 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     
     nkpts = len(kpts)
     nbands = len(bands)
-    nplws = planewaves.nplws[kpts-1]
-    max_nplws = max(planewaves.nplws)
+    nplws = planewaves._nplws[kpts-1]
+    max_nplws = max(planewaves._nplws)
 
     ### Determine variable sizes based on desired conversion
     if convert:
@@ -601,12 +601,12 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     complex_rec = np.zeros(ncomplex, dtype=data_id)
     
     # top header
-    float_rec[:3] = [record_size, planewaves.nspins, rtag]
+    float_rec[:3] = [record_size, planewaves._nspins, rtag]
     float_rec.tofile(file_wrapper)
 
     # second header
     cell_nums = [planewaves.cell.basis[i,j].to_float() for i in range(3) for j in range(3)]
-    float_rec[:12] = [nkpts, nbands, planewaves.encut.to_float()] + cell_nums
+    float_rec[:12] = [nkpts, nbands, planewaves._encut.to_float()] + cell_nums
     float_rec.tofile(file_wrapper)
 
     ### Write wavefunctions and wavefunction headers
@@ -615,7 +615,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         if to_gamma:
             gam_half = gamma_half if gamma_half else "x"
         else:
-            gam_half = planewaves.gamma_half
+            gam_half = planewaves._gamma_half
         gam_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=True, gamma_half=gam_half)
         std_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=False)
 
