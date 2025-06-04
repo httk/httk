@@ -545,7 +545,7 @@ class PlaneWaveFunctions(HttkObject):
         """
         return self.kpts
 
-    def copy(self, spins=None, kpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
+    def copy(self, spins=None, ikpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
         """
         
         """
@@ -554,18 +554,20 @@ class PlaneWaveFunctions(HttkObject):
         else:
             assert len(bands) > 0, 'Empty band list provided'
             bands = np.array(bands)
-            assert (1 <= bands & bands <= self._nbands).all(), 'Provided bands out of bounds of %d and %d' % (1, self._nbands)
+            assert ((1 <= bands) & (bands <= self._nbands)).all(), 'Provided bands out of bounds of %d and %d' % (1, self._nbands)
         
-        if kpts is None:
-            kpts = np.arange(self._nkpts) + 1
+        if ikpts is None:
+            ikpts = np.arange(self._nkpts) + 1
+            kpts = self.kpts
         else:
-            assert len(kpts) > 0, 'Empty k-point list provided'
-            kpts = np.array(kpts)
-            assert (1 <= kpts & kpts <= self._nkpts).all(), 'Provided kpoint indices out of bounds of %d and %d' % (1, self._nkpts)
+            assert len(ikpts) > 0, 'Empty k-point list provided'
+            ikpts = np.array(ikpts)
+            kpts = self.kpts[ikpts - 1]
+        assert ((1 <= ikpts) & (ikpts <= self._nkpts)).all(), 'Provided kpoint indices out of bounds of %d and %d' % (1, self._nkpts)
         if format is not None:
             if format == 'gamma':
                 to_gamma = True
-                assert len(kpts) == 1 and np.norm(kpts[0]) == 0, 'Cannot convert to gamma format, more than gamma-point specified'
+                assert len(ikpts) == 1 and np.norm(kpts[0]) == 0, 'Cannot convert to gamma format, other than gamma-point specified'
             elif format == 'std':
                 to_gamma = False
             else:
@@ -577,15 +579,17 @@ class PlaneWaveFunctions(HttkObject):
             convert = False
         nspins = len(spins)
         nbands = len(bands)
-        nkpts = len(kpts)
+        nkpts = len(ikpts)
 
         if file_ref is None:
             ### make copy in memory
             new_coeffs = {}
-            new_eigs = self.eigs.copy()
+            new_eigs = np.zeros((nspins, nkpts, nbands), dtype=int)
             new_occups = np.zeros((nspins, nkpts, nbands), dtype=int)
+            new_nplws = np.zeros(nkpts, dtype=int)
             for s_i,s in enumerate(spins):
-                for k_i,k in enumerate(kpts):
+                for k_i,k in enumerate(ikpts):
+                    new_nplws[k_i] = self._nplws[k-1]
                     if convert:
                         std_gvecs = self.get_gvecs(kpt_ind=k, gamma=False)
                         gam_gvecs = self.get_gvecs(kpt_ind=k, gamma=True, gamma_half=gamma_half)
@@ -597,20 +601,27 @@ class PlaneWaveFunctions(HttkObject):
                                 coeffs = reduce_std_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, gamma_half)
                             else:
                                 coeffs = expand_gamma_coeffs(coeffs, self.grid_size, std_gvecs, gam_gvecs, self._gamma_half)
-                        new_coeffs[(s_i,k_i,b_i)] = coeffs
+                        new_coeffs[(s_i+1,k_i+1,b_i+1)] = coeffs
                         new_eigs[s_i,k_i,b_i] = self.eigenval(s,k,b)
                         new_occups[s_i,k_i,b_i] = self.occupation(s,k,b)
 
-            # convert to desired format
-
             # make new object
-            new_wavefuncs = PlaneWaveFunctions.create(nkpts=nkpts, nbands=nbands, nspins=nspins, nplws=self._nplws, encut=self._encut, cell=self.cell, kpts=kpts, double_precision=self.double_precision, eigs=new_eigs, occups=new_occups, pw_coeffs=new_coeffs, is_gamma=to_gamma, gamma_half=gamma_half)
-
+            new_wavefuncs = PlaneWaveFunctions.create(
+                    nplws=new_nplws,
+                    encut=self._encut,
+                    cell=self.cell,
+                    kpts=kpts,
+                    double_precision=self.double_precision,
+                    eigs=new_eigs,
+                    occups=new_occups,
+                    pwcoeffs=new_coeffs,
+                    is_gamma=to_gamma,
+                    gamma_half=gamma_half)
         else:
             ### Write a copy to file
             from httk.iface.vasp_if import write_wavecar, read_wavecar
             name_wrapper = IoAdapterFilename.use(file_ref)
-            write_wavecar(name_wrapper, self, bands=bands, spins=spins, kpts=kpts, format=format, gamma_half=gamma_half)
+            write_wavecar(name_wrapper, self, bands=bands, spins=spins, ikpts=ikpts, format=format, gamma_half=gamma_half)
             new_wavefuncs = read_wavecar(name_wrapper)
         
         return new_wavefuncs

@@ -481,7 +481,8 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
             seek_pos = rec_pos(spin+1, kpt+1, 1) - record_len # position of spin-kpt header
             file.seek(seek_pos)
             nentries = (4+3*nbands)
-            record = struct.unpack('d'*nentries, file.read(8*nentries))
+            buffer = file.read(8*nentries)
+            record = struct.unpack('d'*nentries, buffer)
             if spin == 0:
                 # read kpt header info
                 nplw_coeffs[kpt] = int(record[0])
@@ -492,7 +493,7 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
     wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
     return wavefuncs 
 
-def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, format=None, gamma_half="x", keep_records=False):
+def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, format=None, gamma_half="x", keep_records=False):
     """
     Writes a PlaneWaveFunctions object to specified file.
 
@@ -502,7 +503,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     file_wrapper: Filename or file object to new file (will be closed and opened in binary read mode if necessary)
     planewaves: PlaneWaveFunctions object to copy to file
     spins: Indices of spin components to write, default is all, counting from 1
-    kpts: Indices of k-points to write, default is all, counting from 1
+    ikpts: Indices of k-points to write, default is all, counting from 1
     bands: Indices of bands to write, default is all, counting from 1
     format: Output format. Either 'std' or 'gamma', default is same format as planewaves object
     gamma_half: If writing to gamma format, change the axis of reduction, either 'z' or 'x'
@@ -526,9 +527,9 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         if spins is not None:
             spin_to_keep.fill(False)
             spin_to_keep[np.array(spins)-1] = True
-        if kpts is not None:
+        if ikpts is not None:
             kpt_to_keep.fill(False)
-            kpt_to_keep[np.array(kpts)-1] = True
+            kpt_to_keep[np.array(ikpts)-1] = True
 
     if bands is None or keep_records:
         bands = np.arange(1, planewaves._nbands+1)
@@ -538,22 +539,22 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         spins = np.arange(1, planewaves._nspins+1)
     else:
         spins = np.array(spins)
-    if kpts is None or keep_records:
-        kpts = np.arange(1, planewaves._nkpts+1)
+    if ikpts is None or keep_records:
+        ikpts = np.arange(1, planewaves._nkpts+1)
     else:
-        kpts = np.array(kpts)
+        ikpts = np.array(ikpts)
 
     filename = IoAdapterFilename.use(file_wrapper)
     file_wrapper = cleveropen(filename.filename, 'wb')
 
     assert 1 <= min(spins) and max(spins) <= planewaves._nspins
-    assert 1 <= min(kpts) and max(kpts) <= planewaves._nkpts
+    assert 1 <= min(ikpts) and max(ikpts) <= planewaves._nkpts
     assert 1 <= min(bands) and max(bands) <= planewaves._nbands 
 
     ### Determine conversion settings based on provided format and wavefunctions
 
     if format == 'gamma' or format == "gam":
-        assert len(kpts) == 1 and np.allclose(planewaves.kpts[kpts[0] - 1], np.array([0,0,0])), "Can only write gamma-wavecar at the gamma-point, several k-points or non-gamma point provided"
+        assert len(ikpts) == 1 and np.allclose(planewaves.kpts[ikpts[0] - 1], np.array([0,0,0])), "Can only write gamma-wavecar at the gamma-point, several k-points or non-gamma point provided"
         to_gamma = True
     elif format == 'std':
         to_gamma = False
@@ -580,9 +581,10 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         data_size = 16
         data_id = np.complex128
     
-    nkpts = len(kpts)
+    nkpts = len(ikpts)
     nbands = len(bands)
-    nplws = planewaves._nplws[kpts-1]
+    nspins = len(spins)
+    nplws = planewaves._nplws[ikpts-1]
     max_nplws = max(planewaves._nplws)
 
     ### Determine variable sizes based on desired conversion
@@ -601,7 +603,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
     complex_rec = np.zeros(ncomplex, dtype=data_id)
     
     # top header
-    float_rec[:3] = [record_size, planewaves._nspins, rtag]
+    float_rec[:3] = [record_size, nspins, rtag]
     float_rec.tofile(file_wrapper)
 
     # second header
@@ -620,7 +622,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, kpts=None, f
         std_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=False)
 
     for s in spins:
-        for ki, k in enumerate(kpts):
+        for ki, k in enumerate(ikpts):
             ## generate G-vectors for wavefunction conversion
             if convert:
                 gam_gvecs = planewaves.get_gvecs(kpt=planewaves.kpts[k-1], kgrid=gam_kgrid)
