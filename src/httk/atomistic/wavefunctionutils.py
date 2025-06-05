@@ -1,6 +1,6 @@
 import numpy as np
 
-def compare_wavefuncs(wobj1, wobj2, spin1, kind1, band1, spin2, kind2, band2):
+def compare_wavefuncs(wobj1, wobj2, spin1, kind1, band1, spin2, kind2, band2, norm=True):
     """
     Performs the wavefunction overlap of two wavefunctions from given planewave objects.
     
@@ -15,13 +15,13 @@ def compare_wavefuncs(wobj1, wobj2, spin1, kind1, band1, spin2, kind2, band2):
     phase: the phase of the overlap integral (in degrees)
     overlap: the overlap integral itself
     """
-    func1 = wobj1.get_wavr(spin1, kind1, band1)
-    func2 = wobj2.get_wavr(spin2, kind2, band2)
+    func1 = wobj1.get_wavr(spin1, kind1, band1, norm=norm)
+    func2 = wobj2.get_wavr(spin2, kind2, band2, norm=norm)
 
     # could be moved to core?
     overlap = np.sum(np.conjugate(func1) * func2)
     similarity = np.abs(overlap)
-    phase = np.angle(similarity, deg=True)
+    phase = np.angle(overlap, deg=True)
 
     return similarity, phase, overlap
 

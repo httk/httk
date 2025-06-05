@@ -72,7 +72,7 @@ def gen_gvecs(kgrid, kvec, basis, encut):
 
     return gvecs
 
-def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x"):
+def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x", norm=True):
     """
     Fourier-transform the given plane-wave coefficients into a real-space wavefunction
 
@@ -109,16 +109,18 @@ def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x"):
             tmp = expand_gamma_wav(phi, plane_gvecs)
             grid = grid[[2,1,0]]
             tmp = np.swapaxes(phi, 0, 2)
-            tmp = fft.irfftn(tmp, s=grid, norm="ortho") # fourier transform along x (switched z)
+            tmp = fft.irfftn(tmp, s=grid, norm = "ortho") # fourier transform along x (switched z)
             phi = np.swapaxes(tmp, 0, 2)
         elif gamma_half == "z":
             plane_gvecs = gvecs[gvecs[:,2] == 0] ## do not perform a full gamma-expansion, only the ones with expansion-axis == 0, fourier transform sets the rest
             tmp = expand_gamma_wav(phi, plane_gvecs)
-            phi = fft.irfftn(tmp, s=grid)
-        phi /= np.linalg.norm(phi)
-        return phi
+            phi = fft.irfftn(tmp, s=grid, norm = "ortho") # fourier transform along z
     else:
-        return fft.ifftn(phi)
+        phi = fft.ifftn(phi, norm = "ortho")
+    
+    if norm:
+        phi /= np.linalg.norm(phi)
+    return phi
 
 def meshgrid(x,y,z):
     """
@@ -190,24 +192,25 @@ def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half="x"):
         raise ValueError('Unrecognized gamma-half argument. z or x is supported')
     
     # transform the coefficients to real space
-    real_wave = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half)
+    real_wave = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half, norm=False)
 
     # transform the wavefunction to real-valued function, while attempting to keep the same sign, assuming the imaginary part is small
     # This transformation preserves the partial density of the wavefunction, but destroys the phase information
     real_wave = np.sqrt(real_wave.real**2 + real_wave.imag**2)*np.sign(real_wave.real)
     
+    grid = grid_size * 2
     if gamma_half == "x":
-        grid = grid_size[[2,1,0]]
+        grid = grid[[2,1,0]]
         tmp = np.swapaxes(real_wave, 2, 0)
-        tmp = fft.rfftn(tmp, s=grid)
-        real_wave = np.swapaxes(tmp, 2, 0)
+        tmp = fft.rfftn(tmp, s=grid, norm = "ortho")
+        phi = np.swapaxes(tmp, 2, 0)
     elif gamma_half == "z":
-        real_wave = fft.rfftn(real_wave, s=grid_size)
+        phi = fft.rfftn(real_wave, s=grid, norm = "ortho")
 
-    real_wave *= np.sqrt(2)
-    real_wave[0,0,0] /= np.sqrt(2)
+    phi *= np.sqrt(2)
+    phi[0,0,0] /= np.sqrt(2)
 
-    coeffs = real_wave[gam_gvecs[:,0], gam_gvecs[:,1], gam_gvecs[:,2]]
+    coeffs = phi[gam_gvecs[:,0], gam_gvecs[:,1], gam_gvecs[:,2]]
     return coeffs
     
 class PlaneWaveFunctions(HttkObject):
@@ -439,7 +442,7 @@ class PlaneWaveFunctions(HttkObject):
             self.gvecs[immut_kpt] = gvecs 
         return gvecs
 
-    def get_wavr(self, spin, kpt, band):
+    def get_wavr(self, spin, kpt, band, norm=True):
         """
         Getter function for the real-space form of the wavefunction at given indices.
         
@@ -447,6 +450,7 @@ class PlaneWaveFunctions(HttkObject):
         spin: Spin index of the wavefunction (1-indexed)
         kpt: K-point index of the wavefunction (1-indexed)
         band: Band index of the wavefunction (1-indexed)
+        norm: If True, the wavefunction is normalized to unit length. Otherwise, the wavefunction is transformed as found in the WAVECAR.
         
         Output:
         real_space_wave: 3D numpy array of complex numbers, containing the real-space form of the wavefunction
@@ -457,7 +461,7 @@ class PlaneWaveFunctions(HttkObject):
         
         plane_wave = self.get_plws(spin, kpt, band)
         gvecs = self.get_gvecs(kpt_ind=kpt)
-        real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self._is_gamma, gamma_half=self._gamma_half)
+        real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self._is_gamma, gamma_half=self._gamma_half, norm=norm)
 
         return real_space_wave
 
