@@ -140,10 +140,7 @@ def expand_gamma_wav(buffer, xyz):
     buffer: 3D numpy array of complex numbers, containing gamma-compressed wavefunction coefficients in the positive half-space
     xyz: list of g-vectors for the gamma-compressed (negative) half-space. A Nx3 numpy array of integers.
     """
-    #print("start")
-    #for i in range(xyz.shape[0]):
-    #    if xyz[i,0] == 0 and xyz[i,1] == 0:
-    #        print(xyz[i,:])
+
     buffer[-xyz[:,0], -xyz[:,1], -xyz[:,2]] = buffer[xyz[:,0], xyz[:,1], xyz[:,2]].conjugate()
     buffer /= np.sqrt(2)
     buffer[0,0,0] *= np.sqrt(2)
@@ -192,20 +189,20 @@ def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half="x"):
         raise ValueError('Unrecognized gamma-half argument. z or x is supported')
     
     # transform the coefficients to real space
-    real_wave = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half, norm=False)
+    phi = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half, norm=False)
 
     # transform the wavefunction to real-valued function, while attempting to keep the same sign, assuming the imaginary part is small
     # This transformation preserves the partial density of the wavefunction, but destroys the phase information
-    real_wave = np.sqrt(real_wave.real**2 + real_wave.imag**2)*np.sign(real_wave.real)
+    phi = np.sqrt(phi.real**2 + phi.imag**2)*np.sign(phi.real)
     
     grid = grid_size * 2
     if gamma_half == "x":
         grid = grid[[2,1,0]]
-        tmp = np.swapaxes(real_wave, 2, 0)
+        tmp = np.swapaxes(phi, 2, 0)
         tmp = fft.rfftn(tmp, s=grid, norm = "ortho")
         phi = np.swapaxes(tmp, 2, 0)
     elif gamma_half == "z":
-        phi = fft.rfftn(real_wave, s=grid, norm = "ortho")
+        phi = fft.rfftn(phi, s=grid, norm = "ortho")
 
     phi *= np.sqrt(2)
     phi[0,0,0] /= np.sqrt(2)
