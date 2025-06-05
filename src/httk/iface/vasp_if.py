@@ -544,9 +544,6 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
     else:
         ikpts = np.array(ikpts)
 
-    filename = IoAdapterFilename.use(file_wrapper)
-    file_wrapper = cleveropen(filename.filename, 'wb')
-
     assert 1 <= min(spins) and max(spins) <= planewaves._nspins
     assert 1 <= min(ikpts) and max(ikpts) <= planewaves._nkpts
     assert 1 <= min(bands) and max(bands) <= planewaves._nbands 
@@ -569,6 +566,10 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
             gam_half = planewaves._gamma_half
     else:
         convert = False
+
+    # open file for writing
+    filename = IoAdapterFilename.use(file_wrapper)
+    file_wrapper = cleveropen(filename.filename, 'wb')
 
 
     ### Write header
