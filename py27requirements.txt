@@ -1,3 +1,11 @@
 pytest
 matplotlib
-numpy
+numpy==1.16.6
+ase==3.17.0
+pymatgen==2018.12.12
+docutils
+web.py==0.51
+markdown
+python-markdown-math
+pyyaml
+palettable==3.3.2

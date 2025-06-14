@@ -5,8 +5,14 @@ all:	httk.cfg version httk_overview.pdf webdocs
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
+init_venvs:
+	tox --notest
+
 tox:
 	tox
+
+tox27:
+	HTTK_TEST_TYPE=pyver tox -c tox-conda.ini -e py27
 
 tests: unittests2 unittests3
 
@@ -15,42 +21,26 @@ pytests: pytest2 pytest3
 unittests:
 	(cd Tests; TEST_EXPECT_PYVER=ignore python all.py)
 
-unittests2: link_python2
-	echo "Running unittests with Python 2"
+unittests2:
+	echo "Running unittests with default python, expecting Python 2"
 	(cd Tests; TEST_EXPECT_PYVER=2 PATH="$$(pwd -P)/python_versions/ver2:$$PATH" python all.py)
 
 unittests3: link_python3
-	echo "Running unittests with Python 3"
+	echo "Running unittests with default python, expecting Python 2"
 	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" python all.py)
 
 pytest:
 	(cd Tests; TEST_EXPECT_PYVER=ignore py.test)
 
-pytest2: link_python2
-	echo "Running pytest with Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=2 PATH="$$(pwd -P)/python_versions/ver2:$$PATH" py.test)
+pytest2:
+	echo "Running pytest with default python, expecting Python 2"
+	(cd Tests; TEST_EXPECT_PYVER=2 py.test)
 
-pytest3: link_python3
-	echo "Running pytest with Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" py.test-3)
+pytest3:
+	echo "Running pytest with default python, expecting Python 3"
+	(cd Tests; TEST_EXPECT_PYVER=3 py.test-3)
 
-link_python2:
-	if [ ! -e Tests/python_versions ]; then mkdir Tests/python_versions; fi
-	if [ ! -e Tests/python_versions/ver2 ]; then mkdir Tests/python_versions/ver2; fi
-	if [ ! -e Tests/python_versions/ver2/python ]; then ln -sf /usr/bin/python2 Tests/python_versions/ver2/python; fi
-
-link_python3:
-	if [ ! -e Tests/python_versions ]; then mkdir Tests/python_versions; fi
-	if [ ! -e Tests/python_versions/ver3 ]; then mkdir Tests/python_versions/ver3; fi
-	if [ ! -e Tests/python_versions/ver3/python ]; then ln -sf /usr/bin/python3 Tests/python_versions/ver3/python; fi
-
-relink_python:
-	rm -f Tests/python_versions/ver2/python
-	rmdir Tests/python_versions/ver2
-	rm -f Tests/python_versions/ver3/python
-	rmdir Tests/python_versions/ver3
-
-.PHONY: tox unittests unittests2 unittests3 pytest pytest2 pytest3
+.PHONY: tox tox27 unittests unittests2 unittests3 pytest pytest2 pytest3
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
