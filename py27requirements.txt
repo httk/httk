@@ -3,6 +3,7 @@ matplotlib
 numpy==1.16.6
 ase==3.17.0
 pymatgen==2018.12.12
+monty==1.0.5
 docutils
 web.py==0.51
 markdown

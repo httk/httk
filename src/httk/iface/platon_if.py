@@ -241,7 +241,6 @@ def platon_lis_to_struct_broken2(ioa):
     results['occupancies'] = []
     results['coords'] = []
     out = httk.basic.micro_pyawk(ioa, [
-<<<<<<< HEAD
         [r'^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
         [r'^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
         [r'^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
@@ -250,16 +249,6 @@ def platon_lis_to_struct_broken2(ioa):
         #[r'^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
         [r'^[^ ]* +[^ ]* +[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +.* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) *$', lambda results, match: results['in_table'], read_coords],
         [r'^ *Angstrom Coordination Sphere Around Atom +',
-=======
-        ['^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
-        ['^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
-        ['^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
-        ['^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
-        [r'^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
-        #['^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
-        ['^[^ ]* +[^ ]* +[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +.* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) *$', lambda results, match: results['in_table'], read_coords],
-        ['^ *Angstrom Coordination Sphere Around Atom +',
->>>>>>> origin/fix_fill_cell_error
          lambda results, match: results['in_table'] is None and results['section'] == 'Space Group Symmetry', in_table],
         [r'^ *=+ ([A-Za-z ]+) =+ *$', None, section],
     ], results=results, debug=False)

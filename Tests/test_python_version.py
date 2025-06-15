@@ -28,14 +28,17 @@
 import os, sys, unittest, subprocess, argparse, codecs, re
 
 if 'HTTK_TEST_EXPECT_PYVER' in os.environ:
-    m = re.match(r"py(\d)(\d+)", os.environ.get("HTTK_TEST_EXPECT_PYVER"))
+    m = re.match(r"py(\d)(\d+)?", os.environ.get("HTTK_TEST_EXPECT_PYVER"))
     if m:
         major, minor = m.groups()
-        expect_pyver = str(major)+"."+str(minor)
+        if minor:
+            expect_pyver = str(major)+"."+str(minor)
+        else:
+            expect_pyver = str(major)
     else:
         expect_pyver = "<could not parse env var HTTK_TEST_EXPECT_PYVER>"
 else:
-    expect_pyver=None
+    expect_pyver="3"
 
 testdir = os.path.abspath(os.path.dirname(__file__))
 

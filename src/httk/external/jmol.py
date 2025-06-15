@@ -36,6 +36,7 @@ def ensure_has_cif2cell():
         raise ImportError("httk.external.jmol imported with no access to jmol binary")
 
 try:
+    print("HERE",os.environ)
     jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
     jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
@@ -72,7 +73,7 @@ try:
     check_works()
 
 except Exception as e:
-    print("FAIL:"+str(e))
+    print("FAIL:"+str(e),file=sys.stderr)
     pass
 
 

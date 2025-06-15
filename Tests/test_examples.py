@@ -27,19 +27,32 @@
 
 import os, unittest, subprocess, argparse, fnmatch
 
+debug_mode=False
+
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 httk_examples_dir = os.path.join(top,'Examples')
 
 def run(command,args=[]):
     args = list(args)
     popen = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return popen.communicate()
+    out, err = popen.communicate()
+    returncode = popen.returncode
+    return out, err, returncode
 
 def execute(self, command, *args):
-    os.environ["HTTK_DONT_HOLD"] = "1"
-    os.chdir(os.path.dirname(command))
-    out,err = run("python",[os.path.join(httk_examples_dir,command)]+list(args))
-    self.assertTrue(len(err.strip())==0, msg=err)
+    oldpwd = os.getcwd()
+    try:
+        os.environ["HTTK_DONT_HOLD"] = "1"
+        os.chdir(os.path.dirname(command))
+        out,err,returncode = run("python",[os.path.join(httk_examples_dir,command)]+list(args))
+        if debug_mode:
+            print("out: "+str(out))
+            print("err: "+str(err))
+            print("returncode: "+str(returncode))
+        self.assertTrue(len(err.strip())==0, msg=err)
+        self.assertTrue(returncode==0, "Example execution returned non-zero exit code")
+    finally:
+        os.chdir(oldpwd)
 
 class TestExamples(unittest.TestCase):
     pass
@@ -88,9 +101,9 @@ for program in test_programs:
 if __name__ == '__main__':
 
     ap = argparse.ArgumentParser(description="Example tests")
+    ap.add_argument("--debug", help = 'Debug output', action='store_true')
     args, leftovers = ap.parse_known_args()
+    debug_mode = args.debug
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestExamples)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-

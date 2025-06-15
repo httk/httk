@@ -5,47 +5,103 @@ all:	httk.cfg version httk_overview.pdf webdocs
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
+##################################
+## Virtual environment handling
+##################################
+#
+# make init_venvs : creates all uv virtual environments define in tox.ini
+#
+# make init_venv venv=py310 : creates the uv virtual environment for Pyton 3.10
+#
+# After which you can do: 
+#   source .venvs/uv/py310/bin/activate
+# to activate that environment.
+#
+
+init_venv:
+	tox --notest -e $(venv)
+
 init_venvs:
 	tox --notest
+
+##################################
+## Tests
+##################################
+#
+# make tox
+#  - or just -
+# tox : runs tests for all python versions defined in tox.ini
+#
+# make tests 
+# make unittests
+# make pytests : runs all test in the currently active environment (assuming Python 3) 
+# 
+# make unittests2 
+# make pytests2 : runs all test in the currently active environment (assuming Python 2) 
+#
+# make unittests27_conda
+# pytests27_conda:
+#
+# For 'unittests' you can add HTTK_TEST_TYPE=<test type> to run a subset of the tests:
+#   * all (default): the full test suite
+#   * ci: a light set of tests suitable to run in CI
+#   * pyver: just test that the tox and environment setup works
+#          to test things with the intended python versions.
+#
+
+HTTK_TEST_TYPE ?= all
 
 tox:
 	tox
 
-tox27:
-	HTTK_TEST_TYPE=pyver tox -c tox-conda.ini -e py27
-
-tests: unittests2 unittests3
-
-pytests: pytest2 pytest3
+tests: unittests
 
 unittests:
-	(cd Tests; TEST_EXPECT_PYVER=ignore python all.py)
+	echo "Running pytest with current default python, expecting supported Python 3 version"
+	(cd Tests; python $(HTTK_TEST_TYPE).py)
+
+pytests:
+	echo "Running pytest with current default python, expecting supported Python 3 version"
+	(cd Tests; py.test)
 
 unittests2:
-	echo "Running unittests with default python, expecting Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=2 PATH="$$(pwd -P)/python_versions/ver2:$$PATH" python all.py)
+	echo "Running pytest with current default python, expecting supported Python 3 version"
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 python $(HTTK_TEST_TYPE).py)
 
-unittests3: link_python3
-	echo "Running unittests with default python, expecting Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" python all.py)
-
-pytest:
-	(cd Tests; TEST_EXPECT_PYVER=ignore py.test)
-
-pytest2:
+pytests2:
 	echo "Running pytest with default python, expecting Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=2 py.test)
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 py.test)
 
-pytest3:
-	echo "Running pytest with default python, expecting Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 py.test-3)
+unittests27_conda:
+	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running unittests"
+	type -t deactivate 1>/dev/null && deactivate; \
+	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
+        mkdir -p .venvs/conda/; \
+	test ! -e .venvs/conda/py27 && \
+	  conda create -p .venvs/conda/py27 -y python=2.7 tox; \
+	conda activate .venvs/conda/py27; \
+	python -m pip install -r py27requirements.txt; \
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 python $(HTTK_TEST_TYPE).py)
 
-.PHONY: tox tox27 unittests unittests2 unittests3 pytest pytest2 pytest3
+pytests27_conda:
+	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running pytest"
+	type -t deactivate 1>/dev/null && deactivate; \
+	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
+        mkdir -p .venvs/conda/; \
+	test ! -e .venvs/conda/py27 && \
+	  conda create -p .venvs/conda/py27 -y python=2.7 tox; \
+	conda activate .venvs/conda/py27; \
+	python -m pip install -r py27requirements.txt; \
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 py.test)
+
+.PHONY: tox tests unittests pytests unittests2 pytests2 unittests27_conda pytests27_conda
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
+
+.PHONY: autopep8
 
 clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
@@ -56,6 +112,8 @@ clean:
 	rm -f httk_*.md5
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
+
+.PHONY: clean
 
 version:
 	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION

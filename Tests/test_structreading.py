@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 import sys, os, unittest, subprocess, argparse, difflib
 from contextlib import contextmanager
 
@@ -12,6 +11,7 @@ import httk
 from timeit import itertools
 import codecs
 
+debug_mode = False
 logdata = []
 
 def run(command,args=[]):
@@ -23,6 +23,16 @@ def run(command,args=[]):
     out = codecs.decode(out, 'utf-8')
     err = codecs.decode(err, 'utf-8')
     return out, err
+
+def print_num_matrix(l):
+    outstr = ""
+    for i in l:
+        if isinstance(i, list):
+            outstr += print_num_matrix(i)
+            outstr += "\n"
+        else:
+            outstr += str(i) + "\n"
+    return outstr
 
 class TestStructreading(unittest.TestCase):
 
@@ -72,8 +82,8 @@ class TestStructreading(unittest.TestCase):
             self.assertTrue(orig_line is not None, "Verification file missing line:"+new_line+"\nFull diff:\n"+message)
             self.assertTrue(new_line is not None, "New version missing line:"+orig_line+"\nFull diff:\n"+message)
             for orig_datum, new_datum in zip_longest(orig_line.split(),new_line.split()):
-                self.assertTrue(orig_datum is not None, "Verification file missing datum: "+new_datum+"\nFull diff:\n"+message)
-                self.assertTrue(new_datum is not None, "New version missing datum:"+orig_datum+"\nFull diff:\n"+message)
+                self.assertTrue(orig_datum is not None, "Verification file missing datum: "+str(new_datum)+"\nFull diff:\n"+message)
+                self.assertTrue(new_datum is not None, "New version missing datum:"+str(orig_datum)+"\nFull diff:\n"+message)
                 if group == 1:
                     sizes.append(int(orig_datum))
                 if group == 2:
@@ -131,7 +141,8 @@ class TestStructreading(unittest.TestCase):
                 self.assertEqual(len(orig_group),len(p),"Not equal amount of coordinate groups.")
                 check, err = check_permut(orig_group, p, coord_permuts)
                 if check:
-                    print("Found match after considering",pc,"permutations.")
+                    if debug_mode:
+                        print("Found match after considering",pc,"permutations.")
                     #print(orig_group)
                     #print(p)
                     #print("------------------------------------------------")
@@ -172,28 +183,52 @@ class TestStructreading(unittest.TestCase):
 
             # Coordinates can be returned in any order...
 
+    def struct_to_str(self, struct):
+        structstr = " ".join(struct.uc_formula_symbols)+"\n\n\n"
+        structstr += " ".join([str(x) for x in struct.uc_counts])+"\n\n\n"
+        structstr += print_num_matrix(struct.uc_cell.basis.to_floats())
+        structstr += "\n"
+        structstr += print_num_matrix(struct.uc_reduced_coords.to_floats())
+        return structstr
+
+    # Disabling this while testing the tests, as it only works with isotropy which requires older versions of isotropy...
+    def disabled_test_read_write_problem_file(self):
+
+        import httk.db
+
+        backend = httk.db.backend.Sqlite("tmp/test.sqlite")
+        store = httk.db.store.SqlStore(backend)
+        unit_struct = httk.atomistic.Structure.io.load("structreading_data/teststruct/test.vasp")
+        sym_unit_struct = unit_struct.find_symmetry()
+        structure1 = sym_unit_struct.transform([[1,0,0],[0,1,0],[0,0,1]])
+        store.save(structure1)
+        structure1.io.save("tmp/test1.vasp")
+
+        search = store.searcher()
+        search_host = search.variable(httk.atomistic.Structure)
+        search.add(search_host)
+        search.output(search_host, 'test')
+        for match, header in search:
+            structure2 = match[0]
+        structure2.io.save("tmp/test2.vasp")
+
+        struct1str = self.struct_to_str(structure1)
+        struct2str = self.struct_to_str(structure2)        
+        self.assert_numeric_data(struct1str, struct2str)        
 
     def test_read_all_spacegroups(self):
         compdir = 'structreading_data'
         topdir = '../Tutorial/tutorial_data'
         reldir = 'all_spacegroups/cifs/'
 
-        def print_num_matrix(l):
-            outstr = ""
-            for i in l:
-                if isinstance(i, list):
-                    outstr += print_num_matrix(i)
-                    outstr += "\n"
-                else:
-                    outstr += str(i) + "\n"
-            return outstr
-
         structdir = os.path.join(topdir,reldir)
 
+        count = 0
         for subdir, dirs, files in os.walk(structdir):
             for f in files:
                 if f.endswith('.cif'):
-                    print("TESTING:", f)
+                    if debug_mode:
+                        print("TESTING:", f)
 
                     reldir = os.path.relpath(subdir, topdir)
                     ff = os.path.join(subdir, f)
@@ -202,18 +237,20 @@ class TestStructreading(unittest.TestCase):
                     #if not os.path.exists(reldir):
                     #    os.makedirs(reldir)
                     if struct.assignments.ratios != [1]*len(struct.assignments.ratios):
-                        print("Disordered structure, skipping")
+                        if debug_mode:
+                            print("Disordered structure, skipping")
                         continue
 
                     if f in ['70.cif', '26.cif', '190.cif']:
-                        print("Skipping structure incorrectly read by cif2cell")
+                        if debug_mode:
+                            print("Skipping structure incorrectly read by cif2cell")
                         continue
                     #if f == '184.cif' or f == '119.cif' or f == '217.cif' or f == '200.cif':
                     #    # For some reason cif2cell has a different orientation here
                     #    continue
 
 
-                    of = open('structreading.tmp', "w")
+                    of = open('tmp/structreading.tmp', "w")
                     #of.write(" ".join(struct.uc_formula_symbols)+"\n")
                     #of.write(" ".join([str(x) for x in struct.pc.uc_counts])+"\n")
                     #of.write(print_num_matrix(struct.pc.uc_cell.basis.to_floats()))
@@ -232,12 +269,17 @@ class TestStructreading(unittest.TestCase):
                     s1 = f.read()
                     f.close()
 
-                    f = open('structreading.tmp')
+                    f = open('tmp/structreading.tmp')
                     s2 = f.read()
                     f.close()
 
                     self.assert_numeric_data(s1, s2)
-                    #self.assertTrue(filecmp.cmp(compf, 'structreading.tmp'))
+                    #self.assertTrue(filecmp.cmp(compf, 'tmp/structreading.tmp'))
+
+                    count+=1
+                    
+        # Catch directory errors etc., that leads to the test files being missed
+        self.assertTrue(count > 10, msg="current working directory is: "+os.getcwd())
 
 
 #############################################################################
@@ -247,6 +289,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="Structure reading tests")
     ap.add_argument("--debug", help = 'Debug output', action='store_true')
     args, leftovers = ap.parse_known_args()
+    debug_mode = args.debug
 
     try:
         suite = unittest.TestLoader().loadTestsFromTestCase(TestStructreading)
