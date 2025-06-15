@@ -264,7 +264,51 @@ def sites_tidy(sites, backends=['platon']):
     raise Exception("structure_tidy: None of the available backends available.")
 
 
-def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
+def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1, 1000)):
+    symops = spacegrouputils.get_symops(hall_symbol)
+
+    # Number of grid subdivisions along each axis, e.g. if eps=1/1000 => g=1000 
+    g = max(10, int(1 / float(eps)))
+
+    def neighbor_cells(i, j, k):
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                for dk in (-1, 0, 1):
+                    yield ((i + di) % g, (j + dj) % g, (k + dk) % g)
+
+    newcoordgroups = []
+
+    for coordgroup in coordgroups:
+        newcoordgroup = []
+
+        # We'll keep one grid-hash dictionary per coordgroup
+        # Key: (i,j,k) cell index -> Value: list of accepted coords in that cell
+        cell_dict = {}
+
+        for symop in symops:
+            rotcoords = coordgroup * symop[0].T()
+            for coord in rotcoords:
+                finalcoord = (coord + symop[1]).normalize()
+                i, j, k = int(finalcoord[0] * g) % g, int(finalcoord[1] * g) % g, int(finalcoord[2] * g) % g
+                too_close = False
+                for (ni, nj, nk) in neighbor_cells(i, j, k):
+                    for c in cell_dict.get((ni, nj, nk), []):
+                        if (c - finalcoord).normalize_half().lengthsqr() < eps:
+                            too_close = True
+                            break
+                    if too_close:
+                        break
+
+                if not too_close:
+                    newcoordgroup.append(finalcoord)
+                    cell_dict.setdefault((i, j, k), []).append(finalcoord)
+
+        newcoordgroups.append(newcoordgroup)
+
+    return newcoordgroups
+
+
+def coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
     # TODO: This routine is now a bit faster, but maybe can be accelerated further
     # One may also be concerned about how much memory it uses now.
     symops = spacegrouputils.get_symops(hall_symbol)
@@ -280,22 +324,21 @@ def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Frac
                 #count += 1
                 finalcoord = (coord+symop[1]).normalize()
                 newcoordgroup.add(finalcoord)
-                #if finalcoord not in newcoordgroup:
-                #    for checkcoord in newcoordgroup:
-                #        if (checkcoord-finalcoord).normalize_half().lengthsqr() < eps:
-                #            break
-                #    else:
-                #        newcoordgroup.add(finalcoord)
-        newcoordgroup = sorted(list(newcoordgroup), key=lambda x: (x[0], x[1], x[2]))
-        newcoordgroup2 = [newcoordgroup[0]]
-        lastcoord = newcoordgroup[0]
-        for coord in newcoordgroup[1:]:
-            if (coord-lastcoord).normalize_half().lengthsqr() >= eps:
-                newcoordgroup2.append(coord)
-                lastcoord = coord
+                if finalcoord not in newcoordgroup:
+                    for checkcoord in newcoordgroup:
+                        if (checkcoord-finalcoord).normalize_half().lengthsqr() < eps:
+                            break
+                    else:
+                        newcoordgroup.add(finalcoord)
+        #newcoordgroup = sorted(list(newcoordgroup), key=lambda x: (x[0], x[1], x[2]))
+        #newcoordgroup2 = [newcoordgroup[0]]
+        #lastcoord = newcoordgroup[0]
+        #for coord in newcoordgroup[1:]:
+        #    if (coord-lastcoord).normalize_half().lengthsqr() >= eps:
+        #        newcoordgroup2.append(coord)
+        #        lastcoord = coord
         newcoordgroups += [newcoordgroup2]
 
-    #print("EXIT CRDTU",time.process_time() - start)
     #old = coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps)
     #if newcoordgroups != old:
     #    print("\n\nONE\n",FracVector.create(old).to_floats())
