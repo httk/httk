@@ -27,7 +27,7 @@
 
 from __future__ import print_function
 
-import cgi, time, codecs, traceback, cgitb, sys, io
+import time, codecs, traceback, sys, io
 
 try:
     from urllib.parse import parse_qsl, urlunsplit
@@ -35,6 +35,8 @@ except ImportError:
     from urlparse import parse_qsl, urlunsplit
 
 from httk.httkweb.webserver import WebError
+
+from httk.core import parse_header, parse_multipart, cgitb_html
 
 class BytesIOWrapper:
 
@@ -94,7 +96,7 @@ class WsgiApplication:
             # OSErrors don't work in cgitb as it tries to access characters_written
             traceback.print_exc()
             if self.debug and not isinstance(e,OSError):
-                error_html = cgitb.html(sys.exc_info())
+                error_html = cgitb_html(sys.exc_info())
                 return self.output(error_html)
             else:
                 return self.output("<html><body>An unexpected server error has occured.</body></html>")
@@ -135,9 +137,9 @@ class WsgiApplication:
                 request_body_size = 0
             request_body = environ['wsgi.input'].read(request_body_size)
             content_type_header = environ.get('CONTENT_TYPE', 'application/x-www-form-urlencoded')
-            ctype, pdict = cgi.parse_header(content_type_header)
+            ctype, pdict = parse_header(content_type_header)
             if ctype == 'multipart/form-data':
-                postvars = cgi.parse_multipart(request_body, pdict)
+                postvars = parse_multipart(request_body, pdict)
             elif ctype == 'application/x-www-form-urlencoded':
                 postvars = dict(parse_qsl(request_body, keep_blank_values=True))
 

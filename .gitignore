@@ -33,8 +33,6 @@ src/httk.egg-info
 .pytest_cache
 .tox
 .nvimlog
-Tests/structreading.tmp
-Tests/python_versions/ver2
-Tests/python_versions/ver3
-build
-.gitignore
+Tests/tmp
+.venv
+.venvs

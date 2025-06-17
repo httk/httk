@@ -19,6 +19,7 @@
 
 from __future__ import print_function
 import sys, os, tempfile
+from httk.core import which
 
 from httk.core import citation, IoAdapterString
 citation.add_ext_citation('isotropy', "Harold T. Stokes, Dorian M. Hatch, and Branton J. Campbell, Department of Physics and Astronomy, Brigham Young University, Provo, Utah 84606, USA")
@@ -40,17 +41,23 @@ def ensure_has_isotropy():
 
 try:
     isotropy_path = config.get('paths', 'isotropy')
+    if isotropy_path == "" or isotropy_path is None:
+        findsym_path = which('findsym')
+        if findsym_path is not None:
+            isotropy_path = os.path.dirname(findsym_path)
 except Exception:
-    pass
+    findsym_path = which('findsym')
+    if findsym_path is not None:
+        isotropy_path = os.path.dirname(findsym_path)
 
 def isotropy(cwd, args, inputstr, timeout=30):
     ensure_has_isotropy()
 
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE,
     #                                   stderr=subprocess.PIPE, cwd=cwd)
-    #print("COMMAND CIF2CELL")
+    print("COMMAND CIF2CELL"+str(inputstr))
     out, err, completed = Command(os.path.join(isotropy_path, 'findsym'), args, cwd=cwd, inputstr=inputstr).run(timeout)
-    #print("COMMAND CIF2CELL END")
+    print("COMMAND CIF2CELL END"+str(out))
     return out, err, completed
     #out, err = p.communicate()
     #return out, err

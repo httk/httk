@@ -15,6 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import random
+
 from httk.graphics.matplotlib.polygonplot import PolygonPlot
 from httk.graphics.matplotlib.arrowplot import arrowplot
 from httk.core import FracVector

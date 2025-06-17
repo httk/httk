@@ -23,7 +23,7 @@ from _ast import Or
 
 try:
     from io import StringIO
-except ImportException:
+except ImportError:
     from StringIO import StringIO
 
 class Page(object):

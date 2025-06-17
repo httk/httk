@@ -71,7 +71,7 @@ httk_root = None
 _config = configparser.ConfigParser()
 
 def read_config():
-    global python_root, httk_root, _config
+    global httk_root
 
     try:
         with open(os.path.join(python_root, "distdata.py"), 'r') as fp:
@@ -105,7 +105,6 @@ def read_config():
     _config.read([global_cfgpathstr, local_cfgpathstr])
 
 def determine_version_data():
-    global python_root, httk_root, _config
 
     httk_version = None
     if os.path.exists(os.path.join(python_root, "distdata.py")):

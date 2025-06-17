@@ -17,8 +17,8 @@
 #
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
-import pylab 
-
+import pylab
+from math import arctan, pi, mod
 
 class PolygonPlot(object):
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         pylab.array([0, k, 0, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, k, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, 0, k, 0]) + pylab.rand(s, 5),
-        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),        
+        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),
     ))
     color = pylab.array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s + [[1, 1, 0]]*s + [[0, 1, 1]]*s)
 
@@ -145,8 +145,8 @@ if __name__ == '__main__':
         s=2,
         alpha=0.5,
         color=color
-    )    
-    
+    )
+
     pylab.show(block=False)
     pylab.pause(3)
     pylab.close()

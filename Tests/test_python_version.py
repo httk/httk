@@ -25,12 +25,20 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os, sys, unittest, subprocess, argparse, codecs
+import os, sys, unittest, subprocess, argparse, codecs, re
 
-if 'TEST_EXPECT_PYVER' in os.environ:
-    check_pyver=os.environ['TEST_EXPECT_PYVER']
+if 'HTTK_TEST_EXPECT_PYVER' in os.environ:
+    m = re.match(r"py(\d)(\d+)?", os.environ.get("HTTK_TEST_EXPECT_PYVER"))
+    if m:
+        major, minor = m.groups()
+        if minor:
+            expect_pyver = str(major)+"."+str(minor)
+        else:
+            expect_pyver = str(major)
+    else:
+        expect_pyver = "<could not parse env var HTTK_TEST_EXPECT_PYVER>"
 else:
-    check_pyver=None
+    expect_pyver="3"
 
 testdir = os.path.abspath(os.path.dirname(__file__))
 
@@ -45,34 +53,37 @@ def run(command,args=[]):
 class TestPythonVer(unittest.TestCase):
     def test_python_version_internal(self):
 
-        self.assertTrue(check_pyver is not None, msg="Environment variable TEST_EXPECT_PYVER not set.")
+        self.assertTrue(expect_pyver is not None, msg="Environment variable HTTK_TEST_EXPECT_PYVER not set.")
 
-        if check_pyver == 'ignore':
+        if expect_pyver == 'ignore':
             self.assertTrue(True)
         else:
-            out, err = run('python',['--version'])
-            self.assertTrue(sys.version.startswith(check_pyver), msg=sys.version + " does not start with "+check_pyver)
+            self.assertTrue(sys.version.startswith(expect_pyver+" ") or sys.version.startswith(expect_pyver+"."), msg=sys.version + " does not start with "+expect_pyver)
+            #print("Internal python version string:"+str(sys.version))
 
     def test_python_version_exec(self):
 
-        self.assertTrue(check_pyver is not None, msg="Environment variable TEST_EXPECT_PYVER not set.")
+        self.assertTrue(expect_pyver is not None, msg="Environment variable HTTK_TEST_EXPECT_PYVER not set.")
 
-        if check_pyver == 'ignore':
+        if expect_pyver == 'ignore':
             self.assertTrue(True)
         else:
             out, err = run('python',['--version'])
             # Python2 prints version on stderr, Python3 on stdout...
-            self.assertTrue((out+err).startswith("Python "+check_pyver), msg=(out+err) + " does not start with "+check_pyver)
+            msg = out + err
+            self.assertTrue(msg.startswith("Python "+expect_pyver+".") or msg.startswith("Python "+expect_pyver+" "), msg=msg + " does not start with "+expect_pyver)
+            #print("Executable python version string:"+str(msg))
 
     def test_python_version_hashbang(self):
 
-        self.assertTrue(check_pyver is not None, msg="Environment variable TEST_EXPECT_PYVER not set.")
+        self.assertTrue(expect_pyver is not None, msg="Environment variable HTTK_TEST_EXPECT_PYVER not set.")
 
-        if check_pyver == 'ignore':
+        if expect_pyver == 'ignore':
             self.assertTrue(True)
         else:
             out, err = run(os.path.join(testdir,'python_versions/print_python_version.py'))
-            self.assertTrue(out.startswith(check_pyver), msg=out + " does not start with "+check_pyver)
+            self.assertTrue(out.startswith(expect_pyver+" ") or out.startswith(expect_pyver+"."), msg=out + " does not start with "+expect_pyver)
+            #print("Hashbang python version string:"+out)
 
 
 #############################################################################

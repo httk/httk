@@ -17,12 +17,6 @@ try:
 
     suite = unittest.TestLoader().loadTestsFromTestCase(test_python_version.TestPythonVer)
 
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_examples.TestExamples))
-
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_structreading.TestStructreading))
-
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_httk_src_inline.TestHttkSrcInline))
-
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 finally:

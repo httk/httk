@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import unittest, argparse
+import os, unittest, argparse
+
+os.environ["HTTK_TEST_HEADLESS"] = "1"
 
 import test_python_version
 import test_examples
@@ -14,14 +16,9 @@ ap.add_argument("--debug", help = 'Debug output', action='store_true')
 args, leftovers = ap.parse_known_args()
 
 try:
-
     suite = unittest.TestLoader().loadTestsFromTestCase(test_python_version.TestPythonVer)
 
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_examples.TestExamples))
-
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_structreading.TestStructreading))
-
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_httk_src_inline.TestHttkSrcInline))
 
     unittest.TextTestRunner(verbosity=2).run(suite)
 

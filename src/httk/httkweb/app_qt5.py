@@ -15,7 +15,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, subprocess, cgitb
+import sys, os, subprocess
+
+from httk.core import cgitb_html
 
 if sys.version_info[0] == 3:
     import urllib.parse as urlparse
@@ -159,7 +161,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                     response = 500
                     headers['Content-type'] = 'text/html'
                     if self.debug:
-                        outputstr = cgitb.html(sys.exc_info())
+                        outputstr = cgitb_html(sys.exc_info())
                         raise
                     else:
                         outputstr = "<html><body>Could not display 404 error page.</body></html>"
@@ -169,7 +171,7 @@ def run_app(appdir, renderers = None, template_engines = None, function_handlers
                 response = 500
                 headers['Content-type'] = 'text/html'
                 if self.debug:
-                    outputstr = cgitb.html(sys.exc_info())
+                    outputstr = cgitb_html(sys.exc_info())
                     raise
                 else:
                     outputstr = "<html><body>An unexpected server error has occured.</body></html>"

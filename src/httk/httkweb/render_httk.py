@@ -28,7 +28,7 @@ if sys.version[0] == "2":
     # escape funtion instead.
 
     from cgi import escape
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 
     from StringIO import StringIO
     import ConfigParser as configparser

@@ -17,7 +17,7 @@
 """
 Basic help functions
 """
-import sys, signal
+import sys, signal, site
 from fractions import Fraction
 
 # Import python2 and 3-specific routunes
@@ -299,6 +299,37 @@ class rewindable_iterator(object):
 #    signal.signal(signal.SIGQUIT, sigquit_handler)  # Register handler
 #except Exception:
 #    pass
+
+def import_from_legacy_cgi(module_name):
+    # Look for all sys.path entries that include 'site-packages'
+    site_paths = [p for p in sys.path if 'site-packages' in p and os.path.isdir(p)]
+
+    for site_path in site_paths:
+        candidate = os.path.join(site_path, module_name + '.py')
+        if os.path.isfile(candidate):
+            if sys.version_info >= (3, 5):
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(module_name, candidate)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            else:
+                import imp
+                module = imp.load_source(module_name, candidate)
+            sys.modules[module_name] = module
+            return module
+
+    raise ImportError("Could not find legacy-cgi version of '{}' in site-packages.".format(module_name))
+
+try:
+    cgi = import_from_legacy_cgi("cgi")
+    cgitb = import_from_legacy_cgi("cgitb")
+except ImportError as e:
+    # Falling back to standard library import for older versions of Python where it is not deprecated
+    import cgi
+    import cgitb
+
+from cgi import parse_header, parse_multipart
+from cgitb import html as cgitb_html
 
 def main():
     asym = int_to_anonymous_symbol(42)

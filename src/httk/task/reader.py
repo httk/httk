@@ -61,10 +61,10 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = configparser.ConfigParser()
-                        configparser.read(os.path.join(dirpath, 'ht.config'))
-                        if configparser.has_option('main', 'description'):
-                            description = configparser.get('main', 'description')
+                        cp = configparser.ConfigParser()
+                        cp.read(os.path.join(dirpath, 'ht.config'))
+                        if cp.has_option('main', 'description'):
+                            description = cp.get('main', 'description')
                         else:
                             description = default_description
                     else:
@@ -124,10 +124,10 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = configparser.ConfigParser()
-                        configparser.read(os.path.join(dirpath, 'ht.config'))
-                        if configparser.has_option('main', 'description'):
-                            description = configparser.get('main', 'description')
+                        cp = configparser.ConfigParser()
+                        cp.read(os.path.join(dirpath, 'ht.config'))
+                        if cp.has_option('main', 'description'):
+                            description = cp.get('main', 'description')
                         else:
                             description = default_description
                     else:
