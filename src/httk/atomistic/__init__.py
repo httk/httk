@@ -39,10 +39,12 @@ from httk.atomistic.spacegroup import Spacegroup
 from httk.atomistic.compound import Compound, CompoundStructure, CompoundRef, CompoundTag, ComputationRelatedCompound
 from httk.atomistic.structurephasediagram import StructurePhaseDiagram
 
+from httk.atomistic.wavefunction import PlaneWaveFunctions
+
 import io as _atomistic_io
 
 __all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites", "Assignments",
            "Compound", "CompoundStructure", "StructurePhaseDiagram", "StructureRef", "StructureTag",
-           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure"]
+           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure", "PlaneWaveFunctions"]
 
 from httk.atomistic import atomisticio
