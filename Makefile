@@ -69,7 +69,7 @@ tox:
 	tox
 
 ci: flake8
-	(cd Tests; python ci.py)
+	cd Tests && PYTHONPATH=$$(pwd -P)/../src:$$PYTHONPATH PATH=$$(pwd -P)../bin:$$PATH && python ci.py
 
 tests: flake8 unittests
 
