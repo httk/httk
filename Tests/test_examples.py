@@ -93,9 +93,7 @@ for program in test_programs:
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_examples_dir)
 
-    print("ADDING:",rel_program)
     if rel_program in ignore_programs:
-        print("SKIPPING:",rel_program)
         continue
 
     program_name, ext = os.path.splitext(rel_program)

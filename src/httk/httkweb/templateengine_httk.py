@@ -33,7 +33,7 @@ if sys.version[0] == "2":
     # escape funtion instead.
 
     from cgi import escape
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     from html import escape
     unicode_type=str

@@ -269,7 +269,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
-        print("POST request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_get_request))
+        print("POST request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_post_request))
 
     # Redirect log messages to stdout instead of stderr
     def log_message(self, format, *args):

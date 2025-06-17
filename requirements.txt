@@ -12,3 +12,5 @@ python-markdown-math
 pyyaml
 legacy-cgi; python_version >= '3.11'
 pyside6
+flake8
+autopep8

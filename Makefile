@@ -68,7 +68,10 @@ HTTK_TEST_TYPE ?= all
 tox:
 	tox
 
-tests: unittests
+ci: flake8
+	(cd Tests; python ci.py)
+
+tests: flake8 unittests
 
 unittests:
 	echo "Running pytest with current default python, expecting supported Python 3 version"
@@ -107,6 +110,15 @@ pytests_autopy27_conda:
 	conda activate .venvs/conda/py27; \
 	python -m pip install -r py27requirements.txt; \
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 py.test)
+
+flake8:
+	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py"
+
+validate_pep8:
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r src/ > /dev/null
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r Tutorial/ > /dev/null
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r Examples/ > /dev/null
+
 
 .PHONY: tox tests unittests pytests unittests2 pytests2 unittests_autopy27_conda pytests_autopy27_conda
 

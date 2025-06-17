@@ -314,7 +314,6 @@ def filter_sf(sf, halls=None):
 
 
 def filter_symops(symops, halls=None):
-    global symopsindex
 
     if halls is None:
         halls = spacegroupdata.keys()

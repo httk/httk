@@ -20,7 +20,7 @@ import os, sys
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     unicode_type=str
 

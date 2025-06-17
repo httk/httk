@@ -337,7 +337,7 @@ def coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps=fractions.
         #    if (coord-lastcoord).normalize_half().lengthsqr() >= eps:
         #        newcoordgroup2.append(coord)
         #        lastcoord = coord
-        newcoordgroups += [newcoordgroup2]
+        newcoordgroups += [newcoordgroup]
 
     #old = coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps)
     #if newcoordgroups != old:

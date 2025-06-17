@@ -57,7 +57,6 @@ cancel_print_citations = False
 
 
 def print_citations():
-    global cancel_print_citations
     if cancel_print_citations or 'HTTK_SUPRESS_EXIT_MSG' in os.environ and os.environ['HTTK_SUPRESS_EXIT_MSG'] not in ["", "0"]:
         return
     #authors = {}
