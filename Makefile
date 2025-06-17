@@ -5,42 +5,56 @@ all:	httk.cfg version httk_overview.pdf webdocs
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
-##################################
-## Virtual environment handling
-##################################
+##############################
+## Virtual environment helpers
+##############################
 #
-# make init_venvs : creates all uv virtual environments define in tox.ini
+# make init_uv_venv
+# make init_conda_venv: creates the default venv
 #
-# make init_venv venv=py310 : creates the uv virtual environment for Pyton 3.10
+# make init_uv_venv venv=py312
+# make init_conda_venv venv=py312: creates a virtual environment for Pyton 3.12
 #
-# After which you can do: 
-#   source .venvs/uv/py310/bin/activate
-# to activate that environment.
+# make init_tox_venv
+# make init_tox_venv venv=py312: use tox to init the uv environments
 #
+# make init_all_tox_venvs: use tox to init all uv environments defined in tox
 
-init_venv:
+venv ?= py310
+
+init_conda_venv:
+	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "requirements.txt"
+	echo "Activate this environment with:"
+	echo "  conda activate \".venvs/conda/$(venv)\""
+
+init_uv_venv:
+	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "requirements.txt"
+	echo "Activate this environment with:"
+	echo "  source \".venvs/uv/$(venv)/bin/activate\""
+
+init_tox_venv:
 	tox --notest -e $(venv)
 
-init_venvs:
+init_all_tox_venvs:
 	tox --notest
 
-##################################
+##############################
 ## Tests
-##################################
+##############################
 #
 # make tox
 #  - or just -
 # tox : runs tests for all python versions defined in tox.ini
 #
-# make tests 
+# make tests
 # make unittests
-# make pytests : runs all test in the currently active environment (assuming Python 3) 
-# 
-# make unittests2 
-# make pytests2 : runs all test in the currently active environment (assuming Python 2) 
+# make pytests : runs all test in the currently active environment (assuming Python 3)
 #
-# make unittests27_conda
-# pytests27_conda:
+# make unittests2
+# make pytests2 : runs all test in the currently active environment (assuming Python 2)
+#
+# make unittest_autopy27_conda
+# make pytests_autopy27_conda: autoinstall a py27 environment and run all tests
 #
 # For 'unittests' you can add HTTK_TEST_TYPE=<test type> to run a subset of the tests:
 #   * all (default): the full test suite
@@ -65,14 +79,14 @@ pytests:
 	(cd Tests; py.test)
 
 unittests2:
-	echo "Running pytest with current default python, expecting supported Python 3 version"
+	echo "Running pytest with current default python, expecting supported Python 2 version"
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 python $(HTTK_TEST_TYPE).py)
 
 pytests2:
 	echo "Running pytest with default python, expecting Python 2"
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 py.test)
 
-unittests27_conda:
+unittests_autopy27_conda:
 	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running unittests"
 	type -t deactivate 1>/dev/null && deactivate; \
 	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
@@ -83,7 +97,7 @@ unittests27_conda:
 	python -m pip install -r py27requirements.txt; \
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 python $(HTTK_TEST_TYPE).py)
 
-pytests27_conda:
+pytests_autopy27_conda:
 	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running pytest"
 	type -t deactivate 1>/dev/null && deactivate; \
 	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
@@ -94,7 +108,13 @@ pytests27_conda:
 	python -m pip install -r py27requirements.txt; \
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 py.test)
 
-.PHONY: tox tests unittests pytests unittests2 pytests2 unittests27_conda pytests27_conda
+.PHONY: tox tests unittests pytests unittests2 pytests2 unittests_autopy27_conda pytests_autopy27_conda
+
+##############################
+## Code cleanup
+##############################
+#
+# make autopep8: cleans up all source files inline
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
@@ -102,6 +122,12 @@ autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
 
 .PHONY: autopep8
+
+##############################
+## Dev directory cleanup
+##############################
+#
+# make clean: remove all generated files
 
 clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
@@ -114,6 +140,11 @@ clean:
 	rm -rf Docs/full/_build
 
 .PHONY: clean
+
+##############################
+## Distribution helpers
+##############################
+#
 
 version:
 	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION

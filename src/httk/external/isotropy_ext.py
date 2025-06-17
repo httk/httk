@@ -19,7 +19,7 @@
 
 from __future__ import print_function
 import sys, os, tempfile
-from shutil import which
+from httk.core import which
 
 from httk.core import citation, IoAdapterString
 citation.add_ext_citation('isotropy', "Harold T. Stokes, Dorian M. Hatch, and Branton J. Campbell, Department of Physics and Astronomy, Brigham Young University, Provo, Utah 84606, USA")
@@ -49,7 +49,7 @@ except Exception:
     findsym_path = which('findsym')
     if findsym_path is not None:
         isotropy_path = os.path.dirname(findsym_path)
-        
+
 def isotropy(cwd, args, inputstr, timeout=30):
     ensure_has_isotropy()
 
