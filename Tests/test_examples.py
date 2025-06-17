@@ -81,6 +81,11 @@ ignore_programs = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warn
                    '6_website/2_static_rst_templator/publish_static.py' # web.py is broken for python 3.12 and forward, needs web.py commit d3649322b85777b291ac2b7b3699fb6fc839e382
                   ]
 
+if 'HTTK_TEST_HEADLESS' in os.environ and os.environ['HTTK_TEST_HEADLESS'] not in ["", "0"]:
+    ignore_programs += ['1_simple_things/2_build_supercell.py',
+                        '2_visualization/1_structure_visualizer.py',
+                        ]
+
 for program in test_programs:
 
     exec_func = function_factory(program)
@@ -88,7 +93,9 @@ for program in test_programs:
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_examples_dir)
 
+    print("ADDING:",rel_program)
     if rel_program in ignore_programs:
+        print("SKIPPING:",rel_program)
         continue
 
     program_name, ext = os.path.splitext(rel_program)
