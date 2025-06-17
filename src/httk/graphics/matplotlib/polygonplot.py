@@ -18,7 +18,7 @@
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
 import pylab
-from math import arctan, pi, mod
+from math import atan, pi
 
 class PolygonPlot(object):
 
@@ -55,9 +55,9 @@ class PolygonPlot(object):
             x = self.basis[i, 0]
             y = self.basis[i, 1]
             if rotate_labels:
-                angle = 180*arctan(y/x)/pi + 90
+                angle = 180*atan(y/x)/pi + 90
                 if angle > 90 and angle <= 270:
-                    angle = mod(angle + 180, 360)
+                    angle = (angle + 180) % 360
             else:
                 angle = 0
             ax.text(

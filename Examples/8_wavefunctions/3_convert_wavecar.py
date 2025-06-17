@@ -36,11 +36,12 @@ except AssertionError as e:
 print("Checking file sizes of the original and converted WAVECARs:")
 for fname in glob.glob(resource_path + "/WAVECAR.*"):
     size = os.path.getsize(fname)
-    print(f"{fname}: {size/1024**2:.4f} MB")
-print("")
+    print("%s: %.4f MB" % (fname, size / 1024**2))
+
 for fname in glob.glob(dir_path + "WAVECAR.*"):
     size = os.path.getsize(fname)
-    print(f"{fname}: {size/1024**2:.4f} MB")
+    print("%s: %.4f MB" % (fname, size / 1024**2))
+
 print("")
 
 print("Testing the wavefunction conversion precision:")
@@ -53,7 +54,7 @@ for w1, w2 in pairs:
                 w1, w2, s + 1, 1, b + 1, s + 1, 1, b + 1
             )
             assert 1 - similarity < 1e-5, "Wavefunction comparison failed: similarity too low for ({},{}): {}, {}, {}".format(s,b,similarity, phase, overlap)
-            print(f"Wavefunction {s+1} {b+1} OK!")
+            print("Wavefunction "+str(s+1)+" "+str(b+1)+" OK!")
 print("Converted wavefunctions have (absolute) identity overlaps to tested precision!")
 
 

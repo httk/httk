@@ -15,6 +15,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# For a little while longer we need to maintain Python 2.7 compatibility
+from __future__ import print_function
+
 import os, shutil, math
 
 import httk
@@ -446,7 +449,7 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
             raise ValueError("Unknown RTAG value in WAVECAR. Perhaps unsupported version of VASP was used. Specify floating point precision using wavefunc_prec (= {64,128})")
     else:
         float_size = wavefunc_prec//16
-    
+
     file.seek(record_len) # move to second record
     header = struct.unpack('d'*12, file.read(8*12))
 
@@ -455,7 +458,7 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
     encut = header[2]
     cell_nums = header[3:]
     cell = Cell.create(basis=[[cell_nums[3*j + i] for i in range(3)] for j in range(3)])
-    
+
     # define function for seeking specific record in WAVECAR
     def rec_pos(spin, kpt, band, record_length = record_len):
         assert 1 <= spin <= nspin, "Spin index {} out of range [1,{}]".format(spin, nspin)
@@ -489,9 +492,9 @@ def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
                 kpts[kpt] = record[1:4]
             eigs[spin, kpt, :] = record[4::3]
             occups[spin, kpt, :] = record[4+2::3]
- 
+
     wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
-    return wavefuncs 
+    return wavefuncs
 
 def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, format=None, gamma_half="x", keep_records=False):
     """
@@ -510,9 +513,9 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
     keep_records: If True, the coefficients will be written while keeping their positions in the binary file.
                 If only selection of coeffs are to be written, all other coefficients will be set to zero.
     """
-    
+
     import numpy as np # import numpy for faster routines when writing data
-    
+
     ### Sanitize arguments
     if not isinstance(planewaves, PlaneWaveFunctions):
         return None
@@ -546,7 +549,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
 
     assert 1 <= min(spins) and max(spins) <= planewaves._nspins
     assert 1 <= min(ikpts) and max(ikpts) <= planewaves._nkpts
-    assert 1 <= min(bands) and max(bands) <= planewaves._nbands 
+    assert 1 <= min(bands) and max(bands) <= planewaves._nbands
 
     ### Determine conversion settings based on provided format and wavefunctions
 
@@ -581,7 +584,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
         rtag = 45210 # Single-precision vasp tag
         data_size = 16
         data_id = np.complex128
-    
+
     nkpts = len(ikpts)
     nbands = len(bands)
     nspins = len(spins)
@@ -602,7 +605,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
     ncomplex = record_size // data_size
     float_rec = np.zeros(nfloats, dtype=np.float64)
     complex_rec = np.zeros(ncomplex, dtype=data_id)
-    
+
     # top header
     float_rec[:3] = [record_size, nspins, rtag]
     float_rec.tofile(file_wrapper)
@@ -631,7 +634,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
                 nx, ny, nz = [np.max(std_gvecs[:,i]) - np.min(std_gvecs[:,i]) for i in range(3)]
                 wave_buffer = np.zeros((nx, ny, nz), dtype=np.complex128)
 
-                
+
             float_rec = np.zeros(record_size//8, dtype=np.float64)
             nwaves = nplws[ki]
             # write nplws, k-point, eigenvalues and occupations
@@ -640,7 +643,7 @@ def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, 
             float_rec[4:4+len(bands)*3:3] = [planewaves.eigenval(s,k,b) for b in bands]
             float_rec[4+2:4+2+len(bands)*3:3] = [planewaves.occupation(s,k,b) for b in bands]
             float_rec.tofile(file_wrapper)
-    
+
             for b in bands:
                 if keep_records and (not band_to_keep[b-1] or not spin_to_keep[s-1] or not kpt_to_keep[ki-1]):
                     coeffs = np.zeros(record_size, dtype=data_id)
@@ -663,7 +666,7 @@ def save_vesta(filename, structure, isosurface, cols=10):
         ext_name = filename + ext
         f = IoAdapterFileWriter.use(ext_name).file
         structure_to_poscar(f, structure, primitive_cell=False)
-        
+
         iso = isosurface.copy().flatten(order='F')
         if ext_i == 0:
             iso = iso.real
@@ -674,7 +677,7 @@ def save_vesta(filename, structure, isosurface, cols=10):
         remainder = iso.size % cols
         rows = iso.size // cols
         fmt = "%16.8E"
-        
+
         row_s = [0]*(rows + int(remainder != 0))
         for i in range(rows):
             row_s[i] = ' '.join([fmt % v for v in iso[i*cols:(i+1)*cols]])

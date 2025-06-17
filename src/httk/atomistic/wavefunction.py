@@ -5,13 +5,17 @@ from httk.core.vectors import FracVector, FracScalar
 from httk.core.httkobject import HttkObject, HttkPluginPlaceholder, httk_typed_property, httk_typed_property_resolve, httk_typed_property_delayed, httk_typed_init
 from httk.core.ioadapters import IoAdapterFilename
 
-
-
 import math
 from scipy import fft
 from copy import deepcopy
 from collections import defaultdict
 import numpy as np
+
+try:
+    from scipy.fft import ifftn
+except ImportError:
+    from scipy.fftpack import ifftn
+
 #from numba import njit
 
 # constants used in VASP
@@ -23,7 +27,7 @@ PI       = FracScalar.create(3.141592653589793238)
 def gen_kgrid(grid_size, gamma, gamma_half="x"):
     """
     Generates the (rectangular) kgrid containing all k-states within the given grid size (excluding gamma-compressed states if specified).
-    
+
     Input:
     grid_size: Size of the kgrid in each dimension (must be ueven)
     gamma: If the kgrid is gamma-compressed (True) or not (False)
@@ -48,7 +52,7 @@ def gen_kgrid(grid_size, gamma, gamma_half="x"):
 
     fxyz = np.array(np.meshgrid(fz,fy,fx, indexing='ij')).reshape(3,-1).T[:,[2,1,0]]
     kgrid = fxyz[filter_func(fxyz)]
-    
+
     return kgrid
 
 def gen_gvecs(kgrid, kvec, basis, encut):
@@ -116,8 +120,8 @@ def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x", norm=Tru
             tmp = expand_gamma_wav(phi, plane_gvecs)
             phi = fft.irfftn(tmp, s=grid, norm = "ortho") # fourier transform along z
     else:
-        phi = fft.ifftn(phi, norm = "ortho")
-    
+        phi = ifftn(phi, norm = "ortho")
+
     if norm:
         phi /= np.linalg.norm(phi)
     return phi
@@ -125,7 +129,7 @@ def to_real_wave(coeffs, grid_size, gvecs, gamma=False, gamma_half="x", norm=Tru
 def meshgrid(x,y,z):
     """
     Generates a 3D meshgrid of the given x,y,z vectors
-    
+
     Input:
     x, y, z: 1D numpy arrays
     """
@@ -135,7 +139,7 @@ def meshgrid(x,y,z):
 def expand_gamma_wav(buffer, xyz):
     """
     Reverses the gamma-compression of the buffer, by mirroring in provided g-vectors.
-    
+
     Input:
     buffer: 3D numpy array of complex numbers, containing gamma-compressed wavefunction coefficients in the positive half-space
     xyz: list of g-vectors for the gamma-compressed (negative) half-space. A Nx3 numpy array of integers.
@@ -145,22 +149,22 @@ def expand_gamma_wav(buffer, xyz):
     buffer /= np.sqrt(2)
     buffer[0,0,0] *= np.sqrt(2)
     return buffer
-    
+
 def expand_gamma_coeffs(coeffs, std_gvecs, gam_gvecs, buffer=None):
     """
     Expands the gamma-compressed coefficients to the full set of coefficients, using provided g-vectors.
-    
+
     Input:
     coeffs: 3D numpy array of complex numbers, containing gamma-compressed wavefunction coefficients
     std_gvecs: g-vectors for the full set of coefficients
     gam_gvecs: g-vectors for the gamma-compressed coefficients
     (optional) buffer: buffer for intermediate full result. If None, a new buffer is allocated.
-    
+
     Output:
     expanded_coeffs: 3D numpy array of complex numbers, containing the full set of coefficients
-    
+
     """
-    
+
     if buffer is None:
         # allocate a buffer for the total wavefunction coeff buffer
         nx, ny, nz = [np.max(std_gvecs[:,i]) - np.min(std_gvecs[:,i]) for i in range(3)]
@@ -175,26 +179,26 @@ def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half="x"):
     Performs gamma compression of the coefficients, using provided g-vectors.
     This requires for the real-space wavefunction to be real-valued, so a transformation of the wavefunction is performed while retaining the same partial density.
     However, this transformation destroyes the phase information of the wavefunction.
-    
+
     Input:
     coeffs: 3D numpy array of complex numbers, containing the full set of coefficients
     std_gvecs: g-vectors for the full set of coefficients
     gam_gvecs: g-vectors for the gamma-compressed coefficients
     gamma_half: which axis of k-space gamma-compression is done along. Either "x" or "z"
-    
+
     Output:
     result: 3D numpy array of complex numbers, containing the gamma-compressed coefficients
     """
     if not gamma_half == "x" and not gamma_half == "z":
         raise ValueError('Unrecognized gamma-half argument. z or x is supported')
-    
+
     # transform the coefficients to real space
     phi = to_real_wave(coeffs, grid_size, std_gvecs, False, gamma_half, norm=False)
 
     # transform the wavefunction to real-valued function, while attempting to keep the same sign, assuming the imaginary part is small
     # This transformation preserves the partial density of the wavefunction, but destroys the phase information
     phi = np.sqrt(phi.real**2 + phi.imag**2)*np.sign(phi.real)
-    
+
     grid = grid_size * 2
     if gamma_half == "x":
         grid = grid[[2,1,0]]
@@ -209,7 +213,7 @@ def reduce_std_coeffs(coeffs, grid_size, std_gvecs, gam_gvecs, gamma_half="x"):
 
     coeffs = phi[gam_gvecs[:,0], gam_gvecs[:,1], gam_gvecs[:,2]]
     return coeffs
-    
+
 class PlaneWaveFunctions(HttkObject):
     """
     PlaneWaveFunction is a proxy for a collection of wavefunctions contained in output files of plane-wave basis DFT codes.
@@ -252,7 +256,7 @@ class PlaneWaveFunctions(HttkObject):
     def create(cls, file_wrapper = None, rec_pos_func=None, nplws=None, encut=None, cell=None, kpts=None, double_precision=None, eigs=None, occups=None, pwcoeffs=None, is_gamma=None, gamma_half="x"):
         """
         Factory function for the proxy object for wavefunctions file.
-        
+
         Input:
         file_wrapper: File wrapper for the wavefunction file. If None, the wavefunction coefficients must be provided directly
         rec_pos_func: Function taking spin, kpoint and band indices, returning the record position in the binary file. If None, the coefficients must be provided directly
@@ -266,14 +270,14 @@ class PlaneWaveFunctions(HttkObject):
         pwcoeffs: Coefficients of the wavefunctions. Either a nested list of coefficients, or a dictionary with keys (spin, kpt, band) and values as list-like objects of coefficients
         is_gamma: If the wavefunction is gamma-compressed (True) or not (False). If None, the function tries to determine the format from the k-point list and the number of plane-waves
         gamma_half: If the wavefunction is gamma-compressed, which axis of k-space was used for the compression. Either "x" or "z", but defaults to "x". Only relevant if is_gamma is True.
-        
+
         Either file_wrapper and rec_pos_func must be provided, or pwcoeffs must be provided directly. If both are provided, the pwcoeffs are ignored.
-        
+
         """
 
         if is_gamma is not None and not isinstance(is_gamma, bool):
             raise ValueError('Invalid format of gamma boolean in wavefunction creator. Only boolean values accepted')
-    
+
         locs = locals()
         essential_args = dict([(s, locs[s]) for s in ["encut", "cell", "kpts", "eigs", "occups", "nplws"]])
         if any([arg is None for arg in essential_args.values()]):
@@ -325,7 +329,7 @@ class PlaneWaveFunctions(HttkObject):
 
         if file_wrapper is not None and rec_pos_func is not None and double_precision is not None:
             pwcoeffs = defaultdict(None)
-            
+
         elif pwcoeffs is not None:
             # expect one of two formats:
                 # a nested list of all wavefunctions, nested with size according to nspin, nkpts, nbands, in that order
@@ -344,7 +348,7 @@ class PlaneWaveFunctions(HttkObject):
                             dict_pwcoeffs[(i+1,j+1,k+1)] = pwcoeffs[i][j][k]
                 pwcoeffs = dict_pwcoeffs
             elif isinstance(pwcoeffs, dict):
-                assert len(pwcoeffs) == nspins*nkpts*nbands, 'Invalid format of given plane-wave coefficients' 
+                assert len(pwcoeffs) == nspins*nkpts*nbands, 'Invalid format of given plane-wave coefficients'
             else:
                 raise ValueError('Invalid format of given plane-wave coefficients. Do not know what to do with this type {}'.format(type(pwcoeffs)))
         else:
@@ -356,20 +360,20 @@ class PlaneWaveFunctions(HttkObject):
         """
         Getter function for the plane-wave coefficients of the wavefunction.
         The function will check if the coefficients are already cached, and if not, read them from the file.
-        
+
         Input:
         spin: Spin index of the wavefunction (1-indexed)
         kpt: K-point index of the wavefunction (1-indexed)
         band: Band index of the wavefunction (1-indexed)
         cache: If True, the coefficients are cached in the object. If False, the coefficients are not cached and read from the file every time.
-        
+
         Output:
         coeffs: 3D numpy array of complex numbers, containing the plane-wave coefficients of the wavefunction
         """
         assert 1 <= spin <= self._nspins
         assert 1 <= kpt <= self._nkpts
         assert 1 <= band <= self._nbands
-        
+
         ind = (spin, kpt, band)
         if ind in self.reorder_map:
             ind = self.reorder_map[ind]
@@ -395,13 +399,13 @@ class PlaneWaveFunctions(HttkObject):
             coeffs = np.fromfile(self.file_ref, dtype=type_id, count=array_size)
             return coeffs
         else:
-            raise ValueError('Wavefunction file reference or record position function non-existent. Failed to read file') 
+            raise ValueError('Wavefunction file reference or record position function non-existent. Failed to read file')
 
     def get_gvecs(self, kpt_ind=None, kpt=None, gamma=None, gamma_half=None, kgrid=None, cache=True):
         """
         Getter function for the g-vectors of the wavefunction.
         Can either be used to generate a new set of g-vectors, or to retrieve a cached set of g-vectors for the current object.
-        
+
         Input:
         kpt_ind: K-point index of the wavefunction (1-indexed)
         kpt: K-point vector of the wavefunction (3D numpy array), if kpt_ind is not provided
@@ -412,50 +416,50 @@ class PlaneWaveFunctions(HttkObject):
         if kpt_ind is not None:
             assert 1 <= kpt_ind <= self._nkpts
             kpt = self.kpts[kpt_ind - 1]
-        
+
         if kpt is None:
             raise ValueError("Generation of g-vectors requires a k-point, None provided")
-        
-        
+
+
         if gamma is None:
             gamma = self._is_gamma
         if gamma_half is None:
             gamma_half = self._gamma_half
-        
+
         if gamma != self._is_gamma or gamma_half != self._gamma_half or kgrid is not None:
             cache = False
-        
+
         ### check if g-vectors are already cached
         if cache:
             immut_kpt = FracVector.create(tuple(kpt))
             if immut_kpt in self.gvecs:
                 return self.gvecs[immut_kpt]
-       
+
         if kgrid is None:
             kgrid = gen_kgrid(self.kgrid_size, gamma, gamma_half)
         gvecs = gen_gvecs(kgrid, kpt, self.cell.basis, self._encut)
-            
+
         if cache:
-            self.gvecs[immut_kpt] = gvecs 
+            self.gvecs[immut_kpt] = gvecs
         return gvecs
 
     def get_wavr(self, spin, kpt, band, norm=True):
         """
         Getter function for the real-space form of the wavefunction at given indices.
-        
+
         Input:
         spin: Spin index of the wavefunction (1-indexed)
         kpt: K-point index of the wavefunction (1-indexed)
         band: Band index of the wavefunction (1-indexed)
         norm: If True, the wavefunction is normalized to unit length. Otherwise, the wavefunction is transformed as found in the WAVECAR.
-        
+
         Output:
         real_space_wave: 3D numpy array of complex numbers, containing the real-space form of the wavefunction
         """
         assert 1 <= spin <= self._nspins
         assert 1 <= kpt <= self._nkpts
         assert 1 <= band <= self._nbands
-        
+
         plane_wave = self.get_plws(spin, kpt, band)
         gvecs = self.get_gvecs(kpt_ind=kpt)
         real_space_wave = to_real_wave(plane_wave, self.kgrid_size, gvecs=gvecs, gamma=self._is_gamma, gamma_half=self._gamma_half, norm=norm)
@@ -490,7 +494,7 @@ class PlaneWaveFunctions(HttkObject):
         if ind in self.reorder_map:
             ind = self.reorder_map[ind]
         return self.occups[ind[0]-1, ind[1]-1, ind[2]-1]
-    
+
     @property
     def nbands(self):
         """
@@ -525,7 +529,7 @@ class PlaneWaveFunctions(HttkObject):
             return None
         else:
             return self._gamma_half
-    
+
     @property
     def nplanewaves(self):
         """
@@ -538,7 +542,7 @@ class PlaneWaveFunctions(HttkObject):
         Returns the energy cutoff for the plane-wave basis set.
         """
         return self._encut
-    
+
     @property
     def kpoints(self):
         """
@@ -548,7 +552,7 @@ class PlaneWaveFunctions(HttkObject):
 
     def copy(self, spins=None, ikpts=None, bands=None, file_ref=None, format=None, gamma_half='x'):
         """
-        
+
         """
         if bands is None:
             bands = np.arange(self._nbands) + 1
@@ -556,7 +560,7 @@ class PlaneWaveFunctions(HttkObject):
             assert len(bands) > 0, 'Empty band list provided'
             bands = np.array(bands)
             assert ((1 <= bands) & (bands <= self._nbands)).all(), 'Provided bands out of bounds of %d and %d' % (1, self._nbands)
-        
+
         if ikpts is None:
             ikpts = np.arange(self._nkpts) + 1
             kpts = self.kpts
@@ -624,7 +628,5 @@ class PlaneWaveFunctions(HttkObject):
             name_wrapper = IoAdapterFilename.use(file_ref)
             write_wavecar(name_wrapper, self, bands=bands, spins=spins, ikpts=ikpts, format=format, gamma_half=gamma_half)
             new_wavefuncs = read_wavecar(name_wrapper)
-        
-        return new_wavefuncs
 
-    
+        return new_wavefuncs
