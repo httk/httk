@@ -81,6 +81,8 @@ for root, d, files in os.walk(httk_src_dir):
                 else:
                     test_importers += [fullname]
 
+ignore_list = []
+                    
 def function_factory(program):
     def exec_func(slf):
         execute(slf,program)
@@ -91,6 +93,10 @@ for program in test_programs:
     program_path = os.path.dirname(program)
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_src_dir)
+    
+    if rel_program in ignore_list:
+        continue
+    
     program_name, ext = os.path.splitext(rel_program)
     program_name = program_name.replace('/','_')
     setattr(TestHttkSrcInline,'test_'+program_name,exec_func)
@@ -100,6 +106,10 @@ for program in test_importers:
     program_path = os.path.dirname(program)
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_src_dir)
+    
+    if rel_program in ignore_list:
+        continue
+    
     program_name, ext = os.path.splitext(rel_program)
     program_name = program_name.replace('/','_')
     setattr(TestHttkSrcInline,'test_IMPORT_'+program_name,exec_func)

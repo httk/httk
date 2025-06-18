@@ -25,7 +25,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os, unittest, subprocess, argparse, fnmatch
+import os, sys, unittest, subprocess, argparse, fnmatch
 
 debug_mode=False
 
@@ -69,7 +69,7 @@ def function_factory(program):
         execute(slf,program)
     return exec_func
 
-ignore_programs = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warning
+ignore_list = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warning
                    '2_visualization/2_ase_visualizer.py', # Ase visualizer stops forever waiting for user input
                    '6_website/4_search_app/run_as_app.py', # The qt apps don't work that well in testing
                    '6_website/5_widgets/run_as_app.py', # The qt apps don't work that well in testing
@@ -82,10 +82,13 @@ ignore_programs = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warn
                   ]
 
 if 'HTTK_TEST_HEADLESS' in os.environ and os.environ['HTTK_TEST_HEADLESS'] not in ["", "0"]:
-    ignore_programs += ['1_simple_things/2_build_supercell.py',
+    ignore_list += ['1_simple_things/2_build_supercell.py',
                         '2_visualization/1_structure_visualizer.py',
                         ]
 
+if sys.version_info[0] <= 2:
+    ignore_list += [ '8_wavefunctions/3_convert_wavecar.py' ] # Wavecar reader is not Python2 compatible
+    
 for program in test_programs:
 
     exec_func = function_factory(program)
@@ -93,7 +96,7 @@ for program in test_programs:
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_examples_dir)
 
-    if rel_program in ignore_programs:
+    if rel_program in ignore_list:
         continue
 
     program_name, ext = os.path.splitext(rel_program)
