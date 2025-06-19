@@ -21,14 +21,16 @@ httk.cfg:
 # make init_all_tox_venvs: use tox to init all uv environments defined in tox
 
 venv ?= py310
+venv_reqs_prefix := $(if $(filter py27,$(venv)),py27,)
 
+# init_conda_venv works with venv=py27, as well as py38, py39, ...
 init_conda_venv:
-	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "requirements.txt"
+	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install pytest -r "$(venv_reqs_prefix)requirements.txt"
 	echo "Activate this environment with:"
 	echo "  conda activate \".venvs/conda/$(venv)\""
 
 init_uv_venv:
-	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "requirements.txt"
+	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "$(venv_reqs_prefix)requirements.txt"
 	echo "Activate this environment with:"
 	echo "  source \".venvs/uv/$(venv)/bin/activate\""
 
