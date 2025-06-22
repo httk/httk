@@ -112,10 +112,10 @@ class Code(HttkObject):
 class CodeTag(HttkObject):
 
     @httk_typed_init({'code': Code, 'tag': str, 'value': str},
-                     index=['code', 'tag', ('tag', 'value'), ('structure', 'tag', 'value')], skip=['hexhash'])
-    def __init__(self, structure, tag, value):
+                     index=['code', 'tag', ('tag', 'value'), ('code', 'tag', 'value')], skip=['hexhash'])
+    def __init__(self, code, tag, value):
         self.tag = tag
-        self.structure = structure
+        self.code = code
         self.value = value
 
     def __str__(self):

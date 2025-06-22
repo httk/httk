@@ -184,8 +184,6 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
-        print("GET request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_get_request))
-
     def do_POST(self):
 
         starttime_post_request = time.time()

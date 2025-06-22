@@ -31,10 +31,8 @@ class RenderRst(object):
         with codecs.open(self.filename, 'r', encoding='utf-8') as f:
             self.source = f.read()
 
-        try:
-            from docutils.core import publish_parts, publish_doctree
-        except ImportError:
-            raise Exception("Missing docutils python modules.")
+        from httk.external.docutils_ext import docutils
+        from docutils.core import publish_parts, publish_doctree
 
         self.publish_parts = publish_parts
         self.publish_doctree = publish_doctree

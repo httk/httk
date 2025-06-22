@@ -18,7 +18,6 @@
 from __future__ import print_function
 
 import sys, collections, traceback, bz2
-
 import Queue as queue
 
 unicode_type=unicode # noqa: F821
@@ -51,6 +50,9 @@ def is_string(s):
 
 def bz2open(filename, mode, *args):
     return bz2.BZ2File(filename, mode, *args)
+
+def zstdopen(filename, mode, *args):
+    raise Exception("Cannot open .zst file: only supported in Python 3")
 
 def which(executable):
     import distutils.spawn

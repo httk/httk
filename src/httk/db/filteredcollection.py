@@ -356,13 +356,12 @@ class FCMultiDict(FilteredCollection):
 # atexit.register(sqlite_close_all)
 ###############################################################
 
-
 def instantiate_from_store(classobj, store, id):
     types = classobj.types()
     output = store.retrieve(types['name'], types, id)
     args = types['init_keydict'].keys()
     calldict = {}
-    #print("ARGS",args, output, id)
+    # print("ARGS", args, output, id)
     for arg in args:
         try:
             calldict[arg] = output[arg]
@@ -547,6 +546,10 @@ class FCSqlite(FilteredCollection):
                 yield (entry, headers)
         else:
             for entry in cursor:
+                # DuckDB's cursor does not (yet) implement __iter__,
+                # so we have to work around that:
+                if entry[0] is None:
+                    continue
                 entry = list(entry)
                 for replace in mustreplace:
                     entry[replace[0]] = instantiate_from_store(replace[1], self.store, entry[replace[0]])

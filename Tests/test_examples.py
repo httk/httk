@@ -25,9 +25,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os, sys, unittest, subprocess, argparse, fnmatch
+import os, sys, re, unittest, subprocess, argparse, fnmatch
 
-debug_mode=False
+debug_mode = False
 
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 httk_examples_dir = os.path.join(top,'Examples')
@@ -39,6 +39,21 @@ def run(command,args=[]):
     returncode = popen.returncode
     return out, err, returncode
 
+exec_filters = []
+
+if sys.version_info < (3,):
+    # Filter out pymatgen deprecation warning for python2. Remove this when we go python3-only.
+    exec_filters += [
+      re.compile(
+          r"^Pymatgen will drop Py2k support from v2019\.1\.1\. Pls consult the documentation.*\nat https://www\.pymatgen\.org for more details\.\n",
+        re.MULTILINE
+       ),
+      re.compile(
+        r"^.*pymatgen/__init__.py:.*: UserWarning:.*\n *at https://www\.pymatgen\.org for more details.*\n",
+        re.MULTILINE
+       ),        
+    ]
+
 def execute(self, command, *args):
     oldpwd = os.getcwd()
     try:
@@ -49,6 +64,8 @@ def execute(self, command, *args):
             print("out: "+str(out))
             print("err: "+str(err))
             print("returncode: "+str(returncode))
+        for f in exec_filters:
+            err = f.sub("", err)            
         self.assertTrue(len(err.strip())==0, msg=err)
         self.assertTrue(returncode==0, "Example execution returned non-zero exit code")
     finally:
@@ -69,7 +86,8 @@ def function_factory(program):
         execute(slf,program)
     return exec_func
 
-ignore_list = ['1_simple_things/6_write_cif.py', # Need to fix symmetry warning
+ignore_list = [
+                   '1_simple_things/6_write_cif.py', # Need to fix symmetry warning
                    '2_visualization/2_ase_visualizer.py', # Ase visualizer stops forever waiting for user input
                    '6_website/4_search_app/run_as_app.py', # The qt apps don't work that well in testing
                    '6_website/5_widgets/run_as_app.py', # The qt apps don't work that well in testing
@@ -87,7 +105,10 @@ if 'HTTK_TEST_HEADLESS' in os.environ and os.environ['HTTK_TEST_HEADLESS'] not i
                         ]
 
 if sys.version_info[0] <= 2:
-    ignore_list += [ '8_wavefunctions/3_convert_wavecar.py' ] # Wavecar reader is not Python2 compatible
+    ignore_list += [ '8_wavefunctions/3_convert_wavecar.py',         # Only Python 3 compatible
+                     '9_duckdb/1_make_duckdb_database.py',           # No duckdb for Python 2.7
+                     '9_duckdb/4_analyze_database_using_python.py',  # No duckdb for Python 2.7
+                    ] 
     
 for program in test_programs:
 

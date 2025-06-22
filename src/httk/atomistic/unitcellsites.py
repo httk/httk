@@ -15,12 +15,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from httk.core import HttkObject, FracVector
+from httk.core.httkobject import HttkObject, httk_typed_init
+from httk.core.vectors import FracVector
 from httk.core.basic import is_sequence
 from httk.atomistic.cell import Cell
 from httk.atomistic.spacegroup import Spacegroup
 from httk.atomistic.sitesutils import *
-from httk.core.httkobject import HttkObject, httk_typed_init
 from httk.atomistic.sites import Sites
 
 

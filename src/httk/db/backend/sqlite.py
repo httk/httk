@@ -28,7 +28,7 @@ from httk.core import reraise_from
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
-#database_debug = True
+# database_debug = True
 database_debug_slow = False
 if 'DATABASE_DEBUG_SLOW' in os.environ:
     database_debug_slow = True
@@ -77,7 +77,7 @@ class Sqlite(object):
 
         def execute(self, sql, values=[]):
             if database_debug:
-                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values), end="", file=sys.stderr)
+                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values) + "\n", end="", file=sys.stderr)
             if database_debug_slow:
                 time1 = time.time()
             try:

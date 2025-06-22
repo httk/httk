@@ -21,35 +21,36 @@ httk.cfg:
 # make init_tox_venv venv=py312: use tox-uv to init the selected uv environment
 #
 # make init_all_tox_venvs: use tox to init all uv environments defined in tox
+#
+# Note: the uv environments force install of pyside6, because tkinter does not work
+# in the standalone Python used by uv
 
 default_python = py310
 venv ?= py310
-venv_reqs_prefix := $(if $(filter py27,$(venv)),py27,)
 
 init_default_venv:
-	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(default_python) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/default" && uv pip install --python ".venvs/uv/default/bin/python" -r "requirements.txt" -r "requirements-dev.txt"
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(default_python) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/default" && uv pip install --python ".venvs/uv/default/bin/python" -r "requirements.txt" -r "requirements-dev.txt" pyside6
 	ln -nsf .venvs/uv/default .venv
 	echo "Activate this environment with:"
 	echo "  source \".venv/bin/activate\""
 
-# init_conda_venv works with venv=py27, as well as py38, py39, ...
 init_conda_venv:
-	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "$(venv_reqs_prefix)requirements.txt" -r "$(venv_reqs_prefix)requirements-dev.txt"
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "requirements.txt" -r "requirements-dev.txt"
 	echo "Activate this environment with:"
 	echo "  conda activate \".venvs/conda/$(venv)\""
 
 # init_uv_venv only works with uv-supported versions of Python: py38, py39, ...
 init_uv_venv:
-	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "$(venv_reqs_prefix)requirements.txt" -r "$(venv_reqs_prefix)requirements-dev.txt"
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "requirements.txt" -r "requirements-dev.txt" pyside6
 	echo "Activate this environment with:"
 	echo "  source \".venvs/uv/$(venv)/bin/activate\""
 
 # tox uses the tox-uv plugin, so this should mostly do the same as init_uv_venv
 init_tox_venv:
-	tox --notest -e $(venv)
+	tox --notest -r -e $(venv)
 
 init_all_tox_venvs:
-	tox --notest
+	tox --notest -r
 
 ##############################
 ## Tests
@@ -81,6 +82,7 @@ init_all_tox_venvs:
 HTTK_TEST_TYPE ?= all
 
 tox:
+	rm -rf .tox
 	tox
 
 ci: flake8
@@ -96,38 +98,8 @@ pytests:
 	echo "Running pytest with current default python, expecting supported Python 3 version"
 	(cd Tests; py.test)
 
-unittests2:
-	echo "Running pytest with current default python, expecting supported Python 2 version"
-	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 python $(HTTK_TEST_TYPE).py)
-
-pytests2:
-	echo "Running pytest with default python, expecting Python 2"
-	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 py.test)
-
-unittests_autopy27_conda:
-	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running unittests"
-	type -t deactivate 1>/dev/null && deactivate; \
-	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
-        mkdir -p .venvs/conda/; \
-	test ! -e .venvs/conda/py27 && \
-	  conda create -p .venvs/conda/py27 -y python=2.7 tox; \
-	conda activate .venvs/conda/py27; \
-	python -m pip install -r py27requirements.txt; \
-	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 python $(HTTK_TEST_TYPE).py)
-
-pytests_autopy27_conda:
-	echo "Using conda to install Python 2.7 into .venvs/conda/py27, and then running pytest"
-	type -t deactivate 1>/dev/null && deactivate; \
-	eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)"; \
-        mkdir -p .venvs/conda/; \
-	test ! -e .venvs/conda/py27 && \
-	  conda create -p .venvs/conda/py27 -y python=2.7 tox; \
-	conda activate .venvs/conda/py27; \
-	python -m pip install -r py27requirements.txt; \
-	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 py.test)
-
 flake8:
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py,.tox,.venv,.venvs"
+	flake8 . --count --select=E9,F63,F7,F82 --ignore=F824 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py,.tox,.venv,.venvs"
 
 validate_pep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r src/ > /dev/null
@@ -136,6 +108,25 @@ validate_pep8:
 
 
 .PHONY: tox tests unittests pytests unittests2 pytests2 unittests_autopy27_conda pytests_autopy27_conda
+
+##############################
+## python 2.7 support 
+##############################
+# Deprecated; will be removed in next major release of httk
+# Note: duckdb doesn't work in Python3
+
+init_conda_venv27:
+	type -t deactivate 1>/dev/null && deactivate; eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/py27" "python=2.7" && conda activate ".venvs/conda/py27" && python -m pip install -r py27requirements.txt -r py27requirements-dev.txt
+	echo "Activate this environment with:"
+	echo "  conda activate \".venvs/conda/py27\""
+
+unittests2:
+	echo "Running pytest with current default python, expecting supported Python 2 version"
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 python $(HTTK_TEST_TYPE).py)
+
+pytests2:
+	echo "Running pytest with default python, expecting Python 2"
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 py.test)
 
 ##############################
 ## Code cleanup
@@ -165,6 +156,10 @@ clean:
 	rm -f httk_*.md5
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
+	rm -rf .tox
+	rm src/httk/core/database.sqlite
+	rm -rf .pytest_cache
+	find . -name "__pycache__" -print0 | xargs -0 rm -rf
 
 .PHONY: clean
 

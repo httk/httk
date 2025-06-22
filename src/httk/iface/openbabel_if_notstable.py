@@ -38,6 +38,7 @@ def readstruct(ioa, struct, importers=None):
 
         if importer == 'ase':
             try:
+                from httk.external.ase_ext import ase
                 import ase.io
                 atoms = ase.io.read(fileadapter.filename_open_workaround())
                 species = atoms.get_atomic_numbers()
@@ -51,8 +52,9 @@ def readstruct(ioa, struct, importers=None):
 
         elif importer == 'openbabel':
             try:
+                from httk.external.openbabel_ext import openbabel
                 import openbabel
-
+    
                 file = fileadapter.file
                 filename = fileadapter.filename
 
