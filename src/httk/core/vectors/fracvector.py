@@ -1409,8 +1409,38 @@ def tuple_eye(dims, onepos=0):
 #SOFTWARE.
 
 
+def unittests():
+    import math
 
-def main():
+    data1 = [['8.04', '0.0', '0.0'], ['0.0', '3.72', '0.0'], ['0.0', '0.0', '7.38']]
+    data2 = [[804, 0, 0], [0, 372, 0], [0, 0, 738]]
+
+    fv1 = FracVector.create(data2,100)
+    fv2 = FracVector.create(data1)
+    cmpfv = FracVector.create(((402, 0, 0), (0, 186, 0), (0, 0, 369)),50)
+
+    print(fv1)
+    assert(fv1 == cmpfv)
+    
+    print(fv2)
+    assert(fv2 == cmpfv)
+
+    print("===",any_to_fraction('8.04'),any_to_fraction('3.72'),any_to_fraction('7.38'))
+    data3 = FracVector.create([[fractions.Fraction(185,23), 0, 0], [0, fractions.Fraction(67,18), 0], [0, 0, fractions.Fraction(59,8)]])
+    print(data3)
+    cmpfv = FracVector.create(((13320, 0, 0), (0, 6164, 0), (0, 0, 12213)),1656)
+    assert(data3 == cmpfv)
+    
+    # Regression testing, issue #60
+    fv1r = fv1.reciprocal()
+    fv1rcheck = FracVector(((3431700, 0, 0), (0, 7416900, 0), (0, 0, 3738600)),27590868)
+    print(fv1r)
+    assert(fv1r == fv1rcheck)
+
+    exit(0)
+
+
+def other_tests():
     import math
 
     data1 = [['8.04', '0.0', '0.0'], ['0.0', '3.72', '0.0'], ['0.0', '0.0', '7.38']]
@@ -1530,4 +1560,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    unittests()
