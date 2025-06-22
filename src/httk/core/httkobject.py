@@ -127,9 +127,9 @@ class HttkObject(object):
     def new_from(cls, other):
         method = "from_"+other.__class__.__name__
         if hasattr(cls, method):
-            return getattr(self, method)(other)
+            return getattr(cls, method)(other)
         method = "to_"+type.__name__
-        if hasattr(self, method):
+        if hasattr(cls, method):
             return getattr(other, method)()
 
     @classmethod

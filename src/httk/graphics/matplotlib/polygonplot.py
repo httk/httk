@@ -17,6 +17,8 @@
 #
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
+from math import atan, pi
+
 class PolygonPlot(object):
 
     def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three', 'four', 'five'), sides=3,
@@ -54,9 +56,9 @@ class PolygonPlot(object):
             x = self.basis[i, 0]
             y = self.basis[i, 1]
             if rotate_labels:
-                angle = 180*arctan(y/x)/pi + 90
+                angle = 180*atan(y/x)/pi + 90
                 if angle > 90 and angle <= 270:
-                    angle = mod(angle + 180, 360)
+                    angle = (angle + 180) % 360
             else:
                 angle = 0
             ax.text(
@@ -134,7 +136,7 @@ if __name__ == '__main__':
         pylab.array([0, k, 0, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, k, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, 0, k, 0]) + pylab.rand(s, 5),
-        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),        
+        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),
     ))
     color = pylab.array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s + [[1, 1, 0]]*s + [[0, 1, 1]]*s)
 
@@ -148,8 +150,8 @@ if __name__ == '__main__':
         s=2,
         alpha=0.5,
         color=color
-    )    
-    
+    )
+
     pylab.show(block=False)
     pylab.pause(3)
     pylab.close()

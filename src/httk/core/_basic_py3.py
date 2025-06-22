@@ -15,13 +15,14 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, collections, queue, bz2
-import io
+import io, sys, collections, queue, bz2
 
 try:
-    import pyzstd
-except:
-    pass
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
+from shutil import which
 
 unicode_type = str
 
@@ -60,6 +61,7 @@ def bz2open(filename, mode, *args):
         return bz2.BZ2File(filename, mode, *args)
 
 def zstdopen(filename, mode, *args):
+    import pyzstd
     if not 'b' in mode and not 't' in mode:
         mode += 't'
 

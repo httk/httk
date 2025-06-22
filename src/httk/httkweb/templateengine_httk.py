@@ -34,7 +34,7 @@ if sys.version[0] == "2":
     # escape funtion instead.
 
     from cgi import escape
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     from html import escape
     unicode_type=str
@@ -57,12 +57,14 @@ class HttkTemplateFormatter(string.Formatter):
                 new_kwargs['items'] = [new_kwargs['item']] + new_kwargs['items'] if 'items' in new_kwargs else []
             if 'index' in new_kwargs:
                 new_kwargs['indices'] = [new_kwargs['index']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
-            if 'index1' in new_kwargs:
+            if 'index1' in new_kwargs: ## TODO: Came from elastic_contants, what is index1?
                 new_kwargs['indices'] = [new_kwargs['index1']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
             def update_and_return(update):
                 new_kwargs.update(update)
                 return new_kwargs
-            if type(value) is dict:
+            if value is None:
+                raise Exception("HttkTemplateFormatter: asked to loop over None for spec: "+str(spec))
+            elif type(value) is dict:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in value])
             else:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in range(len(value))])
@@ -83,7 +85,14 @@ class HttkTemplateFormatter(string.Formatter):
                             callargs[i] = ast.literal_eval(callargs[i])
                     except ValueError:
                         pass
-            result = value(*callargs[1:])
+            try:
+                result = value(*callargs[1:])
+            except Exception as e:
+                if '::' in spec:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e)+ ". Note: string to render contains '::', which could have been caused by an ':item:' with an item equal the empty string")
+                else:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e))
+
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')

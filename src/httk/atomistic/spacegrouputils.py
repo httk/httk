@@ -317,7 +317,6 @@ def filter_sf(sf, halls=None):
 
 
 def filter_symops(symops, halls=None):
-    global symopsindex
 
     if halls is None:
         halls = spacegroupdata.keys()
@@ -605,7 +604,7 @@ def reduce_by_symops(coordgroups, symopvs, hall_symbol):
     return reduced_coordgroups, wyckoff_symbols, multiplicities
 
 
-def trivial_symmetry_reduce(coordgroups):
+def trivial_symmetry_reduce(coordgroups, hall_symbol = None):
     """
     Looks for 'trivial' ways to reduce the coordinates in the given coordgroups by a standard set of symmetry operations.
     This is not a symmetry finder (and it is not intended to be), but for a standard primitive cell taken from a standard
@@ -613,26 +612,38 @@ def trivial_symmetry_reduce(coordgroups):
     """
     # TODO: Actually implement, instead of this placeholder that just gives up and returns P 1
 
-    symops = []
-    symopvs = []
-    for symop in all_symops:
-        symopv = FracVector.create(symop)
-        if check_symop(coordgroups, symopv):
-            symops += [all_symops[symop]]
-            symopvs += [symopv]
+    if hall_symbol is None:
+        symops = []
+        symopvs = []
+        for symop in all_symops:
+            symopv = FracVector.create(symop)
+            if check_symop(coordgroups, symopv):
+                symops += [all_symops[symop]]
+                symopvs += [symopv]
 
-    shash = symopshash(symops)
-    if shash in symops_hash_index:
-        hall_symbol = symops_hash_index[shash]
-        rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
+        shash = symopshash(symops)
+        if shash in symops_hash_index:
+            hall_symbol = symops_hash_index[shash]
+            rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
+            return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+
+        rc_reduced_coordgroups = coordgroups
+        hall_symbol = 'P 1'
+        wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
+        multiplicities = [1]*sum([len(x) for x in coordgroups])
+
         return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
 
-    rc_reduced_coordgroups = coordgroups
-    hall_symbol = 'P 1'
-    wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
-    multiplicities = [1]*sum([len(x) for x in coordgroups])
+    elif hall_symbol == 'P 1': # shouldnt reduce_by_symops be doing exactly this for P1 ?
+        rc_reduced_coordgroups = coordgroups
+        wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
+        multiplicities = [1]*sum([len(x) for x in coordgroups])
+        return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
 
-    return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+    else:
+        symopvs=get_symops(hall_symbol)
+        rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
+        return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
 
 
 def main():

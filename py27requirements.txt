@@ -1,9 +1,14 @@
 pytest
 matplotlib
-numpy
-docutils
+numpy==1.16.6
 ase==3.17.0
-monty==2.0.7
 pymatgen==2018.12.12
-web.py
-duckdb # python-duckdb in conda-forge
+monty==1.0.5
+docutils
+web.py==0.51
+markdown
+python-markdown-math
+pyyaml
+palettable==3.3.2
+duckdb
+

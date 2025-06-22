@@ -36,8 +36,6 @@ def parse_optimade_filter(filter_string, verbosity=0):
 
 
 def parse_optimade_filter_raw(filter_string, verbosity=0):
-    global ls
-
     if ls is None:
         initialize_optimade_parser()
 

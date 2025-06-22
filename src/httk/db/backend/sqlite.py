@@ -37,20 +37,17 @@ if 'DATABASE_DEBUG' in os.environ:
 
 
 def db_open(filename):
-    global sqliteconnections
     connection = sqlite.connect(filename)
     sqliteconnections.add(connection)
     return connection
 
 
 def db_close(connection):
-    global sqliteconnections
     sqliteconnections.remove(connection)
     connection.close()
 
 
 def db_sqlite_close_all():
-    global sqliteconnections
     for connection in sqliteconnections:
         connection.close()
 
@@ -79,7 +76,6 @@ class Sqlite(object):
             self.db = db
 
         def execute(self, sql, values=[]):
-            global database_debug
             if database_debug:
                 print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values) + "\n", end="", file=sys.stderr)
             if database_debug_slow:

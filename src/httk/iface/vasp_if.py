@@ -15,9 +15,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, shutil, math
-import re
-import inspect
+from __future__ import print_function
+
+import os, shutil, math
 
 import httk
 from httk import config
@@ -26,14 +26,11 @@ from httk.atomistic.data import periodictable
 from httk.core.ioadapters import cleveropen, IoAdapterFileReader
 from httk.core import *
 from httk.core.basic import mkdir_p, micro_pyawk
-from httk.atomistic import Structure
+from httk.atomistic import Structure, Cell, PlaneWaveFunctions
+from httk.atomistic.wavefunction import expand_gamma_coeffs, reduce_std_coeffs, gen_kgrid
 from httk.atomistic.structureutils import cartesian_to_reduced
 
-
-if sys.version_info[0] == 3:
-    import configparser
-else:
-    import ConfigParser as configparser
+import struct
 
 def get_pseudopotential(species, poscarspath=None):
     if poscarspath is None:
@@ -234,7 +231,7 @@ def poscar_to_strs(fio, included_decimals=''):
 
     return (cell, scale, vol, coords, coords_reduced, counts, occupations, comment)
 
-def poscar_to_structure(f, included_decimals=''):
+def poscar_to_structure(f, included_decimals='', structure_class=Structure):
     cell, scale, volume, coords, coords_reduced, counts, occupations, comment = poscar_to_strs(f, included_decimals)
 
     frac_cell = FracVector.create(cell, simplify=True)
@@ -255,7 +252,7 @@ def poscar_to_structure(f, included_decimals=''):
     for occupation in occupations:
         newoccupations.append(periodictable.atomic_number(occupation))
 
-    struct = Structure.create(uc_basis=frac_cell, uc_volume=volume, uc_scale=scale,
+    struct = structure_class.create(uc_basis=frac_cell, uc_volume=volume, uc_scale=scale,
             uc_reduced_coords=frac_coords, uc_counts=counts,
             assignments=newoccupations, tags={'comment': comment}, periodicity=0)
 
@@ -422,6 +419,275 @@ def prepare_single_run(dirpath, struct, poscarspath=None, template='t:/vasp/sing
     apply_templates(template, dirpath, envglobals=data, mkdir=False)
 
 
+def read_wavecar(file, gamma_mode='x', wavefunc_prec = None):
+    """
+    Reads the information in a VASP WAVECAR file into a PlaneWaveFunctions object.
+
+    Input
+    file: File-like object or io adapter pointing to WAVECAR file
+    gamma_mode: Reduction axis in the gamma-point format
+
+    Return
+    PlaneWaveObject acting as proxy for the WAVECAR file
+
+    """
+    import numpy as np
+    file = IoAdapterFilename.use(file)
+    filename = file.filename
+    file = httk.core.ioadapters.cleveropen(filename, "rb") # make sure to open in byte-mode
+
+    record_len, nspin, rtag, _ = map(int, struct.unpack('d'*4, file.read(8*4)))
+
+    # determine complex number precision from rtag
+    if wavefunc_prec is None:
+        if rtag == 45200:
+            float_size = 4 # single precision
+        elif rtag == 45210:
+            float_size = 8 # double precision
+        else:
+            raise ValueError("Unknown RTAG value in WAVECAR. Perhaps unsupported version of VASP was used. Specify floating point precision using wavefunc_prec (= {64,128})")
+    else:
+        float_size = wavefunc_prec//16
+
+    file.seek(record_len) # move to second record
+    header = struct.unpack('d'*12, file.read(8*12))
+
+    nkpts = int(header[0])
+    nbands = int(header[1])
+    encut = header[2]
+    cell_nums = header[3:]
+    cell = Cell.create(basis=[[cell_nums[3*j + i] for i in range(3)] for j in range(3)])
+
+    # define function for seeking specific record in WAVECAR
+    def rec_pos(spin, kpt, band, record_length = record_len):
+        assert 1 <= spin <= nspin, "Spin index {} out of range [1,{}]".format(spin, nspin)
+        assert 1 <= kpt <= nkpts, "K-point index {} out of range [1,{}]".format(kpt, nkpts)
+        assert 1 <= band <= nbands, "Band index {} out of range [1,{}]".format(band, nbands)
+
+        # return position at the first plane-wave coefficient:
+        #### two header records
+        #### for s in spin:
+        ####    for k in kpts:
+        ####        header records with k-point planewave metadata eigenvalues and occupations
+        ####        for b in bands:
+        ####            coeffs <--- Record position goes at start of this record
+        return (2 + (spin - 1) * nkpts * (nbands+1) + (kpt - 1) * (nbands + 1) + band) * record_length
+
+    ### Read occupations and eigenvalues
+    eigs = np.zeros((nspin,nkpts,nbands))
+    occups = np.zeros((nspin,nkpts,nbands))
+    nplw_coeffs = [0]*nkpts
+    kpts = [0]*nkpts
+    for spin in range(nspin):
+        for kpt in range(nkpts):
+            seek_pos = rec_pos(spin+1, kpt+1, 1) - record_len # position of spin-kpt header
+            file.seek(seek_pos)
+            nentries = (4+3*nbands)
+            buffer = file.read(8*nentries)
+            record = struct.unpack('d'*nentries, buffer)
+            if spin == 0:
+                # read kpt header info
+                nplw_coeffs[kpt] = int(record[0])
+                kpts[kpt] = record[1:4]
+            eigs[spin, kpt, :] = record[4::3]
+            occups[spin, kpt, :] = record[4+2::3]
+
+    wavefuncs = PlaneWaveFunctions.create(file_wrapper=file, encut=encut, cell=cell, kpts=kpts, eigs=eigs, occups=occups, rec_pos_func=rec_pos, double_precision=(float_size == 8), nplws=nplw_coeffs)
+    return wavefuncs
+
+def write_wavecar(file_wrapper, planewaves, bands=None, spins=None, ikpts=None, format=None, gamma_half="x", keep_records=False):
+    """
+    Writes a PlaneWaveFunctions object to specified file.
+
+    Optional arguments are for writing a subset of the plane-wave object, limiting the new file to certain spin-components, k-points or bands. Writing to gamma format or standard format can be specified, when possible.
+
+    Input
+    file_wrapper: Filename or file object to new file (will be closed and opened in binary read mode if necessary)
+    planewaves: PlaneWaveFunctions object to copy to file
+    spins: Indices of spin components to write, default is all, counting from 1
+    ikpts: Indices of k-points to write, default is all, counting from 1
+    bands: Indices of bands to write, default is all, counting from 1
+    format: Output format. Either 'std' or 'gamma', default is same format as planewaves object
+    gamma_half: If writing to gamma format, change the axis of reduction, either 'z' or 'x'
+    keep_records: If True, the coefficients will be written while keeping their positions in the binary file.
+                If only selection of coeffs are to be written, all other coefficients will be set to zero.
+    """
+
+    import numpy as np # import numpy for faster routines when writing data
+
+    ### Sanitize arguments
+    if not isinstance(planewaves, PlaneWaveFunctions):
+        return None
+
+    if keep_records:
+        band_to_keep = np.ones(planewaves._nbands, dtype=bool)
+        spin_to_keep = np.ones(planewaves._nspins, dtype=bool)
+        kpt_to_keep = np.ones(planewaves._nkpts, dtype=bool)
+        if bands is not None:
+            band_to_keep.fill(False)
+            band_to_keep[np.array(bands)-1] = True
+        if spins is not None:
+            spin_to_keep.fill(False)
+            spin_to_keep[np.array(spins)-1] = True
+        if ikpts is not None:
+            kpt_to_keep.fill(False)
+            kpt_to_keep[np.array(ikpts)-1] = True
+
+    if bands is None or keep_records:
+        bands = np.arange(1, planewaves._nbands+1)
+    else:
+        bands = np.array(bands)
+    if spins is None or keep_records:
+        spins = np.arange(1, planewaves._nspins+1)
+    else:
+        spins = np.array(spins)
+    if ikpts is None or keep_records:
+        ikpts = np.arange(1, planewaves._nkpts+1)
+    else:
+        ikpts = np.array(ikpts)
+
+    assert 1 <= min(spins) and max(spins) <= planewaves._nspins
+    assert 1 <= min(ikpts) and max(ikpts) <= planewaves._nkpts
+    assert 1 <= min(bands) and max(bands) <= planewaves._nbands
+
+    ### Determine conversion settings based on provided format and wavefunctions
+
+    if format == 'gamma' or format == "gam":
+        assert len(ikpts) == 1 and np.allclose(planewaves.kpts[ikpts[0] - 1], np.array([0,0,0])), "Can only write gamma-wavecar at the gamma-point, several k-points or non-gamma point provided"
+        to_gamma = True
+    elif format == 'std':
+        to_gamma = False
+    else:
+        to_gamma = planewaves._is_gamma
+
+    if to_gamma != planewaves._is_gamma:
+        convert = True
+        if to_gamma:
+            gam_half = gamma_half if gamma_half else "x"
+        else:
+            gam_half = planewaves._gamma_half
+    else:
+        convert = False
+
+    # open file for writing
+    filename = IoAdapterFilename.use(file_wrapper)
+    file_wrapper = cleveropen(filename.filename, 'wb')
+
+
+    ### Write header
+    if not planewaves.double_precision:
+        rtag = 45200 # Double-precision vasp tag
+        data_size = 8
+        data_id = np.complex64
+    else:
+        rtag = 45210 # Single-precision vasp tag
+        data_size = 16
+        data_id = np.complex128
+
+    nkpts = len(ikpts)
+    nbands = len(bands)
+    nspins = len(spins)
+    nplws = planewaves._nplws[ikpts-1]
+    max_nplws = max(planewaves._nplws)
+
+    ### Determine variable sizes based on desired conversion
+    if convert:
+        if to_gamma:
+            nplws = [(nplw - 1)//2 + 1 for nplw in nplws]
+            max_nplws = max(nplws)
+        else:
+            nplws = [2*nplw - 1 for nplw in nplws]
+            max_nplws = max(nplws)
+    ## Record should hold at least all wavefunctions and all band+header data
+    record_size = int(max(max_nplws*data_size, (4+nbands*3)*8))
+    nfloats = record_size // 8
+    ncomplex = record_size // data_size
+    float_rec = np.zeros(nfloats, dtype=np.float64)
+    complex_rec = np.zeros(ncomplex, dtype=data_id)
+
+    # top header
+    float_rec[:3] = [record_size, nspins, rtag]
+    float_rec.tofile(file_wrapper)
+
+    # second header
+    cell_nums = [planewaves.cell.basis[i,j].to_float() for i in range(3) for j in range(3)]
+    float_rec[:12] = [nkpts, nbands, planewaves._encut.to_float()] + cell_nums
+    float_rec.tofile(file_wrapper)
+
+    ### Write wavefunctions and wavefunction headers
+    if convert:
+        ## generate k-grid for G-vectors
+        if to_gamma:
+            gam_half = gamma_half if gamma_half else "x"
+        else:
+            gam_half = planewaves._gamma_half
+        gam_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=True, gamma_half=gam_half)
+        std_kgrid = gen_kgrid(planewaves.kgrid_size, gamma=False)
+
+    for s in spins:
+        for ki, k in enumerate(ikpts):
+            ## generate G-vectors for wavefunction conversion
+            if convert:
+                gam_gvecs = planewaves.get_gvecs(kpt=planewaves.kpts[k-1], kgrid=gam_kgrid)
+                std_gvecs = planewaves.get_gvecs(kpt=planewaves.kpts[k-1], kgrid=std_kgrid)
+                nx, ny, nz = [np.max(std_gvecs[:,i]) - np.min(std_gvecs[:,i]) for i in range(3)]
+                wave_buffer = np.zeros((nx, ny, nz), dtype=np.complex128)
+
+
+            float_rec = np.zeros(record_size//8, dtype=np.float64)
+            nwaves = nplws[ki]
+            # write nplws, k-point, eigenvalues and occupations
+            float_rec[0] = nwaves
+            float_rec[1:4] = planewaves.kpts[k-1][:]
+            float_rec[4:4+len(bands)*3:3] = [planewaves.eigenval(s,k,b) for b in bands]
+            float_rec[4+2:4+2+len(bands)*3:3] = [planewaves.occupation(s,k,b) for b in bands]
+            float_rec.tofile(file_wrapper)
+
+            for b in bands:
+                if keep_records and (not band_to_keep[b-1] or not spin_to_keep[s-1] or not kpt_to_keep[ki-1]):
+                    coeffs = np.zeros(record_size, dtype=data_id)
+                else:
+                    coeffs = planewaves.get_plws(s,k,b, cache=False)
+                if convert:
+                    if to_gamma:
+                        coeffs = reduce_std_coeffs(coeffs, planewaves.kgrid_size, std_gvecs, gam_gvecs, gamma_half)
+                    else:
+                        coeffs = expand_gamma_coeffs(coeffs, std_gvecs, gam_gvecs, buffer=wave_buffer)
+
+                complex_rec[:nwaves] = coeffs
+                complex_rec[nwaves:] = 0j
+                complex_rec.tofile(file_wrapper)
+    file_wrapper.close()
+
+def save_vesta(filename, structure, isosurface, cols=10):
+    filename = IoAdapterFilename.use(filename).filename
+    for ext_i, ext in enumerate(["_r.vasp", "_i.vasp"]):
+        ext_name = filename + ext
+        f = IoAdapterFileWriter.use(ext_name).file
+        structure_to_poscar(f, structure, primitive_cell=False)
+
+        iso = isosurface.copy().flatten(order='F')
+        if ext_i == 0:
+            iso = iso.real
+        else:
+            iso = iso.imag
+        shape = isosurface.shape
+        print("\n{} {} {}".format(*shape), file=f)
+        remainder = iso.size % cols
+        rows = iso.size // cols
+        fmt = "%16.8E"
+
+        row_s = [0]*(rows + int(remainder != 0))
+        for i in range(rows):
+            row_s[i] = ' '.join([fmt % v for v in iso[i*cols:(i+1)*cols]])
+        if remainder != 0:
+            row_s[i+1] = ' '.join(map(str, iso[-remainder:]))
+        print("\n".join(row_s) + "\n", file=f)
+        f.close()
+
+
+
+
 class OutcarReader():
 
     def __init__(self, ioa):
@@ -461,8 +727,8 @@ class OutcarReader():
                 ]
 
         results = micro_pyawk(self.ioa, [
-                              ["^ *energy *without *entropy= *([^ ]+) "+
-                               "*energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
+                              [r"^ *energy *without *entropy= *([^ ]+) "+
+                               r"*energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
                               ["FREE ENERGIE", None, set_final],
                               # ["^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
                               ], results, debug=False)

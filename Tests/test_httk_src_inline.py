@@ -25,7 +25,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os, sys, unittest, subprocess, argparse, fnmatch
+import os, sys, re, unittest, subprocess, argparse, fnmatch
 
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 httk_src_dir = os.path.join(top,'src','httk')
@@ -35,11 +35,32 @@ def run(command,args=[]):
     popen = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return popen.communicate()
 
-def execute(self, command, *args):
-    os.chdir(os.path.dirname(command))
-    out,err = run("python",[os.path.join(httk_src_dir,command)]+list(args))
-    self.assertTrue(len(err.strip())==0, msg=err)
+exec_filters = []
 
+if sys.version_info < (3,):
+    # Filter out pymatgen deprecation warning for python2. Remove this when we go python3-only.
+    exec_filters += [
+      re.compile(
+          r"^Pymatgen will drop Py2k support from v2019\.1\.1\. Pls consult the documentation.*\nat https://www\.pymatgen\.org for more details\.\n",
+        re.MULTILINE
+       ),
+      re.compile(
+        r"^.*pymatgen/__init__.py:.*: UserWarning:.*\n *at https://www\.pymatgen\.org for more details.*\n",
+        re.MULTILINE
+       ),        
+    ]
+
+def execute(self, command, *args):
+    oldpwd = os.getcwd()
+    try:
+        os.chdir(os.path.dirname(command))
+        out,err = run("python",[os.path.join(httk_src_dir,command)]+list(args))
+        for f in exec_filters:
+            err = f.sub("", err)
+        self.assertTrue(len(err.strip())==0, msg=err)
+    finally:
+        os.chdir(oldpwd)
+        
 class TestHttkSrcInline(unittest.TestCase):
     pass
 
@@ -64,6 +85,8 @@ for root, d, files in os.walk(httk_src_dir):
                 else:
                     test_importers += [fullname]
 
+ignore_list = []
+                    
 def function_factory(program):
     def exec_func(slf):
         execute(slf,program)
@@ -74,6 +97,10 @@ for program in test_programs:
     program_path = os.path.dirname(program)
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_src_dir)
+    
+    if rel_program in ignore_list:
+        continue
+    
     program_name, ext = os.path.splitext(rel_program)
     program_name = program_name.replace('/','_')
     setattr(TestHttkSrcInline,'test_'+program_name,exec_func)
@@ -83,10 +110,14 @@ for program in test_importers:
     program_path = os.path.dirname(program)
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_src_dir)
+    
+    if rel_program in ignore_list:
+        continue
+    
     program_name, ext = os.path.splitext(rel_program)
     program_name = program_name.replace('/','_')
     setattr(TestHttkSrcInline,'test_IMPORT_'+program_name,exec_func)
-    
+
 
 #############################################################################
 

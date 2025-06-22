@@ -1,8 +1,10 @@
 # General ignores
 *.pyc
+__pycache__/
 .DS_Store
 .project
 .pydevproject
+.vscode
 **/*~
 # Httk specific ignores
 httk.cfg
@@ -34,17 +36,7 @@ src/httk.egg-info
 .pytest_cache
 .tox
 .nvimlog
-Tests/structreading.tmp
-Tests/python_versions/ver2
-Tests/python_versions/ver3
+Tests/tmp
+.venv
+.venvs
 
-.vscode
-Examples/9_duckdb/duckdb
-
-# Standalone Python interpreter related files
-Standalone_python_interpreter/*.sif
-Standalone_python_interpreter/lib
-Standalone_python_interpreter/python
-
-# ctags
-tags

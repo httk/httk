@@ -969,8 +969,12 @@ def get_primitive_basis_transform(hall_symbol):
 #     # Transform to primitive cell
 #     return lattrans
 
-def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
+def transform(structure, transformation, max_search_cells=20, max_atoms=10000, force_hall_symbol = None):
+    """Applies a transformation matrix to the structure
 
+    Args:
+        force_hall_symbol (str, optional): Enforces a supplied hall_symbol.
+    """
     transformation = FracVector.use(transformation).simplify()
     #if transformation.denom != 1:
     #    raise Exception("Structure.transform requires integer transformation matrix")
@@ -985,7 +989,7 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
     #print("SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation)
     total_seek_counts = sum(seek_counts)
     if total_seek_counts > max_atoms:
-        raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
+        raise Exception("Structure.transform: more than "+str(max_atoms)+" needed, given "+str(total_seek_counts)+". Change limit with max_atoms parameter.")
 
     #if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
     #    raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
@@ -1019,6 +1023,12 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
             break
     else:
         raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
+
+
+    if force_hall_symbol:
+        assert isinstance(force_hall_symbol, str), "hall symbol must be a string"
+
+        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments, hall_symbol=force_hall_symbol)
 
     return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 

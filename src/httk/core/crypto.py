@@ -209,8 +209,8 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
 
     if len(excludes) == 0:
         excludes = ['.*~']
-    excludes += ['ht\.manifest\..*', 'ht\.project/keys', 'ht\.project/manifest', 'ht\.project/computers',
-                 'ht\.project/excludes', 'ht\.project/tags', 'ht\.project/references', 'ht\.tmp\..*']
+    excludes += [r'ht\.manifest\..*', r'ht\.project/keys', r'ht\.project/manifest', r'ht\.project/computers',
+                 r'ht\.project/excludes', r'ht\.project/tags', r'ht\.project/references', r'ht\.tmp\..*']
 
     f = open(os.path.join(keydir, 'key1.pub'), "r")
     pubkey = f.readlines()[0].strip()
@@ -222,7 +222,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     for root, unsorteddirs, unsortedfiles in os.walk(keydir, topdown=True, followlinks=False):
         files = sorted(unsortedfiles)
         for filename in files:
-            if filename != 'key1.pub' and re.match(".*\.pub", filename):
+            if filename != 'key1.pub' and re.match(r'.*\.pub', filename):
                 f = open(os.path.join(root, filename), "r")
                 filedata = f.readlines()
                 f.close()

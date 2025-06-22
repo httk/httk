@@ -160,7 +160,7 @@ class Structure(HttkObject):
                rc_reduced_coords=None, rc_cartesian_coords=None,
                rc_reduced_occupationscoords=None, rc_cartesian_occupationscoords=None,
                rc_occupancies=None, rc_counts=None,
-               wyckoff_symbols=[], multiplicities=[],
+               wyckoff_symbols=None, multiplicities=None,
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
                rc_scale=None, rc_scaling=None, rc_volume=None,
 
@@ -378,7 +378,7 @@ class Structure(HttkObject):
             if rc_sites_exception is not None:
                 reraise_from(Exception,"Sites creation raised an exception",rc_sites_exception)
             if rc_cell is not None and rc_sites is not None and hall_symbol is None:
-                reraise_from(Exception,"Spacegroup creation raised an exception",rc_spacegroup_exception)
+                reraise_from(Exception,"Spacegroup creation raised an exception",spacegroup_exception)
             if uc_cell_exception is not None:
                 reraise_from(Exception,"Cell creation raised an exception", uc_cell_exception)
             if uc_sites_exception is not None:
@@ -392,8 +392,18 @@ class Structure(HttkObject):
             other_reps = {}
 
         if (rc_sites is None or rc_cell is None or hall_symbol is None):
-            new = cls.use(uc_rep)
+            transform = get_primitive_to_conventional_basis_transform(uc_rep.uc_basis)
+            newuc = uc_rep.transform(transform)
+            rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities = spacegrouputils.trivial_symmetry_reduce(newuc.uc_reduced_coordgroups,
+                                                                                                                           hall_symbol=hall_symbol)
+            new = cls.create(assignments=newuc.assignments, rc_cell=newuc.uc_cell,
+                              rc_reduced_coordgroups=rc_reduced_coordgroups,
+                              wyckoff_symbols=wyckoff_symbols,
+                              multiplicities=multiplicities,
+                              hall_symbol=hall_symbol)
+
             new._other_reps = other_reps
+
         else:
             new = cls(assignments=assignments, rc_sites=rc_sites, rc_cell=rc_cell, other_reps=other_reps)
 
@@ -471,8 +481,9 @@ class Structure(HttkObject):
             self._other_reps['rc'] = rc_struct
         return self._other_reps['rc']
 
-    def transform(self, matrix, max_search_cells=20, max_atoms=1000):
-        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
+    def transform(self, matrix, max_search_cells=20, max_atoms=5000,force_hall_symbol=None):
+        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms,force_hall_symbol=force_hall_symbol)
+
 
     @httk_typed_property(str)
     def hall_symbol(self):
@@ -602,7 +613,7 @@ class Structure(HttkObject):
 
     @property
     def uc_cartesian_coords(self):
-        return self.uc.uc_sites.get_cartesian_coords
+        return self.uc.uc_cartesian_coords
 
     @property
     def uc_lengths_and_angles(self):
@@ -740,7 +751,7 @@ class Structure(HttkObject):
     @httk_typed_property((bool, 1, 3))
     #TODO: Do we need to rethink the pbc specifier, when cc and pc can have basis vectors in other directions...
     def pbc(self):
-        return list(self.rc_sites.pbc)
+        return self.rc_sites.pbc
 
     def clean(self):
         rc_sites = self.rc_sites.clean()
@@ -865,11 +876,6 @@ class Structure(HttkObject):
     @httk_typed_property(str)
     def element_wyckoff_sequence(self):
         if self.rc_sites.wyckoff_symbols is None:
-            return None
-        # When this object is retrieved from a database, self.wyckoff_symbols
-        # is no longer None, but an empty list. Need additional check for that:
-        elif isinstance(self.rc_sites.wyckoff_symbols, list) and \
-             len(self.rc_sites.wyckoff_symbols) == 0:
             return None
         symbols = []
         for a in self.assignments:
@@ -1018,7 +1024,7 @@ class StructureTag(HttkObject):
         super(StructureTag, self).__init__()
         self.tag = tag
         self.structure = structure
-        self.value = str(value)
+        self.value = value
 
     def __str__(self):
         return "(Tag) "+self.tag+": "+self.value+""
@@ -1033,7 +1039,7 @@ class StructureRef(HttkObject):
         self.reference = reference
 
     def __str__(self):
-        return str(self.reference)
+        return str(self.reference.ref)
 
 
 def main():

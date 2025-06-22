@@ -27,6 +27,10 @@
 # single_job_taskmanager). When all subtasks are finished, the main task is called again,
 # just as with the normal taskmanager.
 #
+# It supports the functionallity of continiuing a run at a chosen step by renameing the 
+# directory ht.run.resume. This will pick up the state of the run before it was terminated 
+# and continue at the step in ht.nextstep.
+#
 # Recommended uses of this simplified taskmanager:
 #
 #  - You are in the process of developing a run script and "just want to run through this
@@ -80,7 +84,11 @@ while [ "$RESULT" -gt 1 -a "$RESULT" -lt 4 ]; do
   if [ -e "$HT_TASK_TOP_DIR/ht_steps" ]; then
       echo "==== Trying to execute ht_steps: $HT_TASK_TOP_DIR/ht_steps $HT_TASK_STEP"
       (
-      mkdir -p "ht.run.$DATE"
+      if [ ! -e "ht.run.resume" ];then
+        mkdir -p "ht.run.$DATE"
+      else
+        mv "ht.run.resume" "ht.run.$DATE"
+      fi
       export HT_TASK_RUN_NAME="ht.run.$DATE"
       cd "ht.run.$DATE"
       export HT_TASK_CURRENT_DIR="$(pwd -P)"

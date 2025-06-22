@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -37,9 +37,9 @@ def readstruct(ioa, struct, importers=None):
     for importer in try_importers:
 
         if importer == 'ase':
-            from httk.external.ase_ext import ase
-            import ase.io
             try:
+                from httk.external.ase_ext import ase
+                import ase.io
                 atoms = ase.io.read(fileadapter.filename_open_workaround())
                 species = atoms.get_atomic_numbers()
                 coords = atoms.get_positions()
@@ -47,30 +47,33 @@ def readstruct(ioa, struct, importers=None):
                 return Structure(basis=basis, coords=coords, species=species)
             except Exception as e:
                 if importers is not None:
+                    info = sys.exc_info()
                     reraise_from(Exception,"Error while trying ase importer: "+str(info[1]), e)
-    
+
         elif importer == 'openbabel':
-            from httk.external.openbabel_ext import openbabel
             try:
+                from httk.external.openbabel_ext import openbabel
+                import openbabel
+    
                 file = fileadapter.file
                 filename = fileadapter.filename
-        
+
                 # Use babel to read data from file
                 obConversion = openbabel.OBConversion()
                 obConversion.SetInAndOutFormats(obConversion.FormatFromExt(fileadapter.filename), obConversion.FindFormat("pdb"))
-    
-                obmol = openbabel.OBMol()    
-                obConversion.ReadString(obmol, file.read())
-                unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))            
-                unitcell.FillUnitCell(obmol)
-    
-                basisvecs = unitcell.GetCellVectors()
-                basis = array([[basisvecs[0].GetX(), basisvecs[0].GetY(), basisvecs[0].GetZ()],
-                               [basisvecs[1].GetX(), basisvecs[1].GetY(), basisvecs[1].GetZ()],
-                               [basisvecs[2].GetX(), basisvecs[2].GetY(), basisvecs[2].GetZ()]])
 
-                coords = []  
-                species = []              
+                obmol = openbabel.OBMol()
+                obConversion.ReadString(obmol, file.read())
+                unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))
+                unitcell.FillUnitCell(obmol)
+
+                basisvecs = unitcell.GetCellVectors()
+                basis = [[basisvecs[0].GetX(), basisvecs[0].GetY(), basisvecs[0].GetZ()],
+                               [basisvecs[1].GetX(), basisvecs[1].GetY(), basisvecs[1].GetZ()],
+                               [basisvecs[2].GetX(), basisvecs[2].GetY(), basisvecs[2].GetZ()]]
+
+                coords = []
+                species = []
                 for obatom in openbabel.OBMolAtomIter(obmol):
                     cart = openbabel.vector3(obatom.GetX(), obatom.GetY(), obatom.GetZ())
                     coords.append([cart.GetX(), cart.GetY(), cart.GetZ()])
@@ -78,7 +81,7 @@ def readstruct(ioa, struct, importers=None):
 
                 return Structure(basis=basis, coords=coords, species=species)
 
-            except:        
+            except:
                 if importers is not None:
                     info = sys.exc_info()
                     reraise_from(Exception, "Error while trying openbabel importer: "+str(info[1]), info)
@@ -91,11 +94,11 @@ def readstruct(ioa, struct, importers=None):
     #fileadapter = ioutils.fileadapter(file_or_filename)
     #file = fileadapter.file
     #filename = fileadapter.filename
-    
+
     # Use babel to read data from file
     #obConversion = openbabel.OBConversion()
     #obConversion.SetInAndOutFormats(obConversion.FormatFromExt(fileadapter.filename), obConversion.FindFormat("pdb"))
-    #obmol = openbabel.OBMol()    
+    #obmol = openbabel.OBMol()
     #obConversion.ReadString(obmol, file.read())
     #unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))
     #unitcell.FillUnitCell(obmol)
@@ -112,8 +115,8 @@ def readstruct(ioa, struct, importers=None):
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
     #    print("X",[obatom.GetX(),obatom.GetY(),obatom.GetZ()])
-    
-    #spacegroupnumber = unitcell.GetSpaceGroupNumber()    
+
+    #spacegroupnumber = unitcell.GetSpaceGroupNumber()
     #sg = Spacegroup(spacegroupnumber)
     #primitive_cell = sg.scaled_primitive_cell
     #sites = []
@@ -134,7 +137,7 @@ def readstruct(ioa, struct, importers=None):
 
     #obmolout.CloneData(unitcellout)
     #unitcellout.FillUnitCell(obmolout)
-    
+
     #for obatomout in openbabel.OBMolAtomIter(obmolout):
     #    #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
     #    #frac = unitcell.CartesianToFractional(cart)
@@ -148,7 +151,7 @@ def readstruct(ioa, struct, importers=None):
     #               [basisvecs[2].GetX(),basisvecs[2].GetY(),basisvecs[2].GetZ()]])
 
     #invbasis = inv(transpose(basis))
-    
+
     #print(unitcell.GetAlpha(), unitcell.GetSpaceGroup())
 
     #for obatom in openbabel.OBMolAtomIter(obmol):
@@ -156,12 +159,12 @@ def readstruct(ioa, struct, importers=None):
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
         #print([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
-        
+
     #    sites.append([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
     #    occs.append(obatom.GetAtomicNum())
 
     #sites = transpose(dot(invbasis,transpose(sites)))
-        
+
     ##invpc = linalg.inv(primitive_cell)
     ##invpc = transpose(primitive_cell)
     ##sites = transpose(dot(invpc,transpose(sites)))
@@ -170,7 +173,7 @@ def readstruct(ioa, struct, importers=None):
 
     ##for i in range(len(sites2)):
     ##    print("%.6f    %.6f    %.6f   %s" % (sites2[i][0],sites2[i][1],sites2[i][2],occs[i]))
-    
+
     #sites = array(sites)
     #symsites, kinds = sg.equivalent_sites(sites)
     ##symsites, kinds = (sites, range(len(occs)))
