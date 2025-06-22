@@ -27,13 +27,17 @@
 
 import os, sys, re, unittest, subprocess, argparse, fnmatch
 
+debug_mode = False
+
 top = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 httk_src_dir = os.path.join(top,'src','httk')
 
 def run(command,args=[]):
     args = list(args)
     popen = subprocess.Popen([command] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return popen.communicate()
+    out, err = popen.communicate()
+    returncode = popen.returncode
+    return out, err, returncode
 
 exec_filters = []
 
@@ -53,11 +57,17 @@ if sys.version_info < (3,):
 def execute(self, command, *args):
     oldpwd = os.getcwd()
     try:
+        os.environ["HTTK_DONT_HOLD"] = "1"
         os.chdir(os.path.dirname(command))
-        out,err = run("python",[os.path.join(httk_src_dir,command)]+list(args))
+        out,err,returncode = run("python",[os.path.join(httk_src_dir,command)]+list(args))
+        if debug_mode:
+            print("out: "+str(out))
+            print("err: "+str(err))
+            print("returncode: "+str(returncode))
         for f in exec_filters:
             err = f.sub("", err)
         self.assertTrue(len(err.strip())==0, msg=err)
+        self.assertTrue(returncode==0, "Inline tests execution returned non-zero exit code")
     finally:
         os.chdir(oldpwd)
         
@@ -86,7 +96,13 @@ for root, d, files in os.walk(httk_src_dir):
                     test_importers += [fullname]
 
 ignore_list = []
-                    
+
+if 'HTTK_TEST_HEADLESS' in os.environ and os.environ['HTTK_TEST_HEADLESS'] not in ["", "0"]:
+    ignore_list += []
+
+if sys.version_info[0] <= 2:
+    ignore_list += ['external/duckdb_ext.py'] # No duckdb for Python 2.7
+
 def function_factory(program):
     def exec_func(slf):
         execute(slf,program)
@@ -97,7 +113,7 @@ for program in test_programs:
     program_path = os.path.dirname(program)
     program_file = os.path.basename(program)
     rel_program = os.path.relpath(program, httk_src_dir)
-    
+
     if rel_program in ignore_list:
         continue
     

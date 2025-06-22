@@ -40,7 +40,7 @@ except Exception:
 if path == "False":
     raise Exception("httk.external.pymatgen_ext imported, but pymatgen is disabled in configuration file.")
 
-if path is not None:
+if path is not None and path != "":
     pymatgen = submodule_import_external(os.path.join(path), 'pymatgen')
 else:
     try:

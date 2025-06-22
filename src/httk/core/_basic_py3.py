@@ -37,7 +37,7 @@ def print_(*args,**kwargs):
     print(*args,**kwargs)
 
 def is_sequence(l):
-    return isinstance(l, collections.Iterable) and not isinstance(l, str)
+    return isinstance(l, Iterable) and not isinstance(l, str)
     #return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
     #        (hasattr(arg, "__iter__") and not isinstance(arg, str)))
 

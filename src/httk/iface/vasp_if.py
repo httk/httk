@@ -730,7 +730,7 @@ class OutcarReader():
                               [r"^ *energy *without *entropy= *([^ ]+) "+
                                r"*energy\(sigma->0\) *= *([^ ]+) *$", None, read_energy],
                               ["FREE ENERGIE", None, set_final],
-                              # ["^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
+                              # [r"^ *in kB" + " *([^ \n]+)"*6, None, read_stress_tensor]
                               ], results, debug=False)
         self.parsed = True
 
@@ -897,7 +897,7 @@ def get_elastic_constants(path, settings_path=".."):
             # If atoms were relaxed, there might be multiple "in kB"
             # lines. Use re.findall to get them all and then just take
             # the last match.
-            matches = re.findall("in kB" + "\s*([^ \n]+)"*6, file_lines)
+            matches = re.findall(r"in kB" + r"\s*([^ \n]+)"*6, file_lines)
 
             # NOTE: Stress tensor values are in a different order in OUTCAR
             # compared to Voigt notation. In terms of Voigt notation OUTCAR
@@ -1271,23 +1271,23 @@ def get_computation_info(ioa):
             break
         line = line.rstrip()
         if info['version'] is None:
-            tmp = re.search("vasp\.\d\.\d\.\d", line)
+            tmp = re.search(r"vasp\.\d\.\d\.\d", line)
             if tmp is not None:
                 info['version'] = line
         if info['ENCUT'] is None:
-            tmp = re.search("ENCUT\s*=\s*([\d\.]*)\s*eV", line)
+            tmp = re.search(r"ENCUT\s*=\s*([\d\.]*)\s*eV", line)
             if tmp is not None:
                 info['ENCUT'] = tmp.groups()[0]
         if info['NKPTS'] is None:
-            tmp = re.search("NKPTS = \s*(\d+)\s+", line)
+            tmp = re.search(r"NKPTS = \s*(\d+)\s+", line)
             if tmp is not None:
                 info['NKPTS'] = tmp.groups()[0]
         if LEXCH is None:
-            tmp = re.search("\s*LEXCH\s+=\s*(\w+)", line)
+            tmp = re.search(r"\s*LEXCH\s+=\s*(\w+)", line)
             if tmp is not None:
                 LEXCH = tmp.groups()[0]
         if info['XC'] is None:
-            tmp = re.search("\s*GGA\s{5}=\s+([\d-]+)\s+", line)
+            tmp = re.search(r"\s*GGA\s{5}=\s+([\d-]+)\s+", line)
             if tmp is not None:
                 # Check if default POSCAR XC is used:
                 GGA = tmp.groups()[0]
@@ -1304,7 +1304,7 @@ def get_computation_info(ioa):
 
     # Get pseudopot info
     for line in outcar:
-        tmp = re.search("TITEL  =\s*(PAW_.*)", line)
+        tmp = re.search(r"TITEL  =\s*(PAW_.*)", line)
         if tmp is not None:
             pseudo_info = tmp.groups()[0].strip()
             if 'pseudopots' not in info.keys():

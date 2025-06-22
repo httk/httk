@@ -32,7 +32,7 @@ except Exception:
 if path == "False":
     raise Exception("httk.external.webpy_ext imported, but webpy is disabled in configuration file.")
 
-if path is not None:
+if path is not None and path != "":
     web = submodule_import_external(os.path.join(path), 'web')
 else:
     try:

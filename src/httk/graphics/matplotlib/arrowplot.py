@@ -114,7 +114,8 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
 
 if __name__ == '__main__':
-    from httk.external.matplotlib_ext.matplotlib.pyplot import plt
+    from httk.external.matplotlib_ext import matplotlib
+    from matplotlib import pyplot as plt
     from httk.external.numpy_ext import numpy as np
 
     fig = plt.figure()

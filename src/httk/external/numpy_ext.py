@@ -30,9 +30,9 @@ except Exception:
     path = None
 
 if path == "False":
-    raise Exception("httk.external.ase_ext imported, but ase is disabled in configuration file.")
+    raise Exception("httk.external.numpy_ext imported, but numpy is disabled in configuration file.")
 
-if path is not None:
+if path is not None and path != "":
     numpy = submodule_import_external(os.path.join(path), 'numpy')
 else:
     try:

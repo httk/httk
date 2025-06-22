@@ -32,7 +32,7 @@ except Exception:
 if path == "False":
     raise Exception("httk.external.matplotlib_ext imported, but matplotlib is disabled in configuration file.")
 
-if path is not None:
+if path is not None and path != "":
     matplotlib = submodule_import_external(os.path.join(path), 'matplotlib')
     pylab = submodule_import_external(os.path.join(path), 'pylab')
 else:

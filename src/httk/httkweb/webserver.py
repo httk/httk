@@ -26,6 +26,7 @@ except ImportError:
     from urlparse import parse_qsl, urlsplit, urlunsplit
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
+from httk.core import parse_header, parse_multipart, cgitb_html
 
 class WebError(Exception):
     def __init__(self, message, response_code, response_msg, longmsg=None, content_type='text/plain', encoding='utf-8'):

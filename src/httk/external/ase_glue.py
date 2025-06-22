@@ -17,7 +17,7 @@
 
 import os
 
-from httk.core import citation
+from httk.core import citation, FracScalar, IoAdapterFileWriter
 from httk.core.basic import is_sequence
 citation.add_ext_citation('Atomic Simulation Environment (ASE)', "S. R. Bahn, K. W. Jacobsen")
 import httk.atomistic.data
@@ -34,7 +34,8 @@ def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     Code snippet kindly posted by Jesper Friis,
       https://listserv.fysik.dtu.dk/pipermail/ase-users/2011-January/000911.html
     """
-    from httk.external.ase_ext.ase import geometry
+    from httk.external.ase_ext import ase
+    from ase import geometry
 
     sg = spacegroup.Spacegroup(spacegroup, setting)
     prim_cell = sg.scaled_primitive_cell  # Check if we need to transpose
@@ -42,8 +43,10 @@ def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
 
 
 def structure_to_ase_atoms(struct):
-    from httk.external.ase_ext.ase.spacegroup import crystal
-    from httk.external.ase_ext.ase.atoms import Atoms
+    from httk.external.ase_ext import ase
+    from ase.spacegroup import crystal
+    from ase.spacegroup.spacegroup import parse_sitesym, spacegroup_from_data
+    from ase.atoms import Atoms
 
     struct = Structure.use(struct)
 
@@ -80,9 +83,9 @@ def structure_to_ase_atoms(struct):
 
         hall = struct.rc_sites.hall_symbol
         symops = get_symops_strs(hall)
-        rot, trans = ase.spacegroup.spacegroup.parse_sitesym(symops)
+        rot, trans = parse_sitesym(symops)
         spgnbr, setting = spacegroup_get_number_and_setting(hall)
-        spg = ase.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall,
+        spg = spacegroup_from_data(no=spgnbr, symbol=hall,
                                                                      centrosymmetric=None,
                                                                      scaled_primitive_cell=None,
                                                                      reciprocal_cell=None,

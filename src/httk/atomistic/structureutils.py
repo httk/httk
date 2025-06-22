@@ -16,6 +16,7 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import sys
 
 from httk.core import is_sequence, breath_first_idxs
@@ -581,7 +582,7 @@ def coordgroups_reduced_uc_to_representative(coordgroups, basis,
 
         if backend == 'spglib':
             try:
-                from httk.external import isotropy_ext
+                from httk.external import pyspglib_ext
                 struct = pyspglib_ext.uc_reduced_coordgroups_process_with_spglib(coordgroups, basis)
                 return struct
             except ImportError:

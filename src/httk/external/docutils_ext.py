@@ -33,7 +33,7 @@ if path == "False":
     raise Exception("httk.external.docutils_ext imported, but docutils is disabled in configuration file.")
 
 if path is not None:
-    numpy = submodule_import_external(os.path.join(path), 'docutils')
+    docutils = submodule_import_external(os.path.join(path), 'docutils')
 else:
     try:
         external = config.get('general', 'allow_system_libs')
