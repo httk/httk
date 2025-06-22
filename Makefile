@@ -9,31 +9,42 @@ httk.cfg:
 ## Virtual environment helpers
 ##############################
 #
+# make init_default_venv: initializes the standard dev venv in .venvs/uv/default and symlinks .venv to it
+#
 # make init_uv_venv
-# make init_conda_venv: creates the default venv
+# make init_conda_venv: creates the default venv under .venvs/{uv,conda}/py310
 #
 # make init_uv_venv venv=py312
-# make init_conda_venv venv=py312: creates a virtual environment for Pyton 3.12
+# make init_conda_venv venv=py312: creates a virtual environment for Pyton 3.12 under .venvs/{uv,conda}/py312
 #
 # make init_tox_venv
-# make init_tox_venv venv=py312: use tox to init the uv environments
+# make init_tox_venv venv=py312: use tox-uv to init the selected uv environment
 #
 # make init_all_tox_venvs: use tox to init all uv environments defined in tox
 
+default_python = py310
 venv ?= py310
 venv_reqs_prefix := $(if $(filter py27,$(venv)),py27,)
 
+init_default_venv:
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(default_python) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/default" && uv pip install --python ".venvs/uv/default/bin/python" -r "requirements.txt" -r "requirements-dev.txt"
+	ln -nsf .venvs/uv/default .venv
+	echo "Activate this environment with:"
+	echo "  source \".venv/bin/activate\""
+
 # init_conda_venv works with venv=py27, as well as py38, py39, ...
 init_conda_venv:
-	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install pytest -r "$(venv_reqs_prefix)requirements.txt"
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "$(venv_reqs_prefix)requirements.txt" -r "$(venv_reqs_prefix)requirements-dev.txt"
 	echo "Activate this environment with:"
 	echo "  conda activate \".venvs/conda/$(venv)\""
 
+# init_uv_venv only works with uv-supported versions of Python: py38, py39, ...
 init_uv_venv:
-	PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "$(venv_reqs_prefix)requirements.txt"
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "$(venv_reqs_prefix)requirements.txt" -r "$(venv_reqs_prefix)requirements-dev.txt"
 	echo "Activate this environment with:"
 	echo "  source \".venvs/uv/$(venv)/bin/activate\""
 
+# tox uses the tox-uv plugin, so this should mostly do the same as init_uv_venv
 init_tox_venv:
 	tox --notest -e $(venv)
 
@@ -47,6 +58,8 @@ init_all_tox_venvs:
 # make tox
 #  - or just -
 # tox : runs tests for all python versions defined in tox.ini
+#
+# make ci: runs a subset of the tests selected as fitting to run as part of the CI
 #
 # make tests
 # make unittests
@@ -114,7 +127,7 @@ pytests_autopy27_conda:
 	(cd Tests; HTTK_TEST_EXPECT_PYVER=py27 py.test)
 
 flake8:
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py"
+	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py,.tox,.venv,.venvs"
 
 validate_pep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r src/ > /dev/null
