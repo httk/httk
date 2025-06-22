@@ -12,3 +12,4 @@ pyyaml
 legacy-cgi; python_version >= '3.11'
 duckdb
 pyzstd
+spglib

@@ -18,7 +18,7 @@
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from httk.core.basic import is_sequence
 from httk.atomistic.data import periodictable
-from httk.core.vectors import FracVector, FracScalar
+from httk.core import FracVector, FracScalar
 from httk.atomistic.assignment import Assignment
 
 

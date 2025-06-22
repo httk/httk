@@ -27,6 +27,13 @@ if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
 fi
 shift 1
 
+if [ -n "$2" ]; then
+    NUMBER="$2"
+    shift 1
+else
+  NUMBER="1"
+fi
+
 if [ -d "$PIPEPATH1" ]; then
     PIPEPATH=$PIPEPATH1
 elif [ -d "$PIPEPATH2" ]; then
@@ -36,17 +43,4 @@ else
     echo "(Please configure with httk-setup-computer <name>)"
     exit 1
 fi
-
-# Check if second argument is for the NUMBER or an
-# extra argument that a user may want to pass on to
-# the ht.project/computers/X/start-taskmgr script
-# in the form of "$@".
-int_regex='^[0-9]+$'
-if [[ $1 =~ $int_regex ]] ; then
-    NUMBER="$1"
-    shift 1
-else
-    NUMBER="1"
-fi
-
 "$PIPEPATH/start-taskmgr" "$QUEUE" "$NUMBER" "$@"

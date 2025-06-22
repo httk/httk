@@ -15,8 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.core.httkobject import HttkObject, httk_typed_init
-from httk.core.vectors import FracVector
+from httk.core import HttkObject, httk_typed_init
+from httk.core import FracVector
 from httk.atomistic.spacegrouputils import *
 
 
