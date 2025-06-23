@@ -51,7 +51,7 @@ def create_serve_callback(srcdir, port, baseurl, renderers, template_engines, fu
         out = webgenerator.retrieve(request['relpath'],request['query'])
 
         return {'response_code':200, 'content_type':out['mimetype'], 'content':out['content'], 'encoding':'utf-8' }
-
+   
     return httk_web_callback
 
 def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, debug=True, config = "config", override_global_data = None):
