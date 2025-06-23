@@ -4,6 +4,7 @@ DIRNAME=$(dirname "$0")
 HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
 . "${HTTK_BIN_PATH}/internal/setup.sh"
 export HTTK_DIR="$HTTK_BIN_PATH/.."
+export HTTK_PROJECT_DIR="$HTTK_PROJECT_DIR"
 
 echo "==== httk-computer-install"
 
@@ -43,4 +44,4 @@ else
     exit 1
 fi
 
-"$PIPEPATH/install" "$QUEUE"
+"$PIPEPATH/install" "$QUEUE" "${@:2}"

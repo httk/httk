@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-import argparse, unittest
+import unittest, argparse
 
+import test_python_version
 import test_examples
 import test_structreading
+import test_httk_src_inline
 
 logdata = []
 test_examples.logdata = logdata
@@ -12,12 +14,20 @@ ap.add_argument("--debug", help = 'Debug output', action='store_true')
 args, leftovers = ap.parse_known_args()
 
 try:
-    suite = unittest.TestLoader().loadTestsFromTestCase(test_examples.TestExamples)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(test_python_version.TestPythonVer)
+
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_examples.TestExamples))
+
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_structreading.TestStructreading))
+
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_httk_src_inline.TestHttkSrcInline))
+
     unittest.TextTestRunner(verbosity=2).run(suite)
+
 finally:
     if args.debug:
-        print("") 
+        print("")
         print("Loginfo:")
         print("-------------------------------------------------------")
         print("\n".join(logdata))

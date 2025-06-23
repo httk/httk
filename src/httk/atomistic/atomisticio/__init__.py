@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,5 +15,5 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import structureioplugin
-from structure_cif_io import cif_to_struct, struct_to_cif, cifdata_to_struct, struct_to_cifdata
+from httk.atomistic.atomisticio import structureioplugin
+from httk.atomistic.atomisticio.structure_cif_io import cif_to_struct, struct_to_cif, cifdata_to_struct, struct_to_cifdata

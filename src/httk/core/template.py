@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -14,21 +14,25 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import shlex, StringIO, os, sys, shutil
+import shlex, os, sys, shutil
 from string import Template
-from .basic import mkdir_p
+from httk.core.basic import mkdir_p
 
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 def apply_template(template, output, envglobals=None, envlocals=None):
     """
-    Simple Python template engine. 
+    Simple Python template engine.
 
     The file 'template' is turned into a new file 'output' replacing the following:
-    $name -> the value of the variable 'name' in the scope provided by locals and globals. 
+    $name -> the value of the variable 'name' in the scope provided by locals and globals.
     $(python statement) -> result of evaluating the python statment.
     ${some python code} -> text on stdout from running that python code.
 
-    Note: it is safe for the code inside the template 
+    Note: it is safe for the code inside the template
     to load the file it eventually will replace.
     """
 
@@ -45,7 +49,9 @@ def apply_template(template, output, envglobals=None, envlocals=None):
     # Read template and substitute $name entries
     template_file = open(template, 'r')
     ## shlex does not work with unicode, hence the .encode('ascii') to make sure the result is not unicode
-    result_step1 = Template(Template(template_file.read()).safe_substitute(envlocals)).safe_substitute(envglobals).encode('ascii')
+    # Henrik added: These days it looks like we don't need the ascii encoding anymore.
+    result_step1 = Template(Template(template_file.read()).safe_substitute(
+        envlocals)).safe_substitute(envglobals)#.encode('ascii')
     template_file.close()
 
     # Substitute $(some python code) entries
@@ -78,16 +84,16 @@ def apply_template(template, output, envglobals=None, envlocals=None):
             if(token == '}'):
                 exec_nesting -= 1
             if(exec_nesting == 0):
-                sys.stdout = StringIO.StringIO()
+                sys.stdout = StringIO()
                 try:
-                    exec(command, envglobals, envlocals) 
+                    exec(command, envglobals, envlocals)
                 except:
-                    print "Failed to execute:"+command
-                    raise 
+                    print("Failed to execute:"+command)
+                    raise
                 result_step2 += sys.stdout.getvalue()
                 if result_step2.endswith('\n'):
                     result_step2 = result_step2[:-1]
-                sys.stdout = sys.__stdout__                
+                sys.stdout = sys.__stdout__
                 continue
             command += token
 
@@ -98,18 +104,18 @@ def apply_template(template, output, envglobals=None, envlocals=None):
                 eval_nesting -= 1
             if(eval_nesting == 0):
                 try:
-                    result_step2 += str(eval(command, envglobals, envlocals)) 
+                    result_step2 += str(eval(command, envglobals, envlocals))
                 except:
-                    print "Failed to eval:"+command
-                    raise 
+                    print("Failed to eval:"+command)
+                    raise
                 continue
-            command += token            
+            command += token
 
     # Write output, but first remove file if it already exists, this is done explicitly
     # to handle symlinks in a sane way; i.e., they are replaced by the instantiated template,
     # and the file the symlink is pointing at is NOT changed.
     if os.path.exists(output):
-        os.remove(output)    
+        os.remove(output)
     output_file = open(output, 'w')
     output_file.write(result_step2)
     output_file.close()
@@ -134,9 +140,9 @@ def apply_templates(inputpath, outpath, template_suffixes="template", envglobals
         template_suffixes = [template_suffixes]
 
     # Loop over all files in the directory tree and run all templates that are found
-    #main_path = os.getcwd()    
-    #print "Looping over",inputpath
-    
+    #main_path = os.getcwd()
+    #print("Looping over",inputpath)
+
     for root, dirs, files in os.walk(inputpath):
         for filename in files:
             for suffix in template_suffixes:
@@ -149,13 +155,13 @@ def apply_templates(inputpath, outpath, template_suffixes="template", envglobals
                     newname = filename[:-len("."+suffix)]
                     #os.chdir(os.path.join("./",outpath,root))
                     #mkdir_p(os.path.dirname(newname))
-                    #apply_template("./"+filename,"./"+newname,locals,envglobals=None,envlocals=None)        
+                    #apply_template("./"+filename,"./"+newname,locals,envglobals=None,envlocals=None)
                     #os.chdir(path)
-                    apply_template(os.path.join(root, filename), os.path.join(outpath, rp, newname), envglobals=envglobals, envlocals=envlocals)      
+                    apply_template(os.path.join(root, filename), os.path.join(outpath, rp, newname), envglobals=envglobals, envlocals=envlocals)
                     shutil.copymode(os.path.join(root, filename), os.path.join(outpath, rp, newname))
-                    #print "Instanceiate",os.path.join(root,filename),os.path.join(outpath,rp,newname)
+                    #print("Instanceiate",os.path.join(root,filename),os.path.join(outpath,rp,newname))
                 else:
-                    #print "Copy",shutil.copyfile(os.path.join(root,filename),os.path.join(outpath,rp,filename)) 
-                    shutil.copy(os.path.join(root, filename), os.path.join(outpath, rp, filename)) 
+                    #print("Copy",shutil.copyfile(os.path.join(root,filename),os.path.join(outpath,rp,filename)) )
+                    shutil.copy(os.path.join(root, filename), os.path.join(outpath, rp, filename))
 
     #os.chdir(main_path)

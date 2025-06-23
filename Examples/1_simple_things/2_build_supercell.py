@@ -3,9 +3,10 @@
 
 # This is a simple program that just shows some basic functionality using the httk Structure object
 
+from __future__ import print_function
 from httk import *
 from httk.atomistic import *
-import httk.atomistic.vis 
+import httk.atomistic.vis
 
 basis = [[1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
@@ -21,81 +22,84 @@ coordgroups = [[
 
 assignments = ['Pb', 'Ti', 'O']
 
-print "==== Building simple supercell 1x2x3"
+print("==== Building simple supercell 1x2x3")
 
 struct = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
-print "The formula is:", struct.formula+" ("+struct.anonymous_formula+")", " vol=", float(struct.uc_volume)
+print("The formula is:", struct.formula+" ("+struct.anonymous_formula+")", " vol=", float(struct.uc_volume))
 
 supercell = struct.transform([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
-print supercell.uc_reduced_coordgroups.to_floats()
+print(supercell.uc_reduced_coordgroups.to_floats())
 
-print "The formula is:", supercell.formula+" ("+supercell.anonymous_formula+")", " vol=", float(supercell.uc_volume)
+print("The formula is:", supercell.formula+" ("+supercell.anonymous_formula+")", " vol=", float(supercell.uc_volume))
 
 # Read a more complicated structure
 struct = httk.load("../../Tutorial/Step2/POSCAR2")
 try:
     struct.vis.show()
     struct.vis.wait()
-except Exception:
-    print "(Skipping structure visualization due to missing external program (usually jmol).)"
+except Exception as e:
+    print(e)
+    print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
 supercell = struct.transform([[2, 0, 0], [0, 2, 0], [0, 0, 1]])
 try:
     supercell.vis.show()
     supercell.vis.wait()
 except Exception:
-    print "(Skipping structure visualization due to missing external program (usually jmol).)"
+    print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
-print
-print "==== Building orthogonal supercells"
+print()
+print("==== Building orthogonal supercells")
 
-print "== Exact supercell (works):"
+print("== Exact supercell (works):")
 try:
     supercell = struct.supercell.orthogonal(tolerance=None)
-    print supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
+    print(supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)])
 except Exception as e:
-    print e
+    print(e)
 
 supercell = struct.supercell.orthogonal(tolerance=20)
-print supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)]
+print(supercell.uc_nbr_atoms, [supercell.uc_alpha, supercell.uc_beta, supercell.uc_gamma], [float(supercell.uc_a), float(supercell.uc_b), float(supercell.uc_c)])
 
 try:
     supercell.vis.show()
     supercell.vis.wait()
 except Exception:
-    print "(Skipping structure visualization due to missing external program (usually jmol).)"
+    print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
-print "==== Building cubic supercells"
+print("==== Building cubic supercells")
 
-print "== Original cell:"
-print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+print("== Original cell:")
+print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 
-print "== Exact supercell (fails):"
+print("== Exact supercell (fails):")
 try:
     supercell = struct.build_cubic_supercell(tolerance=None)
-    print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+    print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 except Exception as e:
-    print e
+    print(e)
 
-print "== Approx supercells:"    
+print("== Approx supercells:")
 supercell = struct.supercell.cubic(tolerance=7)
-print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 supercell = struct.supercell.cubic(tolerance=10)
-print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 supercell = struct.supercell.cubic(tolerance=15)
 
 try:
     supercell.vis.show()
     supercell.vis.wait()
 except Exception:
-    print "(Skipping structure visualization due to missing external program (usually jmol).)"
+    print("(Skipping structure visualization due to missing external program (usually jmol).)")
 
-print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
 supercell = struct.supercell.cubic(tolerance=25)
-print struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)]
+print(struct.uc_nbr_atoms, [struct.uc_alpha, struct.uc_beta, struct.uc_gamma], [float(struct.uc_a), float(struct.uc_b), float(struct.uc_c)])
+
+
+
+
+
 #supercell = struct.build_cubic_supercell(tolerance=70,max_search_cells=10000)
-#print supercell.full_nbr_atoms,[supercell.alpha, supercell.beta, supercell.gamma], [float(supercell.a), float(supercell.b), float(supercell.c)]
+#print(supercell.full_nbr_atoms,[supercell.alpha, supercell.beta, supercell.gamma], [float(supercell.a), float(supercell.b), float(supercell.c)])
 #supercell.vis.show()
-
-
-

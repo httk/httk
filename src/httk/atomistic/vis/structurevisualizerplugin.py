@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -20,9 +20,9 @@ from httk.atomistic import Structure, UnitcellStructure
 
 
 class StructureVisualizerPlugin(HttkPlugin):
-            
+
     def plugin_init(self, struct):
-        #print "StructureVisualizerPlugin called",struct
+        #print("StructureVisualizerPlugin called",struct)
         self.struct = struct
         self.visualizer = None
 
@@ -37,7 +37,7 @@ class StructureVisualizerPlugin(HttkPlugin):
         for backend in backends:
             if backend == 'jmol':
                 try:
-                    from jmolstructurevisualizer import JmolStructureVisualizer
+                    from httk.atomistic.vis.jmolstructurevisualizer import JmolStructureVisualizer
                     self.visualizer = JmolStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     #self.visualizer.rotate()
@@ -48,7 +48,7 @@ class StructureVisualizerPlugin(HttkPlugin):
                     pass
             if backend == 'ase':
                 try:
-                    from asestructurevisualizer import AseStructureVisualizer
+                    from httk.atomistic.vis.asestructurevisualizer import AseStructureVisualizer
                     self.visualizer = AseStructureVisualizer(self.struct, params)
                     self.visualizer.show()
                     return

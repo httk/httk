@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,12 +17,11 @@
 #
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
-from pylab import *
-
+from math import atan, pi
 
 class PolygonPlot(object):
-    
-    def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three'), sides=3, 
+
+    def __init__(self, start_angle=90, rotate_labels=False, labels=('one', 'two', 'three', 'four', 'five'), sides=3,
                  label_offset=0.10, edge_args={'color': 'black', 'linewidth': 2}, fig_args = {'figsize': (8, 8), 'facecolor': 'white', 'edgecolor': 'white'},
                  text_args = {'fontsize': 24, 'color': 'black'}):
         """
@@ -36,28 +35,30 @@ class PolygonPlot(object):
         text_args: matplotlib keyword args for axis labels.
 
         """
-        self.basis = array(
+        from httk.external.matplotlib_ext import pylab
+
+        self.basis = pylab.array(
             [
                 [
-                    cos(2*_*pi/sides + start_angle*pi/180),
-                    sin(2*_*pi/sides + start_angle*pi/180)
-                ] 
+                    pylab.cos(2*_*pylab.pi/sides + start_angle*pylab.pi/180),
+                    pylab.sin(2*_*pylab.pi/sides + start_angle*pylab.pi/180)
+                ]
                 for _ in range(sides)
             ]
         )
 
-        fig = figure(**fig_args)
+        fig = pylab.figure(**fig_args)
         ax = fig.add_subplot(111)
-    
+
         for i, l in enumerate(labels):
             if i >= sides:
                 break
             x = self.basis[i, 0]
             y = self.basis[i, 1]
             if rotate_labels:
-                angle = 180*arctan(y/x)/pi + 90
+                angle = 180*atan(y/x)/pi + 90
                 if angle > 90 and angle <= 270:
-                    angle = mod(angle + 180, 360)
+                    angle = (angle + 180) % 360
             else:
                 angle = 0
             ax.text(
@@ -69,47 +70,51 @@ class PolygonPlot(object):
                 rotation=angle,
                 **text_args
             )
-    
+
         # Clear normal matplotlib axes graphics.
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_frame_on(False)
-    
+
         # Plot border
         ax.plot(
-            [self.basis[_, 0] for _ in range(sides) + [0, ]],
-            [self.basis[_, 1] for _ in range(sides) + [0, ]],
+            [self.basis[_, 0] for _ in list(range(sides)) + [0, ]],
+            [self.basis[_, 1] for _ in list(range(sides)) + [0, ]],
             **edge_args
         )
         self.ax = ax
-        
+
     def translate_coords(self, data, scaling=True):
+        from httk.external.matplotlib_ext import pylab
+
         if len(data) == 0:
             return data
-        
-        data = array(data)        
-        
+
+        data = pylab.array(data)
+
         # If data is Nxsides, newdata is Nx2.
         if scaling:
             # Scales data for you.
-            newdata = dot((data.T / data.sum(-1)).T, self.basis)
+            newdata = pylab.dot((data.T / data.sum(-1)).T, self.basis)
         else:
             # Assumes data already sums to 1.
-            newdata = dot(data, self.basis)
+            newdata = pylab.dot(data, self.basis)
         return newdata
 
 __all__ = ['PolygonPlot']
 
 if __name__ == '__main__':
+    from httk.external.matplotlib_ext import pylab
+
     k = 0.5
     s = 1000
 
-    data = vstack((
-        array([k, 0, 0]) + rand(s, 3), 
-        array([0, k, 0]) + rand(s, 3), 
-        array([0, 0, k]) + rand(s, 3)
+    data = pylab.vstack((
+        pylab.array([k, 0, 0]) + pylab.rand(s, 3),
+        pylab.array([0, k, 0]) + pylab.rand(s, 3),
+        pylab.array([0, 0, k]) + pylab.rand(s, 3)
     ))
-    color = array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s)
+    color = pylab.array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s)
 
     pp = PolygonPlot()
 
@@ -122,4 +127,31 @@ if __name__ == '__main__':
         alpha=0.5,
         color=color
     )
-    show()
+    pylab.show(block=False)
+    pylab.pause(3)
+    pylab.close()
+
+    data = pylab.vstack((
+        pylab.array([k, 0, 0, 0, 0]) + pylab.rand(s, 5),
+        pylab.array([0, k, 0, 0, 0]) + pylab.rand(s, 5),
+        pylab.array([0, 0, k, 0, 0]) + pylab.rand(s, 5),
+        pylab.array([0, 0, 0, k, 0]) + pylab.rand(s, 5),
+        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),
+    ))
+    color = pylab.array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s + [[1, 1, 0]]*s + [[0, 1, 1]]*s)
+
+    pp = PolygonPlot(sides=5)
+
+    newdata = pp.translate_coords(data)
+
+    pp.ax.scatter(
+        newdata[:, 0],
+        newdata[:, 1],
+        s=2,
+        alpha=0.5,
+        color=color
+    )
+
+    pylab.show(block=False)
+    pylab.pause(3)
+    pylab.close()

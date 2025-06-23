@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -25,14 +25,14 @@ class DictStore(object):
     that enables reterival of data
     """
     basics = [int, float, str, bool]
-    
+
     def __init__(self):
         self.store = {}
         self.sids = {}
         self.types = {}
         self.typedicts = {}
         self.columns = {}
-        self.column_types = {}        
+        self.column_types = {}
 
     class Keeper(object):
 
@@ -40,13 +40,13 @@ class DictStore(object):
             self.store = store
             self.table = table
             self.sid = sid
-    
+
         def __getitem__(self, name):
             return self.store.get(self.table, self.sid, name)
-    
+
         def __setitem__(self, name, val):
             return self.store.put(self.table, self.sid, name, val)
-    
+
         def puts(self, **args):
             self.store.puts(self.table, self.sid, **args)
 
@@ -56,7 +56,7 @@ class DictStore(object):
         if types != self.types[table]:
             raise Exception("DictStore.new: type mismatch when creating a new row in table")
 
-        sid = self.insert(table, keyvals)       
+        sid = self.insert(table, keyvals)
         return DictStore.Keeper(self, table, sid)
 
     def retrieve(self, table, types, sid):
@@ -77,7 +77,7 @@ class DictStore(object):
             name = column[0]
             t = column[1]
 
-            # Regular column, no strangeness            
+            # Regular column, no strangeness
             if t in self.basics:
                 columns.append(name)
                 column_types.append(t)
@@ -92,7 +92,7 @@ class DictStore(object):
 
                 self.create_table(subtablename, subtypes)
 
-            # Tuple means numpy array                
+            # Tuple means numpy array
             elif isinstance(t, tuple):
 
                 # Numpy array with fixed number of entries, just flatten and store as _1, _2, ... columns
@@ -105,13 +105,13 @@ class DictStore(object):
                 # Variable length numpy array, needs subtable
                 if t[0] == 0:
                     subtablename = table+"_"+name
-                    subtablecolumnname = name 
-                    
+                    subtablecolumnname = name
+
                     subdimension = (1, t[1])
                     self.create_table(subtablename, [(table, int), (subtablecolumnname, subdimension)])
-            
+
             elif issubclass(t, Storable):
-                columnname = name+"_"+t.types[0]+"_sid"                
+                columnname = name+"_"+t.types[0]+"_sid"
                 columns.append(columnname)
                 column_types.append(int)
             else:
@@ -123,7 +123,7 @@ class DictStore(object):
     def insert(self, table, keyvals):
         sid = self.sids[table]
         types = self.types[table]
-        
+
         self.store[table][sid] = {}
 
         for column in types:
@@ -135,7 +135,7 @@ class DictStore(object):
             else:
                 val = keyvals[name]
 
-            # Regular column, no strangeness            
+            # Regular column, no strangeness
             if t in self.basics:
                 self.store[table][sid][name] = val
 
@@ -143,15 +143,15 @@ class DictStore(object):
             elif isinstance(t, list):
                 subtablename = table+"_"+name
                 if issubclass(t[0], Storable):
-                    for entry in val:                        
-                        data = {table+"_sid": sid, t[0].types[0]+"_sid": entry.store.sid}                   
+                    for entry in val:
+                        data = {table+"_sid": sid, t[0].types[0]+"_sid": entry.store.sid}
                         self.insert(subtablename, data)
                 else:
-                    for entry in val:                        
+                    for entry in val:
                         data = {table+"_sid": sid, name: entry}
                         self.insert(subtablename, data)
 
-            # Tuple means numpy array                
+            # Tuple means numpy array
             elif isinstance(t, tuple):
                 # Numpy array with fixed number of entries, just flatten and store as _1, _2, ... columns
                 if t[0] >= 1:
@@ -164,15 +164,15 @@ class DictStore(object):
                 # Variable length numpy array, needs subtable
                 if t[0] == 0:
                     subtablename = table+"_"+name
-                    for entry in val:  # loops over rows in 2d array                      
+                    for entry in val:  # loops over rows in 2d array
                         data = {table+"_sid": sid, name: entry}
                         self.insert(subtablename, data)
-                                   
+
             elif issubclass(t, Storable):
-                print "VAL", val
+                print("VAL", val)
                 if val.store != self:
                     raise Exception("DictStore.insert: Can only use Storable variables pertaining to the same store within another Storable.")
-                columnname = name+"_"+t.types[0]+"_sid"                
+                columnname = name+"_"+t.types[0]+"_sid"
                 self.store[table][sid][columnname] = val.store.sid
             else:
                 raise Exception("Dictstore.insert: unexpected class; can only handle basic types and subclasses of Storable. Offending class:"+str(t))
@@ -181,12 +181,12 @@ class DictStore(object):
         return sid
 
     def get(self, table, sid, name):
-        types = self.types[table]        
+        types = self.types[table]
 
-        print "GET on", table, name
+        print("GET on", table, name)
         t = self.typedicts[table][name]
 
-        # Regular column, no strangeness            
+        # Regular column, no strangeness
         if t in self.basics:
             return self.store[table][sid][name]
 
@@ -200,7 +200,7 @@ class DictStore(object):
                     if entry[table+"_sid"] != sid:
                         continue
                     new = t[0].instantiate_from_store(self, entry[t[0].types[0]+"_sid"])
-                    #print "I AM HERE:",new,self,entry[t[0].types[0]+"_sid"]
+                    #print("I AM HERE:",new,self,entry[t[0].types[0]+"_sid"])
                     entries.append(new)
             else:
                 for key in self.store[subtablename]:
@@ -209,8 +209,8 @@ class DictStore(object):
                         continue
                     entries.append(entry[name])
             return entries
-        
-        # Tuple means numpy array                
+
+        # Tuple means numpy array
         elif isinstance(t, tuple):
 
             # Numpy array with fixed number of entries, just flatten and store as _1, _2, ... columns
@@ -220,7 +220,7 @@ class DictStore(object):
                 for i in range(size):
                     columname = name+"_"+str(i)
                     flat.append(self.store[table][sid][columname])
-                arr = array(flat)
+                arr = array(flat) # noqa: F821 ## TODO: what is going on here; dependency on numpy?
                 arr.shape = (t[0], t[1])
                 return arr
 
@@ -230,21 +230,21 @@ class DictStore(object):
                 for key in self.store[subtablename]:
                     entry = self.store[subtablename][key]
                     if entry[table+"_sid"] != sid:
-                        continue                    
+                        continue
                     entries.append(self.get(subtablename), entry.store.sid, name)
-                               
+
         elif issubclass(t, Storable):
-            columnname = name+"_"+t.types[0]+"_sid"                
+            columnname = name+"_"+t.types[0]+"_sid"
             new = t.instantiate_from_store(self, self.store[table][sid][columnname])
             return new
-        
+
         else:
             raise Exception("Dictstore.get: unexpected class; can only handle basic types and subclasses of Storable. Offending class:"+str(t))
 
     def put(self, table, sid, name, val):
         t = self.typedicts[table][name]
 
-        # Regular column, no strangeness            
+        # Regular column, no strangeness
         if t in self.basics:
             self.store[table][sid][name] = val
 
@@ -252,15 +252,15 @@ class DictStore(object):
         elif isinstance(t, list):
             subtablename = table+"_"+name
             if issubclass(t[0], Storable):
-                for entry in val:                        
-                    data = {table+"_sid": sid, t[0].types[0]+"_sid": entry.store.sid}                   
+                for entry in val:
+                    data = {table+"_sid": sid, t[0].types[0]+"_sid": entry.store.sid}
                     self.insert(subtablename, data)
             else:
-                for entry in val:                        
+                for entry in val:
                     data = {table+"_sid": sid, name: entry}
                     self.insert(subtablename, data)
 
-        # Tuple means numpy array                
+        # Tuple means numpy array
         elif isinstance(t, tuple):
             # Numpy array with fixed number of entries, just flatten and store as _1, _2, ... columns
             if t[0] >= 1:
@@ -273,14 +273,14 @@ class DictStore(object):
             # Variable length numpy array, needs subtable
             if t[0] == 0:
                 subtablename = table+"_"+name
-                for entry in val:  # loops over rows in 2d array                      
+                for entry in val:  # loops over rows in 2d array
                     data = {table+"_sid": sid, name: entry}
                     self.insert(subtablename, data)
-                               
+
         elif issubclass(t, Storable):
             if val.store != self:
                 raise Exception("DictStore.put: Can only use Storable variables pertaining to the same store within another Storable.")
-            columnname = name+"_"+t.types[0]+"_sid"                
+            columnname = name+"_"+t.types[0]+"_sid"
             self.store[table][sid][columnname] = val.store.sid
         else:
             raise Exception("Dictstore.put: unexpected class; can only handle basic types and subclasses of Storable")

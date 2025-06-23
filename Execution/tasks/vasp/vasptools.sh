@@ -246,6 +246,15 @@ function VASP_PREPARE_POTCAR {
     local SPECIESLIST=$(awk -v "line=$POSCARSPECIESLINE" 'NR==line { for(i=1;i<=NF;i++) { printf("%s ",$i) } }' "$POSCAR")
     for SPECIES in $SPECIESLIST; do
 	for PRIORITY in "_3" "_2" "_d" "_pv" "_sv" "" "_h" "_s"; do
+            if [ "${SPECIES}${PRIORITY}" == "Ru_pv" ]; then
+              PRIORITY="_sv" # Ru_pv has probelm converging in the ground state
+            fi
+            if [ "${SPECIES}${PRIORITY}" == "K_pv" ]; then
+              PRIORITY="_sv" # K_pv has too low ENCUT to be compatable with ENCUT 600
+            fi
+            if [ "${SPECIES}${PRIORITY}" == "Rb_pv" ]; then
+              PRIORITY="_sv" # Rb_pv has too low ENCUT to be compatable with ENCUT 600
+            fi
 	    if [ -d "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}" ]; then
 	      if [ -e "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" ]; then
 		  cat "$VASP_PSEUDOLIB/${SPECIES}${PRIORITY}/POTCAR" >> "$POTCAR"
@@ -619,6 +628,7 @@ function VASP_STDOUT_CHECKER {
     /REAL_OPTLAY: internal error/ {print "REAL_OPTLAY" >> msgfile;}
 
     /internal ERROR RSPHER/ {print "RSPHER" >> msgfile;}
+    /RSPHER: internal ERROR:/ {print "RSPHER" >> msgfile; exit 2}
 
     /WARNING: DENTET: can'"'"'t reach specified precision/ {print "DENTET" >> msgfile;}
 

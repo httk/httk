@@ -22,8 +22,11 @@ from httk.core.basic import mkdir_p
 from httk.core.template import apply_templates
 
 
-def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args=None, project='noproject', assignment='unassigned',
-                      instantiate_name='ht.instantiate.py', overwrite=False, overwrite_head_dir=True, remove_instantiate=True, name=None, priority=3):
+def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg',
+        args=None, project='noproject', assignment='unassigned',
+        instantiate_name='ht.instantiate.py', overwrite=False,
+        overwrite_head_dir=True, remove_instantiate=True, name=None,
+        priority=3):
     global instantiate_args, instantiate_to_path
 
     if args is None:
@@ -53,14 +56,14 @@ def create_batch_task(dirpath, template='t:vasp/batch/vasp-relax-formenrg', args
     old_path = os.getcwd()
     old_sys_argv = sys.argv
 
-    # Saftey check
+    # Safety check
     if instantiate_name is None or instantiate_name == '' or not isinstance(instantiate_name, str) or not instantiate_name:
         raise Exception("taskmgr.create_batch_task: empty or weird instantiate_name:" + str(instantiate_name))
 
     try:
         os.chdir(taskpath)
         # try:
-        print "INSTANTIATE_NAME", taskpath
+        print("INSTANTIATE_NAME", taskpath)
         exec(compile(open(instantiate_name).read(), instantiate_name, 'exec'), args, {})
         # except:
         #    with open(instantiate_name) as f:

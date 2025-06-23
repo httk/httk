@@ -1,17 +1,20 @@
 # General ignores
 *.pyc
+__pycache__/
 .DS_Store
 .project
 .pydevproject
+.vscode
 **/*~
 # Httk specific ignores
 httk.cfg
 httk.old
 External
-Docs/_static/generated/**
-Docs/_build/**
-Docs/generated/**
-Docs/httk.*
+build
+#Docs/full/_static/generated/**
+Docs/full/_build/**
+# Docs/full/generated/**
+Docs/full/httk.*
 Presentation/generated/**
 Presentation/presentation.pdf
 Presentation/presentation.aux
@@ -24,7 +27,7 @@ Presentation/presentation.snm
 Presentation/presentation.toc
 Presentation/presentation.vrb
 VERSION
-httk_overview.pdf
+#httk_overview.pdf
 gittools
 httk.old*
 *.orig
@@ -32,3 +35,8 @@ src/httk/distdata.py
 src/httk.egg-info
 .pytest_cache
 .tox
+.nvimlog
+Tests/tmp
+.venv
+.venvs
+

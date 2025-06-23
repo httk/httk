@@ -1,8 +1,12 @@
 #! /usr/bin/env python
 
-import sys, os, hashlib, base64, re, ConfigParser, bz2
-
+import sys, os, hashlib, base64, re, bz2
 import hashlib
+
+if sys.version_info[0] == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 b = 256
 q = 2**255 - 19
@@ -146,17 +150,17 @@ def nested_split(s,start,stop):
     return parts
 
 def hexhash(filename):
-    def chunks(f, size=8192): 
-        while True: 
-            s = f.read(size) 
-            if not s: break 
-            yield s     
+    def chunks(f, size=8192):
+        while True:
+            s = f.read(size)
+            if not s: break
+            yield s
     f = open(filename,'rb')
-    s = hashlib.sha256() 
-    for chunk in chunks(f): 
-        s.update(chunk) 
+    s = hashlib.sha256()
+    for chunk in chunks(f):
+        s.update(chunk)
     f.close()
-    return s.hexdigest() 
+    return s.hexdigest()
 
 def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, force=False):
     message = ""
@@ -167,11 +171,11 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
         excludes=[x.strip() for x in f.readlines()]
         f.close()
     try:
-        cp=ConfigParser.ConfigParser()
+        cp=configparser.ConfigParser()
         cp.read(os.path.join(excludespath,"config"))
         excludestr=cp.get('main','excludes').strip()
         excludes+=nested_split(excludestr,'[',']')
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+    except (configparser.NoOptionError, configparser.NoSectionError):
         pass
 
     if len(excludes) == 0:
@@ -201,7 +205,7 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
     message+="\n"
 
     for root, unsorteddirs, unsortedfiles in os.walk(basedir,topdown=True, followlinks=False):
-        if root==basedir: 
+        if root==basedir:
             root = ""
         else:
             root = os.path.relpath(root, basedir)
@@ -219,7 +223,7 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                 manifestfile.write(hh+" "+filename+"\n")
                 message+=hh+" "+filename+"\n"
                 if debug:
-                    print "Adding:",hh+" "+filename
+                    print("Adding:",hh+" "+filename)
         keepdirs = []
         for d in dirs:
             fulldir = os.path.join(root,d)
@@ -230,7 +234,7 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                 if d.startswith("ht.task.") or os.path.exists(os.path.join(fulldir,'ht.config')):
                     if force or (not os.path.exists(os.path.join(fulldir,'ht.manifest.bz2'))):
                         submanifestfile = bz2.BZ2File(os.path.join(fulldir,'ht.tmp.manifest.bz2'),'w')
-                        print "Generating manifest:",os.path.join(fulldir,'ht.manifest.bz2')
+                        print("Generating manifest:",os.path.join(fulldir,'ht.manifest.bz2'))
                         manifest_dir(fulldir,submanifestfile,os.path.join(fulldir,'ht.config'),keydir,sk,pk)
                         submanifestfile.close()
                         os.rename(os.path.join(fulldir,'ht.tmp.manifest.bz2'),os.path.join(fulldir,'ht.manifest.bz2'))
@@ -238,20 +242,20 @@ def manifest_dir(basedir,manifestfile, excludespath, keydir, sk,pk,debug=False, 
                     manifestfile.write(hh+" "+fulldir+"/\n")
                     message+=hh+" "+fulldir+"/\n"
                     if debug:
-                        print "Adding:",hh+" "+fulldir+"/ "
+                        print("Adding:",hh+" "+fulldir+"/ ")
                 else:
                     keepdirs += [d]
         unsorteddirs[:] = keepdirs
 
-    #print "===="+message+"===="
-    
+    #print("===="+message+"====")
+
     sig = signature(message,sk,pk)
     b64sig = base64.b64encode(sig)
 
     manifestfile.write("\n")
     manifestfile.write(b64sig)
     manifestfile.write("\n")
-    
+
 argcount=1
 if sys.argv[argcount] == '-f':
     force=True
@@ -265,7 +269,7 @@ if sys.argv[argcount] == '--':
 basedir = sys.argv[argcount]
 keydir=os.path.join(basedir,'ht.project','keys')
 if (not force) and os.path.exists(os.path.join('ht.project','manifest.bz2')):
-    print "Manifest already exist. Nothing to do. (use -f to force regeneration)"
+    print("Manifest already exist. Nothing to do. (use -f to force regeneration)")
     exit(0)
 
 f = open(os.path.join(keydir,'key1.priv'),"r")

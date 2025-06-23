@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 #from setuptools.command.build import build #sigh...
-from distutils.command.build import build 
+from distutils.command.build import build
 import distutils.spawn
 from codecs import open
 from os import path
@@ -15,9 +15,16 @@ here = path.abspath(path.dirname(__file__))
 sys.path.insert(1, os.path.join(here,'src/httk/config'))
 import config
 
+buildpath = path.join(here, 'BUILD')
+if os.path.exists(buildpath):
+    with open(buildpath, encoding='utf-8') as f:
+        buildtag = '.'+f.read()
+else:
+    buildtag = ''
+
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
-   
+
 class HttkDevelopCommand(develop):
     description = "Development installation of httk"
     def run(self):
@@ -68,14 +75,14 @@ class HttkBuildCommand(build):
         else:
             f.write('root = \"' + self.httkroot + '\"\n')
         f.close()
-        
+
 setup(
      cmdclass={
          'develop': HttkDevelopCommand,
          'install': HttkInstallCommand,
          'build': HttkBuildCommand,
     },
-    
+
     # This is the name of your project. The first time you publish this
     # package, this name will be registered for you. It will determine how
     # users can install this project, e.g.:
@@ -95,7 +102,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=config.version,  # Required
+    version=config.version + buildtag,  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -158,12 +165,18 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
+        #'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         #'Programming Language :: Python :: 3',
         #'Programming Language :: Python :: 3.4',
         #'Programming Language :: Python :: 3.5',
         #'Programming Language :: Python :: 3.6',
+        #'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
 
     # This field adds keywords for your project which will appear on the
@@ -183,7 +196,7 @@ setup(
     #
     packages=find_packages('src',exclude=['contrib', 'docs', 'tests']),  # Required
     package_dir={'': 'src'},
-    
+
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -215,7 +228,7 @@ setup(
     #},
 
     include_package_data=True,
-    
+
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files
@@ -252,7 +265,3 @@ setup(
     #    'Source': 'https://github.com/rartino/httk',
     #},
 )
-
-
-
-

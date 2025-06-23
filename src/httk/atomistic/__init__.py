@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -25,24 +25,26 @@ Classes and utilities for dealing with high-throughput calculations of atomistic
 import httk
 
 #from httk.core import *
-from structure import Structure, StructureRef, StructureTag
-from unitcellstructure import UnitcellStructure
-from representativestructure import RepresentativeStructure
-from representativesites import RepresentativeSites
-from unitcellsites import UnitcellSites
-import formulautils
-import supercellutils
-from cell import Cell
+from httk.atomistic.structure import Structure, StructureRef, StructureTag
+from httk.atomistic.unitcellstructure import UnitcellStructure
+from httk.atomistic.representativestructure import RepresentativeStructure
+from httk.atomistic.representativesites import RepresentativeSites
+from httk.atomistic.unitcellsites import UnitcellSites
+from httk.atomistic import formulautils
+from httk.atomistic import supercellutils
+from httk.atomistic.cell import Cell
 #from representativesitesstructure import RepresentativeSitesStructure
-from assignments import Assignments
-from spacegroup import Spacegroup
-from compound import Compound, CompoundStructure, CompoundRef, CompoundTag, ComputationRelatedCompound
-from structurephasediagram import StructurePhaseDiagram
+from httk.atomistic.assignments import Assignments
+from httk.atomistic.spacegroup import Spacegroup
+from httk.atomistic.compound import Compound, CompoundStructure, CompoundRef, CompoundTag, ComputationRelatedCompound
+from httk.atomistic.structurephasediagram import StructurePhaseDiagram
+
+from httk.atomistic.wavefunction import PlaneWaveFunctions
 
 import io as _atomistic_io
 
 __all__ = ["Structure", "Cell", "RepresentativeSites", "UnitcellSites", "Assignments",
            "Compound", "CompoundStructure", "StructurePhaseDiagram", "StructureRef", "StructureTag",
-           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure"]
+           "CompoundTag", "CompoundRef", "UnitcellStructure", "RepresentativeStructure", "PlaneWaveFunctions"]
 
-import atomisticio
+from httk.atomistic import atomisticio

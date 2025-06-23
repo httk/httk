@@ -20,7 +20,6 @@ fi
 (cat - <<EOF
 #!/bin/bash
 #SBATCH -A $SLURM_PROJECT
-#SBATCH -p $SLURM_QUEUE
 #SBATCH -N $SLURM_NODES
 #SBATCH -t $SLURM_TIMEOUT
 
@@ -39,11 +38,11 @@ HOSTNAME=\$(hostname)
 
 echo "RUN STARTS: \$DATE in dir \$INITIAL on node: \$HOSTNAME"
 
-source "\$HTTK_DIR/setup.shell"
+source "\$HTTK_DIR/init.shell"
 
-"\$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT"
+"\$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT" "$@"
 
 ENDDATE=\$(date +"%Y-%m-%d_%H.%M.%S")
-echo "RUN ENDS: \$ENDDATE" 
+echo "RUN ENDS: \$ENDDATE"
 EOF
 ) | ssh "$USERNAME"@"$REMOTE_HOST" "mkdir -p \"${REMOTE_HTTK_DIR/#\~\//}/Runs/\"$QUEUE\"/ht.taskmgrstats\"; cd \"${REMOTE_HTTK_DIR/#\~\//}/Runs/\"$QUEUE\"/ht.taskmgrstats\"; cat - > ht.tmp.batch.q; for (( i=0; i<$NUMBER; i++)); do sbatch ht.tmp.batch.q; done"

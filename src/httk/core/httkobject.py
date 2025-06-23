@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import inspect
-from .crypto import tuple_to_hexhash
-from .basic import is_sequence
+from httk.core.crypto import tuple_to_hexhash
+from httk.core.basic import is_sequence
 
 
 class HttkTypedProperty(property):
@@ -47,14 +47,14 @@ def httk_typed_property_resolve(cls, propname):
             if not isinstance(resolve, (HttkPluginWrapper, HttkPluginPlaceholder)):
                 return resolve.property_type()
     raise AttributeError
-          
+
 
 def httk_typed_init(t, **kargs):
     def wrapfactory(func):
         func.typed_init = (lambda x=(t, kargs): x)
         return func
     return wrapfactory
-            
+
 
 def httk_typed_init_delayed(t, **kargs):
     def wrapfactory(func):
@@ -65,25 +65,28 @@ def httk_typed_init_delayed(t, **kargs):
 
 class HttkObject(object):
 
-    @classmethod     
+    @classmethod
     def types(cls):
         try:
-            return cls.types_resolved
+            # Make sure the cached types_resolved is not
+            # outdated.
+            if cls.types_resolved['name'] == cls.__name__:
+                return cls.types_resolved
         except Exception:
             pass
-        
+
         cls.types_resolved = {}
         typedata = cls.__init__.typed_init()
         inputkeydict = typedata[0]
         data = typedata[1]
-        params = cls.__init__.func_code.co_varnames[1:]
-        
+        params = cls.__init__.__code__.co_varnames[1:]
+
         keys = []
         for param in params:
             if param in inputkeydict:
                 keys += [(param, inputkeydict[param])]
-            
-        data['keys'] = keys    
+
+        data['keys'] = keys
         data['name'] = cls.__name__
         data['keydict'] = dict(keys)
         data['init_keydict'] = dict(keys)
@@ -94,7 +97,7 @@ class HttkObject(object):
             data['skip'] = []
 
         if not 'hexhash' in data['skip'] and not 'hexhash' in data['index']:
-            data['index'] += ['hexhash']            
+            data['index'] += ['hexhash']
 
         for a in [x for x in dir(cls) if not x.startswith('__')]:
             if a in data['skip']:
@@ -104,14 +107,14 @@ class HttkObject(object):
                 data['derived'] += [(a, resolve)]
                 if a in params:
                     data['init_keydict'][a] = resolve
-                #print "SETTING TYPES: CLS",cls.__name__," DATA:",a
+                #print("SETTING TYPES: CLS",cls.__name__," DATA:",a)
             except AttributeError:
                 pass
         data['derived_keydict'] = dict(data['derived'])
 
         cls.types_resolved = data
         return data
-              
+
     def to(self, newtype):
         method = "from_"+self.__class__.name
         if hasattr(newtype, method):
@@ -124,9 +127,9 @@ class HttkObject(object):
     def new_from(cls, other):
         method = "from_"+other.__class__.__name__
         if hasattr(cls, method):
-            return getattr(self, method)(other)
+            return getattr(cls, method)(other)
         method = "to_"+type.__name__
-        if hasattr(self, method):
+        if hasattr(cls, method):
             return getattr(other, method)()
 
     @classmethod
@@ -148,17 +151,17 @@ class HttkObject(object):
     def to_tuple(self, use_hexhash=False):
         self.types_resolved = {}
         keydict = self.types()['keydict']
-        params = self.__init__.func_code.co_varnames[1:]
-        
+        params = self.__init__.__code__.co_varnames[1:]
+
         keys = [self.types()['name']]
         for param in params:
             if param in keydict:
                 val = getattr(self, param)
-                try:                   
+                try:
                     if issubclass(keydict[param], HttkObject):
                         val = keydict[param].use(val)
                 except TypeError as e:
-                    pass                
+                    pass
                 if use_hexhash and hasattr(val, 'hexhash'):
                     val = val.hexhash
                 elif hasattr(val, 'to_tuple'):
@@ -176,15 +179,15 @@ class HttkObject(object):
                 keys += [(param, val)]
 
         keys = tuple(keys)
-        #print "TUPLE:",keys
+        # print("TUPLE:",keys)
         return keys
-    
+
     @httk_typed_property(str)
     def hexhash(self):
         if not hasattr(self, '_hexhash') or self._hexhash is None:
             t = self.to_tuple(use_hexhash=True)
             self._hexhash = tuple_to_hexhash(t)
-            
+
         return self._hexhash
 
     def get_codependent_data(self):
@@ -211,7 +214,7 @@ class HttkPluginWrapper(object):
         if obj is None:
             return self
         return self.plugin(obj)
-          
+
 
 class HttkPlugin(object):
 
@@ -219,7 +222,7 @@ class HttkPlugin(object):
         name = "plugin_"+cls.__name__
         try:
             return getattr(main_instance, name)
-        except AttributeError:            
+        except AttributeError:
             obj = object.__new__(cls)
             setattr(main_instance, name, obj)
             obj.plugin_init(main_instance)
@@ -230,19 +233,17 @@ class HttkPluginPlaceholder(object):
 
     def __init__(self, plugininfo=None):
         self.plugininfo = plugininfo
-        
-    def __getattr__(self, static, objtype=None):        
+
+    def __getattr__(self, static, objtype=None):
         if self.plugininfo is None:
-            raise Exception("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using an appropriate python import.")
+            raise AttributeError("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using an appropriate python import.")
         else:
-            raise Exception("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using: "+self.plugininfo)
+            raise AttributeError("HttkPluginPlaceholder: Attempt to call a static plugin method. You need to load the appropriate plugin first using: "+self.plugininfo)
 
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
         if self.plugininfo is None:
-            raise Exception("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using an appropriate python import.")
+            raise AttributeError("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using an appropriate python import.")
         else:
-            raise Exception("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using: "+self.plugininfo)
-
-            
+            raise AttributeError("HttkPluginPlaceholder: Attempt to use plugin method on object of class:"+str(obj.__class__)+". You need to load the appropriate plugin first using: "+self.plugininfo)

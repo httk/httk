@@ -2,14 +2,14 @@
 
 # This is the API with which you interact with the httk task system and taskmanager
 
-#### A few minor utility routines 
+#### A few minor utility routines
 
 # Floating point arithemtic in BASH that can be very helpful
-# HT_FCALC: Make a floating point calculation, 
+# HT_FCALC: Make a floating point calculation,
 function HT_FCALC {
     local VARS="$@"
     VARS="$VARS"
-    awk "function abs(_value) {return sqrt(_value^2)} 
+    awk "function abs(_value) {return sqrt(_value^2)}
          function max(_a,_b) {if(_a>_b) {return _a} else {return _b} }
          function min(_a,_b) {if(_a>_b) {return _b} else {return _a} }
          BEGIN {printf(\"%.6g\n\",($VARS))}"
@@ -18,7 +18,7 @@ function HT_FCALC {
 function HT_ECALC {
     local VARS="$@"
     VARS="$VARS"
-    awk "function abs(_value) {return sqrt(_value^2)} 
+    awk "function abs(_value) {return sqrt(_value^2)}
          function max(_a,_b) {if(_a>_b) {return _a} else {return _b} }
          function min(_a,_b) {if(_a>_b) {return _b} else {return _a} }
          BEGIN {printf(\"%.14e\n\",($VARS))}"
@@ -27,7 +27,7 @@ function HT_ECALC {
 function HT_FTEST {
     local VARS="$@"
     VARS="$VARS"
-    awk "function abs(_value) {return sqrt(_value^2)} 
+    awk "function abs(_value) {return sqrt(_value^2)}
          function max(_a,_b) {if(_a>_b) {return _a} else {return _b} }
          function min(_a,_b) {if(_a>_b) {return _b} else {return _a} }
          BEGIN {if($1) { exit 0 } else { exit 1 } }"
@@ -48,14 +48,14 @@ function HT_PATH_PREFIX {
 	COUNT=$((COUNT+1))
     done
     if [ "$FROM" == "-d" ]; then
-	mkdir "${PREFIX}${COUNT}" 
+	mkdir "${PREFIX}${COUNT}"
     elif [ "$FROM" == "-f" ]; then
-	touch "${PREFIX}${COUNT}" 
+	touch "${PREFIX}${COUNT}"
     else
 	mv "$FROM" "${PREFIX}${COUNT}"
     fi
     if [ "$?" == 0 ]; then
-	echo "${PREFIX}${COUNT}" 
+	echo "${PREFIX}${COUNT}"
     else
 	return "$?"
     fi
@@ -69,9 +69,9 @@ function HT_SPLIT_FIELDS {
 }
 
 #### CENTRAL HT ROUTINES
-# HT_TASK_INIT 
+# HT_TASK_INIT
 # Put
-#   HT_TASK_INIT "$@" 
+#   HT_TASK_INIT "$@"
 # at the top of your runscript (right after sourcing ht_tasks_api.sh). It sets the variable
 # STEP to be the next step to execute.
 function HT_TASK_INIT {
@@ -97,11 +97,11 @@ function HT_TASK_INIT {
 
 # Create subtasks to your task
 # Usage:
-#   HT_TASK_CREATE callback location step taskset prio 
+#   HT_TASK_CREATE callback location step taskset prio
 # Reads task parameters as lines on stdin. First column should always be the subtask id.
-# For each line, calls callback with this line as paramter, with the 
+# For each line, calls callback with this line as paramter, with the
 # current working directory set to a new apropriate subtask directory.
-# 
+#
 # Other parameters:
 #   location: path to where to place the subtasks
 #   step: the starting step for the subtasks
@@ -131,7 +131,7 @@ function HT_TASK_CREATE {
 	if [ -e "$LOCATION/ht.task.${TASKSET}.${TASKID}".* ]; then
 	    # If the subtask already exis, we assume it is already ok, and the
 	    # owning job has been restarted, in which case we shouldn't touch
-            # this one in case it is already running. All should be well, just 
+            # this one in case it is already running. All should be well, just
             # continue onwards with trying to create the other subtask jobs
 	    continue
 	fi
@@ -143,7 +143,7 @@ function HT_TASK_CREATE {
 	    echo "Could not create directory: $LOCATION/ht.tmp.task.any.$ID.$STEP.$PRIO.waitstart"
 	    exit 1
 	fi
-	#ln -s "$HT_TASK_REL_TOP_DIR/ht_run" "$LOCATION/ht.tmp.task.any.$ID.$STEP.$PRIO.waitstart/ht_run" 
+	#ln -s "$HT_TASK_REL_TOP_DIR/ht_run" "$LOCATION/ht.tmp.task.any.$ID.$STEP.$PRIO.waitstart/ht_run"
 	(
 	    cd "$LOCATION/ht.tmp.task.${TASKSET}.${TASKID}.${STEP}.0.none.${PRIO}.waitstart"
 	    if [ -n "$CALLBACK" ]; then
@@ -203,13 +203,13 @@ function HT_TASK_LOG {
 # need to do several things 'atomicly', i.e., if the task suddenly is stopped,
 # these things need to have either ALL have happened, or NONE of them.
 # (what is known as a transaction)
-# Call HT_TASK_ATOMIC_SECTION_START. After this the current directory is a 
+# Call HT_TASK_ATOMIC_SECTION_START. After this the current directory is a
 # subdirectory of the run directory. Create files here (accessing files in the run
-# directory via ..). Once finished, call one of 
+# directory via ..). Once finished, call one of
 #   HT_TASK_ATOMIC_SECTION_END_NEXT <next step>
 #   HT_TASK_ATOMIC_SECTION_END_NEXT_SUBTASKS <next step>
 #   HT_TASK_ATOMIC_SECTION_END_NEXT_FINISHED
-# which completes the atomic step and returns. 
+# which completes the atomic step and returns.
 function HT_TASK_ATOMIC_SECTION_START {
     local TMPDIR=$(HT_PATH_PREFIX -d ht.tmp.atomic.)
     cd "$TMPDIR"
@@ -228,30 +228,30 @@ function HT_TASK_ATOMIC_SECTION_END {
 function HT_TASK_ATOMIC_SECTION_END_NEXT {
     NEXTSTATE="$1"
     echo "$NEXTSTATE" > ht.nextstep
-    HT_TASK_ATOMIC_SECTION_END 
+    HT_TASK_ATOMIC_SECTION_END
     HT_TASK_ATOMIC_EXEC
     HT_TASK_NEXT "$NEXTSTATE"
 }
 function HT_TASK_ATOMIC_SECTION_END_SUBTASKS {
     NEXTSTATE="$1"
     echo "$NEXTSTATE" > ht.nextstep
-    HT_TASK_ATOMIC_SECTION_END 
+    HT_TASK_ATOMIC_SECTION_END
     HT_TASK_ATOMIC_EXEC
     HT_TASK_SUBTASKS "$NEXTSTATE"
 }
 function HT_TASK_ATOMIC_SECTION_END_FINISHED {
     echo "ht_finished" > ht.nextstep
-    HT_TASK_ATOMIC_SECTION_END 
+    HT_TASK_ATOMIC_SECTION_END
     HT_TASK_ATOMIC_EXEC
     HT_TASK_FINISHED
 }
 
-# One may think this isn't really needed, but it is really convinient to be 
+# One may think this isn't really needed, but it is really convinient to be
 # able to find out inside an atomic section that things have gone wrong and
 # we must end in a broken state.
 function HT_TASK_ATOMIC_SECTION_END_BROKEN {
     echo "ht_broken" > ht.nextstep
-    HT_TASK_ATOMIC_SECTION_END 
+    HT_TASK_ATOMIC_SECTION_END
     HT_TASK_ATOMIC_EXEC
     HT_TASK_BROKEN
 }
@@ -325,18 +325,18 @@ function HT_TASK_RUN_CONTROLLED {
 	echo "HT_TASK_RUN_CONTROLLED: Starting with PID $BASHPID and timeout $TIMEOUT" >&2
 
 	# Timeout watchdog subshell
-	(   
+	(
 	    SIGNAL=0
 	    trap "echo HT_TASK_RUN_CONTROLLED: TIMEOUT watchdog process got term signal.; SIGNAL=1" TERM
 	    trap "echo HT_TASK_RUN_CONTROLLED: TIMEOUT watchdog process got int signal.; SIGNAL=1" INT
 	    #trap " " TERM
-	    sleep "$TIMEOUT" & 
-	    SP=$! 
+	    sleep "$TIMEOUT" &
+	    SP=$!
 	    wait
 	    RETCODE=$?
-	    echo "HT_TASK_RUN_CONTROLLED: TIMEOUT watchdog wait stopped with code: $RETCODE"; 
+	    echo "HT_TASK_RUN_CONTROLLED: TIMEOUT watchdog wait stopped with code: $RETCODE";
 	    if [ "$RETCODE" -gt "127" ]; then
-	    	kill -TERM "$SP" >/dev/null 2>&1; 
+	    	kill -TERM "$SP" >/dev/null 2>&1;
 	    fi
 	    if [ "$SIGNAL" == 0 ]; then
 		kill -USR2 "$HT_SIGNAL_PID"
@@ -377,8 +377,8 @@ function HT_TASK_RUN_CONTROLLED {
 	    setsid "$@" 2>&1 | tee stdout.out &
 	fi
 	PROCESS="$(jobs -p | grep -v "$EXCLUDEPIDS")"
-	echo "HT_TASK_RUN_CONTROLLED: Started main process with pid: $PROCESS" 
-	
+	echo "HT_TASK_RUN_CONTROLLED: Started main process with pid: $PROCESS"
+
 	# Saftey protection ensuring we don't leave spawned processes if this script breaks
 	trap "echo got EXIT; kill $TIMEOUTPID; kill -9 -$PROCESS;" EXIT
 
@@ -403,7 +403,7 @@ function HT_TASK_RUN_CONTROLLED {
 	sleep 1
 
 	if kill -TERM "$TIMEOUTPID" >/dev/null 2>&1; then
-	    echo "HT_TASK_RUN_CONTROLLED: Timeout process pid $TIMEOUTPID was still alive (killed now)"   
+	    echo "HT_TASK_RUN_CONTROLLED: Timeout process pid $TIMEOUTPID was still alive (killed now)"
 	else
 	    echo "HT_TASK_RUN_CONTROLLED: Timeout process NOT alive."
 	fi
@@ -422,7 +422,7 @@ function HT_TASK_RUN_CONTROLLED {
 	fi
 
 	echo "HT_TASK_RUN_CONTROLLED: Waiting for all checker processes to catch up and finish."
-	wait 
+	wait
 
 	trap - EXIT
 
@@ -436,7 +436,7 @@ function HT_TASK_RUN_CONTROLLED {
 }
 
 function HT_TASK_FOLLOW_FILE {
-    # This appears to be the most portable way of doing this, while still staying reasonably 
+    # This appears to be the most portable way of doing this, while still staying reasonably
     # efficient (i.e., seeking to the end), sigh...
     perl -e '
       use strict;
@@ -472,13 +472,13 @@ function HT_TASK_FOLLOW_FILE {
             print "HT_TIMEOUT (NO FILE)\n";
             $finished = 1;
           }
-        } 
+        }
       }
 
       if(-e $filename) {
         open($filevar,$filename);
-        seek($filevar, 0, 0);      
-        while (!$finished) {    
+        seek($filevar, 0, 0);
+        while (!$finished) {
   	  for ($curpos = tell($filevar); !$finished && ($line = <$filevar>); $curpos = tell($filevar)) {
 	      print $line;
               #print { STDERR } "CHECK:",$filename,":",$line,"\n";
@@ -492,9 +492,11 @@ function HT_TASK_FOLLOW_FILE {
               print "HT_TIMEOUT\n";
               $finished = 1;
             }
-          } 
+          }
           if(!$noexitpid && !kill 0, $exitpid) { $finished = 1 };
           #print { STDERR } "CHECK:",$filename,"\n";
+	  #select()->flush();
+	  $|=1;
 	  seek($filevar, $curpos, 0);
         }
         # Make sure we have seen the last part
@@ -536,7 +538,7 @@ function HT_TASK_STORE_VAR {
 }
 
 function HT_TASK_CLEANUP {
-    rm -f ht.vars ht.controlled.msgs 
+    rm -f ht.vars ht.controlled.msgs
     rm -rf ht.tmp.*
 }
 
@@ -611,4 +613,3 @@ function HT_FIND_NBR_NODES {
 	echo 1
     fi
 }
-

@@ -26,7 +26,7 @@ assignments = ['Pb', 'Ti', 'O']
 
 struct = Structure.create(uc_basis=basis, uc_reduced_coordgroups=coordgroups, assignments=assignments, uc_volume=62.79)
 
-print "Structure data: formula:", struct.formula+" ("+struct.anonymous_formula+")", ", volume:", float(struct.uc_volume), ", basis:", struct.uc_basis.to_floats()
+print("Structure data: formula:", struct.formula+" ("+struct.anonymous_formula+")", ", volume:", float(struct.uc_volume), ", basis:", struct.uc_basis.to_floats())
 
 struct.vis.show()
 struct.vis.wait()

@@ -15,44 +15,36 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-httk core module
+import httk.core.basic
+import httk.core.citation
+import httk.core.code
+import httk.core.computation
+import httk.core.console
+import httk.core.crypto
+import httk.core.ed25519
+import httk.core.geometry
+import httk.core.httkobject
+import httk.core.ioadapters
+import httk.core.miniparser
+import httk.core.project
+import httk.core.reference
+import httk.core.signature
+import httk.core.template
+import httk.core.vectors
 
-Basic utilities and data definitions that are used throughout the httk code.
-
-A few of the most important components:
-  fracvector: our general matrix object used to allow exact representation of arrays to allow, e.g., exact matching 
-              of coordinates to existing structures in the database.
-
-  ioadapters: our classes for generic handling of IO to files, streams, etc.
-  
-  structure: our basic definition of a "structure of atoms"
-"""
-
-import sys
-try:    
-    python_major_version = sys.version_info[0]
-    python_minor_version = sys.version_info[1]
-except Exception:
-    raise Exception("Python version too old. Httk appear to be running on a version older than python 2.0!")
-
-import citation
-citation.add_src_citation("httk", "Rickard Armiento")
-from citation import dont_print_citations_at_exit, print_citations_at_exit
-
-from basic import int_to_anonymous_symbol, anonymous_symbol_to_int, is_sequence, is_unary, flatten, parse_parexpr, create_tmpdir
-from basic import destroy_tmpdir, tuple_to_str, mkdir_p, micro_pyawk, breath_first_idxs, nested_split, rewindable_iterator
-from code import Code
-from computation import Computation, Result, ComputationRelated, ComputationProject
-from reference import Author, Reference
-from project import Project, ProjectRef, ProjectTag
-import crypto
-from vectors import FracVector, FracScalar, MutableFracVector, vectormath
-from signature import Signature, SignatureKey
-
-from ioadapters import IoAdapterFileReader, IoAdapterFileWriter, IoAdapterFileAppender, IoAdapterString, IoAdapterStringList, IoAdapterFilename
-from httkobject import HttkObject, httk_typed_property, httk_typed_init, httk_typed_property_delayed, httk_typed_init_delayed
-from httkobject import HttkPluginWrapper, HttkPlugin, HttkPluginPlaceholder
-
-import console
-
+from httk.core.basic import *
+from httk.core.citation import *
+from httk.core.code import *
+from httk.core.computation import *
+from httk.core.console import *
+from httk.core.crypto import *
+from httk.core.ed25519 import *
+from httk.core.geometry import *
+from httk.core.httkobject import *
+from httk.core.ioadapters import *
+from httk.core.miniparser import *
+from httk.core.project import *
+from httk.core.reference import *
+from httk.core.signature import *
+from httk.core.template import *
+from httk.core.vectors import *

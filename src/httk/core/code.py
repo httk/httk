@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,8 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .httkobject import HttkObject, httk_typed_init
-from .reference import Reference
+from httk.core.httkobject import HttkObject, httk_typed_init
+from httk.core.reference import Reference
 
 
 class Code(HttkObject):
@@ -41,7 +41,7 @@ class Code(HttkObject):
         self._codependent_data = []
         self._codependent_info = [{'class': CodeTag, 'column': 'code', 'add_method': 'add_tags'},
                                   {'class': CodeRef, 'column': 'code', 'add_method': 'add_refs'}]
-        
+
     @classmethod
     def create(cls, name, version, refs=None, tags=None):
         """
@@ -107,15 +107,15 @@ class Code(HttkObject):
     def add_refs(self, refs):
         for ref in refs:
             self.add_ref(ref)
-    
-    
+
+
 class CodeTag(HttkObject):
 
     @httk_typed_init({'code': Code, 'tag': str, 'value': str},
-                     index=['code', 'tag', ('tag', 'value'), ('structure', 'tag', 'value')], skip=['hexhash'])
-    def __init__(self, structure, tag, value):
+                     index=['code', 'tag', ('tag', 'value'), ('code', 'tag', 'value')], skip=['hexhash'])
+    def __init__(self, code, tag, value):
         self.tag = tag
-        self.structure = structure
+        self.code = code
         self.value = value
 
     def __str__(self):
@@ -131,12 +131,12 @@ class CodeRef(HttkObject):
 
     def __str__(self):
         return str(self.reference)
-    
-    
+
+
 def main():
     pass
-    
+
 if __name__ == "__main__":
     main()
-    
-    
+
+

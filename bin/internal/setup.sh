@@ -5,7 +5,7 @@ function HTTK_PROJECT_CFG() {
     KEY=$2
     awk -F "=" "/\[$CATEGORY\]/ {cat=1}
          cat==1 && /^ *$KEY *=/ {print \$2; exit}
-        " "$HTTK_PROJECT_DIR/ht.project/config" 
+        " "$HTTK_PROJECT_DIR/ht.project/config"
 }
 
 if [ ! -e ~/".httk/config" ]; then
@@ -16,7 +16,7 @@ if [ ! -e ~/".httk/config" ]; then
     if [ "$YESNO" != "y" -a "$YESNO" != "Y" -a "$YESNO" != "yes" -a "$YESNO" != "YES" ]; then
 	echo "User cancelled. Nothing done."
 	exit 1
-    fi    
+    fi
     DIRNAME=$(dirname "$0")
     HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
     "${HTTK_BIN_PATH}/httk-setup"
@@ -44,7 +44,7 @@ exit 1
 HTTK_REL_DIR=$(
     DIR=""
     RELPATH="./"
-    while [ "$DIR" != "/" ]; do    
+    while [ "$DIR" != "/" ]; do
     DIR="$(pwd -P)"
     if [ -e ht.project ]; then
 	echo "$RELPATH"
@@ -61,7 +61,3 @@ if [ -n "$HTTK_PROJECT_DIR" ]; then
     HTTK_PROJECT_DIR_NAME=$(basename "$HTTK_PROJECT_DIR")
     HTTK_PROJECT_NAME=$(HTTK_PROJECT_CFG "main" "project_name")
 fi
-
-
-
-

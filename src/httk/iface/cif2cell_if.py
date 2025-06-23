@@ -16,13 +16,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
-from fractions import Fraction
 
 from httk.atomistic.data import periodictable
 from httk.core import FracVector
-import httk  
+import httk
 from httk.atomistic import *
 
+try:
+    from cfractions import Fraction
+except:
+    from fractions import Fraction
 
 def out_to_struct(ioa):
     """
@@ -100,14 +103,14 @@ def out_to_struct(ioa):
     
             if newcoord in results[seenstr]:
                 idx = results[seenstr][newcoord]
-                #print "OLD",results[occstr],idx
+                #print("OLD",results[occstr],idx)
                 results[occstr][idx].append(occup)
             else:
                 results[seenstr][newcoord] = results[idxstr]
                 results[coordstr].append(newcoord)
                 results[occstr].append([occup])
                 results[idxstr] += 1
-                #print "NEW",results[occstr],results[idxstr]
+                #print("NEW",results[occstr],results[idxstr])
                           
     def read_coords(results, match):
         if results['in_input']:
@@ -130,14 +133,14 @@ def out_to_struct(ioa):
 
         if newcoord in results[seenstr]:
             idx = results[seenstr][newcoord]
-            #print "XOLD",results[occstr],idx
+            #print("XOLD",results[occstr],idx)
             results[occstr][idx].append(occup)
         else:
             results[seenstr][newcoord] = results[idxstr]
             results[coordstr].append(newcoord)
             results[occstr].append([occup])
             results[idxstr] += 1
-            #print "XNEW",results[occstr],results['idx']
+            #print("XNEW",results[occstr],results['idx'])
 
         #if results['in_input']:
         #    results['sgcoords'].append(newcoord)
@@ -210,26 +213,26 @@ def out_to_struct(ioa):
         results['source'] = match.group(1).rstrip('.')
                 
     out = httk.basic.micro_pyawk(ioa, [
-        ['^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
-        ['^ *CIF2CELL ([0-9.]*)', None, read_version],
-        ['^ *Output for (.*\)) *$', None, read_name],
-        ['^ *Database reference code: *([0-9]+)', None, read_id],
-        ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
-        ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
-        ['^ *$', lambda results, match: results['in_coords'], coords_stop],
-        ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
-        ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
-        ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
+        [r'^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
+        [r'^ *CIF2CELL ([0-9.]*)', None, read_version],
+        [r'^ *Output for (.*\)) *$', None, read_name],
+        [r'^ *Database reference code: *([0-9]+)', None, read_id],
+        [r'^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
+        [r'^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
+        [r'^ *$', lambda results, match: results['in_coords'], coords_stop],
+        [r'^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
+        [r'^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
+        [r'^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
         #            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
-        ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
-        ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
-        ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
-        ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
-        ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
-        ['^ *OUTPUT CELL INFORMATION *$', None, output_start],
-        ['^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
-        ['^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
-        ['CIF file exported from +(.*) *$', None, read_source]
+        [r'^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
+        [r'^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
+        [r'^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
+        [r'^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
+        [r'^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
+        [r'^ *OUTPUT CELL INFORMATION *$', None, output_start],
+        [r'^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
+        [r'^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
+        [r'CIF file exported from +(.*) *$', None, read_source]
           
     ], debug=False, results=results)
 
@@ -293,7 +296,7 @@ def out_to_struct(ioa):
 
     # A bit of santiy check to trigger on possible bugs from cif2cell
     if len(struct.uc_sites.counts) != len(struct.rc_sites.counts):
-        print struct.uc_sites.counts, struct.rc_sites.counts
+        print(struct.uc_sites.counts, struct.rc_sites.counts)
         raise Exception("cif2cell_if.out_to_struct: non-sensible parsing of cif2cell output.")
 
     #if 'volume' in out:
@@ -304,10 +307,10 @@ def out_to_struct(ioa):
 
     #struct = httk.Structure.create(cell,occupancies=out['occupancies'],coords=coords,volume=vol,tags=tags,hall_symbol=hall_symbol, refs=refs)
     #struct._sgstructure = httk.SgStructure.create(a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma, occupancies=out['sgoccupancies'], coords=sgcoords, hall_symbol=sghall_symbol)
-    #print "HERE WE ARE:",out['sgoccupancies'],sgcoords,sghall_symbol
-    #print "HERE WE ARE:",out['occupancies'],coords
+    #print("HERE WE ARE:",out['sgoccupancies'],sgcoords,sghall_symbol)
+    #print("HERE WE ARE:",out['occupancies'],coords)
     #struct = httk.Structure.create(cell, volume=vol, unique_occupations=out['sgoccupancies'], uc_occupations=out['occupancies'], unique_reduced_occupationscoords=sgcoords, uc_reduced_occupationscoords=coords, spacegroup=sghall_symbol, tags=tags, refs=refs, periodicity=0)
-    #print "HERE",sgcoords, coords
+    #print("HERE",sgcoords, coords)
     #counts = [len(x) for x in out['occupancies']]
     #p1structure = httk.Structure.create(cell,occupancies=out['occupancies'],coords=coords,volume=vol,tags=tags, refs=refs, periodicity=0)
     #struct.set_p1structure(p1structure)

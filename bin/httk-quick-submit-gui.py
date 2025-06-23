@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 
 # This assumes you have put this script in your httk/bin directory,
 # You can override it below
@@ -9,8 +10,12 @@ PATH_TO_HTTK_BIN_DIR=os.path.dirname(os.path.realpath(__file__))
 # Example:
 #PATH_TO_HTTK_BIN_DIR="/home/test/Local/httk/bin"
 
-from Tkinter import *
-import Tkinter as tki
+if sys.version_info[0] == 2:
+    from Tkinter import *
+    import Tkinter as tki
+else:
+    from tkinter import *
+    import tkinter as tki
 from subprocess import call
 
 class TextDialog(object):
@@ -34,19 +39,19 @@ class TextboxDialog(object):
 
         DIR=os.getcwd()
         name=os.path.basename(DIR)
-        
+
         Label(root, text="Path to project").pack()
         self.pe = Entry(root,width=40)
         self.pe.insert(END,DIR)
         self.pe.pack(padx=5)
-        
+
         Label(root, text="Project name").pack()
         self.e = Entry(root,width=40)
         self.e.insert(END,name)
         self.e.pack(padx=5)
 
         Label(root, text="Project description").pack()
-        
+
     # create a Frame for the Text and Scrollbar
         txt_frm = tki.Frame(root, width=600, height=300)
         txt_frm.pack(fill="both", expand=True)
@@ -86,11 +91,11 @@ class TextboxDialog(object):
         scrollb = tki.Scrollbar(reftxt_frm, command=self.reftxt.yview)
         scrollb.grid(row=0, column=1, sticky='nsew')
         self.reftxt['yscrollcommand'] = scrollb.set
-        
+
         b = Button(root, text="OK", command=self.ok)
         b.pack(pady=5)
 
-        
+
     def ok(self):
         self.path = self.pe.get()
         self.name = self.e.get()
@@ -108,11 +113,11 @@ project_description=d.description.replace("\n","\n  ")
 references=d.references
 
 if os.path.exists(os.path.join(project_path,"ht.project")):
-    print "This is already a httk project."
-    print "Either remove ht.project in the directory and re-run this script,"
-    print "or simply go to the directory and run httk-submit"
+    print("This is already a httk project.")
+    print("Either remove ht.project in the directory and re-run this script,")
+    print("or simply go to the directory and run httk-submit")
     exit(0)
-    
+
 #d = TextboxDialog("Description of project")
 #d.root.wait_window(d.root)
 #project_description=d.value
@@ -120,12 +125,12 @@ if os.path.exists(os.path.join(project_path,"ht.project")):
 try:
     returncode = call(["httk-project-setup", project_name])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 except OSError:
     returncode = call([os.path.join(PATH_TO_HTTK_BIN_DIR,"httk-project-setup"), project_name])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 
 with open("ht.project/config", "w") as w:
@@ -138,14 +143,14 @@ description=%s
 
 with open("ht.project/references", "w") as w:
     w.write(references)
-        
+
 try:
     returncode = call(["httk-project-submit"])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)
 except OSError:
     returncode = call([os.path.join(PATH_TO_HTTK_BIN_DIR,"httk-project-submit")])
     if returncode != 0:
-        print "Error returned. Stopping"
+        print("Error returned. Stopping")
         exit(0)

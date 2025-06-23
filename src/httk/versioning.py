@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*- 
-# 
+# -*- coding: utf-8 -*-
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -19,10 +19,13 @@
 _default_copyright_end_year = "2018"
 
 import sys, os, subprocess, datetime
-from .config import httk_root, config
+import codecs
+from httk.config import httk_root, config
+
+sourcedir = os.path.dirname(os.path.realpath(__file__))
 
 try:
-    from .distdata import version, version_date, copyright_note
+    from httk.distdata import version, version_date, copyright_note
     httk_version = version
     httk_version_date = version_date
     httk_copyright_note = copyright_note
@@ -31,11 +34,12 @@ except ImportError:
     httk_version = None
     if (not config.getboolean('general', 'bypass_git_version_lookup')) and os.path.exists(os.path.join(httk_root,'.git')):
         try:
-            httk_version = subprocess.check_output(["git", "describe","--dirty","--always"]).strip()
+            httk_version = subprocess.check_output(["git", "describe","--dirty","--always"],cwd=sourcedir).strip()
+            httk_version = codecs.decode(httk_version, 'utf-8')
             if httk_version.endswith('-dirty'):
                 _git_commit_datetime = datetime.datetime.now()
             else:
-                _git_commit_datetime = datetime.datetime.fromtimestamp(int(subprocess.check_output(["git", "log","-1",'--format=%ct'])))
+                _git_commit_datetime = datetime.datetime.fromtimestamp(int(subprocess.check_output(["git", "log","-1",'--format=%ct'],cwd=sourcedir)))
             httk_version_date = "%d-%02d-%02d" % (_git_commit_datetime.year,_git_commit_datetime.month, _git_commit_datetime.day)
             httk_copyright_note = "(c) 2012 - " + str(_git_commit_datetime.year)
 
@@ -45,15 +49,14 @@ except ImportError:
             httk_version = httk_version.replace('-','+',1)
             if httk_version.endswith('-dirty'):
                 httk_version = httk_version.replace('-dirty','.d')
-            
+
         except Exception as e:
             sys.stderr.write("Note: failed to obtain httk version from git: " + str(e) + "\n")
             httk_version = 'unknown'
             httk_version_date = 'unknown'
             httk_copyright_note = "(c) 2012 - " + _default_copyright_end_year
-            
+
     else:
         httk_version = 'unknown'
         httk_version_date = 'unknown'
         httk_copyright_note = "(c) 2012 - " + _default_copyright_end_year
-

@@ -32,7 +32,7 @@ HOSTNAME=$(hostname)
 
 echo "RUN STARTS: $DATE in dir $INITIAL on node: $HOSTNAME"
 
-source "$HTTK_DIR/setup.shell"
+source "$HTTK_DIR/init.shell"
 
 "$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT"
 

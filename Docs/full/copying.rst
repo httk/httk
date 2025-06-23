@@ -1,5 +1,5 @@
 httk license
 ============
 
-.. literalinclude:: ../../COPYING
+.. literalinclude:: ../../LICENSE.txt
 

@@ -18,10 +18,6 @@
 # Uses parts from 'Pedro M Duarte',
 # http://stackoverflow.com/questions/8247973/how-do-i-specify-an-arrow-like-linestyle-in-matplotlib
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
               hl=0.025, hw=2.5, c='black'):
     ''' narrs  :  Number of arrows that will be drawn along the curve
@@ -37,6 +33,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
         c      :  color of the edge and face of the arrow head
     '''
+    from httk.external.numpy_ext import numpy as np
 
     x = np.array(x)[::-1]
     y = np.array(y)[::-1]
@@ -59,7 +56,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
     #aspace = r.sum() / narrs
     narrs = r.sum()/aspace
 
-    if direc is 'neg':
+    if direc == 'neg':
         dspace = -1.*abs(dspace)
     else:
         dspace = abs(dspace)
@@ -96,7 +93,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
         dx1 = -1.*np.sin(theta)*hl/2. + ax
         dy1 = -1.*np.cos(theta)*hl/2. + ay
 
-        if direc is 'neg':
+        if direc == 'neg':
             ax0 = dx0
             ay0 = dy0
             ax1 = dx1
@@ -109,7 +106,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
         axes.annotate('', xy=(ax0, ay0), xycoords='data',
                       xytext=(ax1, ay1), textcoords='data',
-                      arrowprops=dict(headwidth=hw, frac=1., ec=c, fc=c))
+                      arrowprops=dict(headwidth=hw, headlength=10, ec=c, fc=c))
 
     axes.plot(x, y, color=c)
     #axes.set_xlim(x.min()*.9,x.max()*1.1)
@@ -117,6 +114,10 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
 
 if __name__ == '__main__':
+    from httk.external.matplotlib_ext import matplotlib
+    from matplotlib import pyplot as plt
+    from httk.external.numpy_ext import numpy as np
+
     fig = plt.figure()
     axes = fig.add_subplot(111)
 
@@ -129,4 +130,6 @@ if __name__ == '__main__':
     y = [0, 1]
     arrowplot(axes, x, y)
 
-    plt.show()
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()

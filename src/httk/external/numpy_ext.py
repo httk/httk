@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,15 +21,18 @@ from httk.core import citation
 citation.add_ext_citation('Numpy', "(Author list to be added)")
 
 from httk import config
-from command import Command
-from subimport import submodule_import_external
-import httk
-try:   
+from httk.external.command import Command
+from httk.external.subimport import submodule_import_external
+
+try:
     path = config.get('paths', 'numpy')
 except Exception:
     path = None
 
-if path is not None:    
+if path == "False":
+    raise Exception("httk.external.numpy_ext imported, but numpy is disabled in configuration file.")
+
+if path is not None and path != "":
     numpy = submodule_import_external(os.path.join(path), 'numpy')
 else:
     try:
@@ -39,5 +42,4 @@ else:
     if external == 'yes':
         import numpy
     else:
-        raise Exception("httk.external.numpy_ext imported, but could not access numpy.")
-    
+        raise Exception("httk.external.numpy_ext imported, but numpy module not found.")

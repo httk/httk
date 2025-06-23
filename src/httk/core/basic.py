@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,7 +17,15 @@
 """
 Basic help functions
 """
+import sys, signal, site
 from fractions import Fraction
+
+# Import python2 and 3-specific routunes
+if sys.version_info[0] <= 2:
+    from httk.core._basic_py2 import *
+else:
+    from httk.core._basic_py3 import *
+
 
 def int_to_anonymous_symbol(i):
     bigletters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -42,14 +50,8 @@ def anonymous_symbol_to_int(symb):
     return s-1
 
 
-def is_sequence(arg):
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
-
-
 import re, errno, os, itertools, sys, tempfile, shutil, collections
-from ioadapters import IoAdapterFileReader
+from httk.core.ioadapters import IoAdapterFileReader
 
 
 def is_unary(e):
@@ -67,7 +69,7 @@ def flatten(l):
         flattened = l.flatten()
     except Exception:
         for el in l:
-            if isinstance(el, collections.Iterable) and not isinstance(el, basestring):
+            if is_sequence(el):
                 for sub in flatten(el):
                     yield sub
             else:
@@ -96,7 +98,7 @@ def create_tmpdir():
 def destroy_tmpdir(tmpdir):
     tmpdirname = os.path.dirname(tmpdir)
     segment = os.path.basename(tmpdir)[len("httktmp."):-len(".httktmp")]
-    #print "DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp")
+    #print("DELETING:",os.path.join(tmpdirname,"httktmp."+segment+".httktmp"))
     shutil.rmtree(os.path.join(tmpdirname, "httktmp."+segment+".httktmp"))
 
 
@@ -122,11 +124,10 @@ def mkdir_p(path):
         else:
             raise
 
-
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
     Small awk-mimicking search routine.
-       
+
     'f' is stream object to search through.
     'search' is the "search program", a list of lists/tuples with 3 elements; i.e.,
     [[regex,test,run],[regex,test,run],...]
@@ -135,18 +136,18 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
     Here regex is either as a Regex object, or a string that we compile into a Regex.
     test and run are callable objects.
 
-    This function goes through each line in filename, and if regex matches that line *and* 
-    test(results,line)==True (or test == None) we execute run(results,match), 
-    where match is the match object from running Regex.match.   
-    
-    The default results is an empty dictionary. Passing a results object let you interact 
-    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self. 
-    
+    This function goes through each line in filename, and if regex matches that line *and*
+    test(results,line)==True (or test == None) we execute run(results,match),
+    where match is the match object from running Regex.match.
+
+    The default results is an empty dictionary. Passing a results object let you interact
+    with it in run() and test(). Hence, in many occasions it is thus clever to use results=self.
+
     Returns: results
     """
     ioa = IoAdapterFileReader.use(ioa)
     f = ioa.file
-    
+
     if results is None:
         results = {}
 
@@ -157,24 +158,33 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
                 entry[0] = re.compile(entry[0])
             except Exception as e:
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
-            
-    for line in f:
-        if debug: 
+
+    if debug:
+        for line in f:
             sys.stdout.write("\n" + line[:-1])
-        for i in range(len(search)):
-            match = search[i][0].search(line)
-            if debug and match: 
-                sys.stdout.write(": MATCH")
-            if match and (search[i][1] is None or search[i][1](results, line)):
-                if debug:
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match:
+                    sys.stdout.write(": MATCH")
+                if match and (search[i][1] is None or search[i][1](results, line)):
                     sys.stdout.write(": TRIGGER")
-                if debugfunc is not None:
-                    debugfunc(results, match)
-                search[i][2](results, match)
-                if postdebugfunc is not None:
-                    postdebugfunc(results, match)
-    if debug: 
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
         sys.stdout.write("\n")
+
+    else:
+        for line in f:
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match and (search[i][1] is None or search[i][1](results, line)):
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
 
     ioa.close()
     return results
@@ -199,13 +209,15 @@ def breath_first_idxs(dim=1, start=None, end=None, perm=True, negative=False):
             yield (e,)
             if end[0] is not None and e >= end[0]:
                 return
-   
+
     for e in eles:
         oeles = breath_first_idxs(dim-1, start=start[1:], end=[e]*(dim-1), perm=False)
         for oe in oeles:
             base = (e,) + oe
             if perm:
-                for p in set(itertools.permutations(base)):
+                # sorted here is not strictly necessary, but is needed to ensure we get
+                # the same order every time.
+                for p in sorted(set(itertools.permutations(base))):
                     if negative:
                         nonneg = [i for i in range(len(p)) if p[i] != 0]
                         for x in itertools.chain.from_iterable(itertools.combinations(nonneg, r) for r in range(len(nonneg)+1)):
@@ -257,12 +269,16 @@ class rewindable_iterator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    # Python 3 uses __next__
+    def __next__(self):
         if self._rewind:
             self._rewind = False
         else:
-            self._cache = self._iter.next()
+            self._cache = next(self._iter)
         return self._cache
+
+    # Python 2 uses next
+    next = __next__
 
     def rewind(self, rewindstr=None):
         if self._rewind:
@@ -272,19 +288,72 @@ class rewindable_iterator(object):
         self._rewind = True
         if rewindstr is not None:
             self._cache = rewindstr
-            
+
+# Inspired by https://stackoverflow.com/questions/132058/showing-the-stack-trace-from-a-running-python-application
+#def sigquit_handler(sig, frame):
+#    import code, traceback
+#
+#    d={'_frame':frame}         # Allow access to frame object.
+#    d.update(frame.f_globals)  # Unless shadowed by global
+#    d.update(frame.f_locals)
+#
+#    if(sig == signal.SIGQUIT):
+#        message  = "Sigquit received.\nTraceback:\n"
+#        message += ''.join(traceback.format_stack(frame))
+#        print(message)
+#        exit(131)
+#
+#try:
+#    signal.signal(signal.SIGQUIT, sigquit_handler)  # Register handler
+#except Exception:
+#    pass
+
+def import_from_legacy_cgi(module_name):
+    # Look for all sys.path entries that include 'site-packages'
+    site_paths = [p for p in sys.path if 'site-packages' in p and os.path.isdir(p)]
+
+    for site_path in site_paths:
+        candidate = os.path.join(site_path, module_name + '.py')
+        if os.path.isfile(candidate):
+            if sys.version_info >= (3, 5):
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(module_name, candidate)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            else:
+                import imp
+                module = imp.load_source(module_name, candidate)
+            sys.modules[module_name] = module
+            return module
+
+    raise ImportError("Could not find legacy-cgi version of '{}' in site-packages.".format(module_name))
+
+try:
+    cgi = import_from_legacy_cgi("cgi")
+    cgitb = import_from_legacy_cgi("cgitb")
+except ImportError as e:
+    # Falling back to standard library import for older versions of Python where it is not deprecated
+    import cgi
+    import cgitb
+
+from cgi import parse_header, parse_multipart
+from cgitb import html as cgitb_html
 
 def main():
-    print int_to_anonymous_symbol(0)
-    print anonymous_symbol_to_int("A")
+    asym = int_to_anonymous_symbol(42)
+    assert(asym == "Aq")
+    print("Anoymous symbol:"+asym)
+    i = anonymous_symbol_to_int(asym)
+    assert(i == 42)
+    l = list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
+    ll = [[0, 0, 0], [0, 0, -1], [0, 0, 1], [0, -1, 0], [0, 1, 0], [-1, 0, 0], [1, 0, 0], [0, -1, -1]]
+    print("Length:"+str(len(l)))
+    assert(len(l)==343)
+    print("First elements:"+str(l[:8]))
+    assert(l[:8]==ll)
+    f = list(flatten([[42,"bx"],"xyz",["32",[[6],str]]]))
+    print("Flattened list:"+str(f))
+    assert(f == [42, 'bx', 'xyz', '32', 6, str])
     
-    
-    # print list(breath_first_idxs(dim=3, end=[3,3,3],negative=True))
-
-
 if __name__ == "__main__":
     main()
-    
-
-
-

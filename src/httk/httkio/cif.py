@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,8 +15,15 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, string, re
+import os, sys, re
+from httk.core import is_string
 from collections import OrderedDict
+
+if sys.version_info[0] == 3:
+    maketrans_ = str.maketrans
+else:
+    import string
+    maketrans_ = string.maketrans
 
 import httk
 
@@ -36,13 +43,13 @@ def _read_cif_rewind_if_needed(f, row, done_fields):
 
 
 def _read_cif_loop(f, pragmatic=True, use_types=False):
-    #print "Read cif loop"
+    #print("Read cif loop")
     noteol = False
     loop_data = OrderedDict()
     header = []
     for row in f:
         striprow = row.strip()
-        lowrow = striprow.lower()        
+        lowrow = striprow.lower()
         if lowrow.startswith("_"):
             loop_data[lowrow[1:]] = []
             header += [lowrow[1:]]
@@ -51,14 +58,14 @@ def _read_cif_loop(f, pragmatic=True, use_types=False):
             f.rewind()
             break
 
-    while True:
-        for i in range(len(loop_data)):
+    while True and len(header)>0:
+        for i in range(len(header)):
             try:
-                row = f.next()
+                row = next(f)
+                while row.isspace():
+                    row = next(f)
             except StopIteration:
                 break
-            if row.isspace():
-                continue
             striprow = row.strip()
             lowrow = striprow.lower()
             if not row or row.startswith("_") or lowrow.startswith("data_") or lowrow.startswith("loop_"):
@@ -74,10 +81,10 @@ def _read_cif_loop(f, pragmatic=True, use_types=False):
 
 
 def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=False):
-    #print "Read cif data value"
+    #print("Read cif data value")
     data_value = None
     for row in f:
-        #print "read_cif_data_value_row:",row
+        #print("read_cif_data_value_row:",row)
         striprow = row.strip()
         if striprow == "":
             noteol = False
@@ -117,7 +124,7 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
             break
         elif striprow.startswith("'") or striprow.startswith('"'):
             # The cif quoting rules are ... weird. Quotes are "escaped" if they are not followed by whitespace.
-            quote = striprow[0] 
+            quote = striprow[0]
             starti = 1
             for chari in range(1, len(striprow)-1):
                 if striprow[chari] == quote and str(striprow[chari+1]).isspace():
@@ -143,11 +150,11 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
             # Unquoted string
             if pragmatic and not inloop:
                 # In pragmatic mode, if we are not in a loop and there is more than one data value
-                # separated by whitespace, read all of it. This should always be ok to do, since 
+                # separated by whitespace, read all of it. This should always be ok to do, since
                 # multiple data values in this situation would be an
                 # error in the file otherwise, but if there is whitespace + underscore/data_/loop_ we parse that
                 # as a new symbol, since otherwise we COULD misread valid files (with very weird formatting...).
-                splitstr = re.split("\s+_|\s+data_|\s+loop_", striprow, maxsplit=1)                    
+                splitstr = re.split(r'\s+_|\s+data_|\s+loop_', striprow, maxsplit=1)
             else:
                 splitstr = striprow.split(None, 1)
             data_value = splitstr[0].strip()
@@ -165,16 +172,16 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
                     data_value = int(data_value.replace("(", "").replace(")", ""))
                 elif _cif_is_float(data_value):
                     data_value = float(data_value.replace("(", "").replace(")", ""))
-            
+
     return data_value, noteol
 
 
 def _read_cif_data_block(f, pragmatic=True, use_types=False):
-    #print "Read cif data block"
+    #print("Read cif data block")
     data_items = OrderedDict()
     loops = 0
     for row in f:
-        #print "Read data block read:",row
+        #print("Read data block read:",row)
         striprow = row.strip()
         lowrow = striprow.lower()
         if striprow.startswith("#"):
@@ -185,14 +192,14 @@ def _read_cif_data_block(f, pragmatic=True, use_types=False):
         elif lowrow.startswith("loop_"):
             _read_cif_rewind_if_needed(f, row, 1)
             loopdata = _read_cif_loop(f, pragmatic, use_types)
-            data_items['loop_'+str(loops)] = loopdata.keys()
+            data_items['loop_'+str(loops)] = list(loopdata.keys())
             loops += 1
             data_items.update(loopdata)
         elif striprow.startswith(";"):
             # Multi-line string that we've failed to tie to a name, lets just skip it, maybe we should warn
             for irow in f:
                 if irow.rstrip() == ";":
-                    break 
+                    break
         elif striprow.startswith("_"):
             lowsplit = lowrow.split()
             data_name = lowsplit[0][1:]
@@ -211,20 +218,22 @@ def read_cif(ioa, pragmatic=True, use_types=False):
     """
     Generic cif reader, given a filename / ioadapter it places all data in a python dictionary.
 
-    It returns a tuple: (header, list) 
+    It returns a tuple: (header, list)
     Where list are pairs of data blocks names and data blocks
-     
+
     Each data block is a dictionary with tag_name:value
-    
+
     For loops, value is another dictionary with format column_name:value
 
     The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where
-    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means 
-    to read the cif file precisely according to the spec. For example, in a multiline text field:
+    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means
+    to read the cif file precisely according to the spec. For example, in a multiline text field::
+
         ;
         some text
         ;
-    Means the string '\nsome text'. For this specific case pragmatic=True removes the leading newline. 
+
+    Means the string '\\nsome text'. For this specific case pragmatic=True removes the leading newline.
 
     set use_types to True to convert things that look like floats and integers to those respective types
     """
@@ -249,19 +258,27 @@ def read_cif(ioa, pragmatic=True, use_types=False):
 
     ioa.close()
     return datalist, header
-    
-_cif_ordinary_char = "!%&()*+,-./0123456789:<=>?@ABCDEFGHIHJKLMNOPQRSTUVWXYZ\^`abcdefghijklmnopqrstuvwxyz{|}~"
+
+_cif_ordinary_char = r'!%&()*+,-./0123456789:<=>?@ABCDEFGHIHJKLMNOPQRSTUVWXYZ\^`abcdefghijklmnopqrstuvwxyz{|}~'
 _cif_non_blank_char = _cif_ordinary_char+'"'+"#$"+"'"+"_"+";[]"
 _cif_text_lead_char = _cif_ordinary_char+'"'+"#$"+"'"+"_ \t[]"
 _cif_any_print_char = _cif_ordinary_char+'"'+"#$"+"'"+"_ \t;[]"
 
-_cif_non_blank_char_table = string.maketrans(_cif_non_blank_char, ' ' * len(_cif_non_blank_char))
-_cif_helper_table = string.maketrans('', '')
+_cif_non_blank_char_table = maketrans_(_cif_non_blank_char, ' ' * len(_cif_non_blank_char))
+_cif_helper_table = maketrans_('', '')
 
-_cif_integer_regex = re.compile('^[+-]?[0-9]+$')
-_cif_float_regex = re.compile('^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$')
-_cif_simplestring_regex = re.compile('^[A-Za-z0-9()][A-Za-z0-9()+-]*$')
+# Python 3 specific
+if sys.version_info[0] == 3:
+    _cif_non_blank_char_table = maketrans_(_cif_non_blank_char, _cif_non_blank_char)
+    _cif_unicode_translation_table = {}
+    for i in range(sys.maxunicode+1):
+        _cif_unicode_translation_table[i] = None
+    for key, value in _cif_non_blank_char_table.items():
+        _cif_unicode_translation_table[key] = value
 
+_cif_integer_regex = re.compile(r'^[+-]?[0-9]+$')
+_cif_float_regex = re.compile(r'^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$')
+_cif_simplestring_regex = re.compile(r'^[A-Za-z0-9()][A-Za-z0-9()+-]*$')
 
 def _cif_validate_name(name_unfiltered, context=None):
     if context is not None:
@@ -286,7 +303,10 @@ def _cif_is_int(data_value):
 
 
 def _cif_validate_non_blank_char(s, context=None):
-    out = s.translate(_cif_helper_table, _cif_non_blank_char_table)
+    if sys.version_info[0] == 3:
+        out = s.translate(_cif_unicode_translation_table)
+    else:
+        out = s.translate(_cif_helper_table, _cif_non_blank_char_table)
     if out != s:
         if context is not None:
             sys.stderr.write("***Warning: write_cif: non-permitted characters in "+context+" removed.")
@@ -299,21 +319,21 @@ def _cif_write_semicolontextfield(f, lines, noteol, max_line_length):
     if noteol:
         f.write("\n")
         noteol = False
-    for i in range(len(lines)):            
+    for i in range(len(lines)):
         lines[i] = lines[i].rstrip("\r\n")
         if lines[i][0] == ';':
             sys.stderr.write("***Warning: write_cif: had to insert space before semicolon at the start of a line of a multi-line string to fulfill arcane quoting rules.")
             lines[i] = ' '+lines[i]
         if len(lines[i]) > max_line_length:
-            f.write(";\\"+"\n")            
+            f.write(";\\"+"\n")
             break
     else:
         f.write(";")
-    for line in lines:            
+    for line in lines:
         if len(line) > max_line_length:
             sublines = [line[i:i+max_line_length-2] for i in range(0, len(line), max_line_length-2)]
             # Handle a wonderful corner case: the line splitting for length creates lines that start with one, or more, semi-colons..., sigh...
-            for i in range(1, len(sublines)):                
+            for i in range(1, len(sublines)):
                 if sublines[i][0] == ";":
                     if len(sublines[i]) > 1 and sublines[i][1] != ";":
                         # If its just a single semi-colon, move it to the previous line, which we saved space for by splitting at max_line_length-2
@@ -369,11 +389,11 @@ def _cif_write_data_value(f, orig_data_value, noteol, max_line_length, use_types
             return True
     else:
         # Always quote when a string, never quote otherwise
-        if isinstance(orig_data_value, basestring):
+        if is_string(orig_data_value):
             f.write("'"+data_value+"'")
         else:
             f.write(data_value)
-        return True    
+        return True
 
 
 def _cif_write_data_block(f, data_block, max_line_length, use_types):
@@ -420,34 +440,38 @@ def _cif_write_data_block(f, data_block, max_line_length, use_types):
             if noteol:
                 f.write("\n")
                 noteol = False
-    
+
 
 def write_cif(ioa, data, header=None, max_line_length=80, use_types=False):
     """
-    Generic cif writer, given a filename / ioadapter 
+    Generic cif writer, given a filename / ioadapter
 
     data = the cif data to write as an (ordered) dictionary of tag_name:value
-    
+
     header = the header (comment) segment
 
     max_line_length = the maximum number of characters allowed on each line. This should not be set < 80
     (there is no point, and the length calculating algorithm breaks down at some small line length)
 
-    use_types = 
-        if True: always quote values that are of string type. Numeric values are put in the file unquoted (as they should)
-        if False (default): also strings that look like cif numbers are put in the file unquoted
-    
+    use_types =
+
+       if True: always quote values that are of string type. Numeric values are put in the file unquoted (as they should)
+       if False (default): also strings that look like cif numbers are put in the file unquoted
+
     For loops, value is another dictionary with format column_name:value
 
     The optional parameter pragmatic regulates handling of some counter-intuitive aspects of the cif specification, where
-    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means 
-    to read the cif file precisely according to the spec. For example, in a multiline text field:
-        ;
-        some text
-        ;
-    Means the string '\nsome text'. For this specific case pragmatic=True removes the leading newline. 
+    the default pragmatic=True handles these features the way people usually use them, whereas pragmatic=False means
+    to read the cif file precisely according to the spec. For example, in a multiline text field::
+
+      ;
+      some text
+      ;
+
+    Means the string '\\nsome text'. For this specific case pragmatic=True removes the leading newline.
 
     set use_types to True to convert things that look like floats and integers to those respective types
+
 
     """
 
@@ -456,11 +480,11 @@ def write_cif(ioa, data, header=None, max_line_length=80, use_types=False):
 
     if header is not None:
         lines = header.splitlines()
-        for line in lines:            
+        for line in lines:
             if len(line) > max_line_length:
                 header = "#\n" + header
-                break            
-        for line in lines:            
+                break
+        for line in lines:
             if len(line) > max_line_length:
                 sublines = [line[i:i+79] for i in range(0, len(line), 79)]
                 for subline in sublines:
@@ -478,25 +502,25 @@ def write_cif(ioa, data, header=None, max_line_length=80, use_types=False):
             data_block_name = _cif_validate_name(data_block_name_unfiltered, "data block name")
             if data_block_name == "":
                 data_block_name = "data_"+str(data_block_count)
-                    
+
         f.write("data_"+data_block_name+"\n")
         _cif_write_data_block(f, data_block[1], max_line_length, use_types)
     ioa.close()
 
-        
+
 def main():
-    gurk = open("/tmp/gurk.cif", "r")
-    datalist, header = read_cif(gurk)
-    
-    gurk = open("/tmp/gurk2.cif", "w")
-    write_cif(gurk, datalist, header)
-    gurk.close()
+    #gurk = open("/tmp/gurk.cif", "r")
+    #datalist, header = read_cif(gurk)
 
-    datalist2, header2 = read_cif("/tmp/gurk2.cif")
+    #gurk = open("/tmp/gurk2.cif", "w")
+    #write_cif(gurk, datalist, header)
+    #gurk.close()
 
-    print "MATCH1", header == header2
-    print "MATCH2", datalist == datalist2
-    
+    #datalist2, header2 = read_cif("/tmp/gurk2.cif")
+
+    #print("MATCH1", header == header2)
+    #print("MATCH2", datalist == datalist2)
+
     exit(0)
 
 if __name__ == "__main__":

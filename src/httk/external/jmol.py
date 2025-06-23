@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 from httk.core import citation
 citation.add_ext_citation('Jmol', "An open-source Java viewer for chemical structures in 3D. http://www.jmol.org/")
 
@@ -22,59 +23,81 @@ import os, time, threading, subprocess, signal, sys, glob
 
 import httk
 from httk.iface.jmol_if import *
-import distutils.spawn
 from httk import config
 from httk.core.basic import create_tmpdir, destroy_tmpdir, micro_pyawk
-from command import Command, find_executable
+from httk.external.command import Command, find_executable
 
-jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
-jmol_dirpath, jmol_filename = os.path.split(jmol_path)
-
+jmol_path = None
 jmol_version = None
 jmol_version_date = None
 
+def ensure_has_cif2cell():
+    if jmol_path is None or jmol_path == "" or not os.path.exists(jmol_path):
+        raise ImportError("httk.external.jmol imported with no access to jmol binary")
 
-def check_works():
-    global jmol_version, jmol_version_date
+try:
+    print("HERE",os.environ)
+    jmol_path = find_executable(('jmol.sh', 'jmol'),'jmol')
+    jmol_dirpath, jmol_filename = os.path.split(jmol_path)
 
-    if jmol_path == "" or not os.path.exists(jmol_path):
-        raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
-    
-    out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
-    if completed is None or completed != 0:
-        raise Exception("jmol_ext: Could not execute jmol. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
+    def check_works():
+        global jmol_version, jmol_version_date
 
-    def get_version(results, match):
-        results['version'] = match.group(1)
-        results['version_date'] = match.group(2)
+        if jmol_path == "" or not os.path.exists(jmol_path):
+            raise ImportError("httk.external.jmol imported without access to a jmol binary. jmol path was set to:"+str(jmol_path))
 
-    results = micro_pyawk(os.path.join(httk.IoAdapterString(out)), [
-        ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
-    ], debug=False)
+        out, err, completed = Command(jmol_path, ['-n', '-o'], cwd='./').run(15, debug=False)
 
-    if not 'version' in results:
-        raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))        
+        if completed is None or completed != 0:
+            raise Exception("jmol_ext: Could not execute jmol. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
 
-    jmol_version = results['version']
-    jmol_version_date = results['version_date']
+        def get_version(results, match):
+            results['version'] = match.group(1)
+            results['version_date'] = match.group(2)
 
-check_works()
+        # Why do we take os.path.join() of httk.IoAdapterString(out)?
+        # Trying to do that in Python 3 fails.
+        # results = micro_pyawk(os.path.join(httk.IoAdapterString(out)), [
+            # ['^ *Jmol Version: ([^ ]+) +([^ ]+)', None, get_version],
+        # ], debug=False)
+        results = micro_pyawk(httk.IoAdapterString(out), [
+            ['^ *Jmol [Vv]ersion:? ([^ ]+) +([^ ]+)', None, get_version],
+        ], debug=False)
+
+        if not 'version' in results or results['version'] is None:
+            raise Exception("jmol_ext: Could not extract version string from jmol -n -o. Return code:"+str(completed)+" out:"+str(out)+" err:"+str(err))
+
+        jmol_version = results['version']
+        jmol_version_date = results['version_date']
+
+    check_works()
+
+except Exception as e:
+    print("FAIL:"+str(e),file=sys.stderr)
+    pass
+
 
 
 def run(cwd, args, timeout=None):
-    #print "COMMAND JMOL"
+    ensure_has_cif2cell()
+    #print("COMMAND JMOL")
     out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
-    #print "COMMMDN JMOL END"
-    return out, err, completed    
+    #print("COMMMDN JMOL END")
+    return out, err, completed
 
 
 def _jmol_stophook(command):
     # Lets be nice and let jmol close down on its own
-    command.send("exitJmol;\n")    
+    command.send("exitJmol;\n")
     command.wait_finish(timeout=5)
 
 
 def start(cwd='./', args=['-I']):
+
+    if jmol_version is None:
+        raise Exception("jmol does not seem to be available")
+    
+    ensure_has_cif2cell()
 
     version = jmol_version.split('.')
     if len(version) < 3:
@@ -85,7 +108,7 @@ def start(cwd='./', args=['-I']):
 
     command = Command(jmol_path, args, cwd=cwd, stophook=_jmol_stophook)
     command.start()
-    
+
     return command
 
 
@@ -94,20 +117,18 @@ def main():
     jmol = start()
     jmol.send("background '#F5F5F5';\n")
     time.sleep(1)
-    print jmol.receive()
+    print(jmol.receive())
     time.sleep(3)
     jmol.send("background '#FFFFFF';\n")
     time.sleep(3)
     jmol.send("background '#FF0000';\n")
-    print "Waiting..."
+    print("Waiting...")
     time.sleep(1)
-    print "Print output"
-    print jmol.receive()
-    print "Killing..."
+    print("Print output")
+    print(jmol.receive())
+    print("Killing...")
     jmol.stop()
-    print "Killed."
+    print("Killed.")
 
 if __name__ == "__main__":
     main()
-    
-    

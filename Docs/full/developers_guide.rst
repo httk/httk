@@ -416,7 +416,7 @@ just email your patches / modified source files to us. (In the future
 we'll make arrange for a better way, e.g., github.)
 
 The High-Throughput Toolkit uses the GNU Affero General Public License
-(see the file COPYING for details), which is an open source license
+(see the file LICENSE.txt for details), which is an open source license
 that allows redistribution and re-use if the license requirements are
 met. (Note that this license contains clauses that are not in the
 usual GNU Public License, and source code from httk cannot be imported

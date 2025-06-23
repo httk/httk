@@ -17,17 +17,17 @@
 
 
 from httk.core import HttkPlugin, HttkPluginWrapper, FracVector, breath_first_idxs 
-from unitcellstructure import UnitcellStructure
-from structure import Structure
+from httk.atomistic.unitcellstructure import UnitcellStructure
+from httk.atomistic.structure import Structure
 
-from cell import Cell
+from httk.atomistic.cell import Cell
 
 # TODO: The building of supercells should be moved elsewhere and not be part of this class
 
 
 def build_supercell_old(structure, transformation, max_search_cells=1000):
     ### New basis matrix, note: works in units of old_cell.scale to avoid floating point errors
-    #print "BUILD SUPERCELL",structure.uc_sites.cell.basis.to_floats(), repetitions
+    #print("BUILD SUPERCELL",structure.uc_sites.cell.basis.to_floats(), repetitions)
 
     transformation = FracVector.use(transformation).simplify()
     if transformation.denom != 1:
@@ -69,16 +69,23 @@ def build_supercell_old(structure, transformation, max_search_cells=1000):
     new_counts = [len(x) for x in extendedcoordgroups]
     for i in range(len(structure.uc_counts)):
         if volume_ratio*structure.uc_counts[i] != new_counts[i]:
-            print "Volume ratio:", float(volume_ratio), volume_ratio
-            print "Extended coord groups:", FracVector.create(extendedcoordgroups).to_floats()
-            print "Old counts:", structure.uc_counts, structure.assignments.symbols
-            print "New counts:", new_counts, structure.assignments.symbols
+            print("Volume ratio:", float(volume_ratio), volume_ratio)
+            print("Extended coord groups:", FracVector.create(extendedcoordgroups).to_floats())
+            print("Old counts:", structure.uc_counts, structure.assignments.symbols)
+            print("New counts:", new_counts, structure.assignments.symbols)
             #raise Exception("Structure.build_supercell safety check failure. Volume changed by factor "+str(float(volume_ratio))+", but atoms in group "+str(i)+" changed by "+str(float(new_counts[i])/float(structure.uc_counts[i])))
     
     return structure.create(uc_reduced_coordgroups=extendedcoordgroups, basis=new_cell.basis, assignments=structure.assignments, cell=structure.uc_cell)
 
-
 def build_cubic_supercell(structure, tolerance=None, max_search_cells=1000):
+    transformation = cubic_supercell_transformation(structure=structure, tolerance=tolerance)
+    #print("Running transformation with:",transformation)
+    return structure.transform(transformation, max_search_cells=max_search_cells)
+
+def cubic_supercell_transformation(structure, tolerance=None, max_search_cells=1000):
+    # Note: a better name for tolerance is max_extension or similar, it is not really a tolerance, it regulates the maximum number of repetitions of the primitive cell
+    # in any directions to reach the soughts supercell
+
     if tolerance is None:
         prim_cell = structure.uc_cell.basis            
         inv = prim_cell.inv().simplify()
@@ -92,39 +99,49 @@ def build_cubic_supercell(structure, tolerance=None, max_search_cells=1000):
         #matter is the prime factors?
         for tol in range(1, maxtol):
             prim_cell = structure.uc_cell.basis        
+            prim_cell = structure.uc_cell.basis        
             approxinv = prim_cell.inv().set_denominator(tol).simplify()
             if approxinv[0] == [0, 0, 0] or approxinv[1] == [0, 0, 0] or approxinv[2] == [0, 0, 0]:
                 continue
             transformation = (approxinv*approxinv.denom).simplify()
-            cell = Cell.create(transformation*prim_cell)
+            try:
+                cell = Cell.create(basis=transformation*prim_cell)
+            except Exception:
+                continue
             ortho = (abs(cell.niggli_matrix[1][0])+abs(cell.niggli_matrix[1][1])+abs(cell.niggli_matrix[1][2])).simplify()
             equallen = abs(cell.niggli_matrix[0][0]-cell.niggli_matrix[0][1]) + abs(cell.niggli_matrix[0][0]-cell.niggli_matrix[0][2]) 
             if ortho == 0 and equallen == 0:
                 # Already perfectly cubic, use this
                 besttrans = transformation
                 break
-            if bestlen is None or not (bestortho < ortho and bestlen < equallen):
+            elif bestlen is None or not (bestortho < ortho and bestlen < equallen):
+                bestlen = equallen
+                bestortho = ortho
+                besttrans = transformation
+            elif besttrans == None:
                 bestlen = equallen
                 bestortho = ortho
                 besttrans = transformation
 
         transformation = besttrans
-   
-    #print "Running transformation with:",transformation     
-    return structure.transform(transformation, max_search_cells=max_search_cells)
+
+    if transformation == None:
+        raise Exception("Not possible to find a cubic supercell with this limitation of number of repeated cell (increase tolerance.)")
+        
+    return transformation
 
 
 def build_orthogonal_supercell(structure, tolerance=None, max_search_cells=1000, ortho=[True, True, True]):
-    transformation = orthogonal_supercell_transformation(structure, tolerance, max_search_cells, ortho)
-    #print "Running transformation with:",transformation     
+    transformation = orthogonal_supercell_transformation(structure, tolerance, ortho)
+    #print("Running transformation with:",transformation)
     return structure.transform(transformation, max_search_cells=max_search_cells)
 
 
-def orthogonal_supercell_transformation(structure, tolerance=None, max_search_cells=1000, ortho=[True, True, True]):
+def orthogonal_supercell_transformation(structure, tolerance=None, ortho=[True, True, True]):
     # TODO: How to solve for exact orthogonal cell?
     if tolerance is None:
         prim_cell = structure.uc_cell.basis         
-        print "Starting cell:", prim_cell
+        print("Starting cell:", prim_cell)
         inv = prim_cell.inv().simplify()
         if ortho[0]:
             row0 = (inv[0]/max(inv[0])).simplify()
@@ -162,7 +179,10 @@ def orthogonal_supercell_transformation(structure, tolerance=None, max_search_ce
             else:
                 row2 = [0, 0, 1]
             transformation = FracVector.create([row0*row0.denom, row1*row1.denom, row2*row2.denom])
-            cell = Cell.create(transformation*prim_cell)
+            try:
+                cell = Cell.create(basis=transformation*prim_cell)
+            except Exception:
+                continue
             maxval = (abs(cell.niggli_matrix[1][0])+abs(cell.niggli_matrix[1][1])+abs(cell.niggli_matrix[1][2])).simplify()
             if maxval == 0:
                 besttrans = transformation
@@ -171,7 +191,10 @@ def orthogonal_supercell_transformation(structure, tolerance=None, max_search_ce
                 bestval = maxval
                 besttrans = transformation
         transformation = besttrans
-   
+
+    if transformation == None:
+        raise Exception("Not possible to find a othogonal supercell with this limitation of number of repeated cell (increase tolerance.)")
+        
     return transformation
 
 

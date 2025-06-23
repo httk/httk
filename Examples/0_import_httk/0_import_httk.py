@@ -11,7 +11,7 @@ import sys, os.path
 # to put
 #    import httk
 # in your script. All other httk examples and tutorial assumes
-# this is working. 
+# this is working.
 #
 # If this is *not* working, you get the error message:
 #     ImportError: No module named httk
@@ -23,7 +23,7 @@ import sys, os.path
 #
 ############## code block to import httk ####################
 import sys, os
-try:    
+try:
     import httk
 except Exception:
     # This variable must be set to the path where you downloaded

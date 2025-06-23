@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'httk'
-copyright = u'2015, Rickard Armiento et al.'
+copyright = u'2015 - 2018, Rickard Armiento et al.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -267,7 +267,7 @@ texinfo_documents = [
 epub_title = u'httk'
 epub_author = u'Author'
 epub_publisher = u'Author'
-epub_copyright = u'2015, Author'
+epub_copyright = u'2015 - 2018, Author'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'httk'
@@ -358,3 +358,30 @@ def monkey_patched_visit_raw(self, node):
     raise docutils.nodes.SkipNode
         
 sphinx.writers.text.TextTranslator.visit_raw = monkey_patched_visit_raw
+
+def run_apidoc(_):
+    ignore_paths = []
+
+    argv = [
+        "-f",
+        "-T",
+        "-e",
+        "-M",
+        "-o", ".",
+        "../../src/httk"
+    ] + ignore_paths
+
+    try:
+        # Sphinx 1.7+
+        from sphinx.ext import apidoc
+        apidoc.main(argv)
+    except ImportError:
+        # Sphinx 1.6 (and earlier)
+        from sphinx import apidoc
+        argv.insert(0, apidoc.__file__)
+        apidoc.main(argv)
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
+

@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -18,10 +18,14 @@
 from __future__ import division
 import itertools, os, sys, re, inspect
 
+if sys.version_info[0] == 3:
+    string_types = (str,)
+else:
+    string_types = (str, unicode) # noqa: F821
 
 class FilteredCollection(object):
 
-    """ 
+    """
     Main interface for filtered collections.
 
     Apart from what is declared here, each subclass should define e.g. 'table', 'column', 'function' methods for
@@ -37,24 +41,32 @@ class FilteredCollection(object):
         self.sorts = []
         self.indirection = 1
         self._storable_tables = 0
+        self.offset = 0
+        self.limit = None
 
     def add(self, filterexpr):
         """
-        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the
         FilteredCollection, a result is only included if it matches all the filters.
-        """        
+        """
         self.filterexprs.append(filterexpr)
 
     def add_all(self, filterexpr):
         """
-        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the
         FilteredCollection, a result is only included if it matches all the filters.
         """
         self.postfilterexprs.append(filterexpr)
 
-    def output(self, expression, name=None):
+    def add_offset(self, offset):
+        self.offset += offset
+
+    def set_limit(self, limit):
+        self.limit = limit
+
+    def output(self, expression, name=None, concat=False):
         """
-        Define which columns should be included in the results when iterating over a FilteredCollection. 
+        Define which columns should be included in the results when iterating over a FilteredCollection.
         attributes is a list of tuples consisting of (name,definition) where definition can be any
         expression in columns.
 
@@ -62,7 +74,7 @@ class FilteredCollection(object):
         """
         #if isinstance(expression,TableOrColumn):
         #    expression = TableOrColumn(expression.context,expression.name+"_id")
-        self.columns.append((name, expression))
+        self.columns.append((name, expression, concat))
 
     def reset(self):
         """
@@ -83,7 +95,7 @@ class FilteredCollection(object):
 
     def add_sort(self, expression, direction='ASC'):
         """
-        Define which columns should be included in the results when iterating over a FilteredCollection. 
+        Define which columns should be included in the results when iterating over a FilteredCollection.
         attributes is a list of tuples consisting of (name,definition) where definition can be any
         expression in columns.
 
@@ -112,18 +124,18 @@ class FilteredCollection(object):
 class FCDict(FilteredCollection):
 
     """
-    This implements a filtered collection purely backed by a dictionary and python evaluation. 
+    This implements a filtered collection purely backed by a dictionary and python evaluation.
 
     Note: FCSqliteMemory will usually be faster. (However, you need this class if
     you need to express filters and expressions using python functions rather than Sqlite functions.)
     """
 
     def __init__(self, data=None):
-        """ 
+        """
         #Data should be a list of dictionaries, such that [{column1:value1a, column2:value2a, ...},
-        #{column1:value1b, column2:value2b}, ...] 
+        #{column1:value1b, column2:value2b}, ...]
 
-        Data should be a list of tuples, such that [([value1a, value2a, ...],[column1, column2]), 
+        Data should be a list of tuples, such that [([value1a, value2a, ...],[column1, column2]),
          ([value1b, value2b, ...],[column1, column2]), ...]
         """
         super(FCDict, self).__init__()
@@ -147,7 +159,7 @@ class FCDict(FilteredCollection):
 
     def data(self, outid=None):
         """
-        Return an object where the attributes are accessible as properties. I.e. 
+        Return an object where the attributes are accessible as properties. I.e.
           data = myFCDict.data
           myFCDict.set_filter(data.example == data.otherexample*2)
         """
@@ -174,12 +186,12 @@ class FCDict(FilteredCollection):
             #        headers.append(self.tables[j].outid+"."+element)
 
             for j in range(len(i)):
-                for k in range(len(i[j][0])):                                        
+                for k in range(len(i[j][0])):
                     data[self.tables[j].outid+"."+i[j][1][k]] = i[j][0][k]
                     outdata.append(i[j][0][k])
                     headers.append(self.tables[j].outid+"."+i[j][1][k])
 
-            # Need to check subtable criteria 
+            # Need to check subtable criteria
             # (needed here if someone uses the table as its own subtable, which seems weird but is possible)
             # E.g., roads(fromcity:name, tocity:name) can be subtabled with itself to see where you can get in two hops.
             for table in self.tables:
@@ -200,7 +212,7 @@ class FCMultiDict(FilteredCollection):
 
     """
     This class allows you to combine a number of filtered collections and put filters on any combination
-    of them together. Just create a separate FilteredCollection from each data source, and pass them in 
+    of them together. Just create a separate FilteredCollection from each data source, and pass them in
     a list to the constructor of this class.
 
     Filters that only apply to one of the FilteredCollections can be put on those collections instead,
@@ -225,7 +237,7 @@ class FCMultiDict(FilteredCollection):
 
     def add(self, filterexpr):
         """
-        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the 
+        Append a filter to the filters currently filtering the FilteredCollection. When iterating over the
         FilteredCollection, a result is only included if it matches all the filters.
         """
         context = filterexpr.get_srctable_context()
@@ -242,7 +254,7 @@ class FCMultiDict(FilteredCollection):
         """
         Return an object where the attributes of respective filtered collection is
         accessible as attributes. An example:
-        
+
           languagereview = FCMultiDict('programming':programming_fc, 'review':review_fc)
           language = languagereview.data('programming').language
           review = languagereview.data('review')
@@ -292,7 +304,7 @@ class FCMultiDict(FilteredCollection):
             headers = []
             outdata = []
             for j in range(len(i)):
-                for k in range(len(i[j][0])):                                        
+                for k in range(len(i[j][0])):
                     data[i[j][1][k]] = i[j][0][k]
                     outdata.append(i[j][0][k])
                     headers.append(i[j][1][k])
@@ -320,47 +332,46 @@ class FCMultiDict(FilteredCollection):
 #     connection = sqlite.connect(filename)
 #     sqliteconnections.add(connection)
 #     return connection
-# 
+#
 # def sqlite_close_protected(connection):
 #     global sqliteconnections
 #     sqliteconnections.remove(connection)
 #     connection.close()
-# 
+#
 # def sqlite_close_all():
 #     global sqliteconnections
 #     for connection in sqliteconnections:
 #         connection.close()
-# 
+#
 # def sqlite_execute(cursor, sql, values=[]):
 #     global database_debug
 #     if os.environ.has_key('DATABASE_DEBUG') or database_debug:
-#         print >> sys.stderr, "SQL:"+sql
+#         print("SQL:"+sql, end="", file=sys.stderr)
 #     try:
 #         cursor.execute(sql,values)
 #     except:
 #         raise Exception("Error executing SQL:"+sql)
-# 
+#
 # import atexit
 # atexit.register(sqlite_close_all)
 ###############################################################
-
 
 def instantiate_from_store(classobj, store, id):
     types = classobj.types()
     output = store.retrieve(types['name'], types, id)
     args = types['init_keydict'].keys()
     calldict = {}
-    #print "ARGS",args, output, id
+    # print("ARGS", args, output, id)
     for arg in args:
         try:
             calldict[arg] = output[arg]
         except KeyError:
             pass
-    #print "CALLDICT",classobj,calldict
+    #print("CALLDICT",classobj,calldict)
     try:
         newobj = classobj(**calldict)
     except TypeError:
-        print "Error when trying to create a new object", classobj, calldict
+        print("Error when trying to create a new object", classobj, calldict)
         raise
     newobj.db.sid = id
     # TODO: The handling of codependent data is a mess and really should be better abstracted up in HttkObject
@@ -407,18 +418,12 @@ class FCSqlite(FilteredCollection):
         cursor = self.sqliteconnection.cursor()
         cursor.execute("DROP TABLE IF EXISTS "+name+";")
         cursor.execute("PRAGMA full_column_names = true;")
-        cursor.execute("PRAGMA short_column_names = false;")       
+        cursor.execute("PRAGMA short_column_names = false;")
         #sqlstr = self.sql()
-        cursor.execute(sql)        
+        cursor.execute(sql)
 
-    def sql(self):
+    def sql_query(self):
         sqlstr = ""
-        sqlstr += "SELECT\n"
-        if len(self.columns) == 0:
-            sqlstr += " *\n"
-        else:
-            sqlstr += "  "+", \n  ".join([c[1]._sql()+" "+c[0] for c in self.columns])+" \n"
-        sqlstr += "FROM\n"
         tablelist = []
         groupset = set()
         for table in self.tables:
@@ -430,21 +435,79 @@ class FCSqlite(FilteredCollection):
         sqlstr += "  "+" LEFT OUTER JOIN \n  ".join(tablelist)+"\n"
         if len(self.filterexprs) > 0:
             sqlstr += "WHERE\n"
-            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql() for x in self.filterexprs]) + "\n  )\n"     
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(False) for x in self.filterexprs]) + "\n  )\n"
         if len(groupset) > 0:
             sqlstr += "GROUP BY\n  "
             sqlstr += ",\n  ".join(groupset) + "\n"
 
         if len(self.postfilterexprs) > 0:
             sqlstr += "HAVING\n"
-            sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sql() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(True) for x in self.postfilterexprs]) + "\n  )\n"
+            #sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sqlpost() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
 
         if len(self.sorts) > 0:
             sqlstr += "ORDER BY\n  "
-            sqlstr += ",\n  ".join([s[0]._sql()+" "+s[1] for s in self.sorts]) + "\n"
-        
+            sqlstr += ",\n  ".join([s[0]._sql(False)+" "+s[1] for s in self.sorts]) + "\n"
+
+        return sqlstr
+
+    def sql(self):
+        sqlstr = ""
+        sqlstr += "SELECT\n"
+        if len(self.columns) == 0:
+            sqlstr += " *\n"
+        else:
+            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] if not c[2] else "GROUP_CONCAT("+c[1]._sql(False)+",'"+c[2]+"') "+c[0] for c in self.columns])+" \n"
+        sqlstr += "FROM\n"
+        sqlstr += self.sql_query()
+        if self.limit is not None:
+            sqlstr += "LIMIT "+str(self.limit)+"\n"
+        if self.offset > 0:
+            sqlstr += "OFFSET "+str(self.offset)+"\n"
         sqlstr += ";\n"
         return sqlstr
+
+    def sql_count(self):
+        tablelist = []
+        groupset = set()
+        for table in self.tables:
+            tablelist.append(table._declare())
+            groupby = table._groupby()
+            if groupby is not None:
+                groupset.add(groupby)
+        if len(groupset) > 0:
+            sqlstr = "SELECT COUNT(__count__) FROM ( SELECT\n"
+            sqlstr += "  COUNT(*) as __count__\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += " );\n"
+            return sqlstr
+        else:
+            sqlstr = "SELECT\n"
+            sqlstr += "  COUNT(*)\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += ";\n"
+            return sqlstr
+
+    def count(self):
+        sql = self.sql_count()
+        cursor = self.sqliteconnection.cursor()
+        cursor.execute(sql)
+
+        data = []
+        for entry in cursor:
+            data += [list(entry)]
+
+        cursor.close()
+
+        if len(data)!=1:
+            raise Exception("Unexpected length of count query: "+str(sql))
+
+        try:
+            return int(data[0][0])
+        except Exception as e:
+            raise Exception("Unexpected format on count query: "+str(data[0]))
 
     def __iter__(self):
         sql = self.sql()
@@ -473,17 +536,21 @@ class FCSqlite(FilteredCollection):
         #    yield data
 
         #cursor.row_factory = sqlite.Row
-            
+
         #cursor.text_factory = str
 
         # A bit of premature optimization
-        
-        if len(mustreplace) == 0:        
-            for entry in cursor:            
+
+        if len(mustreplace) == 0:
+            for entry in cursor:
                 yield (entry, headers)
         else:
-            for entry in cursor:    
-                entry = list(entry)                
+            for entry in cursor:
+                # DuckDB's cursor does not (yet) implement __iter__,
+                # so we have to work around that:
+                if entry[0] is None:
+                    continue
+                entry = list(entry)
                 for replace in mustreplace:
                     entry[replace[0]] = instantiate_from_store(replace[1], self.store, entry[replace[0]])
                     #entry[replace[0]] = replace[1].instantiate_from_store(self.store,entry[replace[0]])
@@ -496,7 +563,7 @@ class FCMultiSqlite(FilteredCollection):
 
     """
     This class allows you to combine a number of filtered collections and put filters on any combination
-    of them together. Just create a separate FilteredCollection from each data source, and pass them in 
+    of them together. Just create a separate FilteredCollection from each data source, and pass them in
     a list to the constructor of this class.
 
     Filters that only apply to one of the FilteredCollections should preferably be put on those collections,
@@ -516,19 +583,20 @@ def fc_eval(expr, data):
         return expr
 
 
-def fc_sql(expr):
+def fc_sql(post, expr):
     if hasattr(expr, '_sql'):
-        #print "HERE",expr._sql(), expr.__class__
-        return expr._sql()
-    elif isinstance(expr, (str, unicode)):
+        #print("HERE",expr._sql(), expr.__class__)
+        return expr._sql(post)
+    elif isinstance(expr, string_types):
         # TODO: Fix quoting system
-        return "\""+str(expr).replace("'", "''")+"\""
+        return "'"+str(expr).replace("'", "''")+"'"
+        #return "\""+str(expr).replace("'", "''")+"\""
 
 #    try:
 #        return "\""+str(expr.hexhash)+"\""
 #    except Exception:
     try:
-        return str(expr.db.sid) 
+        return str(expr.db.sid)
     except Exception:
         return str(expr)
 
@@ -537,7 +605,7 @@ def fc_get_srctable_context(*args):
     firstcontext = None
     for arg in args:
         if hasattr(arg, '_get_srctable_context'):
-            newcontext = arg._get_srctable_context()        
+            newcontext = arg._get_srctable_context()
             if firstcontext is None:
                 firstcontext = newcontext
             else:
@@ -558,13 +626,13 @@ class Expression(object):
     def __init__(self, context, exprtype, *args):
         """
         exprtype should be 'bool','value','unknown'
-        """        
+        """
         fc_checkcontext(context, *args)
         self._context = context
         self._args = args
         self._exprtype = exprtype
 
-    #def eval(self,data):        
+    #def eval(self,data):
     #    evaledargs = [fc_eval(arg,data) for arg in self.args]
     #    return eval(self.name+"(" + ",".join([str(x) for x in self.evaledargs]) + ")")
 
@@ -648,6 +716,52 @@ class Expression(object):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
         return BinaryBooleanOp(self._context, "IN", self, args)
 
+    # TODO: This mess with inv vs non-inv any, all, only operators has to be fixed in the
+    # next version of httk, where the operators should more closely follow the optimade
+    # query language.
+    def has_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ANY", self, args)
+
+    def has_inv_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ANY", self, args)
+
+    # Note: this doesn't work, because the operators are created on the same variable
+    # but new variables for each of the AND contexts would need to be established.
+    #def has_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_ANY", self, [arg])
+    #    return expr
+
+    #def has_inv_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [arg])
+    #    return expr
+
+    def has_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ONLY", self, args)
+
+    def has_inv_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ONLY", self, args)
+
+    def like(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "LIKE", self, args)
+
     def __and__(self, other):
         if not self._exprtype in ('bool', 'unknown'):
             raise Exception("Syntax error: and with expression of wrong type.")
@@ -668,6 +782,8 @@ class Expression(object):
             raise Exception("Syntax error: invert with expression of wrong type.")
         return UnaryBooleanOp(self._context, "not", self)
 
+    def _sql(self, post):
+        raise Exception("Requesting SQL on expression that does not implement it.")
 
 class Function(Expression):
 
@@ -682,8 +798,8 @@ class Function(Expression):
     def _get_srctable_context(self, data):
         return self._srctable
 
-    def _sql(self):
-        return self._name+"(" + ",".join([fc_sql(x) for x in self._args]) + ")"
+    def _sql(self, post):
+        return self._name+"(" + ",".join([fc_sql(post, x) for x in self._args]) + ")"
 
 
 class UnaryBooleanOp(Expression):
@@ -700,9 +816,9 @@ class UnaryBooleanOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('not'):
-            return self._operator + fc_sql(self._args[0])
+            return self._operator + fc_sql(post, self._args[0])
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -724,16 +840,44 @@ class BinaryBooleanOp(Expression):
             l = fc_eval(self._args[0], data)
             r = fc_eval(self._args[1], data)
             return (l and (not r)) or ((not l) and r)
+        elif self._operator == 'IN':
+            raise Exception("Not supported yet")
+        elif self._operator == 'LIKE':
+            raise Exception("Not supported yet")
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('and', 'or', 'xor'):
-            return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
-        elif self._operator in ('IN'):
-            return "("+fc_sql(self._args[0]) + " IN (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"            
+            return "("+fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1])+")"
+
+        elif not post:
+            if self._operator in ('IN',):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ANY'):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ONLY'):
+                return "(1=1)"
+            elif self._operator in ('HAS_INV_ANY'):
+                return "(1<>1)"
+            elif self._operator in ('HAS_INV_ONLY'):
+                return "(1<>1)"
+            elif self._operator in ('LIKE'):
+                return "("+fc_sql(post, self._args[0]) + " LIKE (" + ",".join([fc_sql(post, a) for a in self._args[1]])+") ESCAPE '\\')"
         else:
-            raise Exception("Syntax Error generating SQL for operator: " + self._operator)
+
+            if self._operator == 'IN':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            elif self._operator == 'HAS_ANY':
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator == 'HAS_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            if self._operator == 'HAS_INV_ANY':
+                return "(SUM("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))>0)"
+            elif self._operator == 'HAS_INV_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+
+        raise Exception("Syntax Error generating SQL for operator: " + self._operator)
 
 
 class BinaryComparison(Expression):
@@ -759,7 +903,7 @@ class BinaryComparison(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         op = self._operator
         leftarg = None
         rightarg = None
@@ -770,7 +914,7 @@ class BinaryComparison(Expression):
         elif self._args[0] is False:
             leftarg = '0'
         else:
-            leftarg = fc_sql(self._args[0])
+            leftarg = fc_sql(post, self._args[0])
         if self._args[1] is None:
             rightarg = 'NULL'
         elif self._args[1] is True:
@@ -778,20 +922,20 @@ class BinaryComparison(Expression):
         elif self._args[1] is False:
             rightarg = '0'
         else:
-            rightarg = fc_sql(self._args[1])
+            rightarg = fc_sql(post, self._args[1])
         if leftarg == 'NULL' or rightarg == 'NULL':
             if self._operator == '=':
                 op = 'IS'
             elif self._operator == '!=':
-                op = 'IS NOT'            
-            if leftarg == 'NULL' and rightarg != 'NULL': 
-                leftarg, rightarg = rightarg, leftarg                
+                op = 'IS NOT'
+            if leftarg == 'NULL' and rightarg != 'NULL':
+                leftarg, rightarg = rightarg, leftarg
 
         if self._operator in ('=', '<', '>', '>=', '<=', '!='):
             return "("+leftarg + " "+op+" " + rightarg+")"
         else:
             raise Exception("Syntax Error" + self._operator)
-        
+
 #         if self._operator == '=' and self._args[0] is None and self._args[1] is None:
 #             return "(NULL IS NULL)"
 #         elif self._operator == '=' and self._args[0] is None:
@@ -831,9 +975,9 @@ class BinaryOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('+', '-', '*', '/', '||'):
-            return "(" + fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1]) + ")"
+            return "(" + fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1]) + ")"
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -854,10 +998,10 @@ class TableOrColumn(Expression):
 
         self._key = None
         self._subkey = None
-       
+
         # If key is set, this is a subtable, joined on the key column
         if key is not None:
-            #print "TABLE OR COLUMN WITH KEY",subkey
+            #print("TABLE OR COLUMN WITH KEY",subkey)
             self._key = key
             if subkey is None:
                 self._subkey = self._key
@@ -889,13 +1033,13 @@ class TableOrColumn(Expression):
                     self._outid = "t_"+self._parent._outid+"_"+str(len(self._context.tables))
                 else:
                     self._outid = "t"+str(len(self._context.tables))
-                    
+
             if self._key is None:
                 self._context.roottables.append(self)
 
             self._context.tables.append(self)
             self._istable = True
-        
+
     def _declare_as_column(self):
         if self._srctable is not None:
             self._srctable._declare_as_column()
@@ -904,6 +1048,10 @@ class TableOrColumn(Expression):
             self._parent._declare_as_table()
 
     def __getattr__(self, name):
+        if name == '__id':
+            return self
+        if name[0] == '_':
+            return self.__getattribute__(name)
         if self._classref is not None:
             typedict = dict(self._classref.types()['keys']+self._classref.types()['derived'])
             try:
@@ -913,14 +1061,14 @@ class TableOrColumn(Expression):
                 if hasattr(typex, 'types'):
                     return TableOrColumn(self._context, self._outid + "." + name+"_" + typex.types()['name']+"_sid", self, srctable=self._srctable, indirection=self._indirection-1, classref=typex)
                 elif isinstance(typex, list):
-                    if typex[0] in self._context.store.basics: 
+                    if typex[0] in self._context.store.basics:
                         subname = self._name + "_" + name
                         outid = subname + "_" + str(len(self._context.tables))
                         table = TableOrColumn(self._context, subname, parent=self, outid=outid, key=self._name+"_id", subkey=self._name+"_sid", indirection=self._indirection-1)
                         table._declare_as_table()
                         column = TableOrColumn(self._context, outid + "." + name, parent=table, outid=outid, key=None, subkey=None, indirection=self._indirection-1)
                         return column
-                    elif isinstance(typex[0], tuple): 
+                    elif isinstance(typex[0], tuple):
                         subname = self._name + "_" + name
                         outid = subname + "_" + str(len(self._context.tables))
                         table = TableOrColumn(self._context, subname, parent=self, outid=outid, key=self._name+"_id", subkey=self._name+"_sid", indirection=1)
@@ -928,7 +1076,7 @@ class TableOrColumn(Expression):
                         #column = TableOrColumn(self._context,outid + "." + name,parent=table,outid=outid,key=None,subkey=None,indirection=self._indirection-1)
                         return table
                         # Handle tuple
-                        #print name, self._outid, self._classref
+                        #print(name, self._outid, self._classref)
                         #raise Exception("Not implemented yet")
                     if len(typex) == 1 and hasattr(typex[0], 'types'):
                         subname = self._name + "_" + name
@@ -947,9 +1095,9 @@ class TableOrColumn(Expression):
         else:
             return TableOrColumn(self._context, self._outid + "." + name, self, srctable=self._srctable, indirection=self._indirection-1)
 
-    def _evaluate(self, data):        
+    def _evaluate(self, data):
         if not self._iscolumn:
-            raise Exception("Syntax error: asked to eval column on non-column.")        
+            raise Exception("Syntax error: asked to eval column on non-column.")
 
         #disolve = self.name.rsplit('.',1)
         #if len(disolve)==2:
@@ -967,7 +1115,7 @@ class TableOrColumn(Expression):
             return self._name+" "+self._outid
 
     def _groupby(self):
-        if not self._istable:         
+        if not self._istable:
             raise Exception("Syntax error: asked to sql_groupby non-table.")
         if self._key is not None:
             return self._parent._outid+"."+self._key
@@ -981,18 +1129,18 @@ class TableOrColumn(Expression):
             return None
 
     def _check_subtable_on(self, data):
-        if not self._istable:         
+        if not self._istable:
             raise Exception("Syntax error: asked to check_subtable_on non-table.")
         if self._key is None:
             return True
         else:
             return data[self._outid+"."+self._subkey] == data[self._parent._outid+"."+self._key]
 
-    def _sql(self):
+    def _sql(self, post):
         if not self._iscolumn:
-            #print "HUH",self._outid, ".", self._name, "_id"
+            #print("HUH",self._outid, ".", self._name, "_id")
             return self._outid + "." + self._name+"_id"
-            #raise Exception("Syntax error: asked to generate column sql on non-column.")
+            #raise(Exception("Syntax error: asked to generate column sql on non-column."))
         return self._name
 
 
@@ -1002,7 +1150,6 @@ class DeclaredFunction(object):
         self._context = context
         self._name = name
         self._srctable = srctable
-        
+
     def __call__(self, *args):
         return Function(self._context, self._name, self._srctable, *args)
-

@@ -1,0 +1,46 @@
+<div class="row py-3">
+  <div class="col-3 order-2" id="sticky-sidebar">
+    <div class="sticky-top">
+      <div class="nav flex-column">
+        &nbsp;<br/>
+        <b>Latest blogposts</b>
+        &nbsp;<br/>
+        <ul>
+	  {blogposts_latest:repeat::
+          <li><a class="nav-link" href="{page.relbaseurl}/{{pages:call:{{item}}:relurl}}">{{pages:call:{{item}}:name}}</a></li>
+	  }
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col" id="main">
+    <div class="container">
+      <main class="main-content">
+        {content}
+
+        <table class="table table-striped table-class" id="table-id">
+          {blogposts:repeat::
+          <tr><td><a class="nav-link" href="{page.relbaseurl}/{{pages:call:{{item}}:relurl}}"><b><i>{{pages:call:{{item}}:name}}</i></b> - {{pages:call:{{item}}:author}} ({{pages:call:{{item}}:date}})</i></b></a></td></tr>
+          }
+        </table>
+        <div class='pagination-container' >
+          <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item" data-page="prev"><a class="page-link" href="#"> &lt; <span class="sr-only">(current)</span></a></li>
+              <li class="page-item" data-page="next" id="insert-pages-here"><a class="page-link" href="#"> &gt; <span class="sr-only">(current)</span></a></li>
+            </ul>
+            <form onsubmit="setup_pagination('#table-id')" id="filterform">
+              <input type="text" id="filter" placeholder="Filter"/><input type="reset" value="x" alt="Clear the search form">&nbsp; <input type="submit" value="Filter"/>
+            </form>
+          </nav>
+        </div>
+        <div class="form-group">
+          <select class  ="form-control" name="state" id="maxRows" style="display: none">
+            <option value="10">10</option>
+          </select>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+<script src="{page.relbaseurl}/js/paginate.js"></script>

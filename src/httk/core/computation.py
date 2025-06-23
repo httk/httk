@@ -16,23 +16,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from .signature import Signature, SignatureKey
-from .code import Code
-from .project import Project
-from .reference import Reference
+from httk.core.signature import Signature, SignatureKey
+from httk.core.code import Code
+from httk.core.project import Project
+from httk.core.reference import Reference
 
 
 class Computation(HttkObject):
-
     """
     Object for keeping track of httk data about a specific computation run
     """
-    @httk_typed_init({'computation_date': str, 'description': str, 'code': Code, 
+    @httk_typed_init({'computation_date': str, 'description': str, 'code': Code,
                       'manifest_hash': str, 'signatures': [Signature], 'keys': [SignatureKey], 'relpath': str,
                       'project_counter': int},
-                     index=['computation_date', 'added_date', 'description', 'code', 'manifest_hexhash',
+                     index=['computation_date', 'added_date', 'description', 'code', 'manifest_hash',
                             'signatures', 'keys', 'project_counter'])
-    def __init__(self, computation_date, description, code, 
+    def __init__(self, computation_date, description, code,
                  manifest_hash, signatures, keys, relpath, project_counter, added_date=None):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
@@ -50,13 +49,13 @@ class Computation(HttkObject):
         self._projects = None
         self._tags = None
         self._refs = None
-                
+
         self._codependent_callbacks = []
         self._codependent_data = []
         self._codependent_info = [{'class': ComputationProject, 'column': 'computation', 'add_method': 'add_projects'},
-                                  {'class': ComputationTag, 'column': 'structure', 'add_method': 'add_tags'},
-                                  {'class': ComputationRef, 'column': 'structure', 'add_method': 'add_refs'}]        
-        
+                                  {'class': ComputationTag, 'column': 'computation', 'add_method': 'add_tags'},
+                                  {'class': ComputationRef, 'column': 'computation', 'add_method': 'add_refs'}]
+
     @classmethod
     def create(cls, computation_date, description, code, manifest_hash, signatures, keys,
                project_counter, relpath, added_date=None):
@@ -116,8 +115,10 @@ class Computation(HttkObject):
             self._fill_codependent_data()
         if isinstance(ref, ComputationRef):
             refobj = ref.reference
+        elif isinstance(ref, Reference):
+            refobj = ref
         else:
-            refobj = ComputationRef.use(ref)
+            refobj = Reference.use(ref)
         new = ComputationRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
@@ -150,7 +151,7 @@ class Computation(HttkObject):
 class ComputationTag(HttkObject):
 
     @httk_typed_init({'computation': Computation, 'tag': str, 'value': str},
-                     index=['computation', 'tag', ('tag', 'value'), ('computation', 'tag', 'value')], skip=['hexhash'])    
+                     index=['computation', 'tag', ('tag', 'value'), ('computation', 'tag', 'value')], skip=['hexhash'])
     def __init__(self, computation, tag, value):
         self.tag = tag
         self.computation = computation
@@ -162,7 +163,7 @@ class ComputationTag(HttkObject):
 
 class ComputationRef(HttkObject):
 
-    @httk_typed_init({'computation': Computation, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])        
+    @httk_typed_init({'computation': Computation, 'reference': Reference}, index=['computation', 'reference'], skip=['hexhash'])
     def __init__(self, computation, reference):
         self.computation = computation
         self.reference = reference
@@ -181,16 +182,16 @@ class ComputationRelated(HttkObject):
     def __init__(self, main_computation, other_computation, relation):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
-        """    
+        """
         self.main_computation = main_computation
         self.other_computation = other_computation
         self.relation = relation
-        
+
     @classmethod
     def create(cls, main_computation, other_computation, relation):
         """
         Create a Computation object.
-        """        
+        """
         return cls(main_computation, other_computation, relation)
 
 
@@ -206,7 +207,7 @@ class ComputationProject(HttkObject):
         """
         self.computation = computation
         self.project = project
-        
+
     @classmethod
     def create(cls, computation, project):
         """
@@ -226,7 +227,7 @@ class Result(HttkObject):
         Private constructor, as per httk coding guidelines. Use .create method instead.
         """
         self.computation = computation
-        
+
     @classmethod
     def create(cls, computation):
         """
@@ -240,4 +241,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

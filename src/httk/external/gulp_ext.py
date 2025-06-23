@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -21,48 +21,47 @@ citation.add_ext_citation('Jmol', "Jmol: an open-source Java viewer for chemical
 import os
 
 from httk import config
-from command import Command
+from httk.external.command import Command
 import httk
 import httk.iface
 
 try:
-    jmol_path = config.get('paths', 'jmol')
+    gulp_path = config.get('paths', 'gulp')
 except Exception:
-    jmol_path = None
-    raise Exception("httk.external.jmol_ext imported with no jmol path set in httk.cfg")
+    gulp_path = None
+    raise Exception("httk.external.gulp_ext imported with no gulp path set in httk.cfg")
 
 
-def jmol(cwd, args, timeout=10):
-    out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
-    return out, err, completed    
+def gulp(cwd, args, timeout=10):
+    out, err, completed = Command(gulp_path, args, cwd=cwd).run(timeout)
+    return out, err, completed
 
 
 def show(struct):
     tmpdir = httk.utils.create_tmpdir()
-    
+
     f = httk.IoAdapterFilename(os.path.join(tmpdir, "atoms.gin"))
     httk.iface.gulp_if.structure_to_gulp(f, struct)
-    #print "Running gulp"
+    #print("Running gulp")
     out, err, completed = gulp(tmpdir, ["atoms"], timeout=30)
     if not completed:
         raise Exception("Gulp broke:"+tmpdir)
-    #print "Gulp finished",completed
+    #print("Gulp finished",completed)
     if completed:
         def get_energy(results, match):
             results['energy'] = float(match.group(1))
-            
+
         results = httk.utils.micro_pyawk(os.path.join(tmpdir, "atoms.gout"), [
             ['^ *Total lattice energy += +([-0-9.]+) +eV', None, get_energy],
         ])
     else:
         results = {}
-        
-    if 'energy' in results:    
-        #print "HERE:",results['energy']/struct.N
+
+    if 'energy' in results:
+        #print("HERE:",results['energy']/struct.N)
         #exit(0)
         httk.utils.destroy_tmpdir(tmpdir)
         return results['energy']/struct.N
 
     httk.utils.destroy_tmpdir(tmpdir)
     return None
-

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -25,21 +25,21 @@
 #
 #   ht.source : A source directory from which tasks can be created
 #   ht.running : A directory for ongoing tasks
-#   ht.finshed : A directory collecting finished tasks
+#   ht.finished : A directory collecting finished tasks
 #   ht.broken : A directory collecting broken tasks
 #
 #   Statues of waiting, ongoing, etc, tasks:
 #
-#   ht.waiting : Task that wants to be (re)executed. 
+#   ht.waiting : Task that wants to be (re)executed.
 #   ht.finished: Finished task, not to be further touched
-#   ht.running: Task that is currently running - or possibly stale, 
+#   ht.running: Task that is currently running - or possibly stale,
 #                     (if ctime has not been updated in too long)
-# 
+#
 #   Full breakdown:
 #   ht.task.type.id.step.1.running
 #     ht.task = obligatory prefix
 #     type = type of job, allows for differentiation where only some taskmanagers deal with some jobs
-#     id = task unique id 
+#     id = task unique id
 #     step = the step the task is at right now
 #     1 = priority number, 1-5, 1 is highest
 #
@@ -63,7 +63,16 @@ export HT_TASKMGR_SET="$HT_TASKMGR_SET"
 export HT_TASKMGR_ROOTDIR="$HT_TASKMGR_ROOTDIR"
 export HT_TASKMGR_ATTEMPTS="$HT_TASKMGR_ATTEMPTS"
 BZIPLOG=1
+ZSTDLOG=0
 
+# If we have to restart to fix the process group, the command line
+# arguments are lost in the restart, because "$@" on line 175 is empty.
+# Collect arguments in the "args_restart" array to make sure that they
+# are not lost during the restart; see line 176.
+# The "-d" argument should not be saved, because taskmanager changes
+# directory based on the value of -d and the directory change survives
+# the restart.
+args_restart=()
 # Command line argument handling
 while [ -n "$1" ]; do
     case $1 in
@@ -73,19 +82,30 @@ while [ -n "$1" ]; do
 	    ;;
         -w|--wrap)
             HT_TASKMGR_WRAP=$2
+	    args_restart+=(-w)
+	    args_restart+=($HT_TASKMGR_WRAP)
 	    # Never shift > 1, as that shifts 0 if there is no arg...
 	    shift 1
 	    shift 1
             ;;
         -s|--set)
             HT_TASKMGR_SET=$2
+	    args_restart+=(-s)
+	    args_restart+=($HT_TASKMGR_SET)
 	    shift 1
 	    shift 1
             ;;
-        -b|--no-bzip2log)
+	-b|--no-bzip2log)
             BZIPLOG=0
+	    args_restart+=(-b)
 	    shift 1
             ;;
+	--zstdlog)
+	    ZSTDLOG=1
+	    BZIPLOG=0
+	    args_restart+=(--zstdlog)
+	    shift 1
+	    ;;
         -d|--rootdir)
             HT_TASKMGR_ROOTDIR=$2
 	    shift 1
@@ -93,11 +113,15 @@ while [ -n "$1" ]; do
             ;;
         -t|--timeout)
             HT_TASKMGR_TIMEOUT=$2
+	    args_restart+=(-t)
+	    args_restart+=($HT_TASKMGR_TIMEOUT)
 	    shift 1
 	    shift 1
             ;;
         -a|--attempts)
             HT_TASKMGR_ATTEMPTS=$2
+	    args_restart+=(-a)
+	    args_restart+=($HT_TASKMGR_ATTEMPTS)
 	    shift 1
 	    shift 1
             ;;
@@ -143,12 +167,13 @@ if [ "$?" != "0" ]; then
 	# Let this process stay around as the parent of the real taskmanager to handle
 	# a rather specific corner case: if this process was started under the pretense
 	# that if the real process group gets killed, then this process (and the child process =
-	# the real taskmanager) should also get killed. This does not work if 
-	# we had done 'exec setsid', since then the new taskmanager process would be 
+	# the real taskmanager) should also get killed. This does not work if
+	# we had done 'exec setsid', since then the new taskmanager process would be
 	# detached from the original process group.
 	KILLPID=""
 	trap "if [ -n \"\$KILLPID\" ]; then kill \"\$KILLPID\"; fi" EXIT
-	setsid "$0" --norestart "$@" &
+	#setsid "$0" --norestart "$@" &
+	setsid "$0" --norestart ${args_restart[@]} &
 	KILLPID="$!"
 	wait
 	RESULT="$?"
@@ -190,14 +215,14 @@ function PATH_PREFIX {
 	COUNT=$((COUNT+1))
     done
     if [ "$FROM" == "-d" ]; then
-	mkdir "${PREFIX}${COUNT}" 
+	mkdir "${PREFIX}${COUNT}"
     elif [ "$FROM" == "-f" ]; then
-	touch "${PREFIX}${COUNT}" 
+	touch "${PREFIX}${COUNT}"
     else
 	mv "$FROM" "${PREFIX}${COUNT}"
     fi
     if [ "$?" == 0 ]; then
-	echo "${PREFIX}${COUNT}" 
+	echo "${PREFIX}${COUNT}"
     else
 	return "$?"
     fi
@@ -265,7 +290,7 @@ function logmsg {
     fi
 }
 
-# Write out an error msg 
+# Write out an error msg
 function errmsg {
     local MSG=$1
     echo "[$IDCODE|$(date +"%Y-%m-%d %H:%M:%S")] ERROR!: $1" >&2
@@ -356,7 +381,7 @@ function adopt {
     local OWNER=$(split . 7 "$FULLNAME")
     local PRIO=$(split . 8 "$FULLNAME")
     local STATUS=$(split . 9 "$FULLNAME")
-    
+
     local OUTDIR="$DIR"
 
     if [ "${DIR:0:15}" = "ht.waitstart/1/" -o "${DIR:0:15}" = "ht.waitstart/2/" -o \
@@ -375,7 +400,7 @@ function adopt {
 
     local PREDIR="${RESTDIR%+(ht\.waiting|ht\.running|ht\.waitstart)*}"
     local POSTDIR=""
-    if [ "$PREDIR" != "$RESTDIR" ]; then 
+    if [ "$PREDIR" != "$RESTDIR" ]; then
 	POSTDIR="${RESTDIR#$PREDIR+(ht\.waiting|ht\.running|ht\.waitstart)}"
 	OUTDIR="${PREPREDIR}${PREDIR}ht.running${POSTDIR}"
     fi
@@ -395,7 +420,7 @@ function adopt {
     # Must have this here, since some filesystem does not update even the ctime on mv
     touch -c "$DIR/$FULLNAME" > /dev/null 2>&1
 
-    mkdir -p "$OUTDIR"	
+    mkdir -p "$OUTDIR"
     mv "$DIR/$FULLNAME" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" > /dev/null 2>&1
     if [ "$?" != "0" ]; then
 	logmsg 1 "Adopt run: $SRC lost to other process in race condition. Finding another ht.task."
@@ -414,7 +439,7 @@ function adopt {
     if [ "$RESTARTS" -gt "$HT_TASKMGR_ATTEMPTS" ]; then
 	logmsg 1 "Too many restarts, putting this job in a broken state."
 	echo "Too many restarts!" >> "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running/ht.reason"
-	mv "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped" 	
+	mv "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.running" "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped"
 	if [ -e "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped/ht.run.current" ]; then
 	    (
 		cd "$OUTDIR/ht.task.${TASKSET}.${TASKID}.${STEP}.${RESTARTS}.${IDCODE}.${PRIO}.stopped/ht.run.current"
@@ -436,7 +461,7 @@ function start_run {
     local DIRNAME=$(basename "$DIR")
     local PARENTDIR=$(dirname "$DIR")
 
-    local FULLNAME=$(basename "$TASK")	    
+    local FULLNAME=$(basename "$TASK")
     local TASKSET=$(split . 3 "$FULLNAME")
     local TASKID=$(split . 4 "$FULLNAME")
     local STEP=$(split . 5 "$FULLNAME")
@@ -455,7 +480,7 @@ function start_run {
     local PREDIR="${RESTDIR%+(ht\.waiting|ht\.running)*}"
     local POSTDIR=""
     local MOVEDIR=0
-    if [ "$PREDIR" != "$RESTDIR" ]; then 
+    if [ "$PREDIR" != "$RESTDIR" ]; then
 	POSTDIR="${RESTDIR#$PREDIR+(ht\.waiting|ht\.running)}"
 	MOVEDIR=1
     fi
@@ -474,7 +499,7 @@ function start_run {
 	export HT_TASK_RUN_NAME="ht.run.current"
 	export HT_TASK_CURRENT_DIR="$(pwd -P)"
     else
-	logmsg 1 "Trying to execute ht_run: $HT_TASK_TOP_DIR/ht_run $HT_TASK_STEP"	
+	logmsg 1 "Trying to execute ht_run: $HT_TASK_TOP_DIR/ht_run $HT_TASK_STEP"
 	PROGRAM="ht_run"
 	export HT_TASK_RUN_NAME="."
 	export HT_TASK_CURRENT_DIR="$(pwd -P)"
@@ -483,7 +508,7 @@ function start_run {
     if [ -e ht.nextstep ]; then
 	HT_TASK_STEP=$(cat ht.nextstep)
     fi
-    
+
     if [ "$HT_TASK_STEP" != "ht_finished" -a "$HT_TASK_STEP" != "ht_broken" ]; then
 
 	# Allow run to run safely in a setsid, but make sure it gets killed if we get a signal
@@ -492,7 +517,7 @@ function start_run {
 	    trap "if [ -n \"\$KILLPID\" ]; then kill -TERM -- -\"\$KILLPID\"; (sleep 10; kill -KILL -- -\"\$KILLPID\") & fi" EXIT
 	    trap " " TERM
 	    # WARNING: setsid can behave extremely wierd if invoked as a process group leader. That should
-	    # not be an issue here, however. 
+	    # not be an issue here, however.
 	    if [ -n "$HT_TASKMGR_WRAP" ]; then
 		setsid "$HT_TASKMGR_WRAP" "$PROGRAM" "$HT_TASK_STEP" >> "$HT_TASK_TOP_DIR/ht.taskmgr.stdout" 2>&1 &
 	    else
@@ -512,9 +537,9 @@ function start_run {
 	    wait "$KILLPID"
 	    exit 43
 	) &
-	RUNPID=$!    
-	
-	WATCHDOGPID=$( 
+	RUNPID=$!
+
+	WATCHDOGPID=$(
 	    (
 		trap " " TERM
 		sleep "$HT_TASKMGR_TIMEOUT" &
@@ -523,7 +548,7 @@ function start_run {
 		RETCODE=$?
 		logmsg 1 "Watchdog wakes up, with return code=$RETCODE"
 		if [ "$RETCODE" -gt "127" ]; then
-	    	    kill -TERM "$SP" >/dev/null 2>&1; 
+		    kill -TERM "$SP" >/dev/null 2>&1;
 		fi
 		kill -TERM "${RUNPID}"
 		#/bin/kill -TERM -- "-${RUNPID}"
@@ -534,7 +559,7 @@ function start_run {
 		#logmsg 1 "Watchdog has killed job: $NEXTTASK"
 		exit 42
 	    ) >/dev/null 2>&1 & echo $!)
-	
+
 	CHECKPOINTPID=$(
 	    (
 		COUNT=0
@@ -543,7 +568,7 @@ function start_run {
 		    touch -c "$HT_TASK_TOP_DIR"
 		done
 	    ) >/dev/null 2>&1 & echo $!)
-	
+
 	#while [ 0 == 0 ]; do
 	logmsg 1 "Waiting for run to finish"
 	wait "$RUNPID"
@@ -555,16 +580,16 @@ function start_run {
 	    RESULT="$?"
 	    logmsg 1 "Return code: $RESULT"
 	fi
-	    
+
 	kill "$CHECKPOINTPID"
-	
+
 	if kill "$WATCHDOGPID" >/dev/null 2>&1; then
 	    logmsg 1 "Job $NEXTTASK finished ok, watchdog killed."
 	else
 	    logmsg 1 "Job $NEXTTASK was killed by the watchdog."
 	    RESULT=99
 	fi
-	
+
 	logmsg 1 "Job completed, return code: $RESULT"
     else
 	# Below is to handle a corner case where a run is broken after having commited an
@@ -573,7 +598,7 @@ function start_run {
 	if [ "$HT_TASK_STEP" != "ht_finished"]; then
 	    RESULT=10
 	fi
-	if [ "$HT_TASK_STEP" != "ht_broken" ]; then	
+	if [ "$HT_TASK_STEP" != "ht_broken" ]; then
 	    RESULT=4
 	fi
     fi
@@ -590,7 +615,7 @@ function start_run {
 	NEXTSTEP="unknown"
     fi
 
-    cd "$HT_TASKMGR_ROOTDIR"	
+    cd "$HT_TASKMGR_ROOTDIR"
 
     if [ "$RESULT" == "10" -o \( "$PROGRAM" == "ht_run" -a "$RESULT" == "0" \) ]; then
 	logmsg 1 "Return code 10 (or 0 for ht_run) means the run completed successfully."
@@ -600,6 +625,8 @@ function start_run {
 	    cp "$TASK"/ht.taskmgr.stdout "$TASK"/ht.run.current/ht.taskmgr.stdout
 	    if [ "$BZIPLOG" == "1" ]; then
 		bzip2 "$TASK"/ht.run.current/ht.taskmgr.stdout
+	    elif [ "$ZSTDLOG" == "1" ]; then
+		zstd --rm "$TASK"/ht.run.current/ht.taskmgr.stdout
 	    fi
 
 	    DATE="$(date +"%Y-%m-%d_%H.%M.%S")"
@@ -685,7 +712,7 @@ function find_next_task {
 
     PRIORITY=$1
 
-    logmsg 1 "Find next task: search for a task (priority=$PRIORITY)"	
+    logmsg 1 "Find next task: search for a task (priority=$PRIORITY)"
 
     RETURN=3
 
@@ -698,10 +725,10 @@ function find_next_task {
 
     #( find . \( -name "ht.tmp.*" -prune \) -a \( \( -mmin +15 -name "ht.task.*.$PRIORITY.running" -prune \) -o \( -name "ht.task.*.$PRIORITY.subruns" \) -o \( -name "ht.task.*.unclaimed.$PRIORITY.waitstep" -prune \) \); find . \( -name "ht.task.*" -prune \) -a \( -name "ht.task.*.unclaimed.$PRIORITY.subruns" \) | xargs find "{}" \( -name "ht.task.*" -prune \) -a \( -name "ht.task.*.unclaimed.$PRIORITY.waitstart" \); find . \( -name "ht.task.*" -prune \) -a \( -name "ht.task.*.unclaimed.$PRIORITY.waitstart" \) ) | (
 
-    ( 
-	find . "ht.waitstart/$PRIORITY" \( \( -name "ht.tmp.*" -o -name "ht.task.*.finished" -o -name "ht.task.*.broken" -o -name "ht.task.*.stopped" -o -name "ht.task.*.running" -o -name "ht.task.*.waitstep" -o -name "ht.task.*waitstart" -o -name "ht.waitstart" \) -prune -o -true \) -a \( \( -mmin +15 -name "ht.task.*.running" \) -o \( -name "ht.task.*.waitsubtasks" \) -o \( -name "ht.task.*.waitstep" \) -o \( -name "ht.task.*.waitstart" \) \) -print 
-    ) | (
-       RETURN=3; 
+    (
+	find . "ht.waitstart/$PRIORITY" \( \( -name "ht.tmp.*" -o -name "ht.task.*.finished" -o -name "ht.task.*.broken" -o -name "ht.task.*.stopped" -o -name "ht.task.*.running" -o -name "ht.task.*.waitstep" -o -name "ht.task.*waitstart" -o -name "ht.waitstart" \) -prune -o -true \) -a \( \( -mmin +15 -name "ht.task.*.running" \) -o \( -name "ht.task.*.waitsubtasks" \) -o \( -name "ht.task.*.waitstep" \) -o \( -name "ht.task.*.waitstart" \) \) -print
+    ) | sort -V | (
+       RETURN=3;
        while read TASK; do
 
 	    if [ ! -d "$TASK" ]; then
@@ -709,10 +736,10 @@ function find_next_task {
 	    fi
 
 	    logmsg 1 "Find next task: investigating $TASK"
-	
+
             # TASK is now a directory on form /some/path/ht.task.id.1.2.3.code.running
 	    DIR=$(dirname "$TASK")
-	    FULLNAME=$(basename "$TASK")	    
+	    FULLNAME=$(basename "$TASK")
 	    TASKSET=$(split . 3 "$FULLNAME")
 	    TASKID=$(split . 4 "$FULLNAME")
 	    STEP=$(split . 5 "$FULLNAME")
@@ -720,13 +747,13 @@ function find_next_task {
 	    OWNER=$(split . 7 "$FULLNAME")
 	    PRIO=$(split . 8 "$FULLNAME")
 	    STATUS=$(split . 9 "$FULLNAME")
-	    
+
 	    if [ "$HT_TASKMGR_SET" != "any" -a "$HT_TASKMGR_SET" != "$TASKSET" ]; then
 		logmsg 1 ":: Job skipped, since task type $TASKSET should not be run by this jobmanager ($HT_TASKMGR_SET)"
 		continue
 	    fi
 
-	    logmsg 1 "Find next task: Considering $TASK, taskid='$TASKID', owner='$OWNER', status='$STATUS', can I run this?"  	   
+	    logmsg 1 "Find next task: Considering $TASK, taskid='$TASKID', owner='$OWNER', status='$STATUS', can I run this?"
 	#   if [ "${FULLNAME:0:14}" == "ht.tmp.unpack." ]; then
 	#       logmsg 1 "This is a unpack library, checking if it is ready to unpack."
 	#       if [ -e "$TASK/ht.unpack.ready" ]; then
@@ -773,14 +800,14 @@ function find_next_task {
 
 	    if [ "$STATUS" == "running" ]; then
 		MTIME=$(stat -c %y "$TASK")
-	        logmsg 1 "Task $TASK is a stale running task with MTIME: $MTIME"
+		logmsg 1 "Task $TASK is a stale running task with MTIME: $MTIME"
 	    fi
 
 	    logmsg 1 "Found a task we could run and which is available: $TASK, trying to adopt."
-	    	   
+
 	    NEWRUN=$(adopt "$TASK")
 	    RETURNCODE=$?
-	    
+
 	    if [ "$RETURNCODE" == "2" ]; then
 		RETURN=2
 		continue
@@ -794,12 +821,12 @@ function find_next_task {
 	    logmsg 1 "Handling any pending atomic transactions."
 	    (
 		cd "$NEWRUN"
-		ATOMIC_EXEC 
+		ATOMIC_EXEC
 	    )
 	    if [ -e "$NEWRUN/ht.run.current" ]; then
 		(
 		    cd "$NEWRUN/ht.run.current"
-		    ATOMIC_EXEC 
+		    ATOMIC_EXEC
 		)
 	    fi
 
@@ -811,18 +838,18 @@ function find_next_task {
 		logmsg 1 "Find next task: old broken run."
 		# TODO: Handle restart=false in ht.parameters
 	    fi
-	    
+
 	    echo "$NEWRUN"
 	    return 0
         done
 
 	return $RETURN )
 
-    RETURNCODE=$?	
+    RETURNCODE=$?
 
     case $RETURNCODE in
 	0 ) # All is OK, a run has been printed out on stdout, we are finished
-	    return 0 
+	    return 0
 	    ;;
 	2 ) # Could not adopt run, continue onwards, but make sure to retry if nothing is found
 	    return 2
@@ -835,7 +862,7 @@ function find_next_task {
     esac
 }
 
-logmsg 1 "Taskmanager starting up with rootdir: $HT_TASKMGR_ROOTDIR"	    
+logmsg 1 "Taskmanager starting up with rootdir: $HT_TASKMGR_ROOTDIR"
 
 HEARTBEATPID=$( (
     COUNT=0
@@ -850,13 +877,13 @@ while [ 0 == 0 ]; do
     RETRY=0
     while [ 0 == 0 ]; do
 	#sleep 5
-	logmsg 1 "Taskmanager looking for something to do on priority level $PRIORITY."	    
+	logmsg 1 "Taskmanager looking for something to do on priority level $PRIORITY."
 	NEXTTASK=$(find_next_task "$PRIORITY")
 	RETURNCODE=$?
 
 	if [ $RETURNCODE -eq 0 ]; then
 	    RETRY=0
-	    logmsg 1 "##### STARTING RUN: $NEXTTASK"	    
+	    logmsg 1 "##### STARTING RUN: $NEXTTASK"
 	    start_run "$NEXTTASK" &
 	    # TODO: Properly count nodes
 	    FREE_NODES=$((FREE_NODES-1))
@@ -866,23 +893,23 @@ while [ 0 == 0 ]; do
 	else
 	    if [ $RETURNCODE -eq 3 ]; then
 		RETRY=0
-		logmsg 1 "No task to do found."	    
+		logmsg 1 "No task to do found."
 		PRIORITY=$((PRIORITY+1))
 		if [ "$PRIORITY" -gt "5" ]; then
-		    logmsg 1 "Did not find anything to do, already at lowest priority."	    
+		    logmsg 1 "Did not find anything to do, already at lowest priority."
 		    break
 		fi
-		logmsg 1 "Decreased priority to $PRIORITY."	    
+		logmsg 1 "Decreased priority to $PRIORITY."
 		continue
 	    else
 		logmsg 1 "Did not find anything to do (but this is temporary, we should not quit)."
 		RETRY=1
 		PRIORITY=$((PRIORITY+1))
 		if [ "$PRIORITY" -gt "5" ]; then
-		    logmsg 1 "Did not find anything to do, already at lowest priority."	    
+		    logmsg 1 "Did not find anything to do, already at lowest priority."
 		    break
 		fi
-		logmsg 1 "Decreased priority to $PRIORITY."	    
+		logmsg 1 "Decreased priority to $PRIORITY."
 		continue
 	    fi
 	fi
@@ -895,7 +922,7 @@ while [ 0 == 0 ]; do
 	# Possible race condition here?, what happens if a job completes
 	# just after checking, above?
 	while [ 0 == 0 ]; do
-	    wait 
+	    wait
 	    RETCODE=$?
 	    logmsg 1 "Woke up by returncode: $RETCODE"
 	    if [ "$RETCODE" -le 127 ]; then
@@ -903,10 +930,10 @@ while [ 0 == 0 ]; do
 	    fi
 	done
     elif [ "$DAEMONMODE" == "true" -o "$RETRY" == "1" ]; then
-	logmsg 1 "Nothing left to do for now, idling a short while."	
+	logmsg 1 "Nothing left to do for now, idling a short while."
 	sleep 30
     else
-	logmsg 1 "Nothing left to do, not running in daemon mode: quitting."	
+	logmsg 1 "Nothing left to do, not running in daemon mode: quitting."
 	break
     fi
     RUNNING=$(jobs -p | wc -l)

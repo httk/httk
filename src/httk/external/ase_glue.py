@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,75 +17,40 @@
 
 import os
 
-from httk.core import citation
+from httk.core import citation, FracScalar, IoAdapterFileWriter
 from httk.core.basic import is_sequence
 citation.add_ext_citation('Atomic Simulation Environment (ASE)', "S. R. Bahn, K. W. Jacobsen")
 import httk.atomistic.data
 from httk.core.httkobject import HttkPlugin, HttkPluginWrapper
 from httk.atomistic import Cell
 from httk.atomistic.spacegrouputils import get_symops_strs, spacegroup_get_number_and_setting
-
-from httk import config
 from httk.atomistic import Structure, UnitcellSites
-import httk.iface 
-from subimport import submodule_import_external
-try:   
-    ase_path = config.get('paths', 'ase')
-except Exception:
-    ase_path = None
-
-if ase_path == "False":
-    raise Exception("httk.external.ase_glue: module ase_glue imported, but ase is disabled in configuration file.")
-
-if ase_path is not None:    
-    submodule_import_external(os.path.join(ase_path), 'ase')
-else:
-    try:
-        external = config.get('general', 'allow_system_libs')
-    except Exception:
-        external = 'yes'
-    #if external == 'yes':
-    #    import ase
-    #else:
-    #    raise Exception("httk.external.ase_glue: module ase_glue imported, but no ase configured, and package ase not found in the environment.")
-
-from httk.iface.ase_if import *
-
-try:
-    import ase
-except ImportError:
-    raise ImportError("httk.external.ase_glue imported without access to the ase python library.")
-import ase.io
-import ase.utils.geometry
-from ase.lattice.spacegroup import crystal
-from ase.atoms import Atoms
-try:
-    from ase import version 
-    ase_version = version.version
-except ImportError:
-    from ase import __version__ as aseversion
-    
-ase_major_version = aseversion.split('.')[0]
-ase_minor_version = aseversion.split('.')[1]
-
+import httk.iface
 
 def primitive_from_conventional_cell(atoms, spacegroup=1, setting=1):
     """Returns primitive cell given an Atoms object for a conventional
     cell and it's spacegroup.
-    
-    Code snippet kindly posted by Jesper Friis, 
+
+    Code snippet kindly posted by Jesper Friis,
       https://listserv.fysik.dtu.dk/pipermail/ase-users/2011-January/000911.html
-    """    
+    """
+    from httk.external.ase_ext import ase
+    from ase import geometry
+
     sg = spacegroup.Spacegroup(spacegroup, setting)
     prim_cell = sg.scaled_primitive_cell  # Check if we need to transpose
-    return ase.utils.geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])    
-    
+    return geometry.cut(atoms, a=prim_cell[0], b=prim_cell[1], c=prim_cell[2])
+
 
 def structure_to_ase_atoms(struct):
+    from httk.external.ase_ext import ase
+    from ase.spacegroup import crystal
+    from ase.spacegroup.spacegroup import parse_sitesym, spacegroup_from_data
+    from ase.atoms import Atoms
 
     struct = Structure.use(struct)
 
-    if struct.has_uc_repr:    
+    if struct.has_uc_repr:
         symbollist, scaled_positions = httk.iface.ase_if.uc_structure_to_symbols_and_scaled_positions(struct)
         scaled_positions = scaled_positions.to_floats()
         cell = struct.uc_basis.to_floats()
@@ -98,14 +63,14 @@ def structure_to_ase_atoms(struct):
                     symbols += [str(s)]
             else:
                 symbols += [s]
-                    
+
         atoms = Atoms(symbols=symbols,
                       cell=cell,
                       scaled_positions=scaled_positions,
                       pbc=True)
 
     elif struct.has_rc_repr:
-        symbollist, scaled_positions = httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions(struct)    
+        symbollist, scaled_positions = httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions(struct)
         symbols = []
         for s in symbollist:
             if is_sequence(s):
@@ -115,31 +80,34 @@ def structure_to_ase_atoms(struct):
                     symbols += [str(s)]
             else:
                 symbols += [s]
-        
+
         hall = struct.rc_sites.hall_symbol
         symops = get_symops_strs(hall)
-        rot, trans = ase.lattice.spacegroup.spacegroup.parse_sitesym(symops)
+        rot, trans = parse_sitesym(symops)
         spgnbr, setting = spacegroup_get_number_and_setting(hall)
-        spg = ase.lattice.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall, 
-                                                                     centrosymmetric=None, 
-                                                                     scaled_primitive_cell=None, 
-                                                                     reciprocal_cell=None, 
-                                                                     subtrans=None, 
-                                                                     sitesym=None, 
-                                                                     rotations=rot, 
-                                                                     translations=trans, 
+        spg = spacegroup_from_data(no=spgnbr, symbol=hall,
+                                                                     centrosymmetric=None,
+                                                                     scaled_primitive_cell=None,
+                                                                     reciprocal_cell=None,
+                                                                     subtrans=None,
+                                                                     sitesym=None,
+                                                                     rotations=rot,
+                                                                     translations=trans,
                                                                      datafile=None)
-        
-        atoms = crystal(symbols, scaled_positions, spg,  
-                        cellpar=[float(struct.rc_a), float(struct.rc_b), float(struct.rc_c), 
+
+        atoms = crystal(symbols, scaled_positions, spg,
+                        cellpar=[float(struct.rc_a), float(struct.rc_b), float(struct.rc_c),
                                  float(struct.rc_alpha), float(struct.rc_beta), float(struct.rc_gamma)])
     else:
         raise Exception("ase_glue.structure_to_ase_atoms: structure has neither primcell, nor representative, representation.")
-    
+
     return atoms
 
 
 def ase_read_structure(f):
+    from httk.external.ase_ext import ase
+    import ase.io
+
     ioa = httk.IoAdapterFilename.use(f)
     atoms = ase.io.read(ioa.filename)
     ioa.close()
@@ -167,7 +135,7 @@ def coordgroups_reduced_rc_to_unitcellsites(coordgroups, basis, hall_symbol, red
     cell = atoms.get_cell()
     sites = UnitcellSites.create(cell=cell, occupancies=atomic_symbols, reduced_coords=coords, periodicity=atoms.pbc)
     cell = Cell(basis=cell)
-    
+
     return sites, cell
 
 
@@ -185,6 +153,9 @@ def ase_atoms_to_structure(atoms, hall_symbol):
 
 
 def ase_write_struct(struct, ioa, format=None):
+    from httk.external.ase_ext import ase
+    import ase.io
+
     ioa = IoAdapterFileWriter.use(ioa)
     aseatoms = structure_to_ase_atoms(struct)
     ase.io.write(ioa.file, aseatoms, format=format)
@@ -193,7 +164,7 @@ def ase_write_struct(struct, ioa, format=None):
 class StructureAsePlugin(HttkPlugin):
 
     name = 'ase'
-            
+
     def plugin_init(self, struct):
         self.struct = struct
 
@@ -207,22 +178,22 @@ class StructureAsePlugin(HttkPlugin):
 Structure.ase = HttkPluginWrapper(StructureAsePlugin)
 
 # def structure_to_p1structure(sgstruct, primitive=False):
-#     #print "SGSTRUCTURE TO STRUCTURE:",sgstruct.nonequiv.assignments,sgstruct.nonequiv.coordgroups.to_floats(),sgstruct.nonequiv.cell.to_floats()
-#     
-#     symbols, scaled_positions = httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions(sgstruct)    
-#     #print "HERE:",symbols,scaled_positions.to_floats(),primitive
+#     #print("SGSTRUCTURE TO STRUCTURE:",sgstruct.nonequiv.assignments,sgstruct.nonequiv.coordgroups.to_floats(),sgstruct.nonequiv.cell.to_floats())
+#
+#     symbols, scaled_positions = httk.iface.ase_if.rc_structure_to_symbols_and_scaled_positions(sgstruct)
+#     #print("HERE:",symbols,scaled_positions.to_floats(),primitive)
 #     #spacegroup = sgstruct.hm_symbol.split(":")[0]
 #     #setting = sgstruct.setting
 #     spacegroup, setting = sgstruct.spacegroup_number_and_setting
-#     ase_cryst = crystal(symbols, scaled_positions, spacegroup, setting=setting, 
-#                         cellpar=[sgstruct.a, sgstruct.b, sgstruct.c, 
+#     ase_cryst = crystal(symbols, scaled_positions, spacegroup, setting=setting,
+#                         cellpar=[sgstruct.a, sgstruct.b, sgstruct.c,
 #                                  sgstruct.alpha, sgstruct.beta, sgstruct.gamma])
 #     if primitive:
 #         ase_cryst = primitive_from_conventional_cell(ase_cryst, spacegroup=sgstruct.spacegroup)
 #     newstruct = httk.iface.ase_if.ase_atoms_to_structure(ase_cryst,hall_symbol='P 1')
 #     newstruct.tags = sgstruct.tags
 #     newstruct.refs = sgstruct.refs
-#     #print "SGSTRUCTURE TO STRUCTURE NEW:",newstruct.assignments,newstruct.coordgroups.to_floats(),newstruct.cell.to_floats()
+#     #print("SGSTRUCTURE TO STRUCTURE NEW:",newstruct.assignments,newstruct.coordgroups.to_floats(),newstruct.cell.to_floats())
 #     return newstruct.normalize()
 
 # def coordgroups_reduced_rc_to_primcell(coordgroups,basis,hall_symbol):

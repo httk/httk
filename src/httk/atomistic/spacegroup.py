@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -17,7 +17,7 @@
 
 from httk.core import HttkObject, httk_typed_init
 from httk.core import FracVector
-from spacegrouputils import *
+from httk.atomistic.spacegrouputils import *
 
 
 class Spacegroup(HttkObject):
@@ -29,41 +29,41 @@ class Spacegroup(HttkObject):
     def __init__(self, hall_symbol):
         """
         Private constructor, as per httk coding guidelines. Use .create method instead.
-        """    
+        """
         super(Spacegroup, self).__init__()
         self.hall_symbol = hall_symbol
 
     @classmethod
     def create(cls, spacegroup=None, hall_symbol=None, hm_symbol=None, spacegroupnumber=None, setting=None, symops=None):
         """
-        Create a new spacegroup object, 
-        
-        Give ONE OF hall_symbol or spacegroup. 
-        
+        Create a new spacegroup object,
+
+        Give ONE OF hall_symbol or spacegroup.
+
         hall_symbol = a string giving the hall symbol of the spacegroup
-        
+
         spacegroup = a spacegroup on any reasonable format that can be parsed, e.g.,
            an integer (spacegroup number)
-           
+
         setting = if only a spacegroup number is given, this allows also specifying a setting.
-        """        
+        """
         if isinstance(spacegroup, Spacegroup):
             return spacegroup
 
-        #print "Creating spacegroup:",spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting, symops
+        #print("Creating spacegroup:",spacegroup, hall_symbol, hm_symbol, spacegroupnumber, setting, symops)
 
         hall = None
         if hall_symbol is not None or hm_symbol is not None or spacegroupnumber is not None or setting is not None or symops is not None:
             halls = spacegroup_filter_specific(hall_symbol, hm_symbol, spacegroupnumber, setting, symops)
             if len(halls) == 1:
-                hall = halls[0] 
+                hall = halls[0]
 
         if hall is None and spacegroup is not None:
             hall = spacegroup_parse(spacegroup)
-        
+
         if hall is not None:
             return cls(hall)
-        
+
         raise Exception("Spacegroup.create: not enough input parameters given to create a spacegroup object.")
 
     @property
@@ -80,5 +80,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    
+
+

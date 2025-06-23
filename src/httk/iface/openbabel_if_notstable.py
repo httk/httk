@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,10 +15,8 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from numpy import *
-from numpy.linalg import norm, inv
 #from external.spacegroup import Spacegroup
-from httk.core import ioadapters
+from httk.core import ioadapters, reraise_from
 from httk.atomistic import Structure
 import sys
 #from matsci.structure import structure
@@ -37,43 +35,45 @@ def readstruct(ioa, struct, importers=None):
         try_importers = importers
 
     for importer in try_importers:
-        
+
         if importer == 'ase':
             try:
+                from httk.external.ase_ext import ase
                 import ase.io
                 atoms = ase.io.read(fileadapter.filename_open_workaround())
                 species = atoms.get_atomic_numbers()
                 coords = atoms.get_positions()
                 basis = atoms.get_cell()
                 return Structure(basis=basis, coords=coords, species=species)
-            except:
+            except Exception as e:
                 if importers is not None:
                     info = sys.exc_info()
-                    raise Exception("Error while trying ase importer: "+str(info[1])), None, info[2]
-    
+                    reraise_from(Exception,"Error while trying ase importer: "+str(info[1]), e)
+
         elif importer == 'openbabel':
             try:
+                from httk.external.openbabel_ext import openbabel
                 import openbabel
     
                 file = fileadapter.file
                 filename = fileadapter.filename
-        
+
                 # Use babel to read data from file
                 obConversion = openbabel.OBConversion()
                 obConversion.SetInAndOutFormats(obConversion.FormatFromExt(fileadapter.filename), obConversion.FindFormat("pdb"))
-    
-                obmol = openbabel.OBMol()    
-                obConversion.ReadString(obmol, file.read())
-                unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))            
-                unitcell.FillUnitCell(obmol)
-    
-                basisvecs = unitcell.GetCellVectors()
-                basis = array([[basisvecs[0].GetX(), basisvecs[0].GetY(), basisvecs[0].GetZ()],
-                               [basisvecs[1].GetX(), basisvecs[1].GetY(), basisvecs[1].GetZ()],
-                               [basisvecs[2].GetX(), basisvecs[2].GetY(), basisvecs[2].GetZ()]])
 
-                coords = []  
-                species = []              
+                obmol = openbabel.OBMol()
+                obConversion.ReadString(obmol, file.read())
+                unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))
+                unitcell.FillUnitCell(obmol)
+
+                basisvecs = unitcell.GetCellVectors()
+                basis = [[basisvecs[0].GetX(), basisvecs[0].GetY(), basisvecs[0].GetZ()],
+                               [basisvecs[1].GetX(), basisvecs[1].GetY(), basisvecs[1].GetZ()],
+                               [basisvecs[2].GetX(), basisvecs[2].GetY(), basisvecs[2].GetZ()]]
+
+                coords = []
+                species = []
                 for obatom in openbabel.OBMolAtomIter(obmol):
                     cart = openbabel.vector3(obatom.GetX(), obatom.GetY(), obatom.GetZ())
                     coords.append([cart.GetX(), cart.GetY(), cart.GetZ()])
@@ -81,10 +81,10 @@ def readstruct(ioa, struct, importers=None):
 
                 return Structure(basis=basis, coords=coords, species=species)
 
-            except:        
+            except:
                 if importers is not None:
                     info = sys.exc_info()
-                    raise Exception("Error while trying openbabel importer: "+str(info[1])), None, info[2]
+                    reraise_from(Exception, "Error while trying openbabel importer: "+str(info[1]), info)
 
     raise Exception("Could not figure out a way to read structure")
     return None
@@ -94,11 +94,11 @@ def readstruct(ioa, struct, importers=None):
     #fileadapter = ioutils.fileadapter(file_or_filename)
     #file = fileadapter.file
     #filename = fileadapter.filename
-    
+
     # Use babel to read data from file
     #obConversion = openbabel.OBConversion()
     #obConversion.SetInAndOutFormats(obConversion.FormatFromExt(fileadapter.filename), obConversion.FindFormat("pdb"))
-    #obmol = openbabel.OBMol()    
+    #obmol = openbabel.OBMol()
     #obConversion.ReadString(obmol, file.read())
     #unitcell = openbabel.toUnitCell(obmol.GetData(openbabel.UnitCell))
     #unitcell.FillUnitCell(obmol)
@@ -108,15 +108,15 @@ def readstruct(ioa, struct, importers=None):
     #               [basisvecs[1].GetX(),basisvecs[1].GetY(),basisvecs[1].GetZ()],
     #               [basisvecs[2].GetX(),basisvecs[2].GetY(),basisvecs[2].GetZ()]])
     #invbasis = inv(transpose(basis))
-    #print "BASIS",basis
+    #print("BASIS",basis)
 
     #for obatom in openbabel.OBMolAtomIter(obmol):
         #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-    #    print "X",[obatom.GetX(),obatom.GetY(),obatom.GetZ()]
-    
-    #spacegroupnumber = unitcell.GetSpaceGroupNumber()    
+    #    print("X",[obatom.GetX(),obatom.GetY(),obatom.GetZ()])
+
+    #spacegroupnumber = unitcell.GetSpaceGroupNumber()
     #sg = Spacegroup(spacegroupnumber)
     #primitive_cell = sg.scaled_primitive_cell
     #sites = []
@@ -137,34 +137,34 @@ def readstruct(ioa, struct, importers=None):
 
     #obmolout.CloneData(unitcellout)
     #unitcellout.FillUnitCell(obmolout)
-    
+
     #for obatomout in openbabel.OBMolAtomIter(obmolout):
     #    #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
     #    #frac = unitcell.CartesianToFractional(cart)
     #    #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-    #    print "Y",[obatomout.GetX(),obatomout.GetY(),obatomout.GetZ()]
+    #    print("Y",[obatomout.GetX(),obatomout.GetY(),obatomout.GetZ()])
 
-    ##print "Y",unitcell.CartesianToFractional(openbabel.double_array([obatom.GetX(),obatom.GetY(),obatom.GetZ()]))
+    ##print("Y",unitcell.CartesianToFractional(openbabel.double_array([obatom.GetX(),obatom.GetY(),obatom.GetZ()])))
     #basisvecs = unitcell.GetCellVectors()
     #basis = array([[basisvecs[0].GetX(),basisvecs[0].GetY(),basisvecs[0].GetZ()],
     #               [basisvecs[1].GetX(),basisvecs[1].GetY(),basisvecs[1].GetZ()],
     #               [basisvecs[2].GetX(),basisvecs[2].GetY(),basisvecs[2].GetZ()]])
 
     #invbasis = inv(transpose(basis))
-    
-    #print unitcell.GetAlpha(), unitcell.GetSpaceGroup()
+
+    #print(unitcell.GetAlpha(), unitcell.GetSpaceGroup())
 
     #for obatom in openbabel.OBMolAtomIter(obmol):
         #cart = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
         #frac = unitcell.CartesianToFractional(cart)
         #sites.append([frac.GetX(),frac.GetY(),frac.GetZ()])
-        #print [obatom.GetX(),obatom.GetY(),obatom.GetZ()]
-        
+        #print([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
+
     #    sites.append([obatom.GetX(),obatom.GetY(),obatom.GetZ()])
     #    occs.append(obatom.GetAtomicNum())
 
     #sites = transpose(dot(invbasis,transpose(sites)))
-        
+
     ##invpc = linalg.inv(primitive_cell)
     ##invpc = transpose(primitive_cell)
     ##sites = transpose(dot(invpc,transpose(sites)))
@@ -172,14 +172,14 @@ def readstruct(ioa, struct, importers=None):
     ##sites2 = transpose(dot(invpc,transpose(sites)))
 
     ##for i in range(len(sites2)):
-    ##    print "%.6f    %.6f    %.6f   %s" % (sites2[i][0],sites2[i][1],sites2[i][2],occs[i])
-    
+    ##    print("%.6f    %.6f    %.6f   %s" % (sites2[i][0],sites2[i][1],sites2[i][2],occs[i]))
+
     #sites = array(sites)
     #symsites, kinds = sg.equivalent_sites(sites)
     ##symsites, kinds = (sites, range(len(occs)))
 
     #for i in range(len(symsites)):
-    #    print "X",symsites[i],kinds[i]
+    #    print("X",symsites[i],kinds[i])
 
     ##invpc = transpose(primitive_cell)
     ##symsites = transpose(dot(invpc,transpose(symsites)))
@@ -196,32 +196,32 @@ def readstruct(ioa, struct, importers=None):
     #        filteredsites.append(symsites[i])
     #        filteredoccs.append(occs[kinds[i]])
 
-    #print obmol.GetFormula()+" ("+obmol.GetTitle()+") SG:"+ str(unitcell.GetSpaceGroupNumber())
+    #print(obmol.GetFormula()+" ("+obmol.GetTitle()+") SG:"+ str(unitcell.GetSpaceGroupNumber()))
 
-    ##print "%.6f    %.6f    %.6f" % (newcell.GetA(),newcell.GetB(),newcell.GetC())
-    ##print "%.6f    %.6f    %.6f" % (newcell.GetAlpha(),newcell.GetBeta(),newcell.GetGamma())
+    ##print("%.6f    %.6f    %.6f" % (newcell.GetA(),newcell.GetB(),newcell.GetC()))
+    ##print("%.6f    %.6f    %.6f" % (newcell.GetAlpha(),newcell.GetBeta(),newcell.GetGamma()))
 
-    ##print "%.6f    %.6f    %.6f" % (vectors[0].GetX(),vectors[0].GetY(),vectors[0].GetZ())
-    ##print "%.6f    %.6f    %.6f" % (vectors[1].GetX(),vectors[1].GetY(),vectors[1].GetZ())
-    ##print "%.6f    %.6f    %.6f" % (vectors[2].GetX(),vectors[2].GetY(),vectors[2].GetZ())
+    ##print("%.6f    %.6f    %.6f" % (vectors[0].GetX(),vectors[0].GetY(),vectors[0].GetZ()))
+    ##print("%.6f    %.6f    %.6f" % (vectors[1].GetX(),vectors[1].GetY(),vectors[1].GetZ()))
+    ##print("%.6f    %.6f    %.6f" % (vectors[2].GetX(),vectors[2].GetY(),vectors[2].GetZ()))
 
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[0,0],primitive_cell[0,1],primitive_cell[0,2])
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[1,0],primitive_cell[1,1],primitive_cell[1,2])
-    #print "%.6f    %.6f    %.6f" % (primitive_cell[2,0],primitive_cell[2,1],primitive_cell[2,2])
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[0,0],primitive_cell[0,1],primitive_cell[0,2]))
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[1,0],primitive_cell[1,1],primitive_cell[1,2]))
+    #print("%.6f    %.6f    %.6f" % (primitive_cell[2,0],primitive_cell[2,1],primitive_cell[2,2]))
 
     #for i in range(len(filteredsites)):
-    #    print "%.6f    %.6f    %.6f   %s" % (filteredsites[i][0],filteredsites[i][1],filteredsites[i][2],filteredoccs[i])
+    #    print("%.6f    %.6f    %.6f   %s" % (filteredsites[i][0],filteredsites[i][1],filteredsites[i][2],filteredoccs[i]))
 
     ##for i in range(len(symsites)):
-    ##    print "%.6f    %.6f    %.6f   %s" % (symsites[i][0],symsites[i][1],symsites[i][2],symoccs[i])
+    ##    print("%.6f    %.6f    %.6f   %s" % (symsites[i][0],symsites[i][1],symsites[i][2],symoccs[i]))
 
     ##for obatom in openbabel.OBMolAtomIter(obmol):
     ##    obatom.GetAtomicNum()
     ##for obatom in openbabel.OBMolAtomIter(obmol):
     ##    v = openbabel.vector3(obatom.GetX(),obatom.GetY(),obatom.GetZ())
     ##    fv = newcell.CartesianToFractional(v)
-    ##    print "%.6f    %.6f    %.6f" % (fv.GetX(),fv.GetY(),fv.GetZ())
-    ##    #print "%.6f    %.6f    %.6f" % (obatom.GetX(),obatom.GetY(),obatom.GetZ())
+    ##    print("%.6f    %.6f    %.6f" % (fv.GetX(),fv.GetY(),fv.GetZ()))
+    ##    #print("%.6f    %.6f    %.6f" % (obatom.GetX(),obatom.GetY(),obatom.GetZ()))
 
 
 ## Needed because of bug (?) in openbabel, which does not seem to be able to reproduce the correct textual spacegroup

@@ -1,4 +1,4 @@
 #!/bin/bash
-source ../../setup.shell
+source ../../init.shell
 
 httk-tasks-receive-from-computer local Runs/

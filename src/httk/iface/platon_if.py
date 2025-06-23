@@ -126,16 +126,16 @@ def platon_lis_to_struct_broken(ioa):
     results['occupancies'] = []
     results['coords'] = []
     out = httk.basic.micro_pyawk(ioa, [
-        ['^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
-        ['^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
-        ['^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
-        ['^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
-        ['^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
+        [r'^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
+        [r'^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
+        [r'^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
+        [r'^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
+        [r'^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
         #['^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
-        ['^[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ ]*) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ \n]+) *$', lambda results, match: results['in_table'], read_coords],
-        ['^ *Flags Label +Fractional Coordinates \(x,y,z\) +Orthogonal Coordinates \(XO,YO,ZO\) +',
+        [r'^[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ ]*) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([^ \n]+) *$', lambda results, match: results['in_table'], read_coords],
+        [r'^ *Flags Label +Fractional Coordinates \(x,y,z\) +Orthogonal Coordinates \(XO,YO,ZO\) +',
          lambda results, match: results['in_table'] is None and results['section'] == 'Space Group Symmetry', in_table],
-        ['^ *=+ ([A-Za-z ]+) =+ *$', None, section],
+        [r'^ *=+ ([A-Za-z ]+) =+ *$', None, section],
     ], results=results, debug=False)
 
     # If we only have =1 occupancy everywhere, drop the occupancy ratio
@@ -148,7 +148,7 @@ def platon_lis_to_struct_broken(ioa):
     else:
         occupancies = simple_occs
 
-    #print "OUT",out['occupancies']
+    #print("OUT",out['occupancies'])
     #exit(0)
 
     struct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -241,16 +241,16 @@ def platon_lis_to_struct_broken2(ioa):
     results['occupancies'] = []
     results['coords'] = []
     out = httk.basic.micro_pyawk(ioa, [
-        ['^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
-        ['^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
-        ['^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
-        ['^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
-        ['^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
-        #['^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
-        ['^[^ ]* +[^ ]* +[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +.* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) *$', lambda results, match: results['in_table'], read_coords],
-        ['^ *Angstrom Coordination Sphere Around Atom +',
+        [r'^ *Space Group +(([^ ]+ )+) +', lambda results, match: results['section'] == 'Space Group Symmetry' and results['spacegroup'] is None, read_spacegroup],
+        [r'^ *a = +([0-9.()-]+) +(Angstrom)? +alpha = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_a_alpha],
+        [r'^ *b = +([0-9.()-]+) +(Angstrom)? +beta = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_b_beta],
+        [r'^ *c = +([0-9.()-]+) +(Angstrom)? +gamma = +([0-9.()-]+)', lambda results, match: results['section'] == 'Crystal Data', read_c_gamma],
+        [r'^ Asymmetric Residue Unit \(= ARU\) Code List *$', lambda results, match: results['in_table'], end_table],
+        #[r'^ *=+ *$',lambda results,match: results['in_table']==True,end_table],
+        [r'^[^ ]* +[^ ]* +[^ ]* +[^A-Z]*([a-zA-Z]+)[^ ]* +.* +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) +([/0-9.()-]+) *$', lambda results, match: results['in_table'], read_coords],
+        [r'^ *Angstrom Coordination Sphere Around Atom +',
          lambda results, match: results['in_table'] is None and results['section'] == 'Space Group Symmetry', in_table],
-        ['^ *=+ ([A-Za-z ]+) =+ *$', None, section],
+        [r'^ *=+ ([A-Za-z ]+) =+ *$', None, section],
     ], results=results, debug=False)
 
     # If we only have =1 occupancy everywhere, drop the occupancy ratio
@@ -263,7 +263,7 @@ def platon_lis_to_struct_broken2(ioa):
     else:
         occupancies = simple_occs
 
-    #print "OUT",out['occupancies']
+    #print("OUT",out['occupancies'])
     #exit(0)
 
     struct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -286,7 +286,7 @@ def platon_styin_to_sgstruct(ioa):
     """        
     ioa = httk.IoAdapterFileReader(ioa)    
 
-#     print ioa.file.read()
+#     print(ioa.file.read())
 #     exit()
 #     
 #     fi = iter(ioa)
@@ -342,7 +342,7 @@ def platon_styin_to_sgstruct(ioa):
 
     #spacegroup = "".join(out['spacegroup'].split())
     #spacegroup = spacegroup[0]+(spacegroup[1:].lower())
-    #print "GOT SPACEGROUP",spacegroup
+    #print("GOT SPACEGROUP",spacegroup)
     spacegroup = out['spacegroup']
 
     sgstruct = Structure.create(a=out['a'], b=out['b'], c=out['c'], alpha=out['alpha'], beta=out['beta'],
@@ -416,7 +416,7 @@ def platon_styout_to_sgstruct(ioa):
         results['setting'][-1]['wycoff'].append([match.group(3)])
         results['in_setting'] = True
     #def debug(results,match):
-    #    print "DEBUG",match
+    #    print("DEBUG",match)
         
     out = httk.basic.micro_pyawk(ioa, [
         #['^Wyckoff',None,setting_stop],
@@ -457,7 +457,7 @@ def structure_to_platon(ioa, struct, precards, postcards):
         species = struct.rc_occupancies[i]
         f.write(species+str(idx)+" ")
         f.write(" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
-        #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
+        #print("X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
         idx = idx + 1
     for card in postcards:
         f.write(card+"\n")
@@ -482,7 +482,7 @@ def sites_to_platon(ioa, sites, cell, precards, postcards):
         species = sites.rc_occupancies[i]
         f.write(species+str(idx)+" ")
         f.write(" ".join([str(float(x)) for x in sites.coords[i]])+"\n")
-        #print "X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n"
+        #print("X",species+str(idx)+" "+" ".join([str(float(x)) for x in struct.coords[i]])+"\n")
         idx = idx + 1
     for card in postcards:
         f.write(card+"\n")
@@ -583,8 +583,8 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
             results['in_setting'] = True
 
         newcoord = FracVector.create([match.group(4), match.group(5), match.group(6)]).limit_denominator(5000000).simplify()
-        #print "CHECK1",[match.group(4),match.group(5),match.group(6)]
-        #print "CHECK2:",newcoord
+        #print("CHECK1",[match.group(4),match.group(5),match.group(6)])
+        #print("CHECK2:",newcoord)
 
         results['setting'][-1]['coords'].append([match.group(4), match.group(5), match.group(6)])
         
@@ -603,7 +603,7 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         results['setting'][-1]['multiplicities'].append(multiplicity)
         results['in_setting'] = True
     #def debug(results,match):
-    #    print "DEBUG",match
+    #    print("DEBUG",match)
         
     out = httk.basic.micro_pyawk(ioa, [
         #['^Wyckoff',None,setting_stop],
@@ -614,7 +614,7 @@ def platon_styout_to_structure(ioa, based_on_struct=None):
         #['^Setting',None,setting_start],
     ], results=results, debug=False)
 
-    #print "HX",out['setting'][0]['wyckoff']
+    #print("HX",out['setting'][0]['wyckoff'])
 
     if based_on_struct is None:
         structdata = dict(out['cell'].items() + 

@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-import sys, urllib, urllib2, os, mimetools, mimetypes, itertools, httplib, urlparse
+import os, sys, urllib2, mimetools
 
-class form_wrapper(file):
+if sys.version_info[0] == 3:
+    from urllib.request import Request, urlopen
+else:
+    from urllib2 import Request, urlopen
+
+class form_wrapper(file): # noqa: F821 ##TODO: I don't think this works?
     def __init__(self, path, mode, name, filename, fields=[], prepend_progress=""):
-        file.__init__(self, path, mode)
+        file.__init__(self, path, mode) # noqa: F821
         self.seek(0, os.SEEK_END)
         self._total = self.tell()
         self.seek(0)
@@ -13,14 +18,14 @@ class form_wrapper(file):
         self.boundary = mimetools.choose_boundary()
 
         self.predata = ""
-        for field in fields:            
+        for field in fields:
             self.predata += "--" + self.boundary + "\r\n"
             self.predata += 'Content-Disposition: form-data; name="%s"' % (field[0],) + "\r\n\r\n"
             self.predata += field[1] + "\r\n"
         self.predata += "--" + self.boundary + "\r\n"
         self.predata += 'Content-Disposition: file; name="%s"; filename="%s"' % (name, filename)
         #if path.endswith(".bz2"):
-        #    self.predata += 'Content-Type: %s' % ('application/x-bzip2',) + "\r\n\r\n"      
+        #    self.predata += 'Content-Type: %s' % ('application/x-bzip2',) + "\r\n\r\n"
         #else:
         self.predata += 'Content-Type: %s' % ('application/octet-stream',) + "\r\n\r\n"
         #self.predata += 'Content-Length: %d' % (self._total,) + "\r\n\r\n"
@@ -39,7 +44,7 @@ class form_wrapper(file):
             size -= len(newdata)
             self._seen += len(newdata)
         if size > 0 and self._seen < len(self.predata) + self._total:
-            newdata = file.read(self, size)
+            newdata = self.read(self, size)
             data += newdata
             size -= len(newdata)
             self._seen += len(newdata)
@@ -48,7 +53,7 @@ class form_wrapper(file):
             data += newdata
             size -= len(newdata)
             self._seen += len(newdata)
-            
+
         if len(data) > 0:
             progress = float((self._seen)) / len(self)
             sys.stdout.write('\r\033[K[{0}{1}] {2}%'.format('#'*int((100*progress/10)),' '*(10-int((100*progress/10))), int(100*progress))+" "+self._prepend_progress)
@@ -69,19 +74,18 @@ for i in range(argcount+2,len(sys.argv),2):
     fields += [(sys.argv[i], sys.argv[i+1])]
 
 #stream = form_wrapper(path, 'rb', 'file', path, fields)
-#print stream.read(10000000)
+#print(stream.read(10000000))
 stream = form_wrapper(path, 'rb', 'file', path, fields, prepend_progress)
 
 # Build the request
-request = urllib2.Request(url)
+request = Request(url)
 request.add_header('User-agent', 'httk-post')
 request.add_header('Content-type', 'multipart/form-data; boundary='+str(stream.boundary))
 request.add_header('Content-length', len(stream))
 request.add_data(stream)
-result = urllib2.urlopen(request).read()
+result = urlopen(request).read()
 if result=="OK":
     exit(0)
 else:
-    print "===="+result+"===="
+    print("===="+result+"====")
     exit(1)
-

@@ -12,12 +12,12 @@ fi
 
 ssh "$USERNAME"@"$REMOTE_HOST" "REMOTE=\"$REMOTE_HTTK_DIR\"; mkdir -p \"\${REMOTE/#~/\$HOME}/Runs/default/ht.taskmgrstats\""
 
-# Saftey check
-if [ -e "$HTTK_DIR/httk" ]; then
+# Safety check
+if [ -e "$HTTK_DIR/src/httk" ]; then
     echo "Please wait while copying files."    
     rsync --delete -az -r --files-from="$HTTK_DIR/httk.minimal.files"  "$HTTK_DIR" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR/httk/"
     echo "Installation complete."
     echo ""
 else
-    echo "Failure to install code due to configuration error ($HTTK_DIR/httk does not exist.)." >&2
+    echo "Failure to install code due to configuration error ($HTTK_DIR/src/httk does not exist.)." >&2
 fi

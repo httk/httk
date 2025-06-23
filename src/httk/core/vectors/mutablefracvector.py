@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,11 +15,21 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import fractions
 import operator
 import itertools
-from fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
-from vector import MutableVector
+from httk.core.vectors.fracvector import FracVector, nested_map_list, nested_map_fractions_list, nested_reduce_fractions, nested_reduce
+from httk.core.vectors.vector import MutableVector, integer_types
+
+try:
+    import cfractions as fractions
+except ImportError:
+    import fractions
+
+try:
+    from math import gcd as calc_gcd
+except ImportError:
+    from fractions import gcd as calc_gcd
+
 
 # Utility functions needed before defining the class (due to them being statically assigned)
 
@@ -27,7 +37,7 @@ from vector import MutableVector
 def nested_inmap_list(op, *ls):
     """
     Like inmap, but work for nested lists
-    """    
+    """
     if isinstance(ls[0], (list, tuple)):
         if len(ls[0]) == 0 or not isinstance(ls[0][0], list):
             inmap(op, *ls)
@@ -48,9 +58,9 @@ class MutableFracVector(FracVector, MutableVector):
 
     and, e.g., ::
 
-        mfracvec[:,7] = [1,2,3,4] 
+        mfracvec[:,7] = [1,2,3,4]
 
-    Other than this, the FracVector methods exist and do the same, i.e., they return *copies* of the fracvector, rather 
+    Other than this, the FracVector methods exist and do the same, i.e., they return *copies* of the fracvector, rather
     than modifying it.
 
     However, methods have also been added named with set_* prefixes which performs mutating operations, e.g., ::
@@ -62,7 +72,7 @@ class MutableFracVector(FracVector, MutableVector):
        A.T()
 
     just returns a new MutableFracVector that is the transpose of A, leaving A unmodified.
-    """    
+    """
 
     # Implementation note: REMEMBER TO CALL 'self._invalidate()' if any mutation have been done on the frac vector that may have broken
     # cached properties, e.g., self._dim
@@ -72,16 +82,16 @@ class MutableFracVector(FracVector, MutableVector):
     nested_inmap = staticmethod(nested_inmap_list)
     nested_map_fractions = staticmethod(nested_map_fractions_list)
     _dup_noms = staticmethod(list)
-                                              
+
     def __init__(self, noms, denom):
-        """ 
+        """
         Low overhead constructor.
-        
+
         noms: nested *tuples* (may not be a lists!) of nominator integers
         denom: integer denominator
-        
+
         Represents the tensor (1/denom)*(noms)
-        
+
         If you want to create a MutableFracVector from something else than tuples, use the MutableFracVector.create() method.
         """
         super(MutableFracVector, self).__init__(noms, denom)
@@ -94,7 +104,7 @@ class MutableFracVector(FracVector, MutableVector):
         if isinstance(old, MutableFracVector):
             return old
         elif isinstance(old, FracVector):
-            return MutableFracVector.create(old)        
+            return MutableFracVector.create(old)
         else:
             try:
                 return old.to_MutableFracVector()
@@ -103,10 +113,10 @@ class MutableFracVector(FracVector, MutableVector):
 
             try:
                 fracvec = old.to_FracVector()
-                return cls.__init__(fracvec.noms, fracvec.denom)        
+                return cls.__init__(fracvec.noms, fracvec.denom)
             except Exception:
                 pass
-            
+
             return cls.create(old)
 
     def to_FracVector(self):
@@ -134,7 +144,7 @@ class MutableFracVector(FracVector, MutableVector):
         self._dim = None
 
     #### Python special overloads
-    
+
     def __hash__(self):
         raise Exception("MutableFracVector.__hash__: Cannot (should not) use hash number of a mutable object.")
 
@@ -169,7 +179,7 @@ class MutableFracVector(FracVector, MutableVector):
         #TODO: Possible to optimize?
         dim = self.dim
         if len(dim) == 0:
-            return 
+            return
         elif len(dim) == 1:
             self.noms = [[self.noms[col], ] for col in range(dim[0])]
             return
@@ -182,40 +192,40 @@ class MutableFracVector(FracVector, MutableVector):
         """
         Changes MutableFracVector inline into own inverse: self -> self^-1
         """
-        dim = self.dim        
+        dim = self.dim
         if dim == ():
             return self.__class__(self.denom, self.nom)
-        
+
         if dim != (3, 3):
             raise Exception("FracVector.inv: only scalar and 3x3 matrix implemented")
 
-        # We are dividing with a determinant giving self.denom**3 in nominator, and 
-        # from the matrix 1/self.denom**2 falls out => one factor of self.denom in nominator 
+        # We are dividing with a determinant giving self.denom**3 in nominator, and
+        # from the matrix 1/self.denom**2 falls out => one factor of self.denom in nominator
 
         det = self.det()
         det_nom = det.nom
 
         if det_nom == 0:
             raise Exception("ExactVector.inverse: cannot take inverse of singular matrix.")
-        
+
         if det_nom < 0:
             self.denom = -det_nom
             m = -self.denom
         else:
             self.denom = det_nom
             m = self.denom
-            
+
         A = self.noms
         self.noms = [[m * (A[1][1] * A[2][2] - A[1][2] * A[2][1]), m * (A[0][2] * A[2][1] - A[0][1] * A[2][2]), m * (A[0][1] * A[1][2] - A[0][2] * A[1][1])],
                     [m * (A[1][2] * A[2][0] - A[1][0] * A[2][2]), m * (A[0][0] * A[2][2] - A[0][2] * A[2][0]), m * (A[0][2] * A[1][0] - A[0][0] * A[1][2])],
-                    [m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])]]                    
-            
+                    [m * (A[1][0] * A[2][1] - A[1][1] * A[2][0]), m * (A[0][1] * A[2][0] - A[0][0] * A[2][1]), m * (A[0][0] * A[1][1] - A[0][1] * A[1][0])]]
+
     def set_simplify(self):
         """
         Changes MutableFracVector; reduces any common factor between denominator and all nominators
-        """       
+        """
         if self.denom != 1:
-            gcd = self._reduce_over_noms(lambda x, y: fractions.gcd(x, abs(y)), initializer=self.denom)
+            gcd = self._reduce_over_noms(lambda x, y: calc_gcd(x, abs(y)), initializer=self.denom)
             if gcd != 1:
                 self.denom = self.denom / gcd
                 self._inmap_over_noms(lambda x: int(x / gcd))
@@ -223,7 +233,7 @@ class MutableFracVector(FracVector, MutableVector):
     def set_set_denominator(self, resolution=1000000000):
         """
         Changes MutableFracVector; reduces resolution.
-        
+
           resolution is the new denominator, each element becomes the closest numerical approximation using this denominator.
         """
         denom = self.denom
@@ -234,8 +244,8 @@ class MutableFracVector(FracVector, MutableVector):
                 return low + 1
             else:
                 return low
-        
-        self._inmap_over_noms(limit_resolution_one)        
+
+        self._inmap_over_noms(limit_resolution_one)
         self.denom = resolution
 
     def set_normalize(self):
@@ -247,7 +257,7 @@ class MutableFracVector(FracVector, MutableVector):
     def set_normalize_half(self):
         """
         Add/remove an integer +/-N to each element to place it in the range [-1/2,1/2)
-        
+
         This is useful to find the shortest vector C between two points A, B in a space with periodic boundary conditions [0,1):
            C = (A-B).normalize_half()
         """
@@ -265,14 +275,14 @@ class MutableFracVector(FracVector, MutableVector):
             self.noms = op(self.noms, *othernoms)
 
 
-def list_slice(l, key):    
+def list_slice(l, key):
     """
     Given a python slice (i.e., what you get to __getitem__ when you write A[3:2]), cut out the relevant
     nested list.
-    """    
-    if isinstance(key[0], (int, long, slice)):
+    """
+    if isinstance(key[0], (integer_types + (slice,))):
         slicedlist = l[key[0]]
-    else: 
+    else:
         slicedlist = tuple([l[i] for i in key[0]])
     cdr = key[1:]
     if len(cdr) > 0:
@@ -286,20 +296,20 @@ def list_slice(l, key):
 def list_set_slice(l, key, values):
     """
     Given:
-      l = list, 
+      l = list,
       key = python slice (i.e., what you get to __setitem__ when you write A[3:2]=[2,5])
-      values = a list of values, 
+      values = a list of values,
 
     change the elements specified by the slice in key to those given by values.
-    """    
+    """
     if len(key) == 1:
         if isinstance(key[0], (slice,)):
             l[key[0]] = list(values)
         else:
             l[key[0]] = values
-        return 
-    
-    if isinstance(key[0], (int, long)):
+        return
+
+    if isinstance(key[0], integer_types):
         list_set_slice(l[key[0]], key[1:], values)
     elif isinstance(key[0], slice):
         idxs = key[0].indices(len(l))
@@ -315,24 +325,24 @@ def list_set_slice(l, key, values):
 
 def inmap(f, x):
     """
-    Like built-in map, but work on a list and *replace* the elements in the list with the result of the mapping. 
-    """    
+    Like built-in map, but work on a list and *replace* the elements in the list with the result of the mapping.
+    """
     for i, v in enumerate(x):
             x[i] = f(v)
-    
+
 
 def main():
     a = FracVector.create([[2, 3, 5], [3, 5, 4], [4, 6, 7]])
     b = MutableFracVector.from_FracVector(a)
-    print(b)    
-    print(b.T())    
-    print(b.inv())    
-    b[2, 1:] = [4711, 23] 
+    print(b)
+    print(b.T())
+    print(b.inv())
+    b[2, 1:] = [4711, 23]
     print(b)
     b.set_negative()
     print(b)
 
 if __name__ == "__main__":
-    main()  
+    main()
 
-    
+

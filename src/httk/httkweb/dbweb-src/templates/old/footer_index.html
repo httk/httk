@@ -1,0 +1,99 @@
+    <hr>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                  <ul class="list-inline text-center">
+                    $for f in $email.split():
+                      <li>
+                        <a href="mailto:$f">
+                          <span class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-envelope-o fa-stack-1x fa-inverse"></i>
+                          </span>
+                        </a>
+                      </li>
+                    $for f in $social.split():
+                    <li>
+                      <a href="$f.url">
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-$f.title fa-stack-1x fa-inverse"></i>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                  <p class="copyright text-muted">$copyright</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="$baseurl/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="$baseurl/assets/js/vendor/popper.min.js"></script>
+    <script src="$baseurl/dist/js/bootstrap.min.js"></script>
+
+<script>
+  //$( function() {
+  //  $( "#tabs" ).tabs();
+  //} )
+
+  $(document).ready(function() {
+
+  
+    var hash = document.location.hash;
+    var prefix = "tab_";
+    if (hash) {
+      $('a[data-toggle="tab"][href="'+hash.replace(prefix,"")+'"]').tab('show');
+    } 
+
+    // Change hash for page-reload
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      window.location.hash = e.target.hash.replace("#", "#" + prefix);
+    });
+  
+    //$('#tabs').tabs();
+
+  //              $("#content_tabs").tabs({
+  //                      activate: function(event, ui) {
+  //                              window.location.href =     ui.newPanel.selector;
+  //                      }
+  //              });
+  
+    //var activeTab = $('[href=' + location.hash + ']');
+    //activeTab && activeTab.tab('show');
+
+    //TODO: Figure out how to not get the page to offset down to e.g. id="materials" when click on tab
+    //$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    //  e.target // newly activated tab
+    //  e.relatedTarget // previous active tab
+    //  window.location.hash =  e.target.hash;
+    //})
+  });
+</script>
+<!-- Begin of Chaport Live Chat code -->
+<script type="text/javascript">
+(function(w,d,v2){
+w.chaport = { app_id : '5b859b5127349b2d0fc02d8e' };
+
+v2=w.chaport;v2._q=[];v2._l={};v2.q=function(){v2._q.push(arguments)};v2.on=function(e,fn){if(!v2._l[e])v2._l[e]=[];v2._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.com/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document);
+</script>
+<!-- End of Chaport Live Chat code -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-126697486-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-126697486-1');
+</script>
+</body>
+</html>
+
+

@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import httk  
+import httk
 from httk.core.basic import is_sequence
 from httk.atomistic.data import periodictable, spacegroups
 from httk.atomistic import *
@@ -44,6 +44,14 @@ def struct_to_input(struct):
     # 1
     #inputstr += "0.001\n"; #2
     inputstr += "0.001\n"
+    ##################################################################
+    # With FINDSYM, Version 7.1, Jul 2020, lattice, atomic, and magnetic
+    # accuracies have to be all given.
+    # This fixes the format of the input file, but there is still the
+    # "illegal seek" pipe problem.
+    # inputstr += "0.001\n"
+    # inputstr += "0.001\n"
+    ##################################################################
     # 2
     inputstr += "2\n"  # 3
     inputstr += "%.8f %.8f %.8f %.8f %.8f %.8f\n" % (struct.uc_a, struct.uc_b, struct.uc_c, struct.uc_alpha, struct.uc_beta, struct.uc_gamma)  # 4
@@ -53,7 +61,7 @@ def struct_to_input(struct):
     inputstr += " ".join([str(group+1) for group in range(0, len(struct.uc_reduced_coordgroups)) for i in range(0, len(struct.uc_reduced_coordgroups[group]))]) + "\n"
     for row in struct.uc_reduced_coords:
         inputstr += "%.8f %.8f %.8f\n" % (row[0], row[1], row[2])
-    #print "INPUT",struct.formula,len(struct.uc_reduced_coords)
+    #print("INPUT",struct.formula,len(struct.uc_reduced_coords))
     return inputstr
 
 
@@ -73,18 +81,25 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
 
     def add_groupdata(results):
 
-        sorteddata = sorted(results['groupdata'], key=lambda data: (data[4], data[5], data[6]))                    
+        sorteddata = sorted(results['groupdata'], key=lambda data: (data[4], data[5], data[6]))
         for data in sorteddata:
-            #print "HUH",data[1],data[4],data[5],data[6]
+            # print("HUH",data[1],data[4],data[5],data[6])
+            #
+            ##################################################################
+            # data[1] is a SiteAssignment object in the devel/python3 branch,
+            # but a string in the master branch.
+            # Is it OK if we redefine data[1] like below to make it a string?
+            data[1] = data[1].symbol
+            ##################################################################
             occustr = data[1]
             if not occustr in results['occucounts']:
                 results['occucounts'][occustr] = 0
             results['occucounts'][occustr] += 1
-            i = results['occucounts'][occustr]                        
+            i = results['occucounts'][occustr]
             data[0] = occustr+str(i)
             results['cif'] += " ".join(data)+"\n"
             results['data'] += " ".join(data)+"\n"
-        results['groupdata'] = []                   
+        results['groupdata'] = []
 
     def print_hm_and_hall(results):
         grpnbr = results['grpnbr']
@@ -97,11 +112,11 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
         results['data'] += "Columns as follows: label element symmetry_multiplicity Wykoff_label fract_x fract_y fact_z occupancy\n"
         #results['cif']+="_[local]_omdb_cod_original_Hall '"+struct.hall_symbol+"'\n"
         #if(struct.hall_symbol != hallsymb):
-        #    print >> sys.stderr, "== Hall symbol change!",struct.hall_symbol,hallsymb
+        #    print("== Hall symbol change!",struct.hall_symbol,hallsymb, end="", file=sys.stderr)
         #    with open("symmetry-differences.txt", "a") as myfile:
         #        myfile.write(filename+" :"+struct.hall_symbol+"|"+hallsymb+"\n")
         #else:
-        #    print >> sys.stderr, "== Hall symbol the same",struct.hall_symbol,hallsymb
+        #    print("== Hall symbol the same",struct.hall_symbol,hallsymb, end="", file=sys.stderr)
 
     def hm_symbol_origin(results, match):
         results['out'] = True
@@ -126,10 +141,10 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
         results['grpnbr'] = match.group(1)
         if 'hm' in results and 'grpnbr' in results:
             print_hm_and_hall(results)
-        
+
     def coords(results, match):
         results['out'] = True
-        idx = ord(match.group(2)) - 65 
+        idx = ord(match.group(2)) - 65
         if results['group'] != idx:
             add_groupdata(results)
         if match.group(4) == 'alpha':
@@ -155,14 +170,14 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
 
     results = {'on': False, 'data': '', 'cif': '', 'out': False, 'group': -1, 'groupdata': [], 'occucounts': {}, 'did_start': False, 'wyckoff': []}
     httk.basic.micro_pyawk(ioa, [
-        ['This program has bombed', None, cif_broken],
-        ['^# CIF file$', None, cif_start],
-        ['^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
-        ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
-        ['.*', lambda results, match: results['on'], cif_add],
+        [r'This program has bombed', None, cif_broken],
+        [r'^# CIF file$', None, cif_start],
+        [r'^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
+        [r'^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
+        [r'.*', lambda results, match: results['on'], cif_add],
     ], debug=False, results=results)
     add_groupdata(results)
     if results['did_start'] == False:

@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2015 Rickard Armiento
 #
@@ -18,5 +18,5 @@
 from httk.core import citation
 citation.add_src_citation("httk", "Rickard Armiento")
 
-import periodictable
-import spacegroups
+from httk.atomistic.data import periodictable
+from httk.atomistic.data import spacegroups
