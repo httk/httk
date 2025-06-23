@@ -23,7 +23,7 @@ from _ast import Or
 
 try:
     from io import StringIO
-except ImportException:
+except ImportError:
     from StringIO import StringIO
 
 class Page(object):
@@ -79,6 +79,10 @@ class WebGenerator(object):
             init_function = init_function_info['class'](os.path.join(srcdir,'functions'), 'init', {}, global_data)
             init_function.execute()
 
+        # Re-initialize the memcache to avoid chicen-and-egg issues from initalization function
+        self.page_memcache = collections.OrderedDict()
+        self.page_memcache_index = {}
+
     def _render_page(self, relative_filename, render_class, query, page, all_functions = False):
 
         global_data = dict(self.global_data)
@@ -89,8 +93,11 @@ class WebGenerator(object):
         except IOError as e:
             raise IOError("Requested page not found")
 
-        metadata = render_output.metadata()
-        content = render_output.content()
+        try:
+            metadata = render_output.metadata()
+            content = render_output.content()
+        except Exception as e:
+            raise Exception("Failed to render page: "+str(e)+" while using render class: "+render_class.__name__)
 
         # Support for web functions
         page.functions = []
@@ -146,7 +153,7 @@ class WebGenerator(object):
         relroot = os.path.dirname(relative_filename)
         page._relroot = relroot
         if relroot != '.' and relroot != '':
-            page.relbaseurl = '/'.join(['..']*relroot.count(os.sep))
+            page.relbaseurl = '/'.join(['..']*(relroot.count(os.sep)+1))
         else:
             page.relbaseurl = '.'
         if not hasattr(page,'template'):
@@ -183,11 +190,11 @@ class WebGenerator(object):
                 #print("RESULT OF RUN:",outstr,"::",function['output_name'])
 
         base_template_identity = helpers.identify(self.templates_dir,page.base_template,self.template_engines, allow_urls_without_ext=True)
-        instaced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])
-        page.content = instaced_template_engine.apply(UnquotedStr(page._rendered_content), data=global_data, *page._rendered_subcontent)
+        instanced_template_engine = template_identity['class'](self.templates_dir, template_identity['relative_filename'], base_template_identity['relative_filename'])
+        page.content = instanced_template_engine.apply(UnquotedStr(page._rendered_content), data=global_data, *page._rendered_subcontent)
 
         page.mimetype = 'text/html'
-        page.dependency_filenames += instaced_template_engine.get_dependency_filenames()
+        page.dependency_filenames += instanced_template_engine.get_dependency_filenames()
 
     def _retrieve_page(self, relative_url, query=None, update_access_timestamp=True, allow_urls_without_ext=None, all_functions = False):
 
@@ -254,12 +261,12 @@ class WebGenerator(object):
             page.timestamp_render = now
             self._render_page(identity['relative_filename'], identity['class'],
                     query, page, all_functions=all_functions)
-        except Exception:
+        except Exception as e:
             del self.page_memcache[canonical_request]
             del self.page_memcache_index[relative_url][canonical_request]
             if len(self.page_memcache_index[relative_url]) == 0:
                 del self.page_memcache_index[relative_url]
-            raise
+            raise Exception("Page render problem: "+str(e)+" for page:"+str(relative_url))
 
         # Make sure we only keep page_memcache_limit number of pages in cache
         if len(self.page_memcache) > self.page_memcache_limit:

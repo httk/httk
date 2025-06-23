@@ -15,11 +15,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
-from httk.core.vectors import FracVector
+from httk.core import HttkObject, FracVector
 from httk.core.basic import is_sequence, int_to_anonymous_symbol
 from httk.atomistic.spacegroup import Spacegroup
 from httk.atomistic.sitesutils import *
+from httk.core.httkobject import HttkObject, httk_typed_init, httk_typed_property
 from httk.atomistic.sites import Sites
 from httk.atomistic.unitcellsites import UnitcellSites
 from httk.atomistic.spacegrouputils import crystal_system_from_hall, lattice_symbol_from_hall, lattice_system_from_hall
@@ -38,8 +38,8 @@ class RepresentativeSites(Sites):
     def __init__(self, reduced_coordgroups=None,
                  cartesian_coordgroups=None, reduced_coords=None,
                  cartesian_coords=None, counts=None,
-                 hall_symbol=None, pbc=None, wyckoff_symbols=[],
-                 multiplicities=[]):
+                 hall_symbol=None, pbc=None, wyckoff_symbols=None,
+                 multiplicities=None):
         """
         Private constructor, as per httk coding guidelines. Use Sites.create instead.
         """
@@ -57,7 +57,7 @@ class RepresentativeSites(Sites):
                reduced_coords=None,
                counts=None,
                spacegroup=None, hall_symbol=None, spacegroupnumber=None, setting=None,
-               periodicity=None, wyckoff_symbols=[], multiplicities=[], occupancies=None, pbc=None):
+               periodicity=None, wyckoff_symbols=None, multiplicities=None, occupancies=None, pbc=None):
 
         sites = super(RepresentativeSites, cls).create(sites=sites, reduced_coordgroups=reduced_coordgroups,
                                                        reduced_coords=reduced_coords,
@@ -98,11 +98,6 @@ class RepresentativeSites(Sites):
     @httk_typed_property(str)
     def anonymous_wyckoff_sequence(self):
         if self.wyckoff_symbols is None:
-            return None
-        # When this object is retrieved from a database, self.wyckoff_symbols
-        # is no longer None, but an empty list. Need additional check for that:
-        elif isinstance(self.wyckoff_symbols, list) and \
-             len(self.wyckoff_symbols) == 0:
             return None
         data = {}
         idx = 0
@@ -184,7 +179,7 @@ class RepresentativeSites(Sites):
         return sites_tidy(self)
 
     def __str__(self):
-        return "<RepresentativeSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+">"
+        return "<RepresentativeSites:\n"+"\n".join(["".join(["    %.8f %.8f %.8f\n" % (x[0], x[1], x[2]) for x in y]) for y in self.reduced_coordgroups.to_floats()])+" with hall_symbol:"+str(self.hall_symbol)+" and wyckoff_positions:"+str(self.wyckoff_symbols)+">"
 
 
 def main():

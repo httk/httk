@@ -21,7 +21,7 @@ import itertools, os, sys, re, inspect
 if sys.version_info[0] == 3:
     string_types = (str,)
 else:
-    string_types = (str, unicode)
+    string_types = (str, unicode) # noqa: F821
 
 class FilteredCollection(object):
 

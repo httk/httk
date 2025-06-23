@@ -20,7 +20,7 @@ import os, sys
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     unicode_type=str
 
@@ -28,9 +28,9 @@ else:
 class TemplateEngineTemplator(object):
     def __init__(self, template_dir, template_filename, base_template_filename = None):
         try:
-            from web.template import render
+            from httk.external.webpy_ext.web.template import render
             # Hotfix for the web.template engine for more recent versions of Python
-            from web.template import ALLOWED_AST_NODES
+            from httk.external.webpy_ext.web.template import ALLOWED_AST_NODES
             ALLOWED_AST_NODES.append('Constant')
         except ImportError:
             raise Exception("Missing web.py module.")
@@ -58,6 +58,8 @@ class TemplateEngineTemplator(object):
         #can make sure the template application always returns unicode
         if self.base_filename is not None:
             templator = self.render(self.template_dir,base=self.base_template,globals=data)
+            print("HERE", content, subcontent)
+            content=""
             output = unicode_type(getattr(templator,self.template_name)(content,*subcontent))
         else:
             templator = self.render(self.template_dir,globals=data)

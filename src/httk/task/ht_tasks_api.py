@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2022 Henrik Levämäki
@@ -15,6 +16,8 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import print_function
 
 import os
 import sys
@@ -116,7 +119,7 @@ def find_in_remedy_files(pattern):
         with open(f, "r") as tmp:
             lines = tmp.read().splitlines()
         for line in lines:
-            match = re.search("^{}$".format(pattern), line)
+            match = re.search(r"^{}$".format(pattern), line)
             if match is not None:
                 pattern_found = True
                 break
@@ -130,7 +133,7 @@ def find_in_file(pattern, file):
     with open(file, "r") as tmp:
         lines = tmp.read().splitlines()
     for line in lines:
-        match = re.search("{}".format(pattern), line)
+        match = re.search(r"{}".format(pattern), line)
         if match is not None:
             pattern_found = True
             break
@@ -271,7 +274,7 @@ def delete_keyword_line(incar, keyword):
             line_is_comment = False
             if line.lstrip().startswith("#"):
                 line_is_comment = True
-            match = re.search("^[\t ]*{}[\t ]*=.*".format(keyword), line)
+            match = re.search(r"^[\t ]*{}[\t ]*=.*".format(keyword), line)
             if match is not None and not line_is_comment:
                 continue
             f.write(line + "\n")
@@ -294,7 +297,7 @@ def HT_TASK_INIT(args):
         with open("ht.vars", "r") as f:
             lines = f.read().splitlines()
         for line in lines:
-            match = re.search("[\t ]*(\w*)[\t ]*=[\t ]*(\w*)", line)
+            match = re.search(r"[\t ]*(\w*)[\t ]*=[\t ]*(\w*)", line)
             if match is not None:
                 tag = match.groups()[0]
                 value = match.groups()[1]
@@ -534,7 +537,7 @@ def HT_TASK_STORE_VAR(tag, value):
         htvars_after = []
         tag_found = False
         for line in lines:
-            match = re.search("[\t ]*{}[\t ]*=".format(tag), line)
+            match = re.search(r"[\t ]*{}[\t ]*=".format(tag), line)
             if match is not None:
                 htvars_after.append("{}={}".format(tag, value))
                 tag_found = True

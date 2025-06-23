@@ -42,7 +42,7 @@ def make_database(db_name):
         with open(os.path.join(root, 'INCAR.relax')) as tmp:
             lines = tmp.readlines()
             for l in lines:
-                isif = re.search("^[^#]*ISIF\s*=\s*(\d)", l)
+                isif = re.search(r"^[^#]*ISIF\s*=\s*(\d)", l)
                 if isif is not None:
                     isif = int(isif.groups()[0])
                     isif_found = True
@@ -61,7 +61,7 @@ def make_database(db_name):
         struct._tags = None
         struct._codependent_data = []
         for tag in tags:
-            tmp = re.search("^\(Tag\)\s(.*):\s(.*)", tag)
+            tmp = re.search(r"^\(Tag\)\s(.*):\s(.*)", tag)
             if tmp is not None:
                 initial_struct.add_tag(tmp.groups()[0], tmp.groups()[1])
                 struct.add_tag(tmp.groups()[0], tmp.groups()[1])

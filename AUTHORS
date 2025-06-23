@@ -1,0 +1,4 @@
+Rickard Armiento <rartino>: main developer and maintainer, author of initial version and most base functionality; support and interfaces for VASP, ASE, cif2cell, gulp, isotropy, jmol, openbabel, platon, spglib; services: workflow manager, httkweb, OPTIMADE.
+Christopher Tholander <stophe>: adjustments/fixes for workflow handling.
+Henrik Levämäki <hpleva>: first port to python3, elastic constants VASP reading/support, extensions to the httk web template format, many fixes and tweaks; duckdb support.
+Joel Davidsson <j-euler>: adjustments/fixes for workflow handling (also ADAQ, distributed separately).

@@ -16,21 +16,6 @@ ssh "$USERNAME"@"$REMOTE_HOST" "REMOTE=\"$REMOTE_HTTK_DIR\"; mkdir -p \"\${REMOT
 if [ -e "$HTTK_DIR/src/httk" ]; then
     echo "Please wait while copying files."    
     rsync --delete -az -r --files-from="$HTTK_DIR/httk.minimal.files"  "$HTTK_DIR" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR/httk/"
-    if [ "$1" == "--copy-standalone-python" ]; then
-	python_files_from="$HTTK_DIR/Standalone_python_interpreter/standalone_python.files"
-	# Make sure the files we want to upload exist:
-	standalone_dir=`dirname $python_files_from`
-	if [ ! -f $standalone_dir/python -o ! -d $standalone_dir/lib ]; then
-	    echo ""
-	    echo "\"python\" interpreter or the dependency folder \"lib\" could not be"
-	    echo "found in \"$standalone_dir\"."
-	    echo "Please build the standalone interpreter and try again."
-	    echo ""
-	    exit 1
-	fi
-	echo "Copying standalone Python interpreter to \"$REMOTE_HTTK_DIR/standalone_python\"..."
-        rsync --delete -az -r --files-from="$python_files_from" "$standalone_dir" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR/standalone_python"
-    fi
     echo "Installation complete."
     echo ""
 else

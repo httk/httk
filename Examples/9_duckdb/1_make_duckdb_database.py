@@ -2,13 +2,13 @@
 
 import os, sys
 import re
-import numpy as np
 import httk, httk.iface.vasp_if
 from httk.iface.vasp_if import get_elastic_constants
 import httk.db
 from httk.core import HttkObject, FracVector, FracScalar
 from httk.atomistic import Structure, UnitcellStructure
 from httk.atomistic.results.elasticresult import Result_ElasticResult
+from httk.atomistic.results.utils import Method, MethodDescriptions, MaterialId, ElasticTensor
 import httk.task
 import subprocess
 import glob
@@ -32,6 +32,10 @@ def make_database(db_name):
     store = httk.db.store.SqlStore(backend)
     reader = httk.task.reader('./', 'Runs_finished/', 'Total energy and elastic constants')
 
+    method = Method('test method', 'This is just for test', [])
+    methoddescriptions = MethodDescriptions([method])
+    mid = MaterialId("test")
+    
     index = 1
     for rundir, computation in reader:
         root = os.path.join(rundir, '..')
@@ -40,7 +44,7 @@ def make_database(db_name):
         with open(os.path.join(root, 'INCAR.relax')) as tmp:
             lines = tmp.readlines()
             for l in lines:
-                isif = re.search("^[^#]*ISIF\s*=\s*(\d)", l)
+                isif = re.search(r"^[^#]*ISIF\s*=\s*(\d)", l)
                 if isif is not None:
                     isif = int(isif.groups()[0])
                     isif_found = True
@@ -59,7 +63,7 @@ def make_database(db_name):
         struct._tags = None
         struct._codependent_data = []
         for tag in tags:
-            tmp = re.search("^\(Tag\)\s(.*):\s(.*)", tag)
+            tmp = re.search(r"^\(Tag\)\s(.*):\s(.*)", tag)
             if tmp is not None:
                 initial_struct.add_tag(tmp.groups()[0], tmp.groups()[1])
                 struct.add_tag(tmp.groups()[0], tmp.groups()[1])
@@ -93,15 +97,27 @@ def make_database(db_name):
         outcar = httk.iface.vasp_if.read_outcar(os.path.join(rundir, "OUTCAR.cleaned.relax-final"))
         result = Result_ElasticResult(
                 float(outcar.final_energy),
-                computation, initial_struct, struct,
-                cij, cij_nosym, sij, elas_dict['K_V'],
-                elas_dict['K_R'], elas_dict['K_VRH'],
-                elas_dict['G_V'], elas_dict['G_R'],
-                elas_dict['G_VRH'], elas_dict['mu_VRH'],
-                elas_dict['E_VRH'], atomic_relaxations,
-                "", # walltimes
+                computation,
+                initial_struct,
+                struct,
+                0.0, # temperature
+                ElasticTensor.create(cij),
+                ElasticTensor.create(cij_nosym),
+                ElasticTensor.create(sij),
+                elas_dict['K_V'],
+                elas_dict['K_R'],
+                elas_dict['K_VRH'],
+                elas_dict['G_V'],
+                elas_dict['G_R'],
+                elas_dict['G_VRH'],
+                elas_dict['mu_VRH'],
+                elas_dict['E_VRH'],
+                False, # mechanically_stable
+                False, # mechanically_stable_with_tolerance
+                atomic_relaxations, # atomic_relaxations
                 "", # rundir
-                "", # material_id
+                methoddescriptions, #MethodDescriptions,
+                mid, # material_id
                 )
 
         print("{0:3} Processed outcar: {1:10}".format(index, initial_struct.formula))

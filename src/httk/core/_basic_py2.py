@@ -20,7 +20,7 @@ from __future__ import print_function
 import sys, collections, traceback, bz2
 import Queue as queue
 
-unicode_type=unicode
+unicode_type=unicode # noqa: F821
 
 def preserve_exception_backtrace(e):
     e.__backtrace_str__ =  traceback.format_exc()
@@ -41,15 +41,20 @@ def print_(*args,**kwargs):
     print(*args,**kwargs)
 
 def is_sequence(l):
-    return isinstance(l, collections.Iterable) and not isinstance(l, basestring)
+    return isinstance(l, collections.Iterable) and not isinstance(l, basestring) # noqa: F821
     #return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
     #        (hasattr(arg, "__iter__") and not isinstance(arg, str)))
 
 def is_string(s):
-    return isinstance(s, basestring)
+    return isinstance(s, basestring) # noqa: F821
 
 def bz2open(filename, mode, *args):
     return bz2.BZ2File(filename, mode, *args)
 
 def zstdopen(filename, mode, *args):
-    raise Exception("Cannot open .zst file, because pyzstd is a Python 3 only module!")
+    raise Exception("Cannot open .zst file: only supported in Python 3")
+
+def which(executable):
+    import distutils.spawn
+    return distutils.spawn.find_executable(executable)
+    

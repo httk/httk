@@ -17,8 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import os, sys, cgitb, codecs, cgi, shutil
-import io
+import os, sys, codecs, shutil, io, traceback, time
 
 try:
     from urllib.parse import parse_qsl, urlsplit, urlunsplit
@@ -27,6 +26,7 @@ except ImportError:
     from urlparse import parse_qsl, urlsplit, urlunsplit
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
+from httk.core import parse_header, parse_multipart, cgitb_html
 
 class WebError(Exception):
     def __init__(self, message, response_code, response_msg, longmsg=None, content_type='text/plain', encoding='utf-8'):
@@ -69,7 +69,7 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
 
     def wfile_write_encoded(self, s, encoding='utf-8'):
         if hasattr(s, 'read'):
-            #reader = codecs.getreader(encoding)
+            reader = codecs.getreader(encoding)
             # Wrapping the reader doesn't work in
             # Python 3 because of a bug (?)
             # that can be reproduced by the following short script:
@@ -82,13 +82,8 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             # => TypeError: can't concat str to bytes
             #
             # Hence, we wrap the writer instead
-
-            # Python 3 gives the str-bytes mismatch errors
-            # depending on the situation.
-            # This works in Python 3, but is probably not
-            # the optimal/correct solution:
-            if isinstance(s, io.StringIO):
-                writer = codecs.getwriter(encoding)
+            writer = codecs.getwriter(encoding)
+            if isinstance(s,io.StringIO):
                 shutil.copyfileobj(s, writer(self.wfile))
             else:
                 shutil.copyfileobj(s, self.wfile)
@@ -96,6 +91,8 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(codecs.encode(s, encoding))
 
     def do_GET(self):
+
+        starttime_get_request = time.time()
 
         parsed_path = urlsplit(self.path)
         query = dict(parse_qsl(parsed_path.query, keep_blank_values=True))
@@ -182,15 +179,18 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
-                self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                self.wfile_write_encoded(cgitb_html(sys.exc_info()))
+                traceback.print_exc()
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
 
     def do_POST(self):
 
-        ctype, pdict = cgi.parse_header(self.headers['content-type'])
+        starttime_post_request = time.time()
+
+        ctype, pdict = parse_header(self.headers['content-type'])
         if ctype == 'multipart/form-data':
-            postvars = cgi.parse_multipart(self.rfile, pdict)
+            postvars = parse_multipart(self.rfile, pdict)
         elif ctype == 'application/x-www-form-urlencoded':
             length = int(self.headers['content-length'])
             postvars = dict(parse_qsl(self.rfile.read(length), keep_blank_values=True))
@@ -263,9 +263,11 @@ class _CallbackRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             if self.debug:
-                self.wfile_write_encoded(cgitb.html(sys.exc_info()))
+                self.wfile_write_encoded(cgitb_html(sys.exc_info()))
             else:
                 self.wfile_write_encoded("<html><body>An unexpected server error has occured.</body></html>")
+
+        print("POST request "+self.path+" handled in: {:.6f} sec".format(time.time() - starttime_post_request))
 
     # Redirect log messages to stdout instead of stderr
     def log_message(self, format, *args):

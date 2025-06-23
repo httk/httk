@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2022 Henrik Levämäki
@@ -15,6 +16,8 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import print_function
 
 import os
 import sys
@@ -310,7 +313,7 @@ def VASP_GET_TAG(tag, file=None):
         # Skip comment lines:
         if line.lstrip().startswith("#"):
             continue
-        match = re.search("[\t ]*{}[\t ]*=(.*)".format(tag), line)
+        match = re.search(r"[\t ]*{}[\t ]*=(.*)".format(tag), line)
         if match is not None:
             return ht.find_type_conversion(match.groups()[0].rstrip())
     return None
@@ -331,7 +334,7 @@ def VASP_SET_TAG(tag, value):
         line_is_comment = False
         if line.lstrip().startswith("#"):
             line_is_comment = True
-        match = re.search("[\t ]*{}[\t ]*=".format(tag), line)
+        match = re.search(r"[\t ]*{}[\t ]*=".format(tag), line)
         if match is None or line_is_comment:
             new_incar.append(line)
         else:
@@ -501,7 +504,7 @@ def VASP_MAGMOMLINE():
         poscar = f.read().splitlines()
 
     # TODO: This re search should be tested for correctness:
-    match = re.search("^.*\[MAGMOM=([^]]*)\]", poscar[0])
+    match = re.search(r"^.*\[MAGMOM=([^]]*)\]", poscar[0])
     if match is not None:
         return match.groups()[0]
 
@@ -535,7 +538,7 @@ def VASP_NBANDSLINE():
         potcar = f.read()
 
     ZVALS = []
-    match = re.findall("[\t ]*POMASS[\t ]*=[\t ]*[\d.]*;[\t ]*ZVAL[\t ]*=[\t ]*([\d.]*)[\t ]*mass and valenz", potcar)
+    match = re.findall(r"[\t ]*POMASS[\t ]*=[\t ]*[\d.]*;[\t ]*ZVAL[\t ]*=[\t ]*([\d.]*)[\t ]*mass and valenz", potcar)
     if match is not None:
         for m in match:
             ZVALS.append(float(m))
@@ -561,7 +564,7 @@ def VASP_NBANDSLINE():
     with open("INCAR", "r") as f:
         incar = f.read()
     NMAG = 0
-    match = re.search("[\t ]*MAGMOM[\t ]*=(.*)", incar)
+    match = re.search(r"[\t ]*MAGMOM[\t ]*=(.*)", incar)
     if match is not None:
         moms = match.groups()[0].split()
         for m in moms:
@@ -691,7 +694,7 @@ def VASP_STDOUT_CHECKER(MSGFILE, EXITPID, process):
                     continue
 
                 # /^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$/ && simple_number>=100 { next }
-                if ht.re_line_matches("^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$", line) and simple_number >= 100:
+                if ht.re_line_matches(r"^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$", line) and simple_number >= 100:
                     continue
 
                 # /WARNING: chargedensity file is incomplete/ {print "CHGCAR_INCOMPLETE" >> msgfile; exit 2}
@@ -708,7 +711,7 @@ def VASP_STDOUT_CHECKER(MSGFILE, EXITPID, process):
                 sys.stdout.flush()
 
                 # /^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$/ { simple_number+=1; if (simple_number == 99) {print "SPEWS_SINGLE_LINE_VALUES" >> msgfile} }
-                if ht.re_line_matches("^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$", line):
+                if ht.re_line_matches(r"^ *-?[0-9]+\.[0-9]+(E-?[0-9]+)? *$", line):
                     simple_number += 1
                     if simple_number == 99:
                         mf.write("SPEWS_SINGLE_LINE_VALUES\n")
@@ -910,12 +913,12 @@ def VASP_CLEAN_OUTCAR(FILE=None, clean_forces_acting_on_ions=False,
                 elif clean_avg_electrostatic_pot_at_core and "average (electrostatic) potential at core" in line and off == 0:
                     newline = "VASP_CLEAN_OUTCAR: Removed average electrostatic potential at core data\n"
                     off = 2
-                elif ht.re_line_matches("^ *k-point *[0-9*]* *: +[0-9.-]* +[0-9.-]* +[0-9.-]* *$", line) and off == 0:
+                elif ht.re_line_matches(r"^ *k-point *[0-9*]* *: +[0-9.-]* +[0-9.-]* +[0-9.-]* *$", line) and off == 0:
                     newline = "VASP_CLEAN_OUTCAR: Removed k-point occupation data\n"
                     off = 1
-                elif off == 1 and ht.re_line_matches("^ *----------------------------------- *", line):
+                elif off == 1 and ht.re_line_matches(r"^ *----------------------------------- *", line):
                     off = 0
-                elif off == 2 and ht.re_line_matches("^ *$", line):
+                elif off == 2 and ht.re_line_matches(r"^ *$", line):
                     off = 0
                 elif off == 0:
                     newline = line
@@ -1003,18 +1006,18 @@ def VASP_OSZICAR_CHECKER(MSGFILE, EXITPID):
         # SDA:   6    -0.198310401180E+02   -0.81525E+01   -0.11482E-02  1596   0.503E+02 0.000E+00
         # CGA:   7    -0.337212707899E+02   -0.13890E+02   -0.14223E+02  1596   0.488E+01-0.322E+01
         #
-        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})([\s-]*[+0-9.Ee]+)", line)
+        match = re.search(r"^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})([\s-]*[+0-9.Ee]+)", line)
         if match is not None:
             # print(match.groups(), flush=True)
             nstep = int(match.groups()[0])
             lastrmsc = float(match.groups()[5])
             continue
-        match = re.search("^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})", line)
+        match = re.search(r"^[A-Za-z]+: +([0-9]+) +([-+0-9.Ee]+) +([-+0-9.Ee]+) +(-?\d\.\d{5}[Ee][+-]\d{2}) *([0-9]{1,6}) +(-?\d*\.\d*[Ee][+-]\d{2})", line)
         if match is not None:
             # print(match.groups(), flush=True)
             nstep = int(match.groups()[0])
             continue
-        match = re.search("^ +[0-9]+ F= ([-+0-9.Ee]+)\s+E0= ([-+0-9.Ee]+)\s+d E =([-+0-9.Ee]+)\s+mag=\s*([-+0-9.Ee]+)", line)
+        match = re.search(r"^ +[0-9]+ F= ([-+0-9.Ee]+)\s+E0= ([-+0-9.Ee]+)\s+d E =([-+0-9.Ee]+)\s+mag=\s*([-+0-9.Ee]+)", line)
         if match is not None:
             istep += 1
             energy = float(match.groups()[1])
@@ -1081,7 +1084,7 @@ def VASP_GET_ENERGY(FILE=None):
     lines = reversed(lines)
 
     for line in lines:
-        match = re.search("^ +[0-9]+ F= ([-+0-9.Ee]+)\s+E0= ([-+0-9.Ee]+)\s+d E =([-+0-9.Ee]+)\s+mag=\s*([-+0-9.Ee]+)", line)
+        match = re.search(r"^ +[0-9]+ F= ([-+0-9.Ee]+)\s+E0= ([-+0-9.Ee]+)\s+d E =([-+0-9.Ee]+)\s+mag=\s*([-+0-9.Ee]+)", line)
         if match is not None:
             energy = float(match.groups()[1])
             return energy

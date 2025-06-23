@@ -66,17 +66,12 @@ else:
     from StringIO import StringIO
     import ConfigParser as configparser
 
-# This fixes a bug that might happen with standalone Python
-# that is using "frozen" modules.
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    python_root = os.path.abspath(sys._MEIPASS) + "/httk"
-else:
-    python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..'))
+python_root = os.path.realpath(os.path.join(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]),'..'))
 httk_root = None
 _config = configparser.ConfigParser()
 
 def read_config():
-    global python_root, httk_root, _config
+    global httk_root
 
     try:
         with open(os.path.join(python_root, "distdata.py"), 'r') as fp:
@@ -110,7 +105,6 @@ def read_config():
     _config.read([global_cfgpathstr, local_cfgpathstr])
 
 def determine_version_data():
-    global python_root, httk_root, _config
 
     httk_version = None
     if os.path.exists(os.path.join(python_root, "distdata.py")):

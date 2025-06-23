@@ -24,8 +24,7 @@ import httk
 
 
 def _write(obj, string):
-    # obj.write(string.encode())
-    obj.write(string)
+    obj.write(string.encode())
 
 def structure_to_jmol(iof, struct, extbonds=True, repeat=None,
                       copies=None, nl=None):

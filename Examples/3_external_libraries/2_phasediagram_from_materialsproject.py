@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import os
+
 import httk, httk.db, httk.atomistic
 from httk.core import IoAdapterString
 from httk.atomistic import Structure, StructurePhaseDiagram
@@ -13,7 +15,8 @@ import pymatgen
 from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen import MPRester
 
-# Fill in your materials project API key here
+# Set the environment variable MATPROJ_API_KEY with your materials project API key
+# (Or edit the line below to be set to the string)
 mp_key = os.environ["MATPROJ_API_KEY"]
 a = MPRester(mp_key)
 entries = a.get_entries_in_chemsys(['Ca', 'Ti', 'F'],

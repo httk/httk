@@ -32,7 +32,7 @@ def is_string(arg):
     if PY3:
         return isinstance(arg, str)
     else:
-        return isinstance(arg, basestring)
+        return isinstance(arg, basestring) # noqa: F821
 
 
 # Euler's algorithm, code from https://code.google.com/p/mpmath/issues/detail?id=55

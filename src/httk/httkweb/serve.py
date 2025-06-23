@@ -16,10 +16,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from httk.httkweb import webserver, helpers
+from httk.httkweb import helpers
 from httk.httkweb.webgenerator import WebGenerator
 
-def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, debug=True, config = "config", override_global_data = None):
+def create_serve_callback(srcdir, port, baseurl, renderers, template_engines, function_handlers, debug, config, override_global_data):
+
     setup = helpers.setup(renderers, template_engines, function_handlers)
 
     if baseurl == None:
@@ -50,5 +51,18 @@ def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = 
         out = webgenerator.retrieve(request['relpath'],request['query'])
 
         return {'response_code':200, 'content_type':out['mimetype'], 'content':out['content'], 'encoding':'utf-8' }
+   
+    return httk_web_callback
 
-    webserver.startup(httk_web_callback, port=port, debug=True)
+def serve(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, debug=True, config = "config", override_global_data = None):
+    from httk.httkweb import webserver
+
+    callback = create_serve_callback(srcdir, port, baseurl, renderers, template_engines, function_handlers, debug, config, override_global_data)
+    webserver.startup(callback, port=port, netloc=baseurl, debug=debug)
+
+def create_wsgi_application(srcdir, port=80, baseurl = None, renderers = None, template_engines = None, function_handlers = None, debug=True, config = "config", override_global_data = None, generator=None):
+    from httk.httkweb.wsgi import WsgiApplication
+
+    callback = create_serve_callback(srcdir, port, baseurl, renderers, template_engines, function_handlers, debug, config, override_global_data)
+
+    return WsgiApplication(callback, debug=debug)

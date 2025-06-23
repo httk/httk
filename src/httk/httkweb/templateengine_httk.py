@@ -34,7 +34,7 @@ if sys.version[0] == "2":
     # escape funtion instead.
 
     from cgi import escape
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     from html import escape
     unicode_type=str
@@ -57,12 +57,14 @@ class HttkTemplateFormatter(string.Formatter):
                 new_kwargs['items'] = [new_kwargs['item']] + new_kwargs['items'] if 'items' in new_kwargs else []
             if 'index' in new_kwargs:
                 new_kwargs['indices'] = [new_kwargs['index']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
-            if 'index1' in new_kwargs:
+            if 'index1' in new_kwargs: ## TODO: Came from elastic_contants, what is index1?
                 new_kwargs['indices'] = [new_kwargs['index1']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
             def update_and_return(update):
                 new_kwargs.update(update)
                 return new_kwargs
-            if type(value) is dict:
+            if value is None:
+                raise Exception("HttkTemplateFormatter: asked to loop over None for spec: "+str(spec))
+            elif type(value) is dict:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in value])
             else:
                 return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in range(len(value))])
@@ -83,7 +85,14 @@ class HttkTemplateFormatter(string.Formatter):
                             callargs[i] = ast.literal_eval(callargs[i])
                     except ValueError:
                         pass
-            result = value(*callargs[1:])
+            try:
+                result = value(*callargs[1:])
+            except Exception as e:
+                if '::' in spec:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e)+ ". Note: string to render contains '::', which could have been caused by an ':item:' with an item equal the empty string")
+                else:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e))
+
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
@@ -163,7 +172,8 @@ class HttkTemplateFormatter(string.Formatter):
                 # if val[0] == "i":
                     # val = ("index", field_name)
             # Python 3, 'super().get_field(field_name, args, kwargs)' works
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError) as e:
+            #TODO: Allow a debug config that inserts "["+str(e)+"]" as the value
             val = None, field_name
         return val
 
@@ -365,8 +375,11 @@ if __name__ == "__main__":
 
     print()
     print("== Conditionals with \"else\" fallback")
-    print(tf.format("If-else 1.1: '{x.__gt__:call:0::if::positive::else::negative}'", x=2))
-    print(tf.format("If-else 1.2: '{x.__gt__:call:0::if::positive::else::negative}'", x=-2))
+    # Changin previous example that used x=2 and then called __gt__ to instead use a float.
+    # I don't see how that can ever have worked in Python 2, as __gt__ as far as I can see
+    # was never supported.
+    print(tf.format("If-else 1.1: '{x.__gt__:call:0::if::positive::else::negative}'", x=2.0))
+    print(tf.format("If-else 1.2: '{x.__gt__:call:0::if::positive::else::negative}'", x=-2.0))
     print(tf.format("If-else 2.1: '{t:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
     print(tf.format("If-else 2.2: '{f:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
 
