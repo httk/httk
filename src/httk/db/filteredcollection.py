@@ -21,7 +21,7 @@ import itertools, os, sys, re, inspect
 if sys.version_info[0] == 3:
     string_types = (str,)
 else:
-    string_types = (str, unicode)
+    string_types = (str, unicode) # noqa: F821
 
 class FilteredCollection(object):
 
@@ -41,6 +41,8 @@ class FilteredCollection(object):
         self.sorts = []
         self.indirection = 1
         self._storable_tables = 0
+        self.offset = 0
+        self.limit = None
 
     def add(self, filterexpr):
         """
@@ -56,7 +58,13 @@ class FilteredCollection(object):
         """
         self.postfilterexprs.append(filterexpr)
 
-    def output(self, expression, name=None):
+    def add_offset(self, offset):
+        self.offset += offset
+
+    def set_limit(self, limit):
+        self.limit = limit
+
+    def output(self, expression, name=None, concat=False):
         """
         Define which columns should be included in the results when iterating over a FilteredCollection.
         attributes is a list of tuples consisting of (name,definition) where definition can be any
@@ -66,7 +74,7 @@ class FilteredCollection(object):
         """
         #if isinstance(expression,TableOrColumn):
         #    expression = TableOrColumn(expression.context,expression.name+"_id")
-        self.columns.append((name, expression))
+        self.columns.append((name, expression, concat))
 
     def reset(self):
         """
@@ -348,13 +356,12 @@ class FCMultiDict(FilteredCollection):
 # atexit.register(sqlite_close_all)
 ###############################################################
 
-
 def instantiate_from_store(classobj, store, id):
     types = classobj.types()
     output = store.retrieve(types['name'], types, id)
     args = types['init_keydict'].keys()
     calldict = {}
-    #print("ARGS",args, output, id)
+    # print("ARGS", args, output, id)
     for arg in args:
         try:
             calldict[arg] = output[arg]
@@ -415,14 +422,8 @@ class FCSqlite(FilteredCollection):
         #sqlstr = self.sql()
         cursor.execute(sql)
 
-    def sql(self):
+    def sql_query(self):
         sqlstr = ""
-        sqlstr += "SELECT\n"
-        if len(self.columns) == 0:
-            sqlstr += " *\n"
-        else:
-            sqlstr += "  "+", \n  ".join([c[1]._sql()+" "+c[0] for c in self.columns])+" \n"
-        sqlstr += "FROM\n"
         tablelist = []
         groupset = set()
         for table in self.tables:
@@ -434,21 +435,79 @@ class FCSqlite(FilteredCollection):
         sqlstr += "  "+" LEFT OUTER JOIN \n  ".join(tablelist)+"\n"
         if len(self.filterexprs) > 0:
             sqlstr += "WHERE\n"
-            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql() for x in self.filterexprs]) + "\n  )\n"
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(False) for x in self.filterexprs]) + "\n  )\n"
         if len(groupset) > 0:
             sqlstr += "GROUP BY\n  "
             sqlstr += ",\n  ".join(groupset) + "\n"
 
         if len(self.postfilterexprs) > 0:
             sqlstr += "HAVING\n"
-            sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sql() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
+            sqlstr += "  (\n    " + "\n  )  AND  (\n    ".join([x._sql(True) for x in self.postfilterexprs]) + "\n  )\n"
+            #sqlstr += "  ( SUM ( NOT (\n    " + "\n    )) = 0\n  ) AND (SUM ( NOT (\n    ".join([x._sqlpost() for x in self.postfilterexprs]) + "\n    )) = 0\n  )\n"
 
         if len(self.sorts) > 0:
             sqlstr += "ORDER BY\n  "
-            sqlstr += ",\n  ".join([s[0]._sql()+" "+s[1] for s in self.sorts]) + "\n"
+            sqlstr += ",\n  ".join([s[0]._sql(False)+" "+s[1] for s in self.sorts]) + "\n"
 
+        return sqlstr
+
+    def sql(self):
+        sqlstr = ""
+        sqlstr += "SELECT\n"
+        if len(self.columns) == 0:
+            sqlstr += " *\n"
+        else:
+            sqlstr += "  "+", \n  ".join([c[1]._sql(False)+" "+c[0] if not c[2] else "GROUP_CONCAT("+c[1]._sql(False)+",'"+c[2]+"') "+c[0] for c in self.columns])+" \n"
+        sqlstr += "FROM\n"
+        sqlstr += self.sql_query()
+        if self.limit is not None:
+            sqlstr += "LIMIT "+str(self.limit)+"\n"
+        if self.offset > 0:
+            sqlstr += "OFFSET "+str(self.offset)+"\n"
         sqlstr += ";\n"
         return sqlstr
+
+    def sql_count(self):
+        tablelist = []
+        groupset = set()
+        for table in self.tables:
+            tablelist.append(table._declare())
+            groupby = table._groupby()
+            if groupby is not None:
+                groupset.add(groupby)
+        if len(groupset) > 0:
+            sqlstr = "SELECT COUNT(__count__) FROM ( SELECT\n"
+            sqlstr += "  COUNT(*) as __count__\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += " );\n"
+            return sqlstr
+        else:
+            sqlstr = "SELECT\n"
+            sqlstr += "  COUNT(*)\n"
+            sqlstr += "FROM\n"
+            sqlstr += self.sql_query()
+            sqlstr += ";\n"
+            return sqlstr
+
+    def count(self):
+        sql = self.sql_count()
+        cursor = self.sqliteconnection.cursor()
+        cursor.execute(sql)
+
+        data = []
+        for entry in cursor:
+            data += [list(entry)]
+
+        cursor.close()
+
+        if len(data)!=1:
+            raise Exception("Unexpected length of count query: "+str(sql))
+
+        try:
+            return int(data[0][0])
+        except Exception as e:
+            raise Exception("Unexpected format on count query: "+str(data[0]))
 
     def __iter__(self):
         sql = self.sql()
@@ -487,6 +546,10 @@ class FCSqlite(FilteredCollection):
                 yield (entry, headers)
         else:
             for entry in cursor:
+                # DuckDB's cursor does not (yet) implement __iter__,
+                # so we have to work around that:
+                if entry[0] is None:
+                    continue
                 entry = list(entry)
                 for replace in mustreplace:
                     entry[replace[0]] = instantiate_from_store(replace[1], self.store, entry[replace[0]])
@@ -520,13 +583,14 @@ def fc_eval(expr, data):
         return expr
 
 
-def fc_sql(expr):
+def fc_sql(post, expr):
     if hasattr(expr, '_sql'):
         #print("HERE",expr._sql(), expr.__class__)
-        return expr._sql()
+        return expr._sql(post)
     elif isinstance(expr, string_types):
         # TODO: Fix quoting system
-        return "\""+str(expr).replace("'", "''")+"\""
+        return "'"+str(expr).replace("'", "''")+"'"
+        #return "\""+str(expr).replace("'", "''")+"\""
 
 #    try:
 #        return "\""+str(expr.hexhash)+"\""
@@ -652,6 +716,47 @@ class Expression(object):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
         return BinaryBooleanOp(self._context, "IN", self, args)
 
+    # TODO: This mess with inv vs non-inv any, all, only operators has to be fixed in the
+    # next version of httk, where the operators should more closely follow the optimade
+    # query language.
+    def has_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ANY", self, args)
+
+    def has_inv_any(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ANY", self, args)
+
+    # Note: this doesn't work, because the operators are created on the same variable
+    # but new variables for each of the AND contexts would need to be established.
+    #def has_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_ANY", self, [arg])
+    #    return expr
+
+    #def has_inv_all(self, *args):
+    #    if not self._exprtype in ('value', 'unknown'):
+    #        raise Exception("Syntax error: is_in operator with expression of wrong type.")
+    #    expr = BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [args[0]])
+    #    for arg in args[1:]:
+    #        expr = expr & BinaryBooleanOp(self._context, "HAS_INV_ANY", self, [arg])
+    #    return expr
+
+    def has_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_ONLY", self, args)
+
+    def has_inv_only(self, *args):
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: is_in operator with expression of wrong type.")
+        return BinaryBooleanOp(self._context, "HAS_INV_ONLY", self, args)
+
     def like(self, *args):
         if not self._exprtype in ('value', 'unknown'):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
@@ -677,6 +782,8 @@ class Expression(object):
             raise Exception("Syntax error: invert with expression of wrong type.")
         return UnaryBooleanOp(self._context, "not", self)
 
+    def _sql(self, post):
+        raise Exception("Requesting SQL on expression that does not implement it.")
 
 class Function(Expression):
 
@@ -691,8 +798,8 @@ class Function(Expression):
     def _get_srctable_context(self, data):
         return self._srctable
 
-    def _sql(self):
-        return self._name+"(" + ",".join([fc_sql(x) for x in self._args]) + ")"
+    def _sql(self, post):
+        return self._name+"(" + ",".join([fc_sql(post, x) for x in self._args]) + ")"
 
 
 class UnaryBooleanOp(Expression):
@@ -709,9 +816,9 @@ class UnaryBooleanOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('not'):
-            return self._operator + fc_sql(self._args[0])
+            return self._operator + fc_sql(post, self._args[0])
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -740,15 +847,37 @@ class BinaryBooleanOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('and', 'or', 'xor'):
-            return "("+fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1])+")"
-        elif self._operator in ('IN'):
-            return "("+fc_sql(self._args[0]) + " IN (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"
-        elif self._operator in ('LIKE'):
-            return "("+fc_sql(self._args[0]) + " LIKE (" + ",".join([fc_sql(a) for a in self._args[1]])+"))"
+            return "("+fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1])+")"
+
+        elif not post:
+            if self._operator in ('IN',):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ANY'):
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator in ('HAS_ONLY'):
+                return "(1=1)"
+            elif self._operator in ('HAS_INV_ANY'):
+                return "(1<>1)"
+            elif self._operator in ('HAS_INV_ONLY'):
+                return "(1<>1)"
+            elif self._operator in ('LIKE'):
+                return "("+fc_sql(post, self._args[0]) + " LIKE (" + ",".join([fc_sql(post, a) for a in self._args[1]])+") ESCAPE '\\')"
         else:
-            raise Exception("Syntax Error generating SQL for operator: " + self._operator)
+
+            if self._operator == 'IN':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            elif self._operator == 'HAS_ANY':
+                return "("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))"
+            elif self._operator == 'HAS_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+            if self._operator == 'HAS_INV_ANY':
+                return "(SUM("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+"))>0)"
+            elif self._operator == 'HAS_INV_ONLY':
+                return "(SUM(NOT("+fc_sql(post, self._args[0]) + " IN (" + ",".join([fc_sql(post, a) for a in self._args[1]])+")))=0)"
+
+        raise Exception("Syntax Error generating SQL for operator: " + self._operator)
 
 
 class BinaryComparison(Expression):
@@ -774,7 +903,7 @@ class BinaryComparison(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         op = self._operator
         leftarg = None
         rightarg = None
@@ -785,7 +914,7 @@ class BinaryComparison(Expression):
         elif self._args[0] is False:
             leftarg = '0'
         else:
-            leftarg = fc_sql(self._args[0])
+            leftarg = fc_sql(post, self._args[0])
         if self._args[1] is None:
             rightarg = 'NULL'
         elif self._args[1] is True:
@@ -793,7 +922,7 @@ class BinaryComparison(Expression):
         elif self._args[1] is False:
             rightarg = '0'
         else:
-            rightarg = fc_sql(self._args[1])
+            rightarg = fc_sql(post, self._args[1])
         if leftarg == 'NULL' or rightarg == 'NULL':
             if self._operator == '=':
                 op = 'IS'
@@ -846,9 +975,9 @@ class BinaryOp(Expression):
         else:
             raise Exception("Syntax Error")
 
-    def _sql(self):
+    def _sql(self, post):
         if self._operator in ('+', '-', '*', '/', '||'):
-            return "(" + fc_sql(self._args[0]) + " "+self._operator+" " + fc_sql(self._args[1]) + ")"
+            return "(" + fc_sql(post, self._args[0]) + " "+self._operator+" " + fc_sql(post, self._args[1]) + ")"
         else:
             raise Exception("Syntax Error" + self._operator)
 
@@ -919,6 +1048,10 @@ class TableOrColumn(Expression):
             self._parent._declare_as_table()
 
     def __getattr__(self, name):
+        if name == '__id':
+            return self
+        if name[0] == '_':
+            return self.__getattribute__(name)
         if self._classref is not None:
             typedict = dict(self._classref.types()['keys']+self._classref.types()['derived'])
             try:
@@ -1003,7 +1136,7 @@ class TableOrColumn(Expression):
         else:
             return data[self._outid+"."+self._subkey] == data[self._parent._outid+"."+self._key]
 
-    def _sql(self):
+    def _sql(self, post):
         if not self._iscolumn:
             #print("HUH",self._outid, ".", self._name, "_id")
             return self._outid + "." + self._name+"_id"

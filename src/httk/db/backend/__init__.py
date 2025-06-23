@@ -19,3 +19,4 @@ from httk.core import citation
 citation.add_src_citation("httk_db", "Rickard Armiento")
 
 from httk.db.backend.sqlite import Sqlite
+from httk.db.backend.duck_db import Duckdb

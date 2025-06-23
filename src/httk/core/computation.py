@@ -23,7 +23,6 @@ from httk.core.reference import Reference
 
 
 class Computation(HttkObject):
-
     """
     Object for keeping track of httk data about a specific computation run
     """
@@ -54,8 +53,8 @@ class Computation(HttkObject):
         self._codependent_callbacks = []
         self._codependent_data = []
         self._codependent_info = [{'class': ComputationProject, 'column': 'computation', 'add_method': 'add_projects'},
-                                  {'class': ComputationTag, 'column': 'structure', 'add_method': 'add_tags'},
-                                  {'class': ComputationRef, 'column': 'structure', 'add_method': 'add_refs'}]
+                                  {'class': ComputationTag, 'column': 'computation', 'add_method': 'add_tags'},
+                                  {'class': ComputationRef, 'column': 'computation', 'add_method': 'add_refs'}]
 
     @classmethod
     def create(cls, computation_date, description, code, manifest_hash, signatures, keys,
@@ -116,8 +115,10 @@ class Computation(HttkObject):
             self._fill_codependent_data()
         if isinstance(ref, ComputationRef):
             refobj = ref.reference
+        elif isinstance(ref, Reference):
+            refobj = ref
         else:
-            refobj = ComputationRef.use(ref)
+            refobj = Reference.use(ref)
         new = ComputationRef(self, refobj)
         self._refs += [new]
         self._codependent_data += [new]
@@ -162,7 +163,7 @@ class ComputationTag(HttkObject):
 
 class ComputationRef(HttkObject):
 
-    @httk_typed_init({'computation': Computation, 'reference': Reference}, index=['structure', 'reference'], skip=['hexhash'])
+    @httk_typed_init({'computation': Computation, 'reference': Reference}, index=['computation', 'reference'], skip=['hexhash'])
     def __init__(self, computation, reference):
         self.computation = computation
         self.reference = reference

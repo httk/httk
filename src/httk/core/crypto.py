@@ -222,7 +222,7 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     for root, unsorteddirs, unsortedfiles in os.walk(keydir, topdown=True, followlinks=False):
         files = sorted(unsortedfiles)
         for filename in files:
-            if filename != 'key1.pub' and re.match(".*\.pub", filename):
+            if filename != 'key1.pub' and re.match(r'.*\.pub', filename):
                 f = open(os.path.join(root, filename), "r")
                 filedata = f.readlines()
                 f.close()
@@ -280,7 +280,8 @@ def manifest_dir(basedir, manifestfile, excludespath, keydir, sk, pk, debug=Fals
     #print("===="+message+"====")
 
     sig = ed25519.signature(message, sk, pk)
-    b64sig = base64.b64encode(sig)
+    # Make sure b64sig is string in both Python 2 and 3
+    b64sig = codecs.decode(base64.b64encode(sig), 'utf-8')
 
     manifestfile.write("\n")
     manifestfile.write(b64sig)

@@ -1,13 +1,16 @@
 # General ignores
 *.pyc
+__pycache__/
 .DS_Store
 .project
 .pydevproject
+.vscode
 **/*~
 # Httk specific ignores
 httk.cfg
 httk.old
 External
+build
 #Docs/full/_static/generated/**
 Docs/full/_build/**
 # Docs/full/generated/**
@@ -33,6 +36,7 @@ src/httk.egg-info
 .pytest_cache
 .tox
 .nvimlog
-Tests/structreading.tmp
-Tests/python_versions/ver2
-Tests/python_versions/ver3
+Tests/tmp
+.venv
+.venvs
+

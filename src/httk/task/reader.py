@@ -19,6 +19,7 @@ import glob, os, datetime, hashlib, re, base64, bz2, sys, codecs
 from httk.core.basic import print_
 from httk.core.crypto import manifest_dir, verify_crytpo_signature, read_keys
 from httk.core import Computation, ComputationProject, Code, IoAdapterFileReader, Signature, SignatureKey
+from httk.core.ioadapters import bz2open
 
 if sys.version_info[0] == 3:
     import configparser
@@ -60,10 +61,10 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = configparser.ConfigParser()
-                        configparser.read(os.path.join(dirpath, 'ht.config'))
-                        if configparser.has_option('main', 'description'):
-                            description = configparser.get('main', 'description')
+                        cp = configparser.ConfigParser()
+                        cp.read(os.path.join(dirpath, 'ht.config'))
+                        if cp.has_option('main', 'description'):
+                            description = cp.get('main', 'description')
                         else:
                             description = default_description
                     else:
@@ -72,7 +73,7 @@ def reader(projectpath, inpath, excludes=None, default_description=None, project
                         if pk is None:
                             sk, pk = read_keys(keydir)
                         sys.stderr.write("Warning: generating manifest for "+str(dirpath)+", this takes some time.\n")
-                        manifestfile = bz2.BZ2File(os.path.join(dirpath, 'ht.tmp.manifest.bz2'), 'w')
+                        manifestfile = bz2open(os.path.join(dirpath, 'ht.tmp.manifest.bz2'), 'w')
                         manifest_dir(dirpath, manifestfile, os.path.join(dirpath, 'ht.config'), keydir, sk, pk, force=force_remake_manifests)
                         manifestfile.close()
                         os.rename(os.path.join(dirpath, 'ht.tmp.manifest.bz2'), os.path.join(dirpath, 'ht.manifest.bz2'))
@@ -123,10 +124,10 @@ def submit_reader(projectpath, default_description=None, excludes=None, project=
                     else:
                         code = Code('unknown', '0')
                     if os.path.exists(os.path.join(dirpath, 'ht.config')):
-                        configparser = configparser.ConfigParser()
-                        configparser.read(os.path.join(dirpath, 'ht.config'))
-                        if configparser.has_option('main', 'description'):
-                            description = configparser.get('main', 'description')
+                        cp = configparser.ConfigParser()
+                        cp.read(os.path.join(dirpath, 'ht.config'))
+                        if cp.has_option('main', 'description'):
+                            description = cp.get('main', 'description')
                         else:
                             description = default_description
                     else:

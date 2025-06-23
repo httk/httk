@@ -15,10 +15,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import random
+
 from httk.graphics.matplotlib.polygonplot import PolygonPlot
 from httk.graphics.matplotlib.arrowplot import arrowplot
 from httk.core import FracVector
-from pylab import sqrt, show
 
 class MatplotlibPhaseDiagramVisualizer(object):
 
@@ -27,6 +28,7 @@ class MatplotlibPhaseDiagramVisualizer(object):
 
     def show(self, showunstable=True, labelunstable=False, avoid_overlap=True):
         print("Warning: graphical phase diagrams currently does not fill in *all* dividing lines.")
+        from httk.external.ext_matplotlib.pylab import sqrt, show
 
         pd = self.phasediagram
         pp = PolygonPlot(labels=pd.coord_system, sides=len(pd.coord_system), label_offset=0.15)
