@@ -378,7 +378,7 @@ class Structure(HttkObject):
             if rc_sites_exception is not None:
                 reraise_from(Exception,"Sites creation raised an exception",rc_sites_exception)
             if rc_cell is not None and rc_sites is not None and hall_symbol is None:
-                reraise_from(Exception,"Spacegroup creation raised an exception",rc_spacegroup_exception)
+                reraise_from(Exception,"Spacegroup creation raised an exception",spacegroup_exception)
             if uc_cell_exception is not None:
                 reraise_from(Exception,"Cell creation raised an exception", uc_cell_exception)
             if uc_sites_exception is not None:
@@ -392,8 +392,18 @@ class Structure(HttkObject):
             other_reps = {}
 
         if (rc_sites is None or rc_cell is None or hall_symbol is None):
-            new = cls.use(uc_rep)
+            transform = get_primitive_to_conventional_basis_transform(uc_rep.uc_basis)
+            newuc = uc_rep.transform(transform)
+            rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities = spacegrouputils.trivial_symmetry_reduce(newuc.uc_reduced_coordgroups,
+                                                                                                                           hall_symbol=hall_symbol)
+            new = cls.create(assignments=newuc.assignments, rc_cell=newuc.uc_cell,
+                              rc_reduced_coordgroups=rc_reduced_coordgroups,
+                              wyckoff_symbols=wyckoff_symbols,
+                              multiplicities=multiplicities,
+                              hall_symbol=hall_symbol)
+
             new._other_reps = other_reps
+
         else:
             new = cls(assignments=assignments, rc_sites=rc_sites, rc_cell=rc_cell, other_reps=other_reps)
 
@@ -436,7 +446,8 @@ class Structure(HttkObject):
         if 'uc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_cell=self.rc_cell, uc_sites=self.rc_sites.get_uc_sites())
             self._other_reps['uc'] = cc_struct
-            self._other_reps['cc'] = cc_struct
+            if 'cc' not in self._other_reps:
+                self._other_reps['cc'] = cc_struct
         return self._other_reps['uc']
 
     @property
@@ -458,7 +469,8 @@ class Structure(HttkObject):
     def cc(self):
         if 'cc' not in self._other_reps:
             cc_struct = UnitcellStructure.create(assignments=self.assignments, uc_sites=self.rc_sites.get_uc_sites(), uc_cell=self.rc_cell)
-            self._other_reps['uc'] = cc_struct
+            if 'uc' not in self._other_reps:
+                self._other_reps['uc'] = cc_struct
             self._other_reps['cc'] = cc_struct
         return self._other_reps['cc']
 
@@ -469,8 +481,9 @@ class Structure(HttkObject):
             self._other_reps['rc'] = rc_struct
         return self._other_reps['rc']
 
-    def transform(self, matrix, max_search_cells=20, max_atoms=1000):
-        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
+    def transform(self, matrix, max_search_cells=20, max_atoms=5000,force_hall_symbol=None):
+        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms,force_hall_symbol=force_hall_symbol)
+
 
     @httk_typed_property(str)
     def hall_symbol(self):
@@ -600,7 +613,7 @@ class Structure(HttkObject):
 
     @property
     def uc_cartesian_coords(self):
-        return self.uc.get_cartesian_coords
+        return self.uc.uc_cartesian_coords
 
     @property
     def uc_lengths_and_angles(self):

@@ -58,14 +58,14 @@ def _read_cif_loop(f, pragmatic=True, use_types=False):
             f.rewind()
             break
 
-    while True:
-        for i in range(len(loop_data)):
+    while True and len(header)>0:
+        for i in range(len(header)):
             try:
                 row = next(f)
+                while row.isspace():
+                    row = next(f)
             except StopIteration:
                 break
-            if row.isspace():
-                continue
             striprow = row.strip()
             lowrow = striprow.lower()
             if not row or row.startswith("_") or lowrow.startswith("data_") or lowrow.startswith("loop_"):
@@ -154,7 +154,7 @@ def _read_cif_data_value(f, noteol, pragmatic=True, use_types=False, inloop=Fals
                 # multiple data values in this situation would be an
                 # error in the file otherwise, but if there is whitespace + underscore/data_/loop_ we parse that
                 # as a new symbol, since otherwise we COULD misread valid files (with very weird formatting...).
-                splitstr = re.split("\s+_|\s+data_|\s+loop_", striprow, maxsplit=1)
+                splitstr = re.split(r'\s+_|\s+data_|\s+loop_', striprow, maxsplit=1)
             else:
                 splitstr = striprow.split(None, 1)
             data_value = splitstr[0].strip()
@@ -259,7 +259,7 @@ def read_cif(ioa, pragmatic=True, use_types=False):
     ioa.close()
     return datalist, header
 
-_cif_ordinary_char = "!%&()*+,-./0123456789:<=>?@ABCDEFGHIHJKLMNOPQRSTUVWXYZ\^`abcdefghijklmnopqrstuvwxyz{|}~"
+_cif_ordinary_char = r'!%&()*+,-./0123456789:<=>?@ABCDEFGHIHJKLMNOPQRSTUVWXYZ\^`abcdefghijklmnopqrstuvwxyz{|}~'
 _cif_non_blank_char = _cif_ordinary_char+'"'+"#$"+"'"+"_"+";[]"
 _cif_text_lead_char = _cif_ordinary_char+'"'+"#$"+"'"+"_ \t[]"
 _cif_any_print_char = _cif_ordinary_char+'"'+"#$"+"'"+"_ \t;[]"
@@ -276,9 +276,9 @@ if sys.version_info[0] == 3:
     for key, value in _cif_non_blank_char_table.items():
         _cif_unicode_translation_table[key] = value
 
-_cif_integer_regex = re.compile('^[+-]?[0-9]+$')
-_cif_float_regex = re.compile('^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$')
-_cif_simplestring_regex = re.compile('^[A-Za-z0-9()][A-Za-z0-9()+-]*$')
+_cif_integer_regex = re.compile(r'^[+-]?[0-9]+$')
+_cif_float_regex = re.compile(r'^[+-]?[0-9]+[eE][+-]?[0-9]+|([+-]?[0-9]*\.[0-9]+|[+-]?[0-9]\.)([eE][+-]?[0-9]+)?$')
+_cif_simplestring_regex = re.compile(r'^[A-Za-z0-9()][A-Za-z0-9()+-]*$')
 
 def _cif_validate_name(name_unfiltered, context=None):
     if context is not None:

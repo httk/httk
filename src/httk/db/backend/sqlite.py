@@ -28,8 +28,8 @@ from httk.core import reraise_from
 sqliteconnections = set()
 # TODO: Make this flag configurable in httk.cfg
 database_debug = False
-#database_debug = True
-database_debug_slow = True
+# database_debug = True
+database_debug_slow = False
 if 'DATABASE_DEBUG_SLOW' in os.environ:
     database_debug_slow = True
 if 'DATABASE_DEBUG' in os.environ:
@@ -37,20 +37,17 @@ if 'DATABASE_DEBUG' in os.environ:
 
 
 def db_open(filename):
-    global sqliteconnections
     connection = sqlite.connect(filename)
     sqliteconnections.add(connection)
     return connection
 
 
 def db_close(connection):
-    global sqliteconnections
     sqliteconnections.remove(connection)
     connection.close()
 
 
 def db_sqlite_close_all():
-    global sqliteconnections
     for connection in sqliteconnections:
         connection.close()
 
@@ -79,18 +76,17 @@ class Sqlite(object):
             self.db = db
 
         def execute(self, sql, values=[]):
-            global database_debug
             if database_debug:
-                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values), end="", file=sys.stderr)
+                print("DEBUG: EXECUTING SQL:"+sql+" :: "+str(values) + "\n", end="", file=sys.stderr)
             if database_debug_slow:
                 time1 = time.time()
             try:
                 # print("sql = ", sql)
                 # print("values = ", values)
                 self.cursor.execute(sql, values)
-            except Exception:
+            except Exception as e:
                 info = sys.exc_info()
-                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), info)
+                reraise_from(Exception, "backend.Sqlite: Error while executing sql: "+sql+" with values: "+str(values)+", the error returned was: "+str(info[1]), e)
             if database_debug_slow:
                 time2 = time.time()
                 if (time2-time1) > 1 and not sql.startswith("CREATE"):

@@ -15,8 +15,13 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, fractions
+import sys
 from functools import reduce
+
+try:
+    import cfractions as fractions
+except ImportError:
+    import fractions
 
 PY3 = sys.version_info[0] == 3
 
@@ -27,7 +32,7 @@ def is_string(arg):
     if PY3:
         return isinstance(arg, str)
     else:
-        return isinstance(arg, basestring)
+        return isinstance(arg, basestring) # noqa: F821
 
 
 # Euler's algorithm, code from https://code.google.com/p/mpmath/issues/detail?id=55
@@ -98,7 +103,6 @@ def string_to_val_and_delta(arg, min_accuracy=fractions.Fraction(1, 10000)):
         delta = min_accuracy
     val = fractions.Fraction(val)
     return val, delta
-
 
 def any_to_fraction(arg, min_accuracy=fractions.Fraction(1, 10000)):
     """

@@ -15,7 +15,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import fractions
+import time
+try:
+    import cfractions as fractions
+except ImportError:
+    import fractions
 
 from httk.core import FracVector, MutableFracVector
 from httk.core.basic import is_sequence
@@ -240,7 +244,8 @@ def pbc_to_nonperiodic_vecs(pbc):
     return nonperiodic_vecs
 
 
-def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegroup, backends=['isotropy']):
+def structure_reduced_coordgroups_to_representative(coordgroups, cell,
+        spacegroup, backends=['isotropy', 'spglib']):
     for backend in backends:
         if backend == 'isotropy':
             try:
@@ -249,6 +254,15 @@ def structure_reduced_coordgroups_to_representative(coordgroups, cell, spacegrou
             except ImportError:
                 raise
                 pass
+
+        if backend == 'spglib':
+            try:
+                from httk.external import pyspglib_ext
+                return pyspglib_ext.uc_reduced_coordgroups_process_with_isotropy(coordgroups, cell, spacegroup, get_wyckoff=True)
+            except ImportError:
+                raise
+                pass
+
     raise Exception("structure_reduced_coordgroups_to_representative: None of the available backends available.")
 
 
@@ -264,24 +278,86 @@ def sites_tidy(sites, backends=['platon']):
     raise Exception("structure_tidy: None of the available backends available.")
 
 
-def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
-    # TODO: This routine is quite slow and can certainly be speed up.
+def coordgroups_reduced_to_unitcell(coordgroups, hall_symbol, eps=fractions.Fraction(1, 1000)):
     symops = spacegrouputils.get_symops(hall_symbol)
+
+    # Number of grid subdivisions along each axis, e.g. if eps=1/1000 => g=1000 
+    g = max(10, int(1 / float(eps)))
+
+    def neighbor_cells(i, j, k):
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                for dk in (-1, 0, 1):
+                    yield ((i + di) % g, (j + dj) % g, (k + dk) % g)
+
     newcoordgroups = []
+
     for coordgroup in coordgroups:
         newcoordgroup = []
+
+        # We'll keep one grid-hash dictionary per coordgroup
+        # Key: (i,j,k) cell index -> Value: list of accepted coords in that cell
+        cell_dict = {}
+
+        for symop in symops:
+            rotcoords = coordgroup * symop[0].T()
+            for coord in rotcoords:
+                finalcoord = (coord + symop[1]).normalize()
+                i, j, k = int(finalcoord[0] * g) % g, int(finalcoord[1] * g) % g, int(finalcoord[2] * g) % g
+                too_close = False
+                for (ni, nj, nk) in neighbor_cells(i, j, k):
+                    for c in cell_dict.get((ni, nj, nk), []):
+                        if (c - finalcoord).normalize_half().lengthsqr() < eps:
+                            too_close = True
+                            break
+                    if too_close:
+                        break
+
+                if not too_close:
+                    newcoordgroup.append(finalcoord)
+                    cell_dict.setdefault((i, j, k), []).append(finalcoord)
+
+        newcoordgroups.append(newcoordgroup)
+
+    return newcoordgroups
+
+
+def coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps=fractions.Fraction(1,1000)):
+    # TODO: This routine is now a bit faster, but maybe can be accelerated further
+    # One may also be concerned about how much memory it uses now.
+    symops = spacegrouputils.get_symops(hall_symbol)
+    #print("ENTER CRDTU",sum(len(x) for x in coordgroups),len(symops))
+    #start = time.process_time()
+    #count = 0
+    newcoordgroups = []
+    for coordgroup in coordgroups:
+        newcoordgroup = set()
         for symop in symops:
             rotcoords = coordgroup*(symop[0].T())
             for coord in rotcoords:
+                #count += 1
                 finalcoord = (coord+symop[1]).normalize()
+                newcoordgroup.add(finalcoord)
                 if finalcoord not in newcoordgroup:
                     for checkcoord in newcoordgroup:
                         if (checkcoord-finalcoord).normalize_half().lengthsqr() < eps:
                             break
                     else:
-                        newcoordgroup += [finalcoord]
-        newcoordgroup = sorted(newcoordgroup, key=lambda x: (x[0], x[1], x[2]))
+                        newcoordgroup.add(finalcoord)
+        #newcoordgroup = sorted(list(newcoordgroup), key=lambda x: (x[0], x[1], x[2]))
+        #newcoordgroup2 = [newcoordgroup[0]]
+        #lastcoord = newcoordgroup[0]
+        #for coord in newcoordgroup[1:]:
+        #    if (coord-lastcoord).normalize_half().lengthsqr() >= eps:
+        #        newcoordgroup2.append(coord)
+        #        lastcoord = coord
         newcoordgroups += [newcoordgroup]
+
+    #old = coordgroups_reduced_to_unitcell_old(coordgroups, hall_symbol, eps)
+    #if newcoordgroups != old:
+    #    print("\n\nONE\n",FracVector.create(old).to_floats())
+    #    print("\n\nTWO\n",FracVector.create(newcoordgroups).to_floats())
+    #    raise Exception("DIDN'T WORK")
     return newcoordgroups
 
 

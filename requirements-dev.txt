@@ -1,0 +1,4 @@
+setuptools
+pytest
+flake8
+autopep8

@@ -11,8 +11,6 @@ import ase
 import ase.build
 
 # By loading the httk.external.ase_glue package *before* 'import ase' you will load the ASE version specified in your httk configuration files.
-# The below two version are going to be the same.
-print("ASE version loaded by httk:", httk.external.ase_glue.ase_major_version, ".", httk.external.ase_glue.ase_minor_version)
 print("ASE version loaded in this script", ase.__version__)
 
 # First we create a structure object where we know the full set of coordinates.

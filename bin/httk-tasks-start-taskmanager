@@ -5,12 +5,6 @@ HTTK_BIN_PATH=$(cd "$DIRNAME"; pwd -P)
 . "${HTTK_BIN_PATH}/internal/setup.sh"
 export HTTK_DIR="$HTTK_BIN_PATH/.."
 
-if [ -n "$2" ]; then
-  NUMBER="$2"
-else
-  NUMBER="1"
-fi
-
 echo "==== httk-computer-start-taskmanager"
 
 if [ -z "$1" ]; then
@@ -33,6 +27,13 @@ if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
 fi
 shift 1
 
+if [ -n "$2" ]; then
+    NUMBER="$2"
+    shift 1
+else
+  NUMBER="1"
+fi
+
 if [ -d "$PIPEPATH1" ]; then
     PIPEPATH=$PIPEPATH1
 elif [ -d "$PIPEPATH2" ]; then
@@ -42,4 +43,4 @@ else
     echo "(Please configure with httk-setup-computer <name>)"
     exit 1
 fi
-"$PIPEPATH/start-taskmgr" "$QUEUE" "$NUMBER"
+"$PIPEPATH/start-taskmgr" "$QUEUE" "$NUMBER" "$@"

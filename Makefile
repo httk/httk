@@ -5,57 +5,164 @@ all:	httk.cfg version httk_overview.pdf webdocs
 httk.cfg:
 	if [ ! -e httk.cfg ]; then cat httk.cfg.example | grep -v "^#" > httk.cfg; fi
 
+##############################
+## Virtual environment helpers
+##############################
+#
+# make venv: use the system Python to setup a venv with the requirements. It is placed under .venvs/system and .venv symlinked to it.
+#
+# make init_uv_default_venv: uses uv to initialize a venv using the most "standard" Python version in .venvs/uv/default and symlinks .venv to it
+# make init_uv_venv: creates the default venv under .venvs/uv/py310
+# make init_conda_venv: creates the default venv under .venvs/conda/py310
+#
+# make init_uv_venv venv=py312
+# make init_conda_venv venv=py312: creates a virtual environment for Pyton 3.12 under .venvs/{uv,conda}/py312
+#
+# make init_tox_venv
+# make init_tox_venv venv=py312: use tox-uv to init the selected uv environment
+#
+# make init_all_tox_venvs: use tox to init all uv environments defined in tox
+#
+# Note: the uv environments force install of pyside6, because tkinter does not work
+# in the standalone Python used by uv
+
+default_python = py310
+venv ?= py310
+
+venv:
+	if [ -e .venv ]; then \
+	    LINK=$$(readlink .venv); \
+            if [ "$${LINK}" != ".venvs/system" ]; then \
+                echo "You already have a .venv, remove it to recreate"; \
+                exit 1; \
+            fi; \
+        else \
+	    ln -s .venvs/system .venv; \
+        fi
+	mkdir -p .venvs/
+	if [ ! -e .venvs/system ]; then python3 -m venv .venvs/system; fi
+	if [ ! -e .venvs/system/bin/activate ]; then echo "Your venv in venvs/system seems broken? Remove it to recreate it."; fi
+	. .venv/bin/activate && python3 -m pip install -r requirements.txt -r requirements-dev.txt && python3 -m pip install -e .
+	echo -n "venv created, activate with:\n\n  source .venv/bin/activate\n\n"
+
+init_uv_default_venv:
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(default_python) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/default" && uv pip install --python ".venvs/uv/default/bin/python" -r "requirements.txt" -r "requirements-dev.txt" pyside6
+	ln -nsf .venvs/uv/default .venv
+	echo "Activate this environment with:"
+	echo "  source \".venv/bin/activate\""
+
+init_conda_venv:
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/$(venv)" "python=$$PYVER" && conda activate ".venvs/conda/$(venv)" && python -m pip install -r "requirements.txt" -r "requirements-dev.txt"
+	echo "Activate this environment with:"
+	echo "  conda activate \".venvs/conda/$(venv)\""
+
+# init_uv_venv only works with uv-supported versions of Python: py38, py39, ...
+init_uv_venv:
+	type -t deactivate 1>/dev/null && deactivate; PYVER=$$(echo $(venv) | sed 's/^py\([0-9]\)\([0-9]*\)/\1.\2/') && uv venv --python "$${PYVER}" ".venvs/uv/$(venv)" && uv pip install --python ".venvs/uv/$(venv)/bin/python" -r "requirements.txt" -r "requirements-dev.txt" pyside6
+	echo "Activate this environment with:"
+	echo "  source \".venvs/uv/$(venv)/bin/activate\""
+
+# tox uses the tox-uv plugin, so this should mostly do the same as init_uv_venv
+init_tox_venv:
+	tox --notest -r -e $(venv)
+
+init_all_tox_venvs:
+	tox --notest -r
+
+##############################
+## Tests
+##############################
+#
+# make tox
+#  - or just -
+# tox : runs tests for all python versions defined in tox.ini
+#
+# make ci: runs a subset of the tests selected as fitting to run as part of the CI
+#
+# make tests
+# make unittests
+# make pytests : runs all test in the currently active environment (assuming Python 3)
+#
+# make unittests2
+# make pytests2 : runs all test in the currently active environment (assuming Python 2)
+#
+# make unittest_autopy27_conda
+# make pytests_autopy27_conda: autoinstall a py27 environment and run all tests
+#
+# For 'unittests' you can add HTTK_TEST_TYPE=<test type> to run a subset of the tests:
+#   * all (default): the full test suite
+#   * ci: a light set of tests suitable to run in CI
+#   * pyver: just test that the tox and environment setup works
+#          to test things with the intended python versions.
+#
+
+HTTK_TEST_TYPE ?= all
+
 tox:
+	rm -rf .tox
 	tox
 
-tests: unittests2 unittests3
+ci: flake8
+	cd Tests && PYTHONPATH=$$(pwd -P)/../src:$$PYTHONPATH PATH=$$(pwd -P)../bin:$$PATH python ci.py
 
-pytests: pytest2 pytest3
+tests: flake8 unittests
 
 unittests:
-	(cd Tests; TEST_EXPECT_PYVER=ignore python all.py)
+	echo "Running pytest with current default python, expecting supported Python 3 version"
+	(cd Tests; python $(HTTK_TEST_TYPE).py)
 
-unittests2: link_python2
-	echo "Running unittests with Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=2 PATH="$$(pwd -P)/python_versions/ver2:$$PATH" python all.py)
+pytests:
+	echo "Running pytest with current default python, expecting supported Python 3 version"
+	(cd Tests; py.test)
 
-unittests3: link_python3
-	echo "Running unittests with Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" python all.py)
+flake8:
+	flake8 . --count --select=E9,F63,F7,F82 --ignore=F824 --show-source --statistics --exclude "ht_instantiate.py,ht.instantiate.py,.tox,.venv,.venvs"
 
-pytest:
-	(cd Tests; TEST_EXPECT_PYVER=ignore py.test)
+validate_pep8:
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r src/ > /dev/null
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r Tutorial/ > /dev/null
+	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --diff --exit-code -r Examples/ > /dev/null
 
-pytest2: link_python2
-	echo "Running pytest with Python 2"
-	(cd Tests; TEST_EXPECT_PYVER=2 PATH="$$(pwd -P)/python_versions/ver2:$$PATH" py.test)
 
-pytest3: link_python3
-	echo "Running pytest with Python 3"
-	(cd Tests; TEST_EXPECT_PYVER=3 PATH="$$(pwd -P)/python_versions/ver3:$$PATH" py.test-3)
+.PHONY: tox tests unittests pytests unittests2 pytests2 unittests_autopy27_conda pytests_autopy27_conda
 
-link_python2:
-	if [ ! -e Tests/python_versions ]; then mkdir Tests/python_versions; fi
-	if [ ! -e Tests/python_versions/ver2 ]; then mkdir Tests/python_versions/ver2; fi
-	if [ ! -e Tests/python_versions/ver2/python ]; then ln -sf /usr/bin/python2 Tests/python_versions/ver2/python; fi
+##############################
+## python 2.7 support 
+##############################
+# Deprecated; will be removed in next major release of httk
+# Note: duckdb doesn't work in Python3
 
-link_python3:
-	if [ ! -e Tests/python_versions ]; then mkdir Tests/python_versions; fi
-	if [ ! -e Tests/python_versions/ver3 ]; then mkdir Tests/python_versions/ver3; fi
-	if [ ! -e Tests/python_versions/ver3/python ]; then ln -sf /usr/bin/python3 Tests/python_versions/ver3/python; fi
+init_conda_venv27:
+	type -t deactivate 1>/dev/null && deactivate; eval "$$(conda 'shell.bash' 'hook' 2> /dev/null)" && conda create -y -p ".venvs/conda/py27" "python=2.7" && conda activate ".venvs/conda/py27" && python -m pip install -r py27requirements.txt -r py27requirements-dev.txt
+	echo "Activate this environment with:"
+	echo "  conda activate \".venvs/conda/py27\""
 
-relink_python:
-	rm -f Tests/python_versions/ver2/python
-	rmdir Tests/python_versions/ver2
-	rm -f Tests/python_versions/ver3/python
-	rmdir Tests/python_versions/ver3
+unittests2:
+	echo "Running pytest with current default python, expecting supported Python 2 version"
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 python $(HTTK_TEST_TYPE).py)
 
-.PHONY: tox unittests unittests2 unittests3 pytest pytest2 pytest3
+pytests2:
+	echo "Running pytest with default python, expecting Python 2"
+	(cd Tests; HTTK_TEST_EXPECT_PYVER=py2 py.test)
+
+##############################
+## Code cleanup
+##############################
+#
+# make autopep8: cleans up all source files inline
 
 autopep8:
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r httk/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Tutorial/
 	autopep8 --ignore=E501,E401,E402,W291,W293,W391,E265,E266,E226 --aggressive --in-place -r Examples/
+
+.PHONY: autopep8
+
+##############################
+## Dev directory cleanup
+##############################
+#
+# make clean: remove all generated files
 
 clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -f
@@ -66,6 +173,17 @@ clean:
 	rm -f httk_*.md5
 	rm -f Docs/full/httk.*
 	rm -rf Docs/full/_build
+	rm -rf .tox
+	rm src/httk/core/database.sqlite
+	rm -rf .pytest_cache
+	find . -name "__pycache__" -print0 | xargs -0 rm -rf
+
+.PHONY: clean
+
+##############################
+## Distribution helpers
+##############################
+#
 
 version:
 	(cd src/httk/config; python -c "import sys, config; sys.stdout.write(config.version + '\n')") > VERSION

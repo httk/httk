@@ -26,7 +26,8 @@ import httk
 def _write(obj, string):
     obj.write(string.encode())
 
-def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
+def structure_to_jmol(iof, struct, extbonds=True, repeat=None,
+                      copies=None, nl=None):
     """
     Converts structure into jmol format.
 
@@ -50,9 +51,9 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
     """
 
     if repeat is None:
-        supercell = "supercell \"x, y, z\""
+        supercell = "supercell 'x, y, z'"
     else:
-        supercell = "supercell \""+str(int(repeat[0]))+"x, "+str(int(repeat[1]))+"y, "+str(int(repeat[2]))+"z \""
+        supercell = "supercell '"+str(int(repeat[0]))+"x, "+str(int(repeat[1]))+"y, "+str(int(repeat[2]))+"z '"
 
     if copies is None:
         copies = "{ 1 1 1 }"
@@ -62,7 +63,8 @@ def structure_to_jmol(iof, struct, extbonds=True, repeat=None, copies=None):
     iof = httk.IoAdapterFileWriter.use(iof)
     f = iof.file
 
-    nl = "|"
+    if nl is None:
+        nl = "|"
 
     if struct.has_rc_repr:
         basis = struct.rc_basis.to_floats()

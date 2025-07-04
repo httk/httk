@@ -16,13 +16,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
-from fractions import Fraction
 
 from httk.atomistic.data import periodictable
 from httk.core import FracVector
-import httk  
+import httk
 from httk.atomistic import *
 
+try:
+    from cfractions import Fraction
+except:
+    from fractions import Fraction
 
 def out_to_struct(ioa):
     """
@@ -210,26 +213,26 @@ def out_to_struct(ioa):
         results['source'] = match.group(1).rstrip('.')
                 
     out = httk.basic.micro_pyawk(ioa, [
-        ['^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
-        ['^ *CIF2CELL ([0-9.]*)', None, read_version],
-        ['^ *Output for (.*\)) *$', None, read_name],
-        ['^ *Database reference code: *([0-9]+)', None, read_id],
-        ['^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
-        ['^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
-        ['^ *$', lambda results, match: results['in_coords'], coords_stop],
-        ['^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
-        ['^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
-        ['^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
+        [r'^ *INPUT CELL INFORMATION *$', None, bib_stop_input_start],
+        [r'^ *CIF2CELL ([0-9.]*)', None, read_version],
+        [r'^ *Output for (.*\)) *$', None, read_name],
+        [r'^ *Database reference code: *([0-9]+)', None, read_id],
+        [r'^ *All sites, (lattice coordinates): *$', lambda results, match: results['in_cell'], cell_stop],
+        [r'^ *Representative sites *: *$', lambda results, match: results['in_input_cell'], input_cell_stop],
+        [r'^ *$', lambda results, match: results['in_coords'], coords_stop],
+        [r'^ *([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_cell'] or results['in_input_cell'], read_cell],
+        [r'^ *([a-zA-Z]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords],
+        [r'^ *([a-zA-Z/]+) +([-0-9.]+) +([-0-9.]+) +([-0-9.]+)( +([-0-9./]+)) *$', lambda results, match: results['in_coords'] or results['in_input_coords'], read_coords_occs],
         #            ['^ *Hermann-Mauguin symbol *: *(.*)$',lambda results,match: results['in_output'],read_spacegroup],
-        ['^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
-        ['^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
-        ['^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
-        ['^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
-        ['^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
-        ['^ *OUTPUT CELL INFORMATION *$', None, output_start],
-        ['^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
-        ['^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
-        ['CIF file exported from +(.*) *$', None, read_source]
+        [r'^ *Hall symbol *: *(.*)$', lambda results, match: results['in_output'] or results['in_input'], read_hall],
+        [r'^ *Unit cell volume *: *([-0-9.]+) +A\^3 *$', lambda results, match: results['in_output'], read_volume],
+        [r'^ *Bravais lattice vectors : *$', lambda results, match: results['in_output'], cell_start],
+        [r'^ *Lattice parameters: *$', lambda results, match: results['in_input'], input_cell_start],
+        [r'^ *Atom +a1 +a2 +a3', lambda results, match: results['in_output'] or results['in_input'], coords_start],
+        [r'^ *OUTPUT CELL INFORMATION *$', None, output_start],
+        [r'^([^\n]*)$', lambda results, match: results['in_bib'], read_bib],
+        [r'^ *BIBLIOGRAPHIC INFORMATION *$', None, bib_start],
+        [r'CIF file exported from +(.*) *$', None, read_source]
           
     ], debug=False, results=results)
 

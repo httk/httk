@@ -18,10 +18,6 @@
 # Uses parts from 'Pedro M Duarte',
 # http://stackoverflow.com/questions/8247973/how-do-i-specify-an-arrow-like-linestyle-in-matplotlib
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
               hl=0.025, hw=2.5, c='black'):
     ''' narrs  :  Number of arrows that will be drawn along the curve
@@ -37,6 +33,7 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
         c      :  color of the edge and face of the arrow head
     '''
+    from httk.external.numpy_ext import numpy as np
 
     x = np.array(x)[::-1]
     y = np.array(y)[::-1]
@@ -117,6 +114,10 @@ def arrowplot(axes, x, y, narrs=10, dspace=0.5, aspace=0.1, direc='pos',
 
 
 if __name__ == '__main__':
+    from httk.external.matplotlib_ext import matplotlib
+    from matplotlib import pyplot as plt
+    from httk.external.numpy_ext import numpy as np
+
     fig = plt.figure()
     axes = fig.add_subplot(111)
 

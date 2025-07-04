@@ -283,7 +283,7 @@ class Cell(HttkObject):
     def normalization_scale(self):
         """
         """
-        return FracScalar.create(pow(float(self.basis.det()), 0.33333333333333333333333))
+        return FracScalar.create(pow(abs(float(self.basis.det())), 0.33333333333333333333333))
 
     def get_normalized(self):
         scale = self.normalization_scale.inv()
