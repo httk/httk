@@ -249,6 +249,9 @@ function VASP_PREPARE_POTCAR {
             if [ "${SPECIES}${PRIORITY}" == "Ru_pv" ]; then
               PRIORITY="_sv" # Ru_pv has probelm converging in the ground state
             fi
+            if [ "${SPECIES}${PRIORITY}" == "Re_pv" ]; then
+              PRIORITY="" # Re_pv has probelm converging for defects
+            fi
             if [ "${SPECIES}${PRIORITY}" == "K_pv" ]; then
               PRIORITY="_sv" # K_pv has too low ENCUT to be compatable with ENCUT 600
             fi
