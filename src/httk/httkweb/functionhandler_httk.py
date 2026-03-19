@@ -24,7 +24,7 @@ class FunctionHandlerHttk(object):
         self.global_data = global_data
         self.function_dir = function_dir
         self.arg_names = arg_names
-        self.function_name = function_filename.split(os.extsep)[0]
+        self.function_name = '.'.join(function_filename.split(os.extsep)[0].split(os.sep))
         self.instanced_template_engine = instanced_template_engine
         self.filename = os.path.join(function_dir, function_filename)
         self.dependency_filenames = [self.filename]
