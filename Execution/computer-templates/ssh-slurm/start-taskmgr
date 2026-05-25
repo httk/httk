@@ -11,8 +11,8 @@ if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
     . "$SCRIPT_PATH/config.$QUEUE"
 fi
 
-if [ -n "$1" ]; then
-    NUMBER="$1"
+if [ -n "$2" ]; then
+    NUMBER="$2"
 else
     NUMBER="1"
 fi
