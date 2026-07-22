@@ -27,6 +27,8 @@ also of the data being used.
 """
 from __future__ import print_function
 from collections import OrderedDict
+import os
+
 from httk.versioning import httk_version, httk_copyright_note, httk_version_date
 
 # TODO: Convert to using real instances of the core.reference.Reference class instead.
@@ -55,8 +57,7 @@ cancel_print_citations = False
 
 
 def print_citations():
-    global cancel_print_citations
-    if cancel_print_citations:
+    if cancel_print_citations or 'HTTK_SUPRESS_EXIT_MSG' in os.environ and os.environ['HTTK_SUPRESS_EXIT_MSG'] not in ["", "0"]:
         return
     #authors = {}
     #for citation in module_citations:

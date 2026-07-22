@@ -19,12 +19,12 @@ from functools import reduce
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
-    string_types = basestring
-    integer_types = (long, int)
+    string_types = basestring # noqa: F821
+    integer_types = (long, int) # noqa: F821
 else:
     string_types = str
     integer_types = (int,)
-    
+
 
 class Vector(object):
 

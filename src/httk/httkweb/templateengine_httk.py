@@ -22,6 +22,7 @@
 from __future__ import print_function
 import string, os, sys, codecs
 import inspect
+import ast
 
 # Retain python2 compatibility without a dependency on httk.core
 if sys.version[0] == "2":
@@ -33,7 +34,7 @@ if sys.version[0] == "2":
     # escape funtion instead.
 
     from cgi import escape
-    unicode_type=unicode
+    unicode_type=unicode # noqa: F821
 else:
     from html import escape
     unicode_type=str
@@ -56,21 +57,51 @@ class HttkTemplateFormatter(string.Formatter):
                 new_kwargs['items'] = [new_kwargs['item']] + new_kwargs['items'] if 'items' in new_kwargs else []
             if 'index' in new_kwargs:
                 new_kwargs['indices'] = [new_kwargs['index']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
+            if 'index1' in new_kwargs: ## TODO: Came from elastic_contants, what is index1?
+                new_kwargs['indices'] = [new_kwargs['index1']] + new_kwargs['indices'] if 'indices' in new_kwargs else []
             def update_and_return(update):
                 new_kwargs.update(update)
                 return new_kwargs
-            if type(value) is dict:
-                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in value])
+            if value is None:
+                raise Exception("HttkTemplateFormatter: asked to loop over None for spec: "+str(spec))
+            elif type(value) is dict:
+                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in value])
             else:
-                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i}))) for i in range(len(value))])
+                return ''.join([self.format(template,**(update_and_return({'item':value[i], 'index':i, 'index1':i+1}))) for i in range(len(value))])
         elif spec == 'call' or spec.startswith('call:'):
             callargs, _sep, newspec = spec.partition("::")
             callargs = callargs.split(":")
             callargs = [self.get_field(x[1:-1],quote=quote,args=args,kwargs=kwargs)[0] if (x.startswith('{') and x.endswith('}')) else x for x in callargs]
-            result = value(*callargs[1:])
+            # If the variable type is int/float, callargs most likely cannot
+            # be str. Convert callargs to int/float.
+            if hasattr(value,"__repr__") and \
+               ("of float object" in value.__repr__() or
+                "of int object" in value.__repr__()):
+                for i in range(1,len(callargs)):
+                    try:
+                        if callargs[i] == 'nan':
+                            callargs[i] = float('nan')
+                        else:
+                            callargs[i] = ast.literal_eval(callargs[i])
+                    except ValueError:
+                        pass
+            try:
+                result = value(*callargs[1:])
+            except Exception as e:
+                if '::' in spec:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e)+ ". Note: string to render contains '::', which could have been caused by an ':item:' with an item equal the empty string")
+                else:
+                    raise Exception("Templateengine_httk: tried to render: '"+str(spec)+"' as call to function "+str(value)+" triggered exception: "+str(e))
+
             return self.format_field(result, newspec, quote=quote, args=args, kwargs=kwargs)
         elif spec.startswith('getitem:') or spec.startswith('getattr:'):
             x, _dummy, newspec =  spec.partition(':')[2].partition('::')
+            # Check if there is a :call attached to the value that we are getting with
+            # getitem.
+            call_func = None
+            if ":call" in x:
+                call_func = x.partition(".")[-1].split(":")[0]
+                x = x.partition(".")[0]
             idx = self.get_field(x[1:-1],args=args,kwargs=kwargs)[0] if (x.startswith('{') and x.endswith('}')) else x
             try:
                 val = value[idx] if spec.startswith('getitem:') else getattr(value,idx)
@@ -81,15 +112,32 @@ class HttkTemplateFormatter(string.Formatter):
                     return ''
             # TODO: Check if the unicode conversion really is necessary here,
             # or if we can make sure val is always unicode.
-            if newspec == '':
+            if newspec == '' and call_func is None:
                 return unicode_type(val)
             else:
+                # Check if there is a call we want to do with the value that we got with getitem:
+                if call_func is not None:
+                    val = getattr(val, call_func)
+                    newspec = "call" + spec.partition(":call")[-1]
                 return self.format_field(val, newspec, quote=quote, args=args, kwargs=kwargs)
-        elif spec.startswith('if:') or spec.startswith('if-not:') or spec.startswith('if-set:') or spec.startswith('if-unset:'):
-            outcome = (spec.startswith('if:') and value) or (spec.startswith('if-not:') and not value) or (spec.startswith('if-set:') and value is not None) or (spec.startswith('if-unset:') and value is None)
-            if not outcome:
-                return ''
-            template = spec.partition('::')[-1]
+        elif spec.startswith('if:') or spec.startswith('if-not:') or \
+             spec.startswith('if-set:') or spec.startswith('if-unset:'):
+            outcome = (spec.startswith('if:') and value) or \
+                      (spec.startswith('if-not:') and not value) or \
+                      (spec.startswith('if-set:') and value is not None) or \
+                      (spec.startswith('if-unset:') and value is None)
+
+            # Implement optional "else" functionality:
+            if "::else::" in spec:
+                if not outcome:
+                    template = spec.partition('::else::')[-1]
+                else:
+                    template = spec.partition('::else::')[0].partition('::')[-1]
+            else:
+                if not outcome:
+                    return ''
+                template = spec.partition('::')[-1]
+            
             return self.format(template, **kwargs)
         elif value==None:
             return ""
@@ -124,7 +172,8 @@ class HttkTemplateFormatter(string.Formatter):
                 # if val[0] == "i":
                     # val = ("index", field_name)
             # Python 3, 'super().get_field(field_name, args, kwargs)' works
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError) as e:
+            #TODO: Allow a debug config that inserts "["+str(e)+"]" as the value
             val = None, field_name
         return val
 
@@ -244,6 +293,7 @@ if __name__ == "__main__":
 
     # Many examples adapted from https://pyformat.info/
 
+    print()
     print("== Simple strings")
     print(tf.format("Strings:       '{a}' '{b}'",a="one", b="two"))
     print(tf.format("Align:         '{a:>10}' '{a:10}' '{a:_<10}' '{a:^10}'",a='test'))
@@ -254,18 +304,21 @@ if __name__ == "__main__":
     print(tf.format("Std class support:  '{a:%Y-%m-%d %H:%M}'",a=datetime(2010,1,2,3,4)))
     print(tf.format("Own Class support:  '{a:test}' '{a}'",a=ExampleFormatter()))
 
+    print()
     print("== Simple numbers")
     print(tf.format("Integers:      '{a}' '{a:d}'",a=42))
     print(tf.format("Floats:        '{a:f}'",a=3.141592653589793))
     print(tf.format("Number padding:'{a:06.2f}'",a=3.141592653589793))
     print(tf.format("Sign:          '{a:+d}' '{b:+d}' '{a:=+5d}'",a=42,b=-42))
 
+    print()
     print("== Element access")
     print(tf.format("Dicts:          '{a[one]}' '{a[two]}'",a={'one':'1', 'two':'2'}))
     print(tf.format("Lists:          '{a[1]}' '{a[2]}'",a=[1,2,3,4,5]))
     print(tf.format("Attributes:     '{a.x}'",a=ExampleAttribute))
     print(tf.format("Combitations:   '{a.y[0][i]}'",a=ExampleAttribute))
 
+    print()
     print("== Parameterization")
     print(tf.format("Alignment and width: '{a:{align}{width}}'".format(a='test', align='^', width='10')))
     print(tf.format("Precision:           '{a:.{prec}} = {b:.{prec}f}'".format(a='Test', b=2.7182, prec=3)))
@@ -273,24 +326,28 @@ if __name__ == "__main__":
     print(tf.format("Width and precision: '{:{width}.{prec}f}'".format(2.7182, width=5, prec=2)))
     print(tf.format("Embedded class:      '{a:{dfmt} {tfmt}}'".format(a=datetime(2010,1,2,3,4), dfmt='%Y-%m-%d', tfmt='%H:%M')))
 
+    print()
     print("********** Functionality from superformatter (with a slight format change for repeat) **************")
 
+    print()
     print(tf.format("Loops: '{chapters:repeat::Chapter {{item}}, }'", chapters=["I", "II", "III", "IV"]))
     print(tf.format("Calls: '{name.upper:call}'", name="eric"))
-    print(tf.format("Tests: '{t:if:hello}' '{f:if:hello}' '{name:if:hello}' '{empty:if:hello}'", name="eric", empty="", t=True, f=False))
-    print(tf.format("Test and nesting: 'Action: Back / Logout {manager:if:/ Delete {id}}'", manager=True, id=34))
+    print(tf.format("Tests: '{t:if::hello}' '{f:if::hello}' '{name:if::hello}' '{empty:if::hello}'", name="eric", empty="", t=True, f=False))
+    print(tf.format("Test and nesting: 'Action: Back / Logout {manager:if::/ Delete {id}}'", manager=True, id=34))
 
+    print()
     print("********** New functionality here **************")
 
     # Hint: escaped {{ }} are needed to call varibale contents inside nested formatting, which always occur after ::,
     # (If used without nesting, then the content is replaced on the level above, which, e.g., does not contain the item from a loop.)
+    print()
     print("== Loops")
     print(tf.format("Indexed loops: '{chapters:repeat::Chapter {{index}}={{item}},}'", chapters=["I", "II", "III", "IV"]))
     print(tf.format("Nested loops: '{l:repeat::{{k:repeat::{{{{item}}}}({{item}})}}, }'", l=[1,2,3,4],k=["a","b","c","d"]))
     print(tf.format("Nested formatting: '{b:repeat:: {{a:.{{item}}f}},}'", a=3.141592653589793, b=["2","4","8","16"]))
     print()
     print("== Indirection")
-    print(tf.format("Item access indirection: '{a:getitem:{b}}' '{c:getitem:{d}}'",a={'x':1, 'y':2}, b='x', c=["0","1","2","3"], d=2))
+    print(tf.format("Item access indirection: '{a:getitem:{b}}' '{c:getitem:{d}}'",a={'x':1, 'y':2}, b='x', c=["10","11","12","13"], d=2))
     print(tf.format("Attribute access indirection: '{a:getattr:{b}}'",a=ExampleAttribute, b='x'))
     print(tf.format("Attribute access indirection with formatting: '{a:getattr:{b}::>10}'",a=ExampleAttribute, b='x'))
     print()
@@ -306,6 +363,7 @@ if __name__ == "__main__":
     print()
     print("== Advanced")
     print(tf.format("Item access indirection inside loops: '{a:repeat:: {{a:getitem:{{{{index}}}}}}}'",a=[5,6,7,8]))
+    # print(tf.format("Item access indirection inside loops: '{a:repeat:: {{item.__mul__:call:100}}}'",a=[5,6,7,8]))
     print()
     print("== Quoting")
     tf.quote = True
@@ -314,3 +372,28 @@ if __name__ == "__main__":
     print(tf.format("Quoting + formatting:       '{a:unquoted::>70}'",a="<i need to be quoted, \"indeed\" said the cat's hat>"))
     print(tf.format("Unquoted string: '{a}       '",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
     print(tf.format("Overriding unquoted string: '{a:quote}'",a=UnquotedStr("<i need to be quoted, \"indeed\" said the cat's hat>")))
+
+    print()
+    print("== Conditionals with \"else\" fallback")
+    # Changin previous example that used x=2 and then called __gt__ to instead use a float.
+    # I don't see how that can ever have worked in Python 2, as __gt__ as far as I can see
+    # was never supported.
+    print(tf.format("If-else 1.1: '{x.__gt__:call:0::if::positive::else::negative}'", x=2.0))
+    print(tf.format("If-else 1.2: '{x.__gt__:call:0::if::positive::else::negative}'", x=-2.0))
+    print(tf.format("If-else 2.1: '{t:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
+    print(tf.format("If-else 2.2: '{f:if::hello {{name}}::else::hello Unknown}'", t=True, f=False, name="eric"))
+
+    print()
+    print("== 1-indexed loops")
+    print(tf.format("1-indexed loops: '{chapters:repeat::Chapter {{index1}}={{item}},}'", chapters=["I", "II", "III", "IV"]))
+
+    print()
+    print("== Conditional + Calls + Formatting")
+    print(tf.format("x=float: '{x:if-set::{{x.__mul__:call:1000::.1f}}::else::None!}'", x=3.1415926))
+    print(tf.format("x=None: '{x:if-unset::None!::else::{{x.__mul__:call:1000}}}'", x=None))
+    print()
+    print("== Getitem + Calls")
+    print(tf.format("Getitem + Call: '{a:getitem:{b}.__mul__:call:100}'",a={'x':1, 'y':2}, b='x'))
+    print(tf.format("Getitem + Call + Formatting: '{a:getitem:{b}.__mul__:call:100::.8f}'",a={'x':1, 'y':2}, b='x'))
+    print(tf.format("Repeat + Getitem + Call + Formatting: '{a:repeat::{{b:getitem:{{{{index}}}}.__truediv__:call:100}}, }'", a=[1,2,3], b=[100,200,300]))
+

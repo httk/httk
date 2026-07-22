@@ -26,14 +26,14 @@ import httk
 import httk.iface
 
 try:
-    jmol_path = config.get('paths', 'jmol')
+    gulp_path = config.get('paths', 'gulp')
 except Exception:
-    jmol_path = None
-    raise Exception("httk.external.jmol_ext imported with no jmol path set in httk.cfg")
+    gulp_path = None
+    raise Exception("httk.external.gulp_ext imported with no gulp path set in httk.cfg")
 
 
-def jmol(cwd, args, timeout=10):
-    out, err, completed = Command(jmol_path, args, cwd=cwd).run(timeout)
+def gulp(cwd, args, timeout=10):
+    out, err, completed = Command(gulp_path, args, cwd=cwd).run(timeout)
     return out, err, completed
 
 

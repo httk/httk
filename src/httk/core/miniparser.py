@@ -570,7 +570,12 @@ def lexer(source, tokens, partial_tokens, literals, ignore, comment_markers=[], 
 
     token_regexes = dict([(x, re.compile("("+tokens[x]+r')\Z')) for x in tokens.keys()])
     partial_token_regexes = dict([(x, re.compile("("+partial_tokens[x]+r')\Z')) for x in partial_tokens.keys()])
-    all_token_regexes = set(tokens.keys()) | set(partial_tokens.keys())
+
+    # Preserve order in all_token_regexes, because otherwise the lexer is not deterministic between runs
+    # if multiple tokens maches the same input, which makes debugging painful
+    #all_token_regexes = set(tokens.keys()) | set(partial_tokens.keys())
+    all_token_regexes = list(tokens.keys())
+    all_token_regexes += [x for x in partial_tokens.keys() if x not in all_token_regexes]
 
     prescan = iter(split_chars_strip_comments(source, comment_markers))
     pushback = ""

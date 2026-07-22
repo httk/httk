@@ -22,12 +22,12 @@ try:
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_structreading.TestStructreading))
 
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(test_httk_src_inline.TestHttkSrcInline))
-    
+
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 finally:
     if args.debug:
-        print("") 
+        print("")
         print("Loginfo:")
         print("-------------------------------------------------------")
         print("\n".join(logdata))

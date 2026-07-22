@@ -244,13 +244,13 @@ def cif_reader_that_can_only_read_isotropy_cif(ioa):
 
     results = {'idx': 0, 'occups': [], 'wyckoff': [], 'multiplicities': [], 'coords': [], 'seen_coords': {}}
     httk.basic.micro_pyawk(ioa, [
-        ['^_cell_length_([^ ]*) (.*) *$', None, cell_length],
-        ['^_cell_angle_([^ ]*) (.*) *$', None, cell_angle],
-        ['^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
-        ['^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
-        ['^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
+        [r'^_cell_length_([^ ]*) (.*) *$', None, cell_length],
+        [r'^_cell_angle_([^ ]*) (.*) *$', None, cell_angle],
+        [r'^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
+        [r'^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
+        [r'^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
     ], debug=False, results=results)
 
     struct = Structure.create(rc_a=results['length_a'], rc_b=results['length_b'], rc_c=results['length_c'],

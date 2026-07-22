@@ -25,7 +25,7 @@
 #
 #   ht.source : A source directory from which tasks can be created
 #   ht.running : A directory for ongoing tasks
-#   ht.finshed : A directory collecting finished tasks
+#   ht.finished : A directory collecting finished tasks
 #   ht.broken : A directory collecting broken tasks
 #
 #   Statues of waiting, ongoing, etc, tasks:
@@ -63,7 +63,16 @@ export HT_TASKMGR_SET="$HT_TASKMGR_SET"
 export HT_TASKMGR_ROOTDIR="$HT_TASKMGR_ROOTDIR"
 export HT_TASKMGR_ATTEMPTS="$HT_TASKMGR_ATTEMPTS"
 BZIPLOG=1
+ZSTDLOG=0
 
+# If we have to restart to fix the process group, the command line
+# arguments are lost in the restart, because "$@" on line 175 is empty.
+# Collect arguments in the "args_restart" array to make sure that they
+# are not lost during the restart; see line 176.
+# The "-d" argument should not be saved, because taskmanager changes
+# directory based on the value of -d and the directory change survives
+# the restart.
+args_restart=()
 # Command line argument handling
 while [ -n "$1" ]; do
     case $1 in
@@ -73,19 +82,30 @@ while [ -n "$1" ]; do
 	    ;;
         -w|--wrap)
             HT_TASKMGR_WRAP=$2
+	    args_restart+=(-w)
+	    args_restart+=($HT_TASKMGR_WRAP)
 	    # Never shift > 1, as that shifts 0 if there is no arg...
 	    shift 1
 	    shift 1
             ;;
         -s|--set)
             HT_TASKMGR_SET=$2
+	    args_restart+=(-s)
+	    args_restart+=($HT_TASKMGR_SET)
 	    shift 1
 	    shift 1
             ;;
-        -b|--no-bzip2log)
+	-b|--no-bzip2log)
             BZIPLOG=0
+	    args_restart+=(-b)
 	    shift 1
             ;;
+	--zstdlog)
+	    ZSTDLOG=1
+	    BZIPLOG=0
+	    args_restart+=(--zstdlog)
+	    shift 1
+	    ;;
         -d|--rootdir)
             HT_TASKMGR_ROOTDIR=$2
 	    shift 1
@@ -93,11 +113,15 @@ while [ -n "$1" ]; do
             ;;
         -t|--timeout)
             HT_TASKMGR_TIMEOUT=$2
+	    args_restart+=(-t)
+	    args_restart+=($HT_TASKMGR_TIMEOUT)
 	    shift 1
 	    shift 1
             ;;
         -a|--attempts)
             HT_TASKMGR_ATTEMPTS=$2
+	    args_restart+=(-a)
+	    args_restart+=($HT_TASKMGR_ATTEMPTS)
 	    shift 1
 	    shift 1
             ;;
@@ -148,7 +172,8 @@ if [ "$?" != "0" ]; then
 	# detached from the original process group.
 	KILLPID=""
 	trap "if [ -n \"\$KILLPID\" ]; then kill \"\$KILLPID\"; fi" EXIT
-	setsid "$0" --norestart "$@" &
+	#setsid "$0" --norestart "$@" &
+	setsid "$0" --norestart ${args_restart[@]} &
 	KILLPID="$!"
 	wait
 	RESULT="$?"
@@ -523,7 +548,7 @@ function start_run {
 		RETCODE=$?
 		logmsg 1 "Watchdog wakes up, with return code=$RETCODE"
 		if [ "$RETCODE" -gt "127" ]; then
-	    	    kill -TERM "$SP" >/dev/null 2>&1;
+		    kill -TERM "$SP" >/dev/null 2>&1;
 		fi
 		kill -TERM "${RUNPID}"
 		#/bin/kill -TERM -- "-${RUNPID}"
@@ -600,6 +625,8 @@ function start_run {
 	    cp "$TASK"/ht.taskmgr.stdout "$TASK"/ht.run.current/ht.taskmgr.stdout
 	    if [ "$BZIPLOG" == "1" ]; then
 		bzip2 "$TASK"/ht.run.current/ht.taskmgr.stdout
+	    elif [ "$ZSTDLOG" == "1" ]; then
+		zstd --rm "$TASK"/ht.run.current/ht.taskmgr.stdout
 	    fi
 
 	    DATE="$(date +"%Y-%m-%d_%H.%M.%S")"
@@ -773,7 +800,7 @@ function find_next_task {
 
 	    if [ "$STATUS" == "running" ]; then
 		MTIME=$(stat -c %y "$TASK")
-	        logmsg 1 "Task $TASK is a stale running task with MTIME: $MTIME"
+		logmsg 1 "Task $TASK is a stale running task with MTIME: $MTIME"
 	    fi
 
 	    logmsg 1 "Found a task we could run and which is available: $TASK, trying to adopt."

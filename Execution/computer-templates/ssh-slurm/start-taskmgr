@@ -40,7 +40,7 @@ echo "RUN STARTS: \$DATE in dir \$INITIAL on node: \$HOSTNAME"
 
 source "\$HTTK_DIR/init.shell"
 
-"\$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT"
+"\$HTTK_DIR/Execution/taskmanager.sh" -d .. -t "$TASKMGR_JOB_TIMEOUT" "$@"
 
 ENDDATE=\$(date +"%Y-%m-%d_%H.%M.%S")
 echo "RUN ENDS: \$ENDDATE"

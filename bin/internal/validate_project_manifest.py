@@ -167,7 +167,7 @@ def check_manifest_dir(basedir,manifestfilename, excludespath, debug=False):
 
     excludes=[]
     if os.path.exists(os.path.join(excludespath,"excludes")):
-        f = read(os.path.join(excludespath,"excludes"))
+        f = open(os.path.join(excludespath,"excludes"))
         excludes=[x.stip() for x in f.readlines()]
         f.close()
     try:

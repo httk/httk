@@ -15,16 +15,21 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, fractions, random, operator, itertools, decimal
+import sys, random, operator, itertools, decimal, math
 from functools import reduce
 from httk.core.vectors.fracmath import *
 from httk.core.vectors.vector import Vector, string_types, integer_types
 
 try:
+    import cfractions as fractions
+except ImportError:
+    import fractions
+
+try:
     from math import gcd as calc_gcd
 except ImportError:
     from fractions import gcd as calc_gcd
-    
+
 if sys.version_info[0] == 3:
     long = int
 # Utility functions needed before defining the class (due to some of them being statically assigned)
@@ -39,7 +44,6 @@ def nested_map_tuple(op, *ls):
             return tuple(map(op, *ls))
         return tuple(map(lambda *items: nested_map_tuple(op, *items), *ls))
     return op(*ls)
-
 
 def nested_map_fractions_tuple(op, *ls):
     """
@@ -176,6 +180,68 @@ class FracVector(Vector):
             v = v.simplify()
 
         return v
+
+    #TODO: Integrate improvements in create_fast in create
+    @classmethod
+    def create_fast(cls, noms, common_denom=1, max_denom=None, denom=None, simplify=True, chain=False):
+        """ Optimized version that takes advantage of the fact that the type of
+            noms is a nested list of ints.
+        """
+        def getlcd(a, y):
+            b = abs(y).denominator
+            return a * b // calc_gcd(a, b)
+
+        depth = None
+        try:
+            tmp = noms[0]
+        except:
+            depth = 0
+
+        if depth is None:
+            depth = 1
+            tmp = noms[0]
+            while True:
+                try:
+                    tmp = tmp[0]
+                    depth += 1
+                except:
+                    break
+
+        # Creates a tuple of tuples of Fraction
+        if max_denom is not None:
+            if max_denom <= common_denom:
+                # Round nominators to correspond to the desired max_denom.
+                ratio = max_denom / common_denom
+                if depth == 2:
+                    noms = tuple(map(lambda sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_ls)), noms))
+                elif depth == 3:
+                    noms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda integer: int(round(integer * ratio, 0)), sub_sub_ls)), sub_ls)), noms))
+                common_denom = max_denom
+
+        # noms is list of lists
+        if depth == 2:
+            fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_ls)), noms))
+            lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_ls2, sub_ls1), fracnoms, 1)
+            v_noms = tuple(map(lambda sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_ls)), fracnoms))
+
+        elif depth == 3:
+            fracnoms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda integer: fractions.Fraction(integer, common_denom), sub_sub_ls)), sub_ls)), noms))
+            lcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda sub_sub_ls1, sub_sub_ls2: reduce(lambda frac1, frac2: getlcd(frac1, frac2), sub_sub_ls2, sub_sub_ls1), sub_ls2, sub_ls1), fracnoms, 1)
+            v_noms = tuple(map(lambda sub_ls: tuple(map(lambda sub_sub_ls: tuple(map(lambda frac: (frac * lcd).numerator, sub_sub_ls)), sub_ls)), fracnoms))
+
+        if chain:
+            v_noms = cls._dup_noms(itertools.chain(*v_noms))
+
+        if denom is None:
+            v = cls(v_noms, lcd)
+        else:
+            v = cls(v_noms, lcd * denom)
+
+        if simplify and v.denom != 1:
+            v = v.simplify_fast(depth)
+
+        return v
+
 
     # Note, these are different, and thus named different (get_ prefix), than the corresponding methods in a list, since
     # they do not modify the vector itself.
@@ -418,9 +484,17 @@ class FracVector(Vector):
         """
         Converts the ExactVector to a list of floats.
         """
+        def to_floats_nan_check(x, denom):
+            if math.isnan(x):
+                return x
+            else:
+                return float(fractions.Fraction(x, denom))
+
         #denom = float(self.denom)
         #return nested_map_list(lambda x: float(x) / denom, self.noms)
-        return nested_map_list(lambda x: float(fractions.Fraction(x, self.denom)), self.noms)
+        # return nested_map_list(lambda x: float(fractions.Fraction(x, self.denom)), self.noms)
+        #
+        return nested_map_list(lambda x: to_floats_nan_check(x, self.denom), self.noms)
 
     def to_float(self):
         """
@@ -603,6 +677,28 @@ class FracVector(Vector):
 
         if self.denom != 1:
             gcd = self._reduce_over_noms(lambda x, y: calc_gcd(x, abs(y)), initializer=self.denom)
+            if gcd != 1:
+                denom = denom // gcd
+                noms = self._map_over_noms(lambda x: int(x / gcd))
+
+        return self.__class__(noms, denom)
+
+    #TODO: Integrate improvements in simplify_fast with simplify
+    def simplify_fast(self, depth):
+        """
+        Returns a reduced FracVector. I.e., each element has the same numerical value
+        but the new FracVector represents them using the smallest possible shared denominator.
+        """
+        noms = self.noms
+        denom = self.denom
+
+        if self.denom != 1:
+            if depth == 1:
+                gcd = calc_gcd(noms, denom)
+            elif depth == 2:
+                gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_ls2, sub_ls1), noms, denom)
+            elif depth == 3:
+                gcd = reduce(lambda sub_ls1, sub_ls2: reduce(lambda sub_sub_ls1, sub_sub_ls2: reduce(lambda nom1, nom2: calc_gcd(nom1, abs(nom2)), sub_sub_ls2, sub_sub_ls1), sub_ls2, sub_ls1), noms, denom)
             if gcd != 1:
                 denom = denom // gcd
                 noms = self._map_over_noms(lambda x: int(x / gcd))
@@ -797,7 +893,7 @@ class FracVector(Vector):
         denom = self.denom
 
         v1, v2, v3 = noms[0], noms[1], noms[2]
-        noms = (cross_noms(v2, v3), cross_noms(v1, v3), cross_noms(v1, v2))
+        noms = (cross_noms(v2, v3), cross_noms(v3, v1), cross_noms(v1, v2))
         noms = self.nested_map(lambda x: x*denom, noms)
         return self.__class__(noms, detnom)
 
@@ -1409,8 +1505,38 @@ def tuple_eye(dims, onepos=0):
 #SOFTWARE.
 
 
+def unittests():
+    import math
 
-def main():
+    data1 = [['8.04', '0.0', '0.0'], ['0.0', '3.72', '0.0'], ['0.0', '0.0', '7.38']]
+    data2 = [[804, 0, 0], [0, 372, 0], [0, 0, 738]]
+
+    fv1 = FracVector.create(data2,100)
+    fv2 = FracVector.create(data1)
+    cmpfv = FracVector.create(((402, 0, 0), (0, 186, 0), (0, 0, 369)),50)
+
+    print(fv1)
+    assert(fv1 == cmpfv)
+    
+    print(fv2)
+    assert(fv2 == cmpfv)
+
+    print("===",any_to_fraction('8.04'),any_to_fraction('3.72'),any_to_fraction('7.38'))
+    data3 = FracVector.create([[fractions.Fraction(185,23), 0, 0], [0, fractions.Fraction(67,18), 0], [0, 0, fractions.Fraction(59,8)]])
+    print(data3)
+    cmpfv = FracVector.create(((13320, 0, 0), (0, 6164, 0), (0, 0, 12213)),1656)
+    assert(data3 == cmpfv)
+    
+    # Regression testing, issue #60
+    fv1r = fv1.reciprocal()
+    fv1rcheck = FracVector(((3431700, 0, 0), (0, 7416900, 0), (0, 0, 3738600)),27590868)
+    print(fv1r)
+    assert(fv1r == fv1rcheck)
+
+    exit(0)
+
+
+def other_tests():
     import math
 
     data1 = [['8.04', '0.0', '0.0'], ['0.0', '3.72', '0.0'], ['0.0', '0.0', '7.38']]
@@ -1477,8 +1603,8 @@ def main():
     print()
     print("==== Numpy conversion:")
     try:
-        import numpy
-        x = numpy.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
+        from httk.external.numpy_ext import numpy as np
+        x = np.array([[2.3, 3.5, 5.3], [3.7, 5.4, 4.2], [4.6, 6.7, 7.4]])
         a = FracVector.create(x)
         print("Original numpy array:", x)
         print("FracVector:", a)
@@ -1530,4 +1656,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    unittests()

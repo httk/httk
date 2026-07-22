@@ -3,7 +3,7 @@ The High-Throughput Toolkit (httk)
 ==================================
 
 |  The High-Throughput Toolkit (httk)
-|  Copyright (c) 2012 - 2018, Rickard Armiento, et al.
+|  Copyright (c) 2012 - 2025, Rickard Armiento, et al.
 |  For License information see the file COPYING.
 |  Contact: httk [at] openmaterialsdb.se
 

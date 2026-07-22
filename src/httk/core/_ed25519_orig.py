@@ -162,29 +162,29 @@ assert scalarmult(B, l) == [0, 1]
 
 def main():
     import base64
-    print "This runs some tests of the ed25519 python implementation"
+    print("This runs some tests of the ed25519 python implementation")
     message = "This is my message."
     my_secret_key = "swordfish"
-    print "Generating public key"
+    print("Generating public key")
     my_public_key = publickey(my_secret_key)
-    print "Signing message"
+    print("Signing message")
     my_signature = signature(message, my_secret_key, my_public_key)
-    print "base64 encoding of signature"
+    print("base64 encoding of signature")
     b64signature = base64.b64encode(my_signature)
-    print "Signature is"
-    print b64signature
-    print "base64 encoding of signature"
+    print("Signature is")
+    print(b64signature)
+    print("base64 encoding of signature")
     my_signature = base64.b64decode(b64signature)
-    print "Check if signature is valid"
+    print("Check if signature is valid")
     checkvalid(my_signature, message, my_public_key)
     forged_message = "This is not my message."
     try:
-        print "Check if forged message is valid"
+        print("Check if forged message is valid")
         checkvalid(my_signature, forged_message, my_public_key)
     except Exception:
-        print "The forged message did not have the right signature."
+        print("The forged message did not have the right signature.")
         pass
-    print "Finished"
+    print("Finished")
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-# 
+#
 #    The high-throughput toolkit (httk)
 #    Copyright (C) 2012-2018 Rickard Armiento
 #
@@ -26,26 +26,27 @@ except ImportError:
 try:
     from urllib.request import urlopen
 except ImportError:
-    # Python 2 compatibility    
-    from urllib2 import urlopen
+    # Python 2 compatibility
+    from urllib2 import urlopen # noqa: F821
 
+import curses
 from curses import wrapper
 
-    
+
 from re import sub
 from sys import stderr
 
 class MyHTMLParser(HTMLParser):
 
-    ignore_close_tags = ['meta', 'link', 'br', 'img', 'input']    
+    ignore_close_tags = ['meta', 'link', 'br', 'img', 'input']
     ignore_content = ['script','style']
-    
+
     def __init__(self):
         HTMLParser.__init__(self)
         self.content = []
         self.ignore = False
         self.taglist = []
-        
+
     def handle_data(self, data):
         if not self.ignore:
             text = data.strip().encode('utf-8')
@@ -87,7 +88,7 @@ class MyHTMLParser(HTMLParser):
             pass
         if tag in self.ignore_content:
             self.ignore = False
-            
+
     def text(self):
         return ''.join(self.content).strip()
 
@@ -95,8 +96,6 @@ ESC = 27
 next_url = None
 
 def render_page(stdscr):
-    global next_url
-    
     stdscr.clear()
     stdscr.refresh()
     curses.nl()
@@ -107,27 +106,27 @@ def render_page(stdscr):
     curidx = 0
     entries = ["test", "test2" ]
     pending_click = False
-    
+
     while 1:
         stdscr.clear()
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
         line = 0
         offset = max(0, curidx - curses.LINES + 3)
-        
+
         for i in range(len(entries)):
             if line == curidx:
                 if pending_click:
                     next_url = line
                     return
-                stdscr.attrset(curses.color_pair(1) | curses.A_BOLD)        
+                stdscr.attrset(curses.color_pair(1) | curses.A_BOLD)
             else:
                 stdscr.attrset(curses.color_pair(0))
             if 0 <= line - offset < curses.LINES - 1:
                 stdscr.addstr(line - offset, 0, entries[i])
             line +=1
-            
+
         stdscr.refresh()
-        
+
         ch = stdscr.getch()
         if ch == curses.KEY_UP: curidx -= 1
         elif ch == curses.KEY_DOWN: curidx += 1
@@ -149,20 +148,19 @@ class WebviewCurses(object):
 
     def __init__(self,appdir):
         self.appdir = appdir
-    
+
     def open_url(self, url):
-        global next_url
-        
+
         #creating an object of the overridden class
         parser = MyHTMLParser()
 
-        resource = urllib2.urlopen("http://www.google.com")
+        resource = urllib2.urlopen("http://www.google.com") # noqa: F821
         if 'charset' in resource.headers.getparamnames():
             charset = resource.headers.getparam("charset")
         else:
             charset = 'utf-8'
         content =  resource.read().decode(charset)
-            
+
         #Feeding the content
         parser.feed(content)
         parser.close()
@@ -171,4 +169,3 @@ class WebviewCurses(object):
 
         wrapper(render_page)
         print("Next url:",next_url)
-

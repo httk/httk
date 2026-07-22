@@ -29,7 +29,8 @@ if sys.version_info < (3, 4):
         try:
             fp, pathname, description = find_module(pkg, [pathstr])
         except ImportError as e:
-            return e
+            raise ImportError("Could not find module: "+str(e))
+
         try:
             mod = load_module(pkg, fp, pathname, description)
         finally:
@@ -41,6 +42,7 @@ if sys.version_info < (3, 4):
 else: # sys.version_info >= (3, 4)
 
     import importlib
+    import importlib.util
     
     loader_details = (
         importlib.machinery.ExtensionFileLoader,

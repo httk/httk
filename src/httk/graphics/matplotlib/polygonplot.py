@@ -17,8 +17,7 @@
 #
 # Uses parts from 'dave', http://stackoverflow.com/questions/701429/library-tool-for-drawing-ternary-triangle-plots
 
-import pylab 
-
+from math import atan, pi
 
 class PolygonPlot(object):
 
@@ -36,6 +35,8 @@ class PolygonPlot(object):
         text_args: matplotlib keyword args for axis labels.
 
         """
+        from httk.external.matplotlib_ext import pylab
+
         self.basis = pylab.array(
             [
                 [
@@ -55,9 +56,9 @@ class PolygonPlot(object):
             x = self.basis[i, 0]
             y = self.basis[i, 1]
             if rotate_labels:
-                angle = 180*arctan(y/x)/pi + 90
+                angle = 180*atan(y/x)/pi + 90
                 if angle > 90 and angle <= 270:
-                    angle = mod(angle + 180, 360)
+                    angle = (angle + 180) % 360
             else:
                 angle = 0
             ax.text(
@@ -84,6 +85,8 @@ class PolygonPlot(object):
         self.ax = ax
 
     def translate_coords(self, data, scaling=True):
+        from httk.external.matplotlib_ext import pylab
+
         if len(data) == 0:
             return data
 
@@ -101,6 +104,8 @@ class PolygonPlot(object):
 __all__ = ['PolygonPlot']
 
 if __name__ == '__main__':
+    from httk.external.matplotlib_ext import pylab
+
     k = 0.5
     s = 1000
 
@@ -131,7 +136,7 @@ if __name__ == '__main__':
         pylab.array([0, k, 0, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, k, 0, 0]) + pylab.rand(s, 5),
         pylab.array([0, 0, 0, k, 0]) + pylab.rand(s, 5),
-        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),        
+        pylab.array([0, 0, 0, 0, k]) + pylab.rand(s, 5),
     ))
     color = pylab.array([[1, 0, 0]]*s + [[0, 1, 0]]*s + [[0, 0, 1]]*s + [[1, 1, 0]]*s + [[0, 1, 1]]*s)
 
@@ -145,8 +150,8 @@ if __name__ == '__main__':
         s=2,
         alpha=0.5,
         color=color
-    )    
-    
+    )
+
     pylab.show(block=False)
     pylab.pause(3)
     pylab.close()

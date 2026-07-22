@@ -129,7 +129,19 @@ class Sites(HttkObject):
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(self._cartesian_coordgroups,self.cell.basis)
             if self._reduced_coords is not None:
                 reduced_coordgroups = coords_and_counts_to_coordgroups(self._reduced_coords, self._counts)
-                self._reduced_coordgroups = FracVector.use(reduced_coordgroups)
+
+                # Original code:
+                # self._reduced_coordgroups = FracVector.use(reduced_coordgroups)
+
+                # New code:
+                common_denom = list(set(map(lambda x: x.denom, reduced_coordgroups)))
+                assert len(common_denom) == 1
+                common_denom = common_denom[0]
+                noms = []
+                for coord in reduced_coordgroups:
+                    noms.append(coord.noms)
+                self._reduced_coordgroups = FracVector.create_fast(noms, common_denom=common_denom)
+
             #elif self._cartesian_coords != None:
             #    reduced_coordgroups = coords_and_counts_to_coordgroups(self._cartesian_coords,self._counts)
             #    self._reduced_coordgroups = coordgroups_cartesian_to_reduced(reduced_coordgroups,self.cell.basis)
@@ -167,8 +179,10 @@ class Sites(HttkObject):
 
     def clean(self):
 
-        reduced_coordgroups = self.reduced_coordgroups.limit_denominator(5000000)
-        reduced_coords = self.reduced_coords.limit_denominator(5000000)
+        # reduced_coordgroups = self.reduced_coordgroups.limit_denominator(5000000)
+        # reduced_coords = self.reduced_coords.limit_denominator(5000000)
+        reduced_coordgroups = self.reduced_coordgroups.set_denominator(5000000).simplify()
+        reduced_coords = self.reduced_coords.set_denominator(5000000).simplify()
 
         return self.__class__(reduced_coordgroups=reduced_coordgroups,
                               reduced_coords=reduced_coords,

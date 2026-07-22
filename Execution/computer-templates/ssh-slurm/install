@@ -12,7 +12,7 @@ fi
 
 ssh "$USERNAME"@"$REMOTE_HOST" "REMOTE=\"$REMOTE_HTTK_DIR\"; mkdir -p \"\${REMOTE/#~/\$HOME}/Runs/default/ht.taskmgrstats\""
 
-# Saftey check
+# Safety check
 if [ -e "$HTTK_DIR/src/httk" ]; then
     echo "Please wait while copying files."    
     rsync --delete -az -r --files-from="$HTTK_DIR/httk.minimal.files"  "$HTTK_DIR" "$USERNAME"@"$REMOTE_HOST":"$REMOTE_HTTK_DIR/httk/"

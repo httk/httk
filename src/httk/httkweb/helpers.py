@@ -15,15 +15,15 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, errno
+import os, errno, time
 
 class UnquotedStr(object):
     def __init__(self,val):
         self.val = val
     def __str__(self):
-        return str(self.val)
+        return self.val
     def __repr__(self):
-        return str(self.val)
+        return "UnquotedStr("+self.val.__repr__()+")"
 
 def setup_template_helpers(global_data):
 
@@ -31,6 +31,21 @@ def setup_template_helpers(global_data):
         for val in vals:
             if val:
                 return val
+    global_data['first_value'] = first_value
+
+    def listdir(path, filters = '', limit = None):
+        prefix = 'src/content'
+        filterlist = filters.split(';')
+
+        def listdirsorted(path):
+            return [x[0] for x in sorted([(fn, os.stat(os.path.join(prefix,path,fn))) for fn in os.listdir(os.path.join(prefix,path))], key = lambda x: x[1].st_ctime)]
+
+        output = [os.path.join(path, f) for f in listdirsorted(path) if os.path.isfile(os.path.join(prefix, path, f)) and any([f.endswith(t) for t in filterlist])]
+        if limit:
+            return output[:int(limit)]
+        else:
+            return output
+    global_data['listdir'] = listdir
 
     #def getitem(a,i):
         #try:
@@ -42,7 +57,6 @@ def setup_template_helpers(global_data):
     #    except TypeError:
     #        return a[int(i)]
 
-    global_data['first_value'] = first_value
     # global_data['getitem'] = getitem
 
 
@@ -107,7 +121,9 @@ def setup(renderers, template_engines, function_handlers):
     if renderers is None:
         from httk.httkweb.render_httk import RenderHttk
         from httk.httkweb.render_rst import RenderRst
-        renderers = {'httkweb': RenderHttk, 'rst': RenderRst}
+        from httk.httkweb.render_md import RenderMd
+        from httk.httkweb.render_html import RenderHtml
+        renderers = {'httkweb': RenderHttk, 'rst': RenderRst, 'md': RenderMd, 'html': RenderHtml}
 
     if template_engines is None:
         from httk.httkweb.templateengine_httk import TemplateEngineHttk

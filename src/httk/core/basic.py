@@ -17,7 +17,7 @@
 """
 Basic help functions
 """
-import sys
+import sys, signal, site
 from fractions import Fraction
 
 # Import python2 and 3-specific routunes
@@ -124,7 +124,6 @@ def mkdir_p(path):
         else:
             raise
 
-
 def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebugfunc=None):
     """
     Small awk-mimicking search routine.
@@ -160,23 +159,32 @@ def micro_pyawk(ioa, search, results=None, debug=False, debugfunc=None, postdebu
             except Exception as e:
                 raise Exception("Could not compile regular expression:"+entry[0]+" error: "+str(e))
 
-    for line in f:
-        if debug:
-            sys.stdout.write("\n" + line[:-1])
-        for i in range(len(search)):
-            match = search[i][0].search(line)
-            if debug and match:
-                sys.stdout.write(": MATCH")
-            if match and (search[i][1] is None or search[i][1](results, line)):
-                if debug:
-                    sys.stdout.write(": TRIGGER")
-                if debugfunc is not None:
-                    debugfunc(results, match)
-                search[i][2](results, match)
-                if postdebugfunc is not None:
-                    postdebugfunc(results, match)
     if debug:
+        for line in f:
+            sys.stdout.write("\n" + line[:-1])
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match:
+                    sys.stdout.write(": MATCH")
+                if match and (search[i][1] is None or search[i][1](results, line)):
+                    sys.stdout.write(": TRIGGER")
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
         sys.stdout.write("\n")
+
+    else:
+        for line in f:
+            for i in range(len(search)):
+                match = search[i][0].search(line)
+                if match and (search[i][1] is None or search[i][1](results, line)):
+                    if debugfunc is not None:
+                        debugfunc(results, match)
+                    search[i][2](results, match)
+                    if postdebugfunc is not None:
+                        postdebugfunc(results, match)
 
     ioa.close()
     return results
@@ -280,6 +288,56 @@ class rewindable_iterator(object):
         self._rewind = True
         if rewindstr is not None:
             self._cache = rewindstr
+
+# Inspired by https://stackoverflow.com/questions/132058/showing-the-stack-trace-from-a-running-python-application
+#def sigquit_handler(sig, frame):
+#    import code, traceback
+#
+#    d={'_frame':frame}         # Allow access to frame object.
+#    d.update(frame.f_globals)  # Unless shadowed by global
+#    d.update(frame.f_locals)
+#
+#    if(sig == signal.SIGQUIT):
+#        message  = "Sigquit received.\nTraceback:\n"
+#        message += ''.join(traceback.format_stack(frame))
+#        print(message)
+#        exit(131)
+#
+#try:
+#    signal.signal(signal.SIGQUIT, sigquit_handler)  # Register handler
+#except Exception:
+#    pass
+
+def import_from_legacy_cgi(module_name):
+    # Look for all sys.path entries that include 'site-packages'
+    site_paths = [p for p in sys.path if 'site-packages' in p and os.path.isdir(p)]
+
+    for site_path in site_paths:
+        candidate = os.path.join(site_path, module_name + '.py')
+        if os.path.isfile(candidate):
+            if sys.version_info >= (3, 5):
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(module_name, candidate)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            else:
+                import imp
+                module = imp.load_source(module_name, candidate)
+            sys.modules[module_name] = module
+            return module
+
+    raise ImportError("Could not find legacy-cgi version of '{}' in site-packages.".format(module_name))
+
+try:
+    cgi = import_from_legacy_cgi("cgi")
+    cgitb = import_from_legacy_cgi("cgitb")
+except ImportError as e:
+    # Falling back to standard library import for older versions of Python where it is not deprecated
+    import cgi
+    import cgitb
+
+from cgi import parse_header, parse_multipart
+from cgitb import html as cgitb_html
 
 def main():
     asym = int_to_anonymous_symbol(42)

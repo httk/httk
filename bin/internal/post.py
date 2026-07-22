@@ -6,9 +6,9 @@ if sys.version_info[0] == 3:
 else:
     from urllib2 import Request, urlopen
 
-class form_wrapper(file):
+class form_wrapper(file): # noqa: F821 ##TODO: I don't think this works?
     def __init__(self, path, mode, name, filename, fields=[], prepend_progress=""):
-        file.__init__(self, path, mode)
+        file.__init__(self, path, mode) # noqa: F821
         self.seek(0, os.SEEK_END)
         self._total = self.tell()
         self.seek(0)
@@ -44,7 +44,7 @@ class form_wrapper(file):
             size -= len(newdata)
             self._seen += len(newdata)
         if size > 0 and self._seen < len(self.predata) + self._total:
-            newdata = file.read(self, size)
+            newdata = self.read(self, size)
             data += newdata
             size -= len(newdata)
             self._seen += len(newdata)

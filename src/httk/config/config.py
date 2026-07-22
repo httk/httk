@@ -71,14 +71,18 @@ httk_root = None
 _config = configparser.ConfigParser()
 
 def read_config():
-    global python_root, httk_root, _config
+    global httk_root
 
     try:
         with open(os.path.join(python_root, "distdata.py"), 'r') as fp:
             distdata_str = fp.read()
             ini_str = '[distdata]\n' + distdata_str
             ini_fp = StringIO(ini_str)
-            _config.readfp(ini_fp)
+            if not hasattr(_config,'read_file'):
+                # Python2 compatibility
+                _config.readfp(ini_fp)
+            else:
+                _config.read_file(ini_fp)
             httk_root = os.path.realpath(os.path.join(python_root,_config.get('distdata','root').strip('"')))
     except (IOError, configparser.NoSectionError, configparser.NoOptionError):
         httk_root = os.path.realpath(os.path.join(python_root,_default_httk_root))
@@ -105,7 +109,6 @@ def read_config():
     _config.read([global_cfgpathstr, local_cfgpathstr])
 
 def determine_version_data():
-    global python_root, httk_root, _config
 
     httk_version = None
     if os.path.exists(os.path.join(python_root, "distdata.py")):

@@ -1,0 +1,5 @@
+---
+maintitle: My formidable website
+menuitems-list: index, blog, contact
+urls_without_ext: true
+---

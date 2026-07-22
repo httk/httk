@@ -35,8 +35,13 @@ def load(ioa, ext=None):
     try:
         import httk.atomistic
         import httk.atomistic.atomisticio
-
-        return httk.atomistic.Structure.io.load(ioa, ext)
+        
+        ioa = IoAdapterFilename.use(ioa)
+        if "WAVECAR" in ioa.filename.upper():
+            from httk.atomistic.atomisticio.wavefunction_io import load_wavefunc
+            return load_wavefunc(ioa, ext)
+        else:
+            return httk.atomistic.Structure.io.load(ioa, ext)
     except Exception:
         raise
         pass

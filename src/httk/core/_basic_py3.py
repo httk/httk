@@ -15,7 +15,14 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, collections, queue, bz2
+import io, sys, collections, queue, bz2
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
+from shutil import which
 
 unicode_type = str
 
@@ -30,7 +37,7 @@ def print_(*args,**kwargs):
     print(*args,**kwargs)
 
 def is_sequence(l):
-    return isinstance(l, collections.Iterable) and not isinstance(l, str)
+    return isinstance(l, Iterable) and not isinstance(l, str)
     #return (not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or
     #        (hasattr(arg, "__iter__") and not isinstance(arg, str)))
 
@@ -38,19 +45,24 @@ def is_string(s):
     return isinstance(s, str)
 
 # In Python 3 bz2 files are opened by default in binary mode.
-# This is an attempt at making bz2 files behave as ordinary files. 
+# This is an attempt at making bz2 files behave as ordinary files.
 # If mode does not contain 'b' we add 't' for text mode,
-# and open the file with the bz2.open() function (only in Python 3.3)
+# and open the file with the bz2.open() function (>= Python 3.3)
 def bz2open(filename, mode, *args):
     if not 'b' in mode and not 't' in mode:
         mode += 't'
 
     if sys.version_info >= (3, 3):
         return bz2.open(filename, mode, *args)
-        
-    elif not 'b' in mode: 
+
+    elif not 'b' in mode:
         return io.TextIOWrapper(bz2.BZ2File(filename, mode, *args), encoding='utf-8')
     else:
         return bz2.BZ2File(filename, mode, *args)
 
-            
+def zstdopen(filename, mode, *args):
+    import pyzstd
+    if not 'b' in mode and not 't' in mode:
+        mode += 't'
+
+    return pyzstd.open(filename, mode, *args)

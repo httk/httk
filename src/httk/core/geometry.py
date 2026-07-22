@@ -175,7 +175,7 @@ def hull_z(points, zs):
 
 
 def numpy_quickhull_2d(sample):
-    import numpy as np
+    from httk.external.numpy_ext import numpy as np
     link = lambda a, b: np.concatenate((a, b[1:]))
     edge = lambda a, b: np.concatenate(([a], [b]))
 
@@ -260,7 +260,7 @@ if __name__ == '__main__':
 
     exit(0)
 
-    from pylab import *
+    from httk.external.matplotlib_ext.pylab import *
 
     xsample = FracVector.random((5, 1), 0, 100, 100)
     xsample = FracVector.create([[x[0], 1-x[0]] for x in xsample] + [[1, 0]] + [[0, 1]])

@@ -1,0 +1,23 @@
+<div class="row py-3">
+  <div class="col-3 order-2" id="sticky-sidebar">
+    <div class="sticky-top">
+      <div class="nav flex-column">
+        &nbsp;<br/>
+        <b>Latest blogposts</b>
+        &nbsp;<br/>
+        <ul>
+	  {blogposts_latest:repeat::
+          <li><a class="nav-link" href="{page.relbaseurl}/{{pages:call:{{item}}:relurl}}">{{pages:call:{{item}}:name}}</a></li>
+	  }
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col" id="main">
+    <div class="container">
+      <main class="main-content">
+        {content}
+      </main>
+    </div>
+  </div>
+</div>
