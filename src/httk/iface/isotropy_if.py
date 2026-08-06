@@ -34,7 +34,7 @@ def reduced_coordgroups_to_input(coordgroups, cell, comment="FINDSYM input", acc
     inputstr += str(uc_nbr_atoms)+"\n"
     inputstr += " ".join([str(group+1) for group in range(0, len(coordgroups)) for i in range(0, len(coordgroups[group]))]) + "\n"
     for rows in coordgroups:
-        for row in rows:
+        for i,row in enumerate(rows):
             inputstr += "%.8f %.8f %.8f\n" % (row[0], row[1], row[2])
     return inputstr
 
@@ -42,15 +42,14 @@ def reduced_coordgroups_to_input(coordgroups, cell, comment="FINDSYM input", acc
 def struct_to_input(struct):
     inputstr = "FINDSYM input for "+struct.formula+"\n"
     # 1
-    #inputstr += "0.001\n"; #2
-    inputstr += "0.001\n"
+    inputstr += "0.001\n"; #2
     ##################################################################
     # With FINDSYM, Version 7.1, Jul 2020, lattice, atomic, and magnetic
     # accuracies have to be all given.
     # This fixes the format of the input file, but there is still the
     # "illegal seek" pipe problem.
-    # inputstr += "0.001\n"
-    # inputstr += "0.001\n"
+    inputstr += "0.001\n"
+    inputstr += "0.001\n"
     ##################################################################
     # 2
     inputstr += "2\n"  # 3
@@ -58,7 +57,7 @@ def struct_to_input(struct):
     inputstr += "2\n"  # 5
     inputstr += "P\n"  # 6
     inputstr += str(struct.uc_nbr_atoms)+"\n"
-    inputstr += " ".join([str(group+1) for group in range(0, len(struct.uc_reduced_coordgroups)) for i in range(0, len(struct.uc_reduced_coordgroups[group]))]) + "\n"
+    inputstr += " ".join([str(struct.symbols[group]) for group in range(0, len(struct.uc_reduced_coordgroups)) for i in range(0, len(struct.uc_reduced_coordgroups[group]))]) + "\n"
     for row in struct.uc_reduced_coords:
         inputstr += "%.8f %.8f %.8f\n" % (row[0], row[1], row[2])
     #print("INPUT",struct.formula,len(struct.uc_reduced_coords))
@@ -66,18 +65,25 @@ def struct_to_input(struct):
 
 
 def out_to_cif(ioa, assignments, getwyckoff=False):
+    read_data = True
 
     def cif_start(results, match):
         results['did_start'] = True
         results['on'] = True
 
     def cif_add(results, match):
+        if not read_data:
+            return
         if results['out']:
             results['out'] = False
         else:
             add_groupdata(results)
             results['cif'] += match.group(0)+"\n"
             #results['data']+=match.group(0)+"\n"
+    
+    def cif_end(results, match):
+        nonlocal read_data
+        read_data = False # This terminates further reading of the cif data, which is important because isotropy outputs some extra stuff after the cif that we don't want to read as part of the cif.
 
     def add_groupdata(results):
 
@@ -171,12 +177,13 @@ def out_to_cif(ioa, assignments, getwyckoff=False):
     results = {'on': False, 'data': '', 'cif': '', 'out': False, 'group': -1, 'groupdata': [], 'occucounts': {}, 'did_start': False, 'wyckoff': []}
     httk.basic.micro_pyawk(ioa, [
         [r'This program has bombed', None, cif_broken],
-        [r'^# CIF file$', None, cif_start],
+        [r'^# CIF file', None, cif_start],
         [r'^_symmetry_Int_Tables_number +(.*)$', None, groupnbr],
         [r'^_symmetry_space_group_name_H-M +"(([^()]+) \(origin choice ([0-9]+)\))" *$', None, hm_symbol_origin],
         [r'^_symmetry_space_group_name_H-M +"(([^()]+) \((hexagonal axes)\))" *$', None, hm_symbol_origin],
         [r'^_symmetry_space_group_name_H-M +"([^()]+)" *$', None, hm_symbol_no_origin],
         [r'^ *([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) +([0-9.-]+) *$', None, coords],
+        [r'^# end of cif', None, cif_end],
         [r'.*', lambda results, match: results['on'], cif_add],
     ], debug=False, results=results)
     add_groupdata(results)

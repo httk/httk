@@ -11,5 +11,6 @@ if [ -e "$SCRIPT_PATH/config.$QUEUE" ]; then
     . "$SCRIPT_PATH/config.$QUEUE"
 fi
 
+mkdir -p "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/$QUEUE/"
 cd "${LOCAL_HTTK_DIR/#\~/$HOME}/Runs/$QUEUE/"
 eval "$@"
