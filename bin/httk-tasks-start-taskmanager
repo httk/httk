@@ -27,8 +27,8 @@ if [ -z "$QUEUE" -o "$QUEUE" == "$1" ]; then
 fi
 shift 1
 
-if [ -n "$2" ]; then
-    NUMBER="$2"
+if [ -n "$1" ]; then
+    NUMBER="$1"
     shift 1
 else
   NUMBER="1"
