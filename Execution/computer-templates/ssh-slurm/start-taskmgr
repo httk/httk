@@ -13,6 +13,7 @@ fi
 
 if [ -n "$1" ]; then
     NUMBER="$1"
+    shift 1
 else
     NUMBER="1"
 fi
