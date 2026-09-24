@@ -19,7 +19,7 @@
 This provides a thin abstraction layer for SQL queries, implemented on top of sqlite,3 to make it easier to exchange between SQL databases.
 """
 from __future__ import print_function
-import os, sys, time
+import os, sys, time, re
 import sqlite3 as sqlite
 import atexit
 from httk.core import FracScalar
@@ -54,10 +54,22 @@ def db_sqlite_close_all():
 atexit.register(db_sqlite_close_all)
 
 
+def _sqlite_regexp(pattern, text):
+    """Custom REGEXP function for SQLite"""
+    if text is None or pattern is None:
+        return False
+    try:
+        return bool(re.search(pattern, text))
+    except (re.error, TypeError):
+        return False
+
+
 class Sqlite(object):
 
     def __init__(self, filename):
         self.connection = db_open(filename)
+        # Register REGEXP function for SQLite
+        self.connection.create_function("REGEXP", 2, _sqlite_regexp)
         #self._block_commit = False
 
     def close(self):

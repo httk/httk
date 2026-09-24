@@ -762,6 +762,12 @@ class Expression(object):
             raise Exception("Syntax error: is_in operator with expression of wrong type.")
         return BinaryBooleanOp(self._context, "LIKE", self, args)
 
+    def regexp(self, pattern):
+        """Use REGEXP operator for pattern matching (returns BinaryComparison)"""
+        if not self._exprtype in ('value', 'unknown'):
+            raise Exception("Syntax error: regexp operator with expression of wrong type.")
+        return BinaryComparison(self._context, "REGEXP", self, pattern)
+
     def __and__(self, other):
         if not self._exprtype in ('bool', 'unknown'):
             raise Exception("Syntax error: and with expression of wrong type.")
@@ -900,6 +906,14 @@ class BinaryComparison(Expression):
             return fc_eval(self._args[0], data) <= fc_eval(self._args[1], data)
         elif self._operator == '!=':
             return fc_eval(self._args[0], data) != fc_eval(self._args[1], data)
+        elif self._operator == 'REGEXP':
+            import re
+            try:
+                text = str(fc_eval(self._args[0], data))
+                pattern = str(fc_eval(self._args[1], data))
+                return bool(re.search(pattern, text))
+            except (re.error, TypeError):
+                return False
         else:
             raise Exception("Syntax Error")
 
@@ -933,6 +947,8 @@ class BinaryComparison(Expression):
 
         if self._operator in ('=', '<', '>', '>=', '<=', '!='):
             return "("+leftarg + " "+op+" " + rightarg+")"
+        elif self._operator == 'REGEXP':
+            return "("+leftarg + " REGEXP " + rightarg+")"
         else:
             raise Exception("Syntax Error" + self._operator)
 
