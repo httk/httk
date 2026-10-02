@@ -351,12 +351,13 @@ def cifdata_to_struct(cifdata, debug=False):
     if 'atom_site_symmetry_multiplicity' in element:
         multiplicities = [int(x) for x in element['atom_site_symmetry_multiplicity']]
 
-    for atom in range(len(element['atom_site_label'])):
+    symbol_reference = 'atom_site_type_symbol' if 'atom_site_type_symbol' in element else 'atom_site_label'
+    for atom in range(len(element[symbol_reference])):
         if 'atom_site_occupancy' in element:
             ratio = element['atom_site_occupancy'][atom]
         else:
             ratio = 1
-        symbol = str(re.match('[A-Z][a-z]?',element['atom_site_label'][atom]).group(0))
+        symbol = str(re.match('[A-Z][a-z]?',element[symbol_reference][atom]).group(0))
 
         occup = {'atom': periodictable.atomic_number(symbol), 'ratio': FracVector.create(ratio), }
         coord = [element['atom_site_fract_x'][atom], element['atom_site_fract_y'][atom], element['atom_site_fract_z'][atom]]

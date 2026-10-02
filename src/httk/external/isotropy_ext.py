@@ -62,7 +62,11 @@ def isotropy(cwd, args, inputstr, timeout=30):
     #p = subprocess.Popen([cif2cell_path]+args, stdout=subprocess.PIPE,
     #                                   stderr=subprocess.PIPE, cwd=cwd)
     #print("COMMAND CIF2CELL"+str(inputstr))
-    out, err, completed = Command(os.path.join(isotropy_path, 'findsym'), args, cwd=cwd, inputstr=inputstr).run(timeout)
+    input_file = os.path.join(cwd, "findsym_input.txt")
+    with open(input_file, "w") as f:
+        f.write(inputstr.strip())
+        args.append("{}".format(input_file))
+    out, err, completed = Command(os.path.join(isotropy_path, 'findsym'), args, cwd=cwd).run(timeout)
     #print("COMMAND CIF2CELL END"+str(out))
     return out, err, completed
     #out, err = p.communicate()
